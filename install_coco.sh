@@ -24,6 +24,7 @@ COCO_BUILD_PATH="coco/code-experiments/build/c"
 # Copy example if not exists
 if ! [ -f "${SRC_PATH}/example_experiment.c" ]; then
 	cp ${COCO_BUILD_PATH}/example_experiment.c ${SRC_PATH}
+	sed -i "s/int\ main/int\ old_main/g" ${SRC_PATH}/example_experiment.c
 	echo "example_experiment.c copied"
 fi
 
