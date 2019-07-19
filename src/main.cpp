@@ -1,6 +1,7 @@
 #include <iostream>
+#include "tests/vector.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    tests_vector_operator();
     return 0;
 }
