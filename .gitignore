@@ -1,0 +1,9 @@
+coco/
+coco.h
+coco.c
+exdata/
+ppdata/
+build/
+.idea/
+cmake-build-debug/
+src/example_experiment.c
