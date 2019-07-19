@@ -2,8 +2,13 @@
 // Created by samuel on 19/07/19.
 //
 
-#include "vector.h"
-#include "../algebra/basic_operators.h"
+#include "vector_test.h"
+#include "../algebra/operators.h"
+
+using namespace std;
+
+using algebra::operator+;
+using algebra::operator*;
 
 void tests_vector_operator() {
     vector<vector<float>> v1;
