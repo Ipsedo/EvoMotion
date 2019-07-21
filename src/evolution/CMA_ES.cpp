@@ -14,7 +14,7 @@ CMA_ES::CMA_ES(coco_problem_s *p) :
     __problem(p),
     __min_values(coco_problem_get_smallest_values_of_interest(p)),
     __max_values(coco_problem_get_largest_values_of_interest(p)),
-    __n(static_cast<int>(coco_problem_get_dimension(p))), __lambda(10), __mu(__lambda / 2),
+    __n(static_cast<unsigned int>(coco_problem_get_dimension(p))), __lambda(10), __mu(__lambda / 2),
     __x(__init_x()),
     /*__w(__init_w(vector<individual>())), //TODO piger algo : log rank - w_k
     __mu_w(1.0 / arma::sum(__w  * __w)),
@@ -26,13 +26,13 @@ CMA_ES::CMA_ES(coco_problem_s *p) :
     __c_m(1.0),*/
     __s_sigma(arma::vec(__n, arma::fill::zeros)),
     __s_c(arma::vec(__n, arma::fill::zeros)),
-    __C(arma::mat(arma::uword(__n), arma::uword(__n), arma::fill::eye)),
-    __sigma(arma::randu<arma::vec>(arma::uword(__n))) {
+    __C(arma::mat(__n, __n, arma::fill::eye)),
+    __sigma(arma::randu<arma::vec>(__n)) {
 
 }
 
 individual CMA_ES::__init_x() {
-    arma::vec res(arma::uword(__n), arma::fill::zeros);
+    arma::vec res(__n, arma::fill::zeros);
 
     for (int i = 0; i < __n; i++)
         res[i] = __uniform_dist(__generator) * (__max_values[i] - __min_values[i]) + __min_values[i];

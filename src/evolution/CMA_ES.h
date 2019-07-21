@@ -32,7 +32,7 @@ private:
      * CMA-ES stuff
      */
 
-    int __n;
+    unsigned int __n;
 
     int __lambda;
     int __mu;
