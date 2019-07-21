@@ -5,10 +5,11 @@
 #ifndef EVOMOTION_INDIVIDUAL_H
 #define EVOMOTION_INDIVIDUAL_H
 
-#include <vector>
+#include <armadillo>
 
 struct individual {
-    std::vector<double> geno;
+    arma::vec geno;
+    arma::vec z;
     double fitness;
 };
 

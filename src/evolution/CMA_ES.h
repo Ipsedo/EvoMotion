@@ -7,9 +7,8 @@
 
 #include <vector>
 #include <random>
-#include "../coco.h"
 #include "individual.h"
-#include "../algebra/matrix.h"
+#include "../coco.h"
 
 using namespace std;
 
@@ -40,7 +39,7 @@ private:
 
     individual __x;
 
-    vector<double> __w;
+    arma::vec __w;
 
     double __mu_w;
     double __c_sigma;
@@ -50,14 +49,16 @@ private:
     double __c_mu;
     double __c_m;
 
-    vector<double> __s_sigma;
-    vector<double> __s_c;
-    algebra::matrix __C;
-    vector<double> __sigma;
+    arma::vec __s_sigma;
+    arma::vec __s_c;
+    arma::mat __C;
+    arma::vec __sigma;
 
     individual __init_x();
 
-    vector<double> __init_w(std::vector<individual> pop);
+    void __init_values(std::vector<individual> pop);
+
+    arma::vec __init_w(std::vector<individual> pop);
 
 public:
     explicit CMA_ES(coco_problem_s *p);

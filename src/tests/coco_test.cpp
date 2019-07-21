@@ -5,6 +5,7 @@
 
 #include <cstdio>
 #include "coco_test.h"
+#include "../evolution/CMA_ES.h"
 
 
 static coco_problem_t *PROBLEM;
@@ -20,8 +21,12 @@ static const unsigned int BUDGET_MULTIPLIER = 2;
 void example_experiment(const char *suite_name,
                         const char *suite_options,
                         const char *observer_name,
-                        const char *observer_options,
-                        coco_random_state_t *random_generator) {
+                        const char *observer_options) {
+
+    coco_random_state_t *random_generator = coco_random_new(12345);
+
+    /* Change the log level to "warning" to get less output */
+    coco_set_log_level("info");
 
     size_t run;
     coco_suite_t *suite;
@@ -54,16 +59,9 @@ void example_experiment(const char *suite_name,
                 break;
 
             /* Call the optimization algorithm for the remaining number of evaluations */
-            /*my_random_search(evaluate_function,
-                             evaluate_constraint,
-                             dimension,
-                             coco_problem_get_number_of_objectives(PROBLEM),
-                             coco_problem_get_number_of_constraints(PROBLEM),
-                             coco_problem_get_smallest_values_of_interest(PROBLEM),
-                             coco_problem_get_largest_values_of_interest(PROBLEM),
-                             coco_problem_get_number_of_integer_variables(PROBLEM),
-                             (size_t) evaluations_remaining,
-                             random_generator);*/
+            CMA_ES cma = CMA_ES(PROBLEM);
+            for (int i = 0; i < 20; i++)
+                cma.step();
 
             /* Break the loop if the algorithm performed no evaluations or an unexpected thing happened */
             if (coco_problem_get_evaluations(PROBLEM) == evaluations_done) {
