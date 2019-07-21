@@ -4,8 +4,8 @@
 // From COCO (https://github.com/numbbo/coco) random search example
 
 #include <cstdio>
-#include "coco_test.h"
 #include "../evolution/CMA_ES.h"
+#include "coco_test.h"
 
 
 static coco_problem_t *PROBLEM;
