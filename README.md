@@ -6,6 +6,21 @@ The final goal of this project is to implement CMA-ES or any kind of optimisatio
 
 __Note__ : In a first time, only CMA-ES will be implemented and tested with [coco](https://github.com/numbbo/coco) benchmark tools. Then the creature walk teaching will be implemented.
 
+## Requirements
+This project requires LAPACK, BLAS, Boost and Armadillo libraries.
+### Ubuntu
+LAPACK, BLAS and Boost :
+```bash
+$ sudo apt-get install liblapack-dev
+$ sudo apt-get install libblas-dev
+$ sudo apt-get install libboost-dev
+```
+
+Armadillo :
+```bash
+$ sudo apt-get install libarmadillo-dev
+```
+
 ## Installation
 First clone this repository :
 ```bash
