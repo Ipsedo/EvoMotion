@@ -24,8 +24,8 @@ CMA_ES::CMA_ES(coco_problem_s *p) :
     __c_1(2.0 / (double(__n * __n) + __mu_w)),
     __c_mu(__mu_w / (double(__n * __n) + __mu_w)),
     __c_m(1.0),*/
-    __s_sigma(vector<double>(static_cast<unsigned long>(__n), 0.0)),
-    __s_c(vector<double>(static_cast<unsigned long>(__n), 0.0)),
+    __s_sigma(arma::vec(__n, arma::fill::zeros)),
+    __s_c(arma::vec(__n, arma::fill::zeros)),
     __C(arma::mat(arma::uword(__n), arma::uword(__n), arma::fill::eye)),
     __sigma(arma::randu<arma::vec>(arma::uword(__n))) {
 
@@ -58,7 +58,7 @@ arma::vec CMA_ES::__init_w(std::vector<individual> pop) {
 }
 
 void CMA_ES::__init_values(std::vector<individual> pop) {
-    __w = __init_w(pop);
+    __w = __init_w(std::move(pop));
     __mu_w = 1.0 / arma::sum(__w  % __w);
     __c_sigma = __mu_w / (double(__n) + __mu_w);
     __d = 1.0 + sqrt(__mu_w / double(__n));
@@ -71,7 +71,8 @@ void CMA_ES::__init_values(std::vector<individual> pop) {
 void CMA_ES::step() {
     vector<individual> childs(static_cast<unsigned long>(__lambda));
 
-    auto C_sqrt = arma::sqrtmat_sympd(__C);
+    //std::cout << __C << std::endl;
+    arma::mat C_sqrt = arma::sqrtmat_sympd(__C);
 
     for (int k = 0; k < __lambda; k++) {
         childs[k].z = arma::randn(arma::uword(__n));
@@ -84,14 +85,17 @@ void CMA_ES::step() {
     sort(childs.begin(), childs.end(), [](individual i1, individual i2){ return i1.fitness < i2.fitness; });
     vector<individual> pop(&childs[0], &childs[__mu]);
 
-    __init_values(pop);
+    //if (__started) {
+        __init_values(pop);
+    //    __started = true;
+    //}
 
     arma::vec sum_z(__n, arma::fill::zeros);
 
     for (int k = 0; k < pop.size(); k++)
-        sum_z = sum_z + __w[k] * pop[k].z;
+        sum_z += __w[k] * pop[k].z;
 
-    __x.geno += __c_m * __sigma % (C_sqrt * sum_z);
+    __x.geno += __c_m * (C_sqrt * __sigma) % sum_z;
 
     __s_sigma = ( - __c_sigma) * __s_sigma + sqrt(__c_sigma * (2.0 - __c_sigma)) * sqrt(__mu_w) * sum_z;
 
@@ -103,12 +107,12 @@ void CMA_ES::step() {
 
     __s_c = (1 - __c_c) * __s_c + h_sigma * sqrt(__c_c * (2.0 - __c_c)) * sqrt(__mu_w) * sum_c_z;
 
-    __sigma *= exp(((__c_sigma / __d) / 2.0) * (arma::norm(__s_sigma) / double(__n) - 1.0));
+    __sigma *= pow((arma::norm(__s_sigma) / double(__n) - 1.0), ((__c_sigma / __d) / 2.0));
 
     double c_h = __c_1 * (1.0 - h_sigma * h_sigma) * __c_c * (2.0 - __c_c);
     arma::mat sum_c(__n, __n, arma::fill::zeros);
     for (int k = 0; k < pop.size(); k++)
         sum_c += __w[k] * C_sqrt * pop[k].z * (C_sqrt * pop[k].z).t();
 
-    __C = (1 - __c_1 + c_h - __c_mu) * __C + __c_1 * __s_c * __s_c.t() + __c_mu * sum_c;
+    __C = (1.0 - __c_1 + c_h - __c_mu) * __C + __c_1 * __s_c * __s_c.t() + __c_mu * sum_c;
 }

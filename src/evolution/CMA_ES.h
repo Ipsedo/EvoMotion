@@ -60,6 +60,8 @@ private:
 
     arma::vec __init_w(std::vector<individual> pop);
 
+    bool __started;
+
 public:
     explicit CMA_ES(coco_problem_s *p);
 
