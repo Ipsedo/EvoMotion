@@ -48,11 +48,10 @@ individual CMA_ES::__init_x() {
 }
 
 arma::vec CMA_ES::__init_w() {
-    arma::vec w(arma::uword(__mu), arma::fill::zeros);
-    arma::vec w_prime(arma::uword(__mu), arma::fill::zeros);
+    arma::vec w(__mu, arma::fill::zeros);
+    arma::vec w_prime(__mu, arma::fill::zeros);
 
-    for (int k = 0; k < __mu; k++)
-        w_prime[k] = log(double(__lambda) / 2.0 + 0.5) - log(1.0 + k);
+    w_prime = log(double(__lambda) / 2.0 + 0.5) - arma::log(arma::linspace(1.0, __mu, __mu));
 
     double sum = arma::sum(w_prime);
 
