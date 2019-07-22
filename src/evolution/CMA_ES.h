@@ -5,21 +5,18 @@
 #ifndef EVOMOTION_CMA_ES_H
 #define EVOMOTION_CMA_ES_H
 
-#include <vector>
 #include <random>
 #include "individual.h"
 #include "../coco.h"
-
-using namespace std;
 
 class CMA_ES {
 private:
     /*
      * std::random stuff
      */
-    normal_distribution<double> __normal_dist;
-    uniform_real_distribution<double> __uniform_dist;
-    default_random_engine __generator;
+    std::normal_distribution<double> __normal_dist;
+    std::uniform_real_distribution<double> __uniform_dist;
+    std::default_random_engine __generator;
 
     /*
      * COCO stuff

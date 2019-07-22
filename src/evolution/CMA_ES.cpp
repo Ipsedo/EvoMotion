@@ -4,6 +4,7 @@
 
 #include "CMA_ES.h"
 
+#include <vector>
 #include <algorithm>
 #include <chrono>
 
@@ -61,7 +62,7 @@ arma::vec CMA_ES::__init_w() {
 }
 
 void CMA_ES::step() {
-    vector<individual> childs(static_cast<unsigned long>(__lambda));
+    std::vector<individual> childs(static_cast<unsigned long>(__lambda));
 
     arma::mat C_sqrt = arma::sqrtmat_sympd(__C);
 
@@ -74,7 +75,7 @@ void CMA_ES::step() {
     }
 
     sort(childs.begin(), childs.end(), [](individual i1, individual i2){ return i1.fitness < i2.fitness; });
-    vector<individual> pop(&childs[0], &childs[__mu]);
+    std::vector<individual> pop(&childs[0], &childs[__mu]);
 
     arma::vec sum_z(__n, arma::fill::zeros);
 
