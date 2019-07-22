@@ -52,15 +52,16 @@ private:
     arma::vec __s_sigma;
     arma::vec __s_c;
     arma::mat __C;
-    arma::vec __sigma;
+    double __sigma;
+
+    int __step;
+
+    /*
+     * Init methods
+     */
 
     individual __init_x();
-
-    void __init_values(std::vector<individual> pop);
-
-    arma::vec __init_w(std::vector<individual> pop);
-
-    bool __started;
+    arma::vec __init_w();
 
 public:
     explicit CMA_ES(coco_problem_s *p);
