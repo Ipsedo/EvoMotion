@@ -11,7 +11,3 @@ echo "Removed ppdata/"
 echo "Start Algo"
 ./build/EvoMotion
 python -m cocopp exdata/CMA_on_bbob
-
-cd ppdata
-firefox index.html
-cd ..
