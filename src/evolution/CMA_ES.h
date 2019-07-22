@@ -34,8 +34,8 @@ private:
 
     unsigned int __n;
 
-    int __lambda;
-    int __mu;
+    unsigned int __lambda;
+    unsigned int __mu;
 
     individual __x;
 
