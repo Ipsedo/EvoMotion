@@ -3,8 +3,6 @@ project(EvoMotion)
 
 set(CMAKE_CXX_STANDARD 11)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -llapack -lblas -larmadillo")
-set(ARMA_DONT_PRINT_CXX11_WARNING)
 set(CMAKE_PREFIX_PATH "/usr/include/armadillo")
 
 find_package(Armadillo REQUIRED)
