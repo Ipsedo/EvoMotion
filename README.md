@@ -17,8 +17,14 @@ $ sudo apt-get install libboost-dev
 ```
 
 Armadillo :
+download latest version on http://arma.sourceforge.net/download.html
 ```bash
-$ sudo apt-get install libarmadillo-dev
+$ # change directory to extracted armadillo dir
+$ cd armadillo
+$ # then install
+$ cmake .
+$ make
+$ sudo make install
 ```
 
 ## Installation
