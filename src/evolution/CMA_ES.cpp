@@ -23,17 +23,19 @@ CMA_ES::CMA_ES(coco_problem_s *p) :
     __x(__init_x()),
     __w(__init_w()),
     __mu_w(1.0 / arma::sum(__w  % __w)),
-    __c_sigma(__mu_w / (double(__n) + __mu_w)),
+    __c_sigma(__mu_w / (double(__n) + __mu_w)), // papier inria
+    //__c_sigma(3.0 / double(__n)), // wiki
     __d(1.0 + sqrt(__mu_w / double(__n))),
     __c_c((4.0 + __mu_w / double(__n)) / (double(__n) + 4 + 2 * __mu_w / double(__n))),
-    __c_1(2.0 / (double(__n * __n) + __mu_w)),
-    __c_mu(__mu_w / (double(__n * __n) + __mu_w)),
+    __c_1(2.0 / (double(__n * __n) + __mu_w)), // papier inria
+    //__c_1(2.0 / double(__n * __n)), // wiki
+    __c_mu(__mu_w / (double(__n * __n) + __mu_w)), // papier inria
+    //__c_mu(__mu_w / (double(__n * __n))), // wiki
     __c_m(1.0),
     __s_sigma(arma::vec(__n, arma::fill::zeros)),
     __s_c(arma::vec(__n, arma::fill::zeros)),
     __C(arma::mat(__n, __n, arma::fill::eye)),
-    __sigma(__uniform_dist(__generator) * 10.0 + 1e-3) {
-
+    __sigma(__uniform_dist(__generator) * 1.0 + 1e-3) {
 }
 
 individual CMA_ES::__init_x() {
@@ -61,13 +63,28 @@ arma::vec CMA_ES::__init_w() {
     return w;
 }
 
-void CMA_ES::step() {
+// https://stackoverflow.com/questions/19837576/comparing-floating-point-number-to-zero
+bool is_nearly_equal(double a, double b)
+{
+    int factor = 1000;
+
+    double min_a = a - (a - std::nextafter(a, std::numeric_limits<double>::lowest())) * factor;
+    double max_a = a + (std::nextafter(a, std::numeric_limits<double>::max()) - a) * factor;
+
+    return min_a <= b && max_a >= b;
+}
+
+bool CMA_ES::step() {
     std::vector<individual> childs(static_cast<unsigned long>(__lambda));
 
-    arma::mat C_sqrt = arma::sqrtmat_sympd(__C);
+    arma::mat C_sqrt;
+
+    if (!arma::sqrtmat_sympd(C_sqrt, __C)) // TODO vrai check limites numeriques
+        // erreur dans arma pour lancer warning...
+        return false;
 
     for (int k = 0; k < __lambda; k++) {
-        childs[k].z = arma::randn(arma::uword(__n));
+        childs[k].z = arma::randn<arma::vec>(arma::uword(__n));
 
         childs[k].geno = __x.geno + __sigma * C_sqrt * childs[k].z;
 
@@ -94,7 +111,12 @@ void CMA_ES::step() {
 
     __s_c = (1 - __c_c) * __s_c + h_sigma * sqrt(__c_c * (2.0 - __c_c)) * sqrt(__mu_w) * sum_c_z;
 
-    __sigma *= exp(((__c_sigma / __d) / 2.0) * arma::norm(__s_sigma) / double(__n) - 1.0);
+    __sigma *= exp(((__c_sigma / __d) / 2.0)
+            * (pow(arma::norm(__s_sigma), 2.0) /
+            double(__n) - 1.0));
+            /*(sqrt(double(__n)) * (1.0 - 1.0 / (4.0 * double(__n))
+            + 1.0 / (21.0 * pow(double(__n), 2.0)))) - 1.0)); // wiki */
+
 
     double c_h = __c_1 * (1.0 - h_sigma * h_sigma) * __c_c * (2.0 - __c_c);
     arma::mat sum_c(__n, __n, arma::fill::zeros);
@@ -104,4 +126,6 @@ void CMA_ES::step() {
     __C = (1.0 - __c_1 + c_h - __c_mu) * __C + __c_1 * __s_c * __s_c.t() + __c_mu * sum_c;
 
     __step++;
+
+    return true;
 }

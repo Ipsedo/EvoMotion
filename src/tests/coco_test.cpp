@@ -60,8 +60,8 @@ void example_experiment(const char *suite_name,
 
             /* Call the optimization algorithm for the remaining number of evaluations */
             CMA_ES cma = CMA_ES(PROBLEM);
-            for (int i = 0; i < 20; i++)
-                cma.step();
+            for (int i = 0; i < 200 && cma.step(); i++) {}
+
 
             /* Break the loop if the algorithm performed no evaluations or an unexpected thing happened */
             if (coco_problem_get_evaluations(PROBLEM) == evaluations_done) {

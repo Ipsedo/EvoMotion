@@ -63,7 +63,7 @@ private:
 public:
     explicit CMA_ES(coco_problem_s *p);
 
-    void step();
+    bool step();
 };
 
 
