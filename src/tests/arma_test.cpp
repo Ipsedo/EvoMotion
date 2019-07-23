@@ -4,6 +4,7 @@
 
 #include "arma_test.h"
 
+#define ARMA_DONT_PRINT_ERRORS
 #include <armadillo>
 #include <iostream>
 

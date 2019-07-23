@@ -5,6 +5,7 @@
 #ifndef EVOMOTION_INDIVIDUAL_H
 #define EVOMOTION_INDIVIDUAL_H
 
+#define ARMA_DONT_PRINT_ERRORS
 #include <armadillo>
 
 struct individual {
