@@ -35,7 +35,7 @@ CMA_ES::CMA_ES(coco_problem_s *p) :
     __s_sigma(arma::vec(__n, arma::fill::zeros)),
     __s_c(arma::vec(__n, arma::fill::zeros)),
     __C(arma::mat(__n, __n, arma::fill::eye)),
-    __sigma(__uniform_dist(__generator) * 1.0 + 1e-3) {
+    __sigma(__uniform_dist(__generator) * 1e-3 + 1e-18) {
 }
 
 individual CMA_ES::__init_x() {
@@ -63,28 +63,16 @@ arma::vec CMA_ES::__init_w() {
     return w;
 }
 
-// https://stackoverflow.com/questions/19837576/comparing-floating-point-number-to-zero
-bool is_nearly_equal(double a, double b)
-{
-    int factor = 1000;
-
-    double min_a = a - (a - std::nextafter(a, std::numeric_limits<double>::lowest())) * factor;
-    double max_a = a + (std::nextafter(a, std::numeric_limits<double>::max()) - a) * factor;
-
-    return min_a <= b && max_a >= b;
-}
-
 bool CMA_ES::step() {
     std::vector<individual> childs(static_cast<unsigned long>(__lambda));
 
     arma::mat C_sqrt;
 
     if (!arma::sqrtmat_sympd(C_sqrt, __C)) // TODO vrai check limites numeriques
-        // erreur dans arma pour lancer warning...
         return false;
 
     for (int k = 0; k < __lambda; k++) {
-        childs[k].z = arma::randn<arma::vec>(arma::uword(__n));
+        childs[k].z = arma::randn<arma::vec>(__n);
 
         childs[k].geno = __x.geno + __sigma * C_sqrt * childs[k].z;
 
@@ -113,7 +101,7 @@ bool CMA_ES::step() {
 
     __sigma *= exp(((__c_sigma / __d) / 2.0)
             * (pow(arma::norm(__s_sigma), 2.0) /
-            double(__n) - 1.0));
+            double(__n) - 1.0)); // inria
             /*(sqrt(double(__n)) * (1.0 - 1.0 / (4.0 * double(__n))
             + 1.0 / (21.0 * pow(double(__n), 2.0)))) - 1.0)); // wiki */
 
