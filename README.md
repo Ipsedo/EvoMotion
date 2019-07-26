@@ -17,7 +17,7 @@ $ sudo apt-get install libboost-dev
 ```
 
 Armadillo :
-download latest version on http://arma.sourceforge.net/download.html
+download latest version on offical [website](http://arma.sourceforge.net/download.html)
 ```bash
 $ # change directory to extracted armadillo dir
 $ cd armadillo
