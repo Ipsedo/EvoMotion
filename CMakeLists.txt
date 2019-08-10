@@ -3,8 +3,6 @@ project(EvoMotion)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_PREFIX_PATH "/usr/include/armadillo")
-
 find_package(Armadillo REQUIRED)
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 
