@@ -11,21 +11,18 @@ __Note__ : In a first time, only CMA-ES will be implemented and tested with [coc
 ## Requirements
 This project requires LAPACK, BLAS, Boost and Armadillo libraries.
 ### Ubuntu
-LAPACK, BLAS and Boost :
+LAPACK, BLAS, Boost and Armadillo :
 ```bash
+$ # Update
+$ sudo apt-get update
+$ # Install LAPACK
 $ sudo apt-get install liblapack-dev
+$ # Install BLAS
 $ sudo apt-get install libblas-dev
+$ # Install Boost
 $ sudo apt-get install libboost-dev
-```
-
-Download the latest version of Armadillo on official [website](http://arma.sourceforge.net/download.html)
-```bash
-$ # Go to extracted armadillo directory
-$ cd armadillo
-$ # Then install
-$ cmake .
-$ make
-$ sudo make install
+$ # Install Armadillo
+$ sudo apt-get install libarmadillo-dev
 ```
 
 ## Installation
