@@ -4,9 +4,9 @@ __author__ : Samuel Berrien
 ## Description
 The final goal of this project is to implement CMA-ES or any kind of optimisation algorithm in order to teach creature to walk, run etc.
 
-We will first try to reproduce the results of the article [Flexible Muscle-Based Locomotion for Bipedal Creatures](https://www.goatstream.com/research/papers/SA2013/SA2013.pdf)
+We will first try to reproduce the results of the article [Flexible Muscle-Based Locomotion for Bipedal Creatures](https://www.goatstream.com/research/papers/SA2013/SA2013.pdf).
 
-__Note__ : In a first time, only CMA-ES will be implemented and tested with [coco](https://github.com/numbbo/coco) benchmark tools. Then the creature walk teaching will be implemented.
+__Note__ : In a first time, only CMA-ES will be implemented and tested with [COCO](https://github.com/numbbo/coco) benchmark tools. Then the creature walk teaching will be implemented.
 
 ## Requirements
 This project requires LAPACK, BLAS, Boost and Armadillo libraries.
