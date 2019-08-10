@@ -18,6 +18,6 @@ void test_armadillo() {
 
     std::cout << v << std::endl;
     std::cout << v.size() << std::endl;
-    auto a = v * m1;
+    auto a = m1 * v;
     std::cout << v * a.t() << std::endl;
 }
