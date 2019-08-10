@@ -18,10 +18,10 @@ static const long INDEPENDENT_RESTARTS = 1e5;
 
 static const unsigned int BUDGET_MULTIPLIER = 2;
 
-void example_experiment(const char *suite_name,
-                        const char *suite_options,
-                        const char *observer_name,
-                        const char *observer_options) {
+void test_coco(const char *suite_name,
+               const char *suite_options,
+               const char *observer_name,
+               const char *observer_options) {
 
     coco_random_state_t *random_generator = coco_random_new(12345);
 

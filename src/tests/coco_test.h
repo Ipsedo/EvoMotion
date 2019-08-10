@@ -21,9 +21,9 @@ typedef struct {
 } timing_data_t;
 
 
-void example_experiment(const char *suite_name,
-                        const char *suite_options,
-                        const char *observer_name,
-                        const char *observer_options);
+void test_coco(const char *suite_name,
+               const char *suite_options,
+               const char *observer_name,
+               const char *observer_options);
 
 #endif //EVOMOTION_COCO_TEST_H
