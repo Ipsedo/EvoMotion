@@ -35,7 +35,7 @@ CMA_ES::CMA_ES(coco_problem_s *p) :
     __s_sigma(arma::vec(__n, arma::fill::zeros)),
     __s_c(arma::vec(__n, arma::fill::zeros)),
     __C(arma::mat(__n, __n, arma::fill::eye)),
-    __sigma(__uniform_dist(__generator) * 1e-3 + 1e-18) {
+    __sigma(3.0) {
 }
 
 individual CMA_ES::__init_x() {
