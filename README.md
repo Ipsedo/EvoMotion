@@ -9,7 +9,7 @@ We will first try to reproduce the results of the article [Flexible Muscle-Based
 __Note__ : In a first time, only CMA-ES will be implemented and tested with [COCO](https://github.com/numbbo/coco) benchmark tools. Then the creature walk teaching will be implemented.
 
 ## Requirements
-This project requires LAPACK, BLAS, Boost and Armadillo libraries.
+This project requires LAPACK, BLAS, Boost, Armadillo and Bullet3 libraries.
 ### Ubuntu
 LAPACK, BLAS, Boost and Armadillo :
 ```bash
@@ -23,6 +23,8 @@ $ # Install Boost
 $ sudo apt-get install libboost-dev
 $ # Install Armadillo
 $ sudo apt-get install libarmadillo-dev
+$ # Install Bullet3
+$ sudo apt-get install libbullet-dev
 ```
 
 ## Installation
