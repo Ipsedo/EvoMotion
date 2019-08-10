@@ -4,6 +4,8 @@ __author__ : Samuel Berrien
 ## Description
 The final goal of this project is to implement CMA-ES or any kind of optimisation algorithm in order to teach creature to walk, run etc.
 
+We will first try to reproduce the results of the article [Flexible Muscle-Based Locomotion for Bipedal Creatures](https://www.goatstream.com/research/papers/SA2013/SA2013.pdf)
+
 __Note__ : In a first time, only CMA-ES will be implemented and tested with [coco](https://github.com/numbbo/coco) benchmark tools. Then the creature walk teaching will be implemented.
 
 ## Requirements
@@ -16,12 +18,11 @@ $ sudo apt-get install libblas-dev
 $ sudo apt-get install libboost-dev
 ```
 
-Armadillo :
-download latest version on offical [website](http://arma.sourceforge.net/download.html)
+Download the latest version of Armadillo on official [website](http://arma.sourceforge.net/download.html)
 ```bash
-$ # change directory to extracted armadillo dir
+$ # Go to extracted armadillo directory
 $ cd armadillo
-$ # then install
+$ # Then install
 $ cmake .
 $ make
 $ sudo make install
@@ -31,18 +32,21 @@ $ sudo make install
 First clone this repository :
 ```bash
 $ git clone https://github.com/Ipsedo/EvoMotion.git
-$ cd EvoMotion
 ```
 
 Then install coco benchmark platform :
 ```bash
+$ # Go to EvoMotion root directory
 $ cd EvoMotion
+$ # Clone and install COCO
 $ ./install_coco.sh
 ```
 
 Finally you are able to build the source
 ```bash
+$ # Go to EvoMotion root directory
 $ cd EvoMotion
+$ # Build project with CMake and Makefile
 $ ./build.sh
 ```
 
