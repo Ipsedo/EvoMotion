@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
                    "Example (launch COCO test) : ./build/EvoMotion coco\n";
 
     if (argc <= 1) {
-        std::cout << err_msg << std::endl;
+        std::cout << err_msg;
         return 1;
     }
 
