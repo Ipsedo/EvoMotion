@@ -13,10 +13,7 @@
 
 #include "opengl_test.h"
 #include "../utils/res.h"
-
-void error_callback(int error, const char *description) {
-    fputs(description, stderr);
-}
+#include "../view/error.h"
 
 void test_opengl() {
     std::cout << "OpenGL test" << std::endl;
