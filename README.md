@@ -28,43 +28,12 @@ Graphic stuff :
 * SOIL
 
 ### Ubuntu
-LAPACK, BLAS and Boost :
 ```bash
 $ # Update
 $ sudo apt-get update
-$ # Install LAPACK
-$ sudo apt-get install liblapack-dev
-$ # Install BLAS
-$ sudo apt-get install libblas-dev
-$ # Install Boost
-$ sudo apt-get install libboost-dev
-```
-Armadillo and Bullet :
-```bash
-$ # Update
-$ sudo apt-get update
-$ # Install Armadillo
-$ sudo apt-get install libarmadillo-dev
-$ # Install Bullet3
-$ sudo apt-get install libbullet-dev
-```
-GLM, GLEW and GLFW :
-```bash
-$ # Update
-$ sudo apt-get update
-$ # Install GLM
-$ sudo apt-get install libglm-dev
-$ # Install GLEW
-$ sudo apt-get install libglew-dev
-$ # Install GLFW-3
-$ sudo apt-get install libglfw3-dev
-```
-SOIL :
-```bash
-$ # Update
-$ sudo apt-get update
-$ # Install SOIL
-$ sudo apt-get install libsoil-dev
+$ # Install libraries
+$ sudo apt-get install liblapack-dev libblas-dev libboost-dev \
+libarmadillo-dev libbullet-dev libglm-dev libglew-dev libglfw3-dev libsoil-dev
 ```
 
 ## Installation
