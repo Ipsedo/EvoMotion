@@ -9,9 +9,26 @@ We will first try to reproduce the results of the article [Flexible Muscle-Based
 __Note__ : In a first time, only CMA-ES will be implemented and tested with [COCO](https://github.com/numbbo/coco) benchmark tools. Then the creature walk teaching will be implemented.
 
 ## Requirements
-This project requires LAPACK, BLAS, Boost, Armadillo and Bullet3 libraries.
+This project requires multiple librairies.
+
+Linear algebra stuff : 
+* LAPACK
+* BLAS
+* Boost
+* Armadillo
+
+Physic engine stuff :
+* Bullet
+
+Graphic stuff :
+* OpenGL
+* GLM
+* GLEW
+* GLFW
+* SOIL
+
 ### Ubuntu
-LAPACK, BLAS, Boost and Armadillo :
+LAPACK, BLAS and Boost :
 ```bash
 $ # Update
 $ sudo apt-get update
@@ -21,10 +38,33 @@ $ # Install BLAS
 $ sudo apt-get install libblas-dev
 $ # Install Boost
 $ sudo apt-get install libboost-dev
+```
+Armadillo and Bullet :
+```bash
+$ # Update
+$ sudo apt-get update
 $ # Install Armadillo
 $ sudo apt-get install libarmadillo-dev
 $ # Install Bullet3
 $ sudo apt-get install libbullet-dev
+```
+GLM, GLEW and GLFW :
+```bash
+$ # Update
+$ sudo apt-get update
+$ # Install GLM
+$ sudo apt-get install libglm-dev
+$ # Install GLEW
+$ sudo apt-get install libglew-dev
+$ # Install GLFW-3
+$ sudo apt-get install libglfw3-dev
+```
+SOIL :
+```bash
+$ # Update
+$ sudo apt-get update
+$ # Install SOIL
+$ sudo apt-get install libsoil-dev
 ```
 
 ## Installation
