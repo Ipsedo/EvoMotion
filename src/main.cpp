@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     else if (arg == "bullet") test_bullet();
     else if (arg == "opengl") test_opengl();
     else {
-        std::cout << "Unrognized arg !" << std::endl;
+        std::cout << "Unrecognized arg : " << arg << std::endl;
         std::cout << err_msg;
         return 1;
     }
