@@ -43,11 +43,11 @@ void test_opengl() {
         exit(0);
     }
 
-    //obj_mtl_vbo objVBO(get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "whale.obj"); // Prendre Ipsedo/mediefight/ [...]
-    /*obj_mtl_vbo objMtlVBO(get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "whale.obj",
+    //ObjMtlVBO objVBO(get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "whale.obj"); // Prendre Ipsedo/mediefight/ [...]
+    /*ObjMtlVBO objMtlVBO(get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "whale.obj",
                         get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "whale.mtl",
                         true);*/
-    normal_map_obj square_map(get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "sphere.obj",
+    NormalMapObj square_map(get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "sphere.obj",
                              get_res_folder() + EVOMOTION_SEP + "tex" + EVOMOTION_SEP + "alien_color.png",
                              get_res_folder() + EVOMOTION_SEP + "tex" + EVOMOTION_SEP + "alien_norm.png");
 
