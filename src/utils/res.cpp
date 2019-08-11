@@ -11,14 +11,14 @@
 
 std::string get_res_folder() {
     std::string this_file = __FILE__;
-    std::vector<std::string> splittedPath = split(this_file, EVOMOTION_SEP);
+    std::vector<std::string> splited_path = split(this_file, EVOMOTION_SEP);
 
-    while (splittedPath.back() != "EvoMotion") {
-        splittedPath.pop_back();
+    while (splited_path.back() != "EvoMotion") {
+        splited_path.pop_back();
     }
 
     std::string res_path;
-    for (auto &elt : splittedPath) {
+    for (auto &elt : splited_path) {
         res_path += EVOMOTION_SEP + elt;
     }
 
@@ -29,14 +29,14 @@ std::string get_res_folder() {
 
 std::string get_shader_folder() {
     std::string this_file = __FILE__;
-    std::vector<std::string> splittedPath = split(this_file, EVOMOTION_SEP);
+    std::vector<std::string> splited_path = split(this_file, EVOMOTION_SEP);
 
-    while (splittedPath.back() != "EvoMotion") {
-        splittedPath.pop_back();
+    while (splited_path.back() != "EvoMotion") {
+        splited_path.pop_back();
     }
 
     std::string res_path;
-    for (auto &elt : splittedPath) {
+    for (auto &elt : splited_path) {
         res_path += EVOMOTION_SEP + elt;
     }
 
