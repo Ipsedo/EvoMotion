@@ -4,7 +4,7 @@
 // From COCO (https://github.com/numbbo/coco) random search example
 
 #include <cstdio>
-#include "../evolution/CMA_ES.h"
+#include "../algos/evolution/CMA_ES.h"
 #include "coco_test.h"
 
 
