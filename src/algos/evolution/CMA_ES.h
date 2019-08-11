@@ -7,7 +7,7 @@
 
 #include <random>
 #include "individual.h"
-#include "../coco.h"
+#include "../../coco.h"
 
 class CMA_ES {
 private:
