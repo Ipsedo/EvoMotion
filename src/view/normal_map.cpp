@@ -24,8 +24,6 @@ void normal_map_obj::init_tex(std::string texture_file, std::string normals_file
 
     img_rgb img_2 = load_image(std::move(normals_file));
 
-    std::cout << img_1.width << " " << img_2.width << std::endl;
-
     glGenTextures(2, textures);
 
     glActiveTexture(GL_TEXTURE0);
