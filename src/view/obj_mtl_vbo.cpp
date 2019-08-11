@@ -11,7 +11,7 @@
 #include "../utils/res.h"
 #include "../utils/string_utils.h"
 
-void obj_mtl_vbo::init() {
+void ObjMtlVBO::init() {
     m_program = glCreateProgram();
 
     GLuint vertex_shader = load_shader(GL_VERTEX_SHADER, get_shader_folder() + EVOMOTION_SEP + "specular_vs.glsl");
@@ -22,7 +22,7 @@ void obj_mtl_vbo::init() {
     glLinkProgram(m_program);
 }
 
-void obj_mtl_vbo::bind() {
+void ObjMtlVBO::bind() {
     m_mvp_matrix_handle = (GLuint) glGetUniformLocation(m_program, "u_MVPMatrix");
     m_mv_matrix_handle = (GLuint) glGetUniformLocation(m_program, "u_MVMatrix");
     m_position_handle = (GLuint) glGetAttribLocation(m_program, "a_Position");
@@ -37,7 +37,7 @@ void obj_mtl_vbo::bind() {
     m_spec_shininess_handle = (GLuint) glGetAttribLocation(m_program, "a_material_shininess");
 }
 
-void obj_mtl_vbo::bind_buffer(std::vector<float> packed_data) {
+void ObjMtlVBO::bind_buffer(std::vector<float> packed_data) {
     glGenBuffers(1, &packed_data_buffer_id);
 
     glBindBuffer(GL_ARRAY_BUFFER, packed_data_buffer_id);
@@ -48,7 +48,7 @@ void obj_mtl_vbo::bind_buffer(std::vector<float> packed_data) {
     packed_data.clear();
 }
 
-std::vector<float> obj_mtl_vbo::parse_obj(std::string obj_file_name, std::string mtl_file_name) {
+std::vector<float> ObjMtlVBO::parse_obj(std::string obj_file_name, std::string mtl_file_name) {
     using namespace std;
     vector<float> res;
     std::map<string, glm::vec3> amb_color;
@@ -197,7 +197,7 @@ std::vector<float> obj_mtl_vbo::parse_obj(std::string obj_file_name, std::string
     return res;
 }
 
-obj_mtl_vbo::obj_mtl_vbo(std::string obj_file_name, std::string mtl_file_name, bool will_random_color) {
+ObjMtlVBO::ObjMtlVBO(std::string obj_file_name, std::string mtl_file_name, bool will_random_color) {
     this->random_color = will_random_color;
 
     init();
@@ -208,7 +208,7 @@ obj_mtl_vbo::obj_mtl_vbo(std::string obj_file_name, std::string mtl_file_name, b
     distance_coef = 0;
 }
 
-void obj_mtl_vbo::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 ligh_pos_in_eye_space, glm::vec3 camera_pos) {
+void ObjMtlVBO::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 ligh_pos_in_eye_space, glm::vec3 camera_pos) {
     glUseProgram(m_program);
 
     glBindBuffer(GL_ARRAY_BUFFER, packed_data_buffer_id);

@@ -2,15 +2,15 @@
 // Created by samuel on 11/08/19.
 //
 
-#ifndef EVOMOTION_OBJ_MODEL_H
-#define EVOMOTION_OBJ_MODEL_H
+#ifndef EVOMOTION_OBJ_MTL_VBO_H
+#define EVOMOTION_OBJ_MTL_VBO_H
 
 #include <GL/glew.h>
 #include <vector>
 #include <glm/glm.hpp>
 #include <string>
 
-class obj_mtl_vbo {
+class ObjMtlVBO {
 
 private:
     /**
@@ -67,7 +67,7 @@ private:
     std::vector<float> parse_obj(std::string obj_file_name, std::string mtl_file_name);
 
 public:
-    obj_mtl_vbo(std::string obj_file_name, std::string mtl_file_name, bool will_random_color);
+    ObjMtlVBO(std::string obj_file_name, std::string mtl_file_name, bool will_random_color);
 
     void draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 ligh_pos_in_eye_space, glm::vec3 camera_pos);
 };

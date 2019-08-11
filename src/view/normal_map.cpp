@@ -11,14 +11,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-normal_map_obj::normal_map_obj(std::string obj_file, std::string texture_file, std::string normals_file) : textures(new GLuint[2]) {
+NormalMapObj::NormalMapObj(std::string obj_file, std::string texture_file, std::string normals_file) : textures(new GLuint[2]) {
     init_prgm();
     bind();
     init_tex(std::move(texture_file), std::move(normals_file));
     gen_buffer(std::move(obj_file));
 }
 
-void normal_map_obj::init_tex(std::string texture_file, std::string normals_file) {
+void NormalMapObj::init_tex(std::string texture_file, std::string normals_file) {
 
     img_rgb img_1 = load_image(std::move(texture_file));
 
@@ -48,7 +48,7 @@ void normal_map_obj::init_tex(std::string texture_file, std::string normals_file
     delete[] img_2.colors;
 }
 
-void normal_map_obj::init_prgm() {
+void NormalMapObj::init_prgm() {
     m_program = glCreateProgram();
     GLuint vs = load_shader(GL_VERTEX_SHADER, get_shader_folder() + EVOMOTION_SEP + "normal_map_vs.glsl");
     GLuint fs = load_shader(GL_FRAGMENT_SHADER, get_shader_folder() + EVOMOTION_SEP + "normal_map_fs.glsl");
@@ -57,7 +57,7 @@ void normal_map_obj::init_prgm() {
     glLinkProgram(m_program);
 }
 
-void normal_map_obj::bind() {
+void NormalMapObj::bind() {
     m_mvp_matrix_handle = (GLuint) glGetUniformLocation(m_program, "u_MVPMatrix");
     m_mv_matrix_handle = (GLuint) glGetUniformLocation(m_program, "u_MVMatrix");
 
@@ -75,7 +75,7 @@ void normal_map_obj::bind() {
     m_normal_map_handle = (GLuint) glGetUniformLocation(m_program, "u_normalMap");
 }
 
-void normal_map_obj::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 light_pos, glm::vec3 cam_pos) {
+void NormalMapObj::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 light_pos, glm::vec3 cam_pos) {
     glUseProgram(m_program);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -121,7 +121,7 @@ void normal_map_obj::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 l
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void normal_map_obj::gen_buffer(std::string obj_file_name) {
+void NormalMapObj::gen_buffer(std::string obj_file_name) {
     std::vector<float> packed_data = parse_obj(move(obj_file_name));
 
     glGenBuffers(1, &buffer);
@@ -132,7 +132,7 @@ void normal_map_obj::gen_buffer(std::string obj_file_name) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-std::vector<float> normal_map_obj::parse_obj(std::string obj_file_name) {
+std::vector<float> NormalMapObj::parse_obj(std::string obj_file_name) {
     nb_vertex = 0;
 
     std::ifstream in(obj_file_name);
@@ -218,7 +218,7 @@ std::vector<float> normal_map_obj::parse_obj(std::string obj_file_name) {
     return packed_data;
 }
 
-normal_map_obj::~normal_map_obj() {
+NormalMapObj::~NormalMapObj() {
     glDeleteTextures(2, textures);
     // TODO desaloué images textures
 }

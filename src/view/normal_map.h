@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 
 
-class normal_map_obj {
+class NormalMapObj {
 private:
     const int POSITION_SIZE = 3;
     const int TEX_COORD_SIZE = 2;
@@ -49,11 +49,11 @@ private:
     std::vector<float> parse_obj(std::string obj_file_name);
 
 public:
-    normal_map_obj(std::string obj_file, std::string texture_file, std::string normals_file);
+    NormalMapObj(std::string obj_file, std::string texture_file, std::string normals_file);
 
     void draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 light_pos, glm::vec3 cam_pos);
 
-    ~normal_map_obj();
+    ~NormalMapObj();
 };
 
 #endif //EVOMOTION_NORMAL_MAP_H
