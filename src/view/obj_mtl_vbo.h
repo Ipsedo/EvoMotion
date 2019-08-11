@@ -72,4 +72,4 @@ public:
     void draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 ligh_pos_in_eye_space, glm::vec3 camera_pos);
 };
 
-#endif //EVOMOTION_OBJ_MODEL_H
+#endif //EVOMOTION_OBJ_MTL_VBO_H
