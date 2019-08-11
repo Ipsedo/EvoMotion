@@ -7,7 +7,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <vector>
-#include "body.h"
+#include "item.h"
 
 struct engine {
     btBroadphaseInterface *m_broad_phase;

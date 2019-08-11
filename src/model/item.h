@@ -2,8 +2,8 @@
 // Created by samuel on 11/08/19.
 //
 
-#ifndef EVOMOTION_BODY_H
-#define EVOMOTION_BODY_H
+#ifndef EVOMOTION_ITEM_H
+#define EVOMOTION_ITEM_H
 
 #include <btBulletDynamicsCommon.h>
 #include "../view/obj_mtl_vbo.h"
@@ -19,4 +19,4 @@ localCreateInfo(btCollisionShape *collision_shape, glm::vec3 pos, glm::mat4 rot_
 
 item create_item_box(glm::vec3 pos, glm::mat4 rot_mat, glm::vec3 scale, float mass);
 
-#endif //EVOMOTION_BODY_H
+#endif //EVOMOTION_ITEM_H

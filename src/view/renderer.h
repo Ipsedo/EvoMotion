@@ -10,7 +10,7 @@
 #include <glm/glm.hpp>
 #include "obj_mtl_vbo.h"
 #include <GLFW/glfw3.h>
-#include "../model/body.h"
+#include "../model/item.h"
 
 struct renderer {
 

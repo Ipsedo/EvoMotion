@@ -3,7 +3,7 @@
 //
 
 #include <glm/gtc/quaternion.hpp>
-#include "body.h"
+#include "item.h"
 #include "../utils/res.h"
 
 btRigidBody::btRigidBodyConstructionInfo
