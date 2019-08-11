@@ -31,6 +31,10 @@ include_directories(${GLFW_INCLUDE_DIRS})
 # SOIL
 find_library(SOIL SOIL lib/libsoil.a)
 
+# LibTorch
+set(CMAKE_PREFIX_PATH "/opt/libtorch")
+find_package(Torch REQUIRED)
+
 # Get all source files
 file(GLOB_RECURSE SRC "src/*.cpp" "src/*.c")
 
@@ -46,4 +50,5 @@ target_link_libraries(
         ${OPENGL_LIBRARIES}
         ${GLFW_LIBRARIES}
         ${SOIL}
+        ${TORCH_LIBRARIES}
 )
