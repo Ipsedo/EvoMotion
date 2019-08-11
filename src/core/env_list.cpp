@@ -35,10 +35,22 @@ environment cartpole_env() {
     rend.init();
 
     // TODO fix object relative place with correct constraint anchor pos
-    item base = create_item_box(glm::vec3(0.f, -1.f - 3.f, 10.f), glm::mat4(1.f), glm::vec3(10.f, 2.f, 10.f), 0.f);
+    item base = create_item_box(glm::vec3(0.f, -4.f, 10.f), glm::mat4(1.f), glm::vec3(10.f, 2.f, 10.f), 0.f);
 
-    item chariot = create_item_box(glm::vec3(0.f, 0.6f - 2.f, 10.f), glm::mat4(1.f), glm::vec3(2.f, 0.25f, 1.f), 1.f);
-    item pendule = create_item_box(glm::vec3(0.f, 2.f - 2.f, 10.f), glm::mat4(1.f), glm::vec3(0.1f, 1.f, 0.1f), 1.f);
+    float size_pendule = 0.5;
+    float width_pendule = 0.05f;
+
+    float size_chariot = 0.12f;
+    float width_chariot = 0.5f;
+
+    float pos_chariot = -3.f;
+
+    item chariot = create_item_box(glm::vec3(0.f, pos_chariot, 10.f),
+            glm::mat4(1.f),
+            glm::vec3(width_chariot, size_chariot, width_chariot), 1.f);
+    item pendule = create_item_box(glm::vec3(0.f, pos_chariot + size_chariot * 0.5f - size_pendule * 0.5f, 10.f),
+            glm::mat4(1.f),
+            glm::vec3(width_pendule, size_pendule, width_pendule), 0.1f);
 
     std::vector<item> items{base, chariot, pendule};
 
@@ -62,7 +74,8 @@ environment cartpole_env() {
     // For hinge between pendule and chariot
     btVector3 axis(0.f, 0.f, 1.f);
     auto *hinge = new btHingeConstraint(*chariot.m_rg_body, *pendule.m_rg_body,
-                                        btVector3(0.f, 0.4f, 0.f), btVector3(0.f, -1.1f, 0.f),
+                                        btVector3(0.f, size_chariot * 0.5f, 0.f),
+                                        btVector3(0.f, -size_pendule * 0.5f, 0.f),
                                         axis, axis, true);
 
     float force_scale = 2.f;
@@ -73,6 +86,7 @@ environment cartpole_env() {
 
     btRigidBody *chariot_rg = chariot.m_rg_body;
     btRigidBody *pendule_rg = pendule.m_rg_body;
+    chariot_rg->setIgnoreCollisionCheck(pendule_rg, true);
 
     auto step = [chariot_rg, pendule_rg](std::vector<item> items) {
         float pos = chariot_rg->getWorldTransform().getOrigin().x();
