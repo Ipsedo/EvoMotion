@@ -17,6 +17,8 @@ This project requires multiple libraries.
 
 * Graphic stuff : OpenGL, GLM, GLEW, GLFW and SOIL
 
+* Reinforcement Learning : LibTorch
+
 ### Ubuntu
 ```bash
 $ # Update
@@ -25,6 +27,13 @@ $ # Install libraries
 $ sudo apt-get install liblapack-dev libblas-dev libboost-dev \
 libarmadillo-dev libbullet-dev libglm-dev libglew-dev libglfw3-dev libsoil-dev
 ```
+```bash
+$ # Download libtorch for CUDA 10.0
+$ wget https://download.pytorch.org/libtorch/nightly/cu100/libtorch-shared-with-deps-latest.zip
+$ # Unzip libtorch to /opt
+$ sudo unzip libtorch-shared-with-deps-latest.zip -d /opt
+```
+__Note__ : if you want to extract LibTorch in a custom directory you need to modify EvoMotion's `CMakeLists.txt`.
 
 ## Installation
 First clone this repository :
