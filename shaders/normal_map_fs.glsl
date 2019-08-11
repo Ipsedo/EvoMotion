@@ -46,7 +46,8 @@ void main() {
     vec3 texColor = texture2D(u_tex, v_TexCoord).rgb;
 
     vec3 lightVector = u_LightPos - v_Position;
-    vec3 eyeVec = u_cam_pos - v_Position;
+    //vec3 eyeVec = u_cam_pos - v_Position;
+    vec3 eyeVec = 0.0 - v_Position;
 
     vec2 uv = v_TexCoord;
 
