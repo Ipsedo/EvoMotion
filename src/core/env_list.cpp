@@ -3,7 +3,7 @@
 //
 
 #include "env_list.h"
-#include "../model/body.h"
+#include "../model/item.h"
 
 environment create_test_env() {
     int nb_box = 10;
@@ -21,21 +21,26 @@ environment create_test_env() {
 
     items.push_back(create_item_box(glm::vec3(0.f, -3.f, 10.f), glm::mat4(1.f), glm::vec3(1.f), 0.f));
 
-    return environment(rend, items, true);
+    auto act = [](torch::Tensor action, std::vector<item> items) {
+        return;
+    };
+    auto step = [](std::vector<item> items) {
+        return env_step();
+    };
+    return environment(rend, items, true, act, step);
 }
 
 environment cartpole_env() {
     auto rend = renderer(1920, 1080);
     rend.init();
 
+    // TODO fix object relative place with correct constraint anchor pos
     item base = create_item_box(glm::vec3(0.f, -1.f - 3.f, 10.f), glm::mat4(1.f), glm::vec3(10.f, 2.f, 10.f), 0.f);
 
     item chariot = create_item_box(glm::vec3(0.f, 0.6f - 2.f, 10.f), glm::mat4(1.f), glm::vec3(2.f, 0.25f, 1.f), 1.f);
     item pendule = create_item_box(glm::vec3(0.f, 2.f - 2.f, 10.f), glm::mat4(1.f), glm::vec3(0.1f, 1.f, 0.1f), 1.f);
 
     std::vector<item> items{base, chariot, pendule};
-
-    environment env(rend, items, true);
 
     // For slider between chariot and base
     btTransform tr_base;
@@ -50,17 +55,46 @@ environment cartpole_env() {
     slider->setEnabled(true);
     slider->setPoweredLinMotor(true);
     slider->setMaxLinMotorForce(10.f);
-    slider->setTargetLinMotorVelocity(-1.f);
+    slider->setTargetLinMotorVelocity(0.f);
     slider->setLowerLinLimit(-10.f);
     slider->setUpperLinLimit(10.f);
 
-    env.m_engine.m_world->addConstraint(slider);
-
     // For hinge between pendule and chariot
+    btVector3 axis(0.f, 0.f, 1.f);
     auto *hinge = new btHingeConstraint(*chariot.m_rg_body, *pendule.m_rg_body,
-            btVector3(0.f, 0.4f, 0.f), btVector3(0.f, -1.1f, 0.f),
-            btVector3(0.f, 0.f, 1.f), btVector3(0.f, 0.f, 1.f), true);
+                                        btVector3(0.f, 0.4f, 0.f), btVector3(0.f, -1.1f, 0.f),
+                                        axis, axis, true);
 
+    float force_scale = 2.f;
+
+    auto act = [slider, force_scale](torch::Tensor action, std::vector<item> items) {
+        slider->setTargetLinMotorVelocity((action.item().toDouble() > 0 ? 1.f : -1.f) * force_scale);
+    };
+
+    btRigidBody *chariot_rg = chariot.m_rg_body;
+    btRigidBody *pendule_rg = pendule.m_rg_body;
+
+    auto step = [chariot_rg, pendule_rg](std::vector<item> items) {
+        float pos = chariot_rg->getWorldTransform().getOrigin().x();
+        float vel = chariot_rg->getLinearVelocity().x();
+
+        float ang = pendule_rg->getWorldTransform().getRotation().getAngle();
+        float ang_vel = pendule_rg->getAngularVelocity().z();
+
+        torch::Tensor state = torch::zeros(4);
+        state[0] = pos;
+        state[1] = vel;
+        state[2] = ang;
+        state[3] = ang_vel;
+
+        bool done = pos > 8.f || pos < -8.f || ang > 0.9 || ang < -0.9;
+
+        env_step new_state {state, done ? 0.f : 1.f, done};
+        return new_state;
+    };
+
+    environment env(rend, items, true, act, step);
+    env.m_engine.m_world->addConstraint(slider);
     env.m_engine.m_world->addConstraint(hinge);
 
     return env;
