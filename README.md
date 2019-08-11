@@ -9,7 +9,7 @@ We will first try to reproduce the results of the article [Flexible Muscle-Based
 __Note__ : In a first time, only CMA-ES will be implemented and tested with [COCO](https://github.com/numbbo/coco) benchmark tools. Then the creature walk teaching will be implemented.
 
 ## Requirements
-This project requires multiple librairies.
+This project requires multiple libraries.
 
 Linear algebra stuff : 
 * LAPACK
