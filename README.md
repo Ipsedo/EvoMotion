@@ -11,11 +11,11 @@ __Note__ : In a first time, only CMA-ES will be implemented and tested with [COC
 ## Requirements
 This project requires multiple libraries.
 
-__Linear algebra stuff__ : LAPACK, BLAS, Boost and Armadillo
+* Linear algebra stuff : LAPACK, BLAS, Boost and Armadillo
 
-__Physic engine stuff__ : Bullet
+* Physic engine stuff : Bullet
 
-__Graphic stuff__ : OpenGL, GLM, GLEW, GLFW and SOIL
+* Graphic stuff : OpenGL, GLM, GLEW, GLFW and SOIL
 
 ### Ubuntu
 ```bash
