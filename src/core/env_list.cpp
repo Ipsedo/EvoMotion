@@ -30,7 +30,7 @@ environment create_test_env() {
     return environment(rend, items, true, act, step);
 }
 
-environment cartpole_env() {
+environment cartpole_env(bool will_draw) {
     auto rend = renderer(1920, 1080);
     rend.init();
 
@@ -107,7 +107,7 @@ environment cartpole_env() {
         return new_state;
     };
 
-    environment env(rend, items, true, act, step);
+    environment env(rend, items, will_draw, act, step);
     env.m_engine.m_world->addConstraint(slider);
     env.m_engine.m_world->addConstraint(hinge);
 
