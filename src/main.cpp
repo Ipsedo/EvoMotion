@@ -4,6 +4,7 @@
 #include "tests/coco_test.h"
 #include "tests/bullet_test.h"
 #include "tests/opengl_test.h"
+#include "tests/rl_test.h"
 
 int main(int argc, char *argv[]) {
 
@@ -12,6 +13,7 @@ int main(int argc, char *argv[]) {
                    "- bullet\n"
                    "- armadillo\n"
                    "- opengl\n"
+                   "- rl\n"
                    "Example (launch COCO test) : ./build/EvoMotion coco\n";
 
     if (argc <= 1) {
@@ -25,6 +27,7 @@ int main(int argc, char *argv[]) {
     else if (arg == "armadillo") test_armadillo();
     else if (arg == "bullet") test_bullet();
     else if (arg == "opengl") test_opengl();
+    else if (arg == "rl") test_reinforcement_learning();
     else {
         std::cout << "Unrecognized arg : " << arg << std::endl;
         std::cout << err_msg;
