@@ -9,6 +9,6 @@
 
 environment create_test_env();
 
-environment cartpole_env(bool will_draw);
+environment create_cartpole_env();
 
 #endif //EVOMOTION_ENV_LIST_H
