@@ -19,13 +19,12 @@ env_step environment::step(float delta, torch::Tensor action, bool will_draw) {
     m_act_fun(std::move(action), m_items);
     m_engine.step(delta);
 
-    if (will_draw && !m_renderer.m_is_on)
-        m_renderer.init();
-
-    if (m_renderer.m_is_on && will_draw)
+    if (will_draw) {
+        if (!m_renderer.m_is_on)
+            m_renderer.init();
         m_renderer.draw(delta, m_items);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
+    }
 
     m_step += 1;
 
