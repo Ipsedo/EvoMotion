@@ -3,6 +3,7 @@
 //
 
 #include "test.h"
+#include <random>
 
 environment create_test_env() {
     int seed = 12345;
