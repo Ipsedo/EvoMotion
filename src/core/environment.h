@@ -23,16 +23,25 @@ struct environment {
     renderer m_renderer;
     std::vector<item> m_items;
 
-    bool will_draw;
+    int m_step;
 
-    std::function<void(torch::Tensor, std::vector<item>)> m_apply_action;
-    std::function<env_step(std::vector<item>)> m_get_state;
+    std::function<void(torch::Tensor, std::vector<item>)> m_act_fun;
+    std::function<env_step(std::vector<item>)> m_step_fun;
+    std::function<void(std::vector<item>)> m_reset_fun;
 
-    environment(renderer renderer, std::vector<item> items, bool will_draw,
-            std::function<void(torch::Tensor, std::vector<item>)> apply_action,
-            std::function<env_step(std::vector<item>)> process_env);
+    torch::IntArrayRef m_actions_sizes;
+    torch::IntArrayRef m_state_sizes;
 
-    env_step step(float delta, torch::Tensor action);
+    environment(renderer renderer, std::vector<item> items,
+            torch::IntArrayRef action_sizes, torch::IntArrayRef state_sizes,
+            std::function<void(torch::Tensor, std::vector<item>)> act_fun,
+            std::function<env_step(std::vector<item>)> step_fun,
+            std::function<void(std::vector<item>)> reset_fun);
+
+    env_step step(float delta, torch::Tensor action, bool will_draw);
+    void reset();
+
+    // TODO quit : delete ObjMtlVBO pointers
 };
 
 #endif //EVOMOTION_ENVIRONMENT_H
