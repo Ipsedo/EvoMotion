@@ -5,10 +5,7 @@
 #ifndef EVOMOTION_ENV_LIST_H
 #define EVOMOTION_ENV_LIST_H
 
-#include "environment.h"
-
-environment create_test_env();
-
-environment create_cartpole_env();
+#include "envs/cartpole.h"
+#include "envs/test.h"
 
 #endif //EVOMOTION_ENV_LIST_H
