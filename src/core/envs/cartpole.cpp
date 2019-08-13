@@ -3,26 +3,13 @@
 //
 
 #include "cartpole.h"
-
-btTransform get_pendule_transform(std::uniform_real_distribution<float> *rd_uni,
-        std::default_random_engine *rd_gen, float pendule_height) {
-    btTransform translate_1;
-    translate_1.setIdentity();
-    translate_1.setOrigin((btVector3(0, -pendule_height, 0)));
-    btTransform rot;
-    rot.setRotation(btQuaternion(btVector3(0,0,1), float(M_PI / 6.0) * rd_uni->operator()(*rd_gen) - float(M_PI / 12.0)));
-    btTransform translate_2;
-    translate_2.setIdentity();
-    translate_2.setOrigin((btVector3(0, pendule_height, 0)));
-
-    return translate_1 * rot * translate_2;
-}
+#include <random>
 
 environment create_cartpole_env() {
     int seed = 12345;
 
-    auto rd_gen = std::make_shared<std::default_random_engine>(seed);
-    auto rd_uni = std::make_shared<std::uniform_real_distribution<float>>(0.f, 1.f);
+    auto rd_gen = new std::default_random_engine(seed);
+    auto rd_uni = new std::uniform_real_distribution<float>(0.f, 1.f);
 
     auto rend = renderer(1920, 1080);
 
@@ -90,9 +77,12 @@ environment create_cartpole_env() {
     btRigidBody *base_rg = base.m_rg_body;
     btRigidBody *chariot_rg = chariot.m_rg_body;
     btRigidBody *pendule_rg = pendule.m_rg_body;
+
     chariot_rg->setIgnoreCollisionCheck(pendule_rg, true);
     base_rg->setIgnoreCollisionCheck(chariot_rg, true);
     base_rg->setIgnoreCollisionCheck(pendule_rg, true);
+
+    chariot_rg->applyForce(btVector3(0.f, ((*rd_uni)(*rd_gen) * 2.f - 1.f) * 0.1f, 0.f), chariot_rg->getCenterOfMassPosition());
 
     auto step = [chariot_rg, pendule_rg](std::vector<item> items) {
         float pos = chariot_rg->getWorldTransform().getOrigin().x();
@@ -108,51 +98,43 @@ environment create_cartpole_env() {
         state[3] = ang_vel;
 
         bool done = pos > 8.f || pos < -8.f || ang > M_PI * 0.5 || ang < -M_PI * 0.5;
-        float reward = abs(1.f - abs(ang) / float(M_PI * 0.5));
+        //float reward = abs(1.f - abs(ang) / float(M_PI * 0.5));
+        float reward = done ? 0.f : 1.f;
 
         env_step new_state {state, reward, done};
         return new_state;
     };
 
-    auto rot = get_pendule_transform(rd_uni.get(), rd_gen.get(), pendule_height);
-    pendule_rg->getMotionState()->setWorldTransform(pendule_rg->getWorldTransform() * rot);
-    pendule_rg->setWorldTransform(pendule_rg->getWorldTransform() * rot);
-
     auto reset = [chariot_rg, pendule_rg,
                   chariot_pos, pendule_pos, pendule_height,
-                  slider,
-                  rd_gen, rd_uni](std::vector<item> v){
+                  slider, rd_gen, rd_uni](std::vector<item> v){
+
+        slider->setTargetLinMotorVelocity(0.f);
 
         btTransform tr_chariot_reset;
         tr_chariot_reset.setIdentity();
-
         tr_chariot_reset.setOrigin(btVector3(0.f, chariot_pos, 10.f));
 
+        chariot_rg->setWorldTransform(tr_chariot_reset);
+        chariot_rg->getMotionState()->setWorldTransform(tr_chariot_reset);
+
+        chariot_rg->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
+        chariot_rg->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
         chariot_rg->clearForces();
 
-        chariot_rg->getMotionState()->setWorldTransform(tr_chariot_reset);
-        chariot_rg->setWorldTransform(tr_chariot_reset);
-
-        chariot_rg->setLinearVelocity(btVector3(0, 0, 0));
-        chariot_rg->setAngularVelocity(btVector3(0, 0, 0));
+        chariot_rg->applyForce(btVector3(0.f, ((*rd_uni)(*rd_gen) * 2.f - 1.f) * 0.1f, 0.f), chariot_rg->getCenterOfMassPosition());
 
         // Pendule
         btTransform tr_pendule_reset;
         tr_pendule_reset.setIdentity();
-
         tr_pendule_reset.setOrigin(btVector3(0.f, pendule_pos, 10.f));
 
+        pendule_rg->setWorldTransform(tr_pendule_reset);
+        pendule_rg->getMotionState()->setWorldTransform(tr_pendule_reset);
+
+        pendule_rg->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
+        pendule_rg->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
         pendule_rg->clearForces();
-
-        auto rot_pendule = get_pendule_transform(rd_uni.get(), rd_gen.get(), pendule_height);
-
-        pendule_rg->getMotionState()->setWorldTransform(tr_pendule_reset * rot_pendule);
-        pendule_rg->setWorldTransform(tr_pendule_reset * rot_pendule);
-
-        pendule_rg->setLinearVelocity(btVector3(0, 0, 0));
-        pendule_rg->setAngularVelocity(btVector3(0, 0, 0));
-
-        slider->setTargetLinMotorVelocity(0.f);
     };
 
     auto action_sizes = torch::IntArrayRef({2});
