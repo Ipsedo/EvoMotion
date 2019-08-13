@@ -5,18 +5,26 @@
 #include "renderer.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 #include "error.h"
 
 
-renderer::renderer(int width, int height) {
-    width_px = width;
-    height_px = height;
-}
+renderer::renderer(int width, int height) :
+    m_width_px(width), m_height_px(height), m_is_on(false) {}
 
-bool renderer::draw(float delta, std::vector<item> to_draw) {
+void renderer::draw(float delta, std::vector<item> to_draw) {
+    // Init ObjMtlVBO if not yet
+    for (item t : to_draw)
+        if (!t.m_obj_mtl_vbo->can_draw())
+            t.m_obj_mtl_vbo->init();
+
+    // Kill program if OpenGL & GLFW not initialized
+    if (!m_is_on) {
+        std::cout << "OpenGL and GLFW context not initialized !" << std::endl;
+        exit(1);
+    }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
     for (item t : to_draw) {
         btScalar tmp[16];
@@ -29,14 +37,28 @@ bool renderer::draw(float delta, std::vector<item> to_draw) {
         glm::mat4 mv_mat = m_view_mat * model_mat;
         glm::mat4 mvp_mat = m_proj_mat * mv_mat;
 
-        t.m_obj_mtl_vbo.draw(mvp_mat, mv_mat, glm::vec3(0.f), m_cam_pos);
+        t.m_obj_mtl_vbo->draw(mvp_mat, mv_mat, glm::vec3(0.f), m_cam_pos);
     }
 
     glfwSwapBuffers(m_window);
 
     glfwPollEvents();
 
-    return !glfwWindowShouldClose(m_window);
+    bool will_draw_next_frame =  !glfwWindowShouldClose(m_window);
+
+    // If will quit renderer
+    if (!will_draw_next_frame) {
+        // Stop GLFW & OpenGL context
+        glfwDestroyWindow(m_window);
+        glfwTerminate();
+
+        m_is_on = false;
+
+        // Stop ObjMtlVBO in prevent of new OpenGL context
+        // (will be reinitialized)
+        for (item t : to_draw)
+            t.m_obj_mtl_vbo->kill();
+    }
 }
 
 
@@ -48,7 +70,7 @@ void renderer::init() {
 
     glfwDefaultWindowHints();
     glfwWindowHint(GLFW_SAMPLES, 4);
-    m_window = glfwCreateWindow(int(width_px), int(height_px), "EvoMotion", NULL, NULL);
+    m_window = glfwCreateWindow(int(m_width_px), int(m_height_px), "EvoMotion", NULL, NULL);
     if (!m_window) {
         fprintf(stderr, "Failed to open GLFW window.\n");
         glfwTerminate();
@@ -63,18 +85,20 @@ void renderer::init() {
     }
 
     m_cam_pos = glm::vec3(0., 0., -1.);
-    m_proj_mat = glm::frustum(-1.f, 1.f, -height_px / width_px, height_px / width_px, 1.0f, 200.0f);
+    m_proj_mat = glm::frustum(-1.f, 1.f, -m_height_px / m_width_px, m_height_px / m_width_px, 1.0f, 200.0f);
     m_view_mat = glm::lookAt(
             glm::vec3(0., 0., 0.),
             glm::vec3(0., 0., 1.),
             glm::vec3(0, 1, 0)
     );
 
-    glViewport(0, 0, int(width_px), int(height_px));
+    glViewport(0, 0, int(m_width_px), int(m_height_px));
     glClearColor(0.5, 0.0, 0.0, 1.0);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_TRUE);
+
+    m_is_on = true;
 }
