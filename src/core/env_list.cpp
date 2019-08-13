@@ -29,6 +29,19 @@ environment create_test_env() {
     return environment(rend, items, torch::IntArrayRef({1}), torch::IntArrayRef({1}) ,act, step, [](std::vector<item> v){return;});
 }
 
+btTransform get_pendule_transform(float pendule_height) {
+    btTransform translate_1;
+    translate_1.setIdentity();
+    translate_1.setOrigin((btVector3(0, -pendule_height, 0)));
+    btTransform rot;
+    rot.setRotation(btQuaternion(btVector3(0,0,1), float(M_PI / 3.0) * float(rand()) / RAND_MAX - float(M_PI / 6.)));
+    btTransform translate_2;
+    translate_2.setIdentity();
+    translate_2.setOrigin((btVector3(0, pendule_height, 0)));
+
+    return translate_1 * rot * translate_2;
+}
+
 environment create_cartpole_env() {
     auto rend = renderer(1920, 1080);
 
@@ -86,10 +99,11 @@ environment create_cartpole_env() {
                                         btVector3(0.f, -pendule_height, 0.f),
                                         axis, axis, true);
 
-    float force_scale = 2.f;
+    float force_scale = 3.f;
 
     auto act = [slider, force_scale](torch::Tensor action, std::vector<item> items) {
-        slider->setTargetLinMotorVelocity((action.item().toDouble() > 0 ? 1.f : -1.f) * force_scale);
+        int act_idx = action.argmax(-1).item().toInt();
+        slider->setTargetLinMotorVelocity((act_idx == 0 ? 1.f : -1.f) * force_scale);
     };
 
     btRigidBody *base_rg = base.m_rg_body;
@@ -112,13 +126,15 @@ environment create_cartpole_env() {
         state[2] = ang;
         state[3] = ang_vel;
 
-        bool done = pos > 8.f || pos < -8.f || ang > 0.9 || ang < -0.9;
+        bool done = pos > 8.f || pos < -8.f || ang > M_PI * 3. / 4. || ang < -M_PI * 3. / 4.;
 
         env_step new_state {state, done ? 0.f : 1.f, done};
         return new_state;
     };
 
-    auto reset = [chariot_rg, pendule_rg, chariot_pos, pendule_pos, slider](std::vector<item> v){
+    pendule_rg->setWorldTransform(pendule_rg->getWorldTransform() * get_pendule_transform(pendule_height));
+
+    auto reset = [chariot_rg, pendule_rg, chariot_pos, pendule_pos, slider, pendule_height](std::vector<item> v){
         btTransform tr_chariot_reset;
         tr_chariot_reset.setIdentity();
         tr_chariot_reset.setOrigin(btVector3(0.f, chariot_pos, 10.f));
@@ -137,10 +153,12 @@ environment create_cartpole_env() {
         pendule_rg->setLinearVelocity(btVector3(0, 0, 0));
         pendule_rg->setAngularVelocity(btVector3(0, 0, 0));
 
+        pendule_rg->setWorldTransform(pendule_rg->getWorldTransform() * get_pendule_transform(pendule_height));
+
         slider->setTargetLinMotorVelocity(0.f);
     };
 
-    auto action_sizes = torch::IntArrayRef({1});
+    auto action_sizes = torch::IntArrayRef({2});
     auto states_sizes = torch::IntArrayRef({4});
 
     environment env(rend, items, action_sizes, states_sizes, act, step, reset);
