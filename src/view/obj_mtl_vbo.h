@@ -37,6 +37,9 @@ private:
      * GL program handle
      */
     GLuint m_program;
+    GLuint m_vertex_shader;
+    GLuint m_fragment_shader;
+
     GLuint m_position_handle;
     GLuint m_normal_handle;
     GLuint m_amb_color_handle;

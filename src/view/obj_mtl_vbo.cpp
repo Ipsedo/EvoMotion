@@ -12,14 +12,16 @@
 #include "../utils/string_utils.h"
 
 
+
 ObjMtlVBO::ObjMtlVBO(std::string obj_file_name, std::string mtl_file_name, bool will_random_color) :
     m_obj_file_name(std::move(obj_file_name)), m_mtl_file_name(std::move(mtl_file_name)),
-    random_color(will_random_color), light_coef(1.f), distance_coef(0.f), is_init(false) {}
+    random_color(will_random_color), light_coef(1.f), distance_coef(0.f), is_init(false) {
+}
 
 void ObjMtlVBO::init() {
     create_program();
     bind();
-    bind_buffer(parse_obj(std::move(m_obj_file_name), std::move(m_mtl_file_name)));
+    bind_buffer(parse_obj(m_obj_file_name, m_mtl_file_name));
     is_init = true;
 }
 
@@ -29,17 +31,21 @@ bool ObjMtlVBO::can_draw() {
 
 void ObjMtlVBO::kill() {
     // TODO delete old GPU program and old VBO when OpenGL context recreated
+    glDeleteShader(m_vertex_shader);
+    glDeleteShader(m_fragment_shader);
+    glDeleteBuffers(1, &packed_data_buffer_id);
+    glDeleteProgram(m_program);
     is_init = false;
 }
 
 void ObjMtlVBO::create_program() {
     m_program = glCreateProgram();
 
-    GLuint vertex_shader = load_shader(GL_VERTEX_SHADER, get_shader_folder() + EVOMOTION_SEP + "specular_vs.glsl");
-    GLuint fragment_shader = load_shader(GL_FRAGMENT_SHADER, get_shader_folder() + EVOMOTION_SEP + "specular_fs.glsl");
+    m_vertex_shader = load_shader(GL_VERTEX_SHADER, get_shader_folder() + EVOMOTION_SEP + "specular_vs.glsl");
+    m_fragment_shader = load_shader(GL_FRAGMENT_SHADER, get_shader_folder() + EVOMOTION_SEP + "specular_fs.glsl");
 
-    glAttachShader(m_program, vertex_shader);
-    glAttachShader(m_program, fragment_shader);
+    glAttachShader(m_program, m_vertex_shader);
+    glAttachShader(m_program, m_fragment_shader);
     glLinkProgram(m_program);
 }
 
