@@ -11,7 +11,28 @@
 #include "../utils/res.h"
 #include "../utils/string_utils.h"
 
+
+ObjMtlVBO::ObjMtlVBO(std::string obj_file_name, std::string mtl_file_name, bool will_random_color) :
+    m_obj_file_name(std::move(obj_file_name)), m_mtl_file_name(std::move(mtl_file_name)),
+    random_color(will_random_color), light_coef(1.f), distance_coef(0.f), is_init(false) {}
+
 void ObjMtlVBO::init() {
+    create_program();
+    bind();
+    bind_buffer(parse_obj(std::move(m_obj_file_name), std::move(m_mtl_file_name)));
+    is_init = true;
+}
+
+bool ObjMtlVBO::can_draw() {
+    return is_init;
+}
+
+void ObjMtlVBO::kill() {
+    // TODO delete old GPU program and old VBO when OpenGL context recreated
+    is_init = false;
+}
+
+void ObjMtlVBO::create_program() {
     m_program = glCreateProgram();
 
     GLuint vertex_shader = load_shader(GL_VERTEX_SHADER, get_shader_folder() + EVOMOTION_SEP + "specular_vs.glsl");
@@ -195,17 +216,6 @@ std::vector<float> ObjMtlVBO::parse_obj(std::string obj_file_name, std::string m
     }
 
     return res;
-}
-
-ObjMtlVBO::ObjMtlVBO(std::string obj_file_name, std::string mtl_file_name, bool will_random_color) {
-    this->random_color = will_random_color;
-
-    init();
-    bind();
-    bind_buffer(parse_obj(std::move(obj_file_name), std::move(mtl_file_name)));
-
-    light_coef = 1;
-    distance_coef = 0;
 }
 
 void ObjMtlVBO::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 ligh_pos_in_eye_space, glm::vec3 camera_pos) {

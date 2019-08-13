@@ -28,6 +28,12 @@ private:
              + SHININESS_DATA_SIZE) * BYTES_PER_FLOAT;
 
     /**
+     * OBJ & MTL file names
+     */
+    std::string m_obj_file_name;
+    std::string m_mtl_file_name;
+
+    /**
      * GL program handle
      */
     GLuint m_program;
@@ -50,6 +56,7 @@ private:
     float light_coef;
     float distance_coef;
     int nb_vertex;
+    bool is_init;
 
     /**
      * VBO id
@@ -58,7 +65,7 @@ private:
 
     bool random_color;
 
-    void init();
+    void create_program();
 
     void bind();
 
@@ -68,6 +75,12 @@ private:
 
 public:
     ObjMtlVBO(std::string obj_file_name, std::string mtl_file_name, bool will_random_color);
+
+    void init();
+
+    bool can_draw();
+
+    void kill();
 
     void draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 ligh_pos_in_eye_space, glm::vec3 camera_pos);
 };
