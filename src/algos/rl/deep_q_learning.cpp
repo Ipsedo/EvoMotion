@@ -29,8 +29,8 @@ dqn_agent::dqn_agent(torch::IntArrayRef state_space, torch::IntArrayRef action_s
         agent(state_space, action_space, 2000),
         target_q_network(m_state_space, m_action_space),
         local_q_network(m_state_space, m_action_space),
-        optimizer(torch::optim::Adam(local_q_network.parameters(), 1e-3f)),
-        idx_step(0), batch_size(16), gamma(0.9f), tau(1e-1f), update_every(4),
+        optimizer(torch::optim::Adam(local_q_network.parameters(), 3e-4f)),
+        idx_step(0), batch_size(16), gamma(0.99f), tau(1e-5f), update_every(4),
         rd_gen(123456), rd_uni(0.f, 1.f) {}
 
 void dqn_agent::step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) {

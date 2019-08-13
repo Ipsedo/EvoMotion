@@ -16,22 +16,24 @@ void test_reinforcement_learning() {
 	std::cout << "Action space : " << cartpole_env.m_actions_sizes << std::endl;
 	std::cout << "State space : " << cartpole_env.m_state_sizes << std::endl;
 
-	int nb_try = 3000;
-	int max_step = 300;
+	int nb_episode = 300;
+	int max_episode_step = 300;
 	int consecutive_succes = 0;
 
-	float eps = 3e-1f;
-	float eps_decay = 1.f;
-	float eps_min = 1e-1f;
+	float eps = 0.5f;
+	float eps_decay = 0.9995f;
+	float eps_min = 5e-2f;
 
-	for (int i = 0; i < nb_try; i++) {
+	int step = 0;
+
+	for (int i = 0; i < nb_episode; i++) {
 		env_step state = cartpole_env.get_first_state();
 
 		float cumulative_reward = 0.f;
 
-		int step = 0;
+		int episode_step = 0;
 
-		while (!state.done && step < max_step) {
+		while (!state.done && episode_step < max_episode_step) {
 			auto act = ag.act(state.state, eps);
 
 			env_step new_state = cartpole_env.step(1.f / 60.f, act, false);
@@ -42,34 +44,41 @@ void test_reinforcement_learning() {
 
 			cumulative_reward += state.reward;
 
-			step++;
-
 			eps *= eps_decay;
 			eps = eps < eps_min ? eps_min : eps;
+
+			episode_step++;
+			step++;
 		}
 
-		if (step >= max_step) consecutive_succes++;
+		if (episode_step >= max_episode_step) consecutive_succes++;
 		else consecutive_succes = 0;
 
 		if (consecutive_succes > 10) { cartpole_env.reset(); break; }
 
 		cartpole_env.reset();
 		std::cout << std::fixed << std::setprecision(5)
-		<< "Episode (" << i << ") (step " << step << ") : cumulative_reward = " << cumulative_reward
-		<< ", reward_per_step = " << cumulative_reward / step
+		<< "Episode (" << i << ") : cumulative_reward = " << cumulative_reward
 		<< ", eps = " << eps << std::endl;
 	}
 
-	env_step state = cartpole_env.get_first_state();
+	int nb_test = 100;
 
-	while (!state.done) {
-		auto act = ag.act(state.state, 0.f);
+	for (int i = 0; i < nb_test; i++) {
 
-		env_step new_state = cartpole_env.step(1.f / 60.f, act, true);
+		env_step state = cartpole_env.get_first_state();
 
-		//ag.step(state.state, act, new_state.reward, new_state.state, new_state.done);
+		while (!state.done) {
+			auto act = ag.act(state.state, 0.f);
 
-		state = new_state;
+			env_step new_state = cartpole_env.step(1.f / 60.f, act, true);
 
+			//ag.step(state.state, act, new_state.reward, new_state.state, new_state.done);
+
+			state = new_state;
+
+		}
+
+		cartpole_env.reset();
 	}
 }
