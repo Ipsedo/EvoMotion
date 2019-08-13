@@ -38,6 +38,7 @@ struct environment {
             std::function<env_step(std::vector<item>)> step_fun,
             std::function<void(std::vector<item>)> reset_fun);
 
+    env_step get_first_state();
     env_step step(float delta, torch::Tensor action, bool will_draw);
     void reset();
 

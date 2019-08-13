@@ -13,7 +13,11 @@ environment::environment(renderer renderer, std::vector<item> items,
     m_actions_sizes(action_sizes), m_state_sizes(state_sizes),
     m_act_fun(std::move(act_fun)),
     m_step_fun(std::move(step_fun)),
-    m_reset_fun(std::move(reset_fun)) {}
+    m_reset_fun(std::move(reset_fun)) { m_step_fun(m_items); }
+
+env_step environment::get_first_state() {
+    return m_step_fun(m_items);
+}
 
 env_step environment::step(float delta, torch::Tensor action, bool will_draw) {
     m_act_fun(std::move(action), m_items);
