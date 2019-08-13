@@ -32,7 +32,7 @@ localCreateInfo(btCollisionShape *shape, glm::vec3 pos, glm::mat4 rot_mat, glm::
 item create_item_box(glm::vec3 pos, glm::mat4 rot_mat, glm::vec3 scale, float mass) {
     auto box_shape = new btBoxShape(btVector3(scale.x, scale.y, scale.z));
     auto rg_body = new btRigidBody(localCreateInfo(box_shape, pos, rot_mat, scale, mass));
-    auto obj_mtl_vbo = ObjMtlVBO(
+    auto obj_mtl_vbo = new ObjMtlVBO(
             get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "cube.obj",
             get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "cube.mtl",
             true);

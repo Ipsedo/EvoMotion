@@ -10,7 +10,7 @@
 
 struct item {
     btRigidBody *m_rg_body;
-    ObjMtlVBO m_obj_mtl_vbo;
+    ObjMtlVBO *m_obj_mtl_vbo;
     glm::vec3 m_obj_mtl_vbo_scale;
 };
 
