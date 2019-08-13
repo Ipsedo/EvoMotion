@@ -7,6 +7,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <torch/torch.h>
+#include <random>
 #include "../view/obj_mtl_vbo.h"
 #include "../view/renderer.h"
 #include "../model/engine.h"
@@ -19,8 +20,13 @@ struct env_step {
 
 struct environment {
 
+    // Model
     engine m_engine;
+
+    // View
     renderer m_renderer;
+
+    // Items
     std::vector<item> m_items;
 
     int m_step;
