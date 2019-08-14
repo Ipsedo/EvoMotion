@@ -17,8 +17,11 @@ struct env_step {
     bool done;
 };
 
-struct environment {
+class Environment {
+private:
+    int m_step;
 
+protected:
     // Model
     engine m_engine;
 
@@ -28,26 +31,32 @@ struct environment {
     // Items
     std::vector<item> m_items;
 
-    int m_step;
+    /**
+     * Virtual fonction applying action
+     * Need to be overloaded !
+     * @param action
+     */
+    virtual void act(torch::Tensor action) = 0;
 
-    std::function<void(torch::Tensor, std::vector<item>)> m_act_fun;
-    std::function<env_step(std::vector<item>)> m_step_fun;
-    std::function<void(std::vector<item>)> m_reset_fun;
+    /**
+     * Virtual function to compute next state
+     * @return
+     */
+    virtual env_step compute_new_state() = 0;
 
-    torch::IntArrayRef m_actions_sizes;
-    torch::IntArrayRef m_state_sizes;
+    virtual env_step reset_engine() = 0;
 
-    environment(renderer renderer, std::vector<item> items,
-            torch::IntArrayRef action_sizes, torch::IntArrayRef state_sizes,
-            std::function<void(torch::Tensor, std::vector<item>)> act_fun,
-            std::function<env_step(std::vector<item>)> step_fun,
-            std::function<void(std::vector<item>)> reset_fun);
+public:
+    Environment(renderer renderer, std::vector<item> items);
+    virtual torch::IntArrayRef action_space() = 0;
+    virtual torch::IntArrayRef state_space() = 0;
+    const env_step reset();
+    const env_step step(float delta, torch::Tensor action, bool will_draw);
 
-    env_step get_first_state();
-    env_step step(float delta, torch::Tensor action, bool will_draw);
-    void reset();
+    bool is_renderer_on();
 
-    // TODO quit : delete ObjMtlVBO pointers
+    virtual ~Environment();
+
 };
 
 #endif //EVOMOTION_ENVIRONMENT_H
