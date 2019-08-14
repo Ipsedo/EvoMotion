@@ -23,15 +23,16 @@ torch::Tensor q_network::forward(torch::Tensor input) {
 
 ////////////////////////
 // DQN agent
+// https://github.com/udacity/deep-reinforcement-learning/tree/master/dqn
 ////////////////////////
 
-dqn_agent::dqn_agent(torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
+dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
         agent(state_space, action_space, 2000),
         target_q_network(m_state_space, m_action_space),
         local_q_network(m_state_space, m_action_space),
-        optimizer(torch::optim::Adam(local_q_network.parameters(), 3e-4f)),
-        idx_step(0), batch_size(16), gamma(0.99f), tau(1e-5f), update_every(4),
-        rd_gen(123456), rd_uni(0.f, 1.f) {}
+        optimizer(torch::optim::Adam(local_q_network.parameters(), 1e-3f)),
+        idx_step(0), batch_size(16), gamma(0.9f), tau(1e-1f), update_every(4),
+        rd_gen(seed), rd_uni(0.f, 1.f) {}
 
 void dqn_agent::step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) {
     memory_buffer.add(state, action, reward, next_state, done);
@@ -73,6 +74,7 @@ void dqn_agent::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor
                       torch::Tensor dones) {
     // Get max predicted Q values (for next states) from target model
     torch::Tensor q_targets_next = std::get<0>(target_q_network.forward(std::move(next_states)).detach().max(1)).unsqueeze(1);
+
     // Compute Q targets for current states
     torch::Tensor q_targets = rewards + (gamma * q_targets_next * (1.f - dones.to(torch::kFloat)));
 

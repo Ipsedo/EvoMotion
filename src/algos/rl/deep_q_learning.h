@@ -38,7 +38,7 @@ struct dqn_agent : agent {
     int update_every;
     int idx_step;
 
-    dqn_agent(torch::IntArrayRef state_space, torch::IntArrayRef action_space);
+    dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space);
     void step(torch::Tensor state, torch::Tensor action, float reward,
               torch::Tensor next_state, bool done) override;
     torch::Tensor act(torch::Tensor state, float eps) override;
