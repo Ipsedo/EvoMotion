@@ -7,6 +7,7 @@
 
 #include <torch/torch.h>
 #include <deque>
+#include <random>
 
 struct memory {
     torch::Tensor state;
@@ -18,9 +19,13 @@ struct memory {
 
 struct replay_buffer {
     std::deque<memory> mem;
+
     int max_size;
 
-    explicit replay_buffer(int max_size);
+    std::default_random_engine rd_gen;
+    std::uniform_real_distribution<float> rd_uni;
+
+    explicit replay_buffer(int max_size, unsigned long seed);
     void add(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done);
     std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor>
         sample(int batch_size);

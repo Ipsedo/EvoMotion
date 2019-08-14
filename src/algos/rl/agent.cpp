@@ -3,9 +3,12 @@
 //
 
 #include "agent.h"
+#include <random>
 
-replay_buffer::replay_buffer(int max_size) :
-max_size(max_size), mem() {}
+replay_buffer::replay_buffer(int max_size, unsigned long seed) :
+max_size(max_size), mem(),
+rd_gen(seed),
+rd_uni(0.f, 1.f){}
 
 void replay_buffer::add(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) {
     memory m{std::move(state), std::move(action), reward, std::move(next_state), done};
@@ -25,14 +28,10 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
         exit(1);
     }
 
-    std::vector<torch::Tensor> state_list;
-    std::vector<torch::Tensor> action_list;
-    std::vector<torch::Tensor> reward_list;
-    std::vector<torch::Tensor> new_state_list;
-    std::vector<torch::Tensor> done_list;
+    std::vector<torch::Tensor> state_list, action_list, reward_list, new_state_list, done_list;
 
     for (int i = 0; i < batch_size; i++) {
-        auto idx = rand() % mem.size();
+        int idx = int(floor(rd_uni(rd_gen) * mem.size()));
         auto sample = mem[idx];
 
         state_list.push_back(sample.state);
@@ -54,7 +53,8 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
 
 // Agent
 agent::agent(torch::IntArrayRef state_space, torch::IntArrayRef action_space, int buffer_size) :
-        m_state_space(state_space), m_action_space(action_space), memory_buffer(buffer_size) {}
+        m_state_space(state_space), m_action_space(action_space),
+        memory_buffer(buffer_size, static_cast<unsigned long>(time(nullptr))) {}
 
 
 // Random agent
