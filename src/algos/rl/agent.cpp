@@ -25,25 +25,28 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
         exit(1);
     }
 
+    std::vector<torch::Tensor> state_list;
+    std::vector<torch::Tensor> action_list;
+    std::vector<torch::Tensor> reward_list;
+    std::vector<torch::Tensor> new_state_list;
+    std::vector<torch::Tensor> done_list;
+
     for (int i = 0; i < batch_size; i++) {
         auto idx = rand() % mem.size();
-        tmp.push_back(mem[idx]);
+        auto sample = mem[idx];
+
+        state_list.push_back(sample.state);
+        action_list.push_back(sample.action);
+        reward_list.push_back(torch::tensor(sample.reward));
+        new_state_list.push_back(sample.next_state);
+        done_list.push_back(torch::tensor({sample.done ? 1.f : 0.f}));
     }
 
-    torch::Tensor states = tmp[0].state.unsqueeze(0);
-    torch::Tensor actions = tmp[0].action.unsqueeze(0);
-    torch::Tensor rewards = torch::tensor({tmp[0].reward}).unsqueeze(0);
-    torch::Tensor new_states = tmp[0].next_state.unsqueeze(0);
-    torch::Tensor dones = torch::tensor({tmp[0].done ? 1.f : 0.f}).unsqueeze(0);
-
-    for (int i = 1; i < tmp.size(); i++) {
-        auto m = tmp[i];
-        states = torch::cat({states, m.state.unsqueeze(0)}, 0);
-        actions = torch::cat({actions, m.action.unsqueeze(0)}, 0);
-        rewards = torch::cat({rewards, torch::tensor({m.reward}).unsqueeze(0)}, 0);
-        new_states = torch::cat({new_states, m.next_state.unsqueeze(0)}, 0);
-        dones = torch::cat({dones, torch::tensor({tmp[0].done ? 1.f : 0.f}).unsqueeze(0)}, 0);
-    }
+    torch::Tensor states = torch::stack(state_list, 0);
+    torch::Tensor actions = torch::stack(action_list, 0);
+    torch::Tensor rewards = torch::stack(reward_list, 0);
+    torch::Tensor new_states = torch::stack(new_state_list, 0);
+    torch::Tensor dones = torch::stack(done_list, 0);
 
     return std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor>(
             states, actions, rewards, new_states, dones);
