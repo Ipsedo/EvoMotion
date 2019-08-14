@@ -58,11 +58,11 @@ void test_reinforcement_learning() {
 
 		cartpole_env.reset();
 		std::cout << std::fixed << std::setprecision(5)
-		<< "Episode (" << i << ") : cumulative_reward = " << cumulative_reward
-		<< ", eps = " << eps << std::endl;
+		<< "Episode (" << std::setw(3) << i << ") : cumulative_reward = " << std::setw(9) << cumulative_reward
+		<< ", eps = " << std::setw(9) << eps << std::endl;
 	}
 
-	int nb_test = 100;
+	int nb_test = 0;
 
 	for (int i = 0; i < nb_test; i++) {
 
