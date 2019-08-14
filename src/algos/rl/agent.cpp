@@ -34,7 +34,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
     torch::Tensor actions = tmp[0].action.unsqueeze(0);
     torch::Tensor rewards = torch::tensor({tmp[0].reward}).unsqueeze(0);
     torch::Tensor new_states = tmp[0].next_state.unsqueeze(0);
-    torch::Tensor dones = torch::tensor({tmp[0].done}).unsqueeze(0);
+    torch::Tensor dones = torch::tensor({tmp[0].done ? 1.f : 0.f}).unsqueeze(0);
 
     for (int i = 1; i < tmp.size(); i++) {
         auto m = tmp[i];
@@ -42,7 +42,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
         actions = torch::cat({actions, m.action.unsqueeze(0)}, 0);
         rewards = torch::cat({rewards, torch::tensor({m.reward}).unsqueeze(0)}, 0);
         new_states = torch::cat({new_states, m.next_state.unsqueeze(0)}, 0);
-        dones = torch::cat({dones, torch::tensor({m.done}).unsqueeze(0)}, 0);
+        dones = torch::cat({dones, torch::tensor({tmp[0].done ? 1.f : 0.f}).unsqueeze(0)}, 0);
     }
 
     return std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor>(
