@@ -5,6 +5,7 @@
 #include "rl_test.h"
 #include "../core/env_list.h"
 #include "../algos/rl/deep_q_learning.h"
+#include "../algos/rl/actor_critic.h"
 #include <chrono>
 
 void test_reinforcement_learning() {
@@ -18,7 +19,7 @@ void test_reinforcement_learning() {
 	std::cout << "Action space : " << cartpole_env->action_space() << std::endl;
 	std::cout << "State space : " << cartpole_env->state_space() << std::endl;
 
-	int nb_episode = 300;
+	int nb_episode = 1000;
 	int max_episode_step = 300;
 	int consecutive_succes = 0;
 
