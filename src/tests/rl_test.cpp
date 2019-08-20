@@ -5,7 +5,7 @@
 #include "rl_test.h"
 #include "../core/env_list.h"
 #include "../algos/rl/deep_q_learning.h"
-#include "../algos/rl/actor_critic.h"
+//#include "../algos/rl/ddpg.h"
 #include <chrono>
 
 void test_reinforcement_learning() {
@@ -23,7 +23,7 @@ void test_reinforcement_learning() {
 	int max_episode_step = 300;
 	int consecutive_succes = 0;
 
-	float eps = 0.5f;
+	float eps = 0.8f;
 	float eps_decay = 0.99995f;
 	float eps_min = 1e-1f;
 
