@@ -2,11 +2,15 @@
 __author__ : Samuel Berrien
 
 ## Description
-The final goal of this project is to implement CMA-ES or any kind of optimisation algorithm in order to teach creature to walk, run etc.
+The final goal of this project is to implement any kind of optimisation algorithm in order to teach creature to walk, run etc.
 
 We will first try to reproduce the results of the article [Flexible Muscle-Based Locomotion for Bipedal Creatures](https://www.goatstream.com/research/papers/SA2013/SA2013.pdf).
 
-__Note__ : In a first time, only CMA-ES will be implemented and tested with [COCO](https://github.com/numbbo/coco) benchmark tools. Then the creature walk teaching will be implemented.
+### Done
+* CMA-ES and [COCO](https://github.com/numbbo/coco) benchmark work well.
+* RL environments with bullet and OpenGL/GLFW can be created (only cartpole is done for the moment)
+* DQN agent with libtorch is implemented but not functional... 
+
 
 ## Requirements
 This project requires multiple libraries.
