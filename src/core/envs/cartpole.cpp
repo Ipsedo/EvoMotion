@@ -4,7 +4,13 @@
 
 #include "cartpole.h"
 
-CartPoleEnv::CartPoleEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f), slider_speed(5.f), chariot_push_force(1.5f),
+CartPoleEnvParams::CartPoleEnvParams() : slider_speed(2.5f), chariot_push_force(0.f),
+        limit_angle(float(M_PI * 0.5)), reset_frame_nb(4),
+        chariot_mass(1.f), pendule_mass(1.15f), slider_force(3e2f) {
+
+}
+
+CartPoleEnv::CartPoleEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f), CartPoleEnvParams(),
     Environment(renderer(1920/2, 1080/2), init_cartpole())  {
     m_engine.m_world->addConstraint(slider);
     m_engine.m_world->addConstraint(hinge);
@@ -33,10 +39,10 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 
     item chariot = create_item_box(glm::vec3(0.f, chariot_pos, 10.f),
                                    glm::mat4(1.f),
-                                   glm::vec3(chariot_width, chariot_height, chariot_width), 1.f);
+                                   glm::vec3(chariot_width, chariot_height, chariot_width), chariot_mass);
     item pendule = create_item_box(glm::vec3(0.f, pendule_pos, 10.f),
                                    glm::mat4(1.f),
-                                   glm::vec3(pendule_width, pendule_height, pendule_width), 0.5f);
+                                   glm::vec3(pendule_width, pendule_height, pendule_width), pendule_mass);
 
     std::vector<item> items{base, chariot, pendule};
 
@@ -53,7 +59,7 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 
     slider->setEnabled(true);
     slider->setPoweredLinMotor(true);
-    slider->setMaxLinMotorForce(300.f);
+    slider->setMaxLinMotorForce(slider_force);
     slider->setTargetLinMotorVelocity(0.f);
     slider->setLowerLinLimit(-10.f);
     slider->setUpperLinLimit(10.f);
@@ -102,10 +108,11 @@ env_step CartPoleEnv::compute_new_state() {
 
     torch::Tensor state = torch::tensor({pos, vel, ang, ang_vel});
 
-    bool done = pos > 8.f || pos < -8.f || ang > M_PI * 0.5 || ang < -M_PI * 0.5;
-    //float reward = abs(float(M_PI * 0.5) - abs(ang) / float(M_PI * 0.5));
-    float reward = done ? 0.f : 1.f;
+    bool done = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
+    float reward = abs(limit_angle - abs(ang) / limit_angle);
+    //float reward = done ? 0.f : 1.f;
 
+    //std::cout << state << std::endl;
     env_step new_state {state, reward, done};
     return new_state;
 }
@@ -139,6 +146,9 @@ env_step CartPoleEnv::reset_engine() {
     float rand_force = (rd_uni(rd_gen) * 0.5f + 0.5f);
 	float dir = rd_uni(rd_gen) > 0.5f ? rand_force * chariot_push_force : - rand_force * chariot_push_force;
 	chariot_rg->applyCentralImpulse(btVector3(dir * chariot_push_force, 0.f, 0.f));
+
+	for (int i = 0; i < reset_frame_nb; i++)
+	    m_engine.step(1.f / 60.f);
 
     return compute_new_state();
 }

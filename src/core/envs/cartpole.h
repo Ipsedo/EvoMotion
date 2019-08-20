@@ -8,20 +8,31 @@
 #include <random>
 #include "../environment.h"
 
-//environment create_cartpole_env();
-
-class CartPoleEnv : public Environment {
-private:
+class CartPoleEnvParams {
+protected:
     /*
-     * Bullet stuff
+     * Env params
      */
-    btHingeConstraint *hinge;
-    btSliderConstraint *slider;
+    float slider_speed;
+    float slider_force;
 
-    btRigidBody *base_rg;
-    btRigidBody *chariot_rg;
-    btRigidBody *pendule_rg;
+    float chariot_push_force;
+    float chariot_pos;
+    float pendule_pos;
 
+    float limit_angle;
+
+    int reset_frame_nb;
+
+    float chariot_mass;
+    float pendule_mass;
+
+protected:
+    CartPoleEnvParams();
+};
+
+class CartPoleEnv : public CartPoleEnvParams, public Environment {
+private:
     /*
      * Random stuff
      */
@@ -29,17 +40,20 @@ private:
     std::uniform_real_distribution<float> rd_uni;
 
     /*
+     * Bullet stuff
+     */
+
+    btRigidBody *base_rg;
+    btRigidBody *chariot_rg;
+    btRigidBody *pendule_rg;
+
+    btHingeConstraint *hinge;
+    btSliderConstraint *slider;
+
+    /*
      * Init cartpole env methods
      */
     std::vector<item> init_cartpole();
-
-    /*
-     * Env params
-     */
-    float slider_speed;
-    float chariot_push_force;
-    float chariot_pos;
-    float pendule_pos;
 
 public:
     explicit CartPoleEnv(int seed);
