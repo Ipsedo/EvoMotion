@@ -4,8 +4,8 @@
 
 #include "cartpole.h"
 
-CartPoleEnvParams::CartPoleEnvParams() : slider_speed(2.5f), chariot_push_force(0.f),
-        limit_angle(float(M_PI * 0.5)), reset_frame_nb(4),
+CartPoleEnvParams::CartPoleEnvParams() : slider_speed(2.5f), chariot_push_force(0.5f),
+        limit_angle(float(M_PI * 0.25)), reset_frame_nb(0),
         chariot_mass(1.f), pendule_mass(1.15f), slider_force(3e2f) {
 
 }
@@ -109,8 +109,8 @@ env_step CartPoleEnv::compute_new_state() {
     torch::Tensor state = torch::tensor({pos, vel, ang, ang_vel});
 
     bool done = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
-    float reward = abs(limit_angle - abs(ang) / limit_angle);
-    //float reward = done ? 0.f : 1.f;
+    //float reward = abs(limit_angle - abs(ang) / limit_angle);
+    float reward = done ? 0.f : 1.f;
 
     //std::cout << state << std::endl;
     env_step new_state {state, reward, done};
@@ -143,8 +143,8 @@ env_step CartPoleEnv::reset_engine() {
     pendule_rg->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
     pendule_rg->clearForces();
 
-    float rand_force = (rd_uni(rd_gen) * 0.5f + 0.5f);
-	float dir = rd_uni(rd_gen) > 0.5f ? rand_force * chariot_push_force : - rand_force * chariot_push_force;
+    float rand_force = (rd_uni(rd_gen) * 0.5f + 0.5f) * chariot_push_force ;
+	float dir = rd_uni(rd_gen) > 0.5f ? rand_force : -rand_force;
 	chariot_rg->applyCentralImpulse(btVector3(dir * chariot_push_force, 0.f, 0.f));
 
 	for (int i = 0; i < reset_frame_nb; i++)
