@@ -12,6 +12,8 @@
 q_network::q_network(torch::IntArrayRef state_space, torch::IntArrayRef action_space) {
     l1 = register_module("l1", torch::nn::Linear(state_space[0], 16));
     l2 = register_module("l2", torch::nn::Linear(16, action_space[0]));
+    torch::nn::init::xavier_normal_(l1->weight);
+    torch::nn::init::xavier_normal_(l2->weight);
 }
 
 torch::Tensor q_network::forward(torch::Tensor input) {
@@ -30,8 +32,8 @@ dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRe
         agent(state_space, action_space, 10000),
         target_q_network(m_state_space, m_action_space),
         local_q_network(m_state_space, m_action_space),
-        optimizer(torch::optim::Adam(local_q_network.parameters(), 3e-5f)),
-        idx_step(0), batch_size(16), gamma(0.9f), tau(1e-2f), update_every(4),
+        optimizer(torch::optim::Adam(local_q_network.parameters(), 1e-3f)),
+        idx_step(0), batch_size(16), gamma(0.9f), tau(1e-3f), update_every(4),
         rd_gen(seed), rd_uni(0.f, 1.f) {}
 
 void dqn_agent::step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) {
