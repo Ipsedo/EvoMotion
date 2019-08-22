@@ -10,15 +10,18 @@
 ////////////////////////
 
 q_network::q_network(torch::IntArrayRef state_space, torch::IntArrayRef action_space) {
-    l1 = register_module("l1", torch::nn::Linear(state_space[0], 16));
-    l2 = register_module("l2", torch::nn::Linear(16, action_space[0]));
+    l1 = register_module("l1", torch::nn::Linear(state_space[0], 24));
+    l2 = register_module("l2", torch::nn::Linear(24, 24));
+    l3 = register_module("l3", torch::nn::Linear(24, action_space[0]));
     torch::nn::init::xavier_normal_(l1->weight);
     torch::nn::init::xavier_normal_(l2->weight);
+    torch::nn::init::xavier_normal_(l3->weight);
 }
 
 torch::Tensor q_network::forward(torch::Tensor input) {
     auto out_l1 = torch::relu(l1->forward(input));
-    auto pred = torch::softmax(l2->forward(out_l1), -1);
+    auto out_l2 = torch::relu(l2->forward(out_l1));
+    auto pred = torch::softmax(l3->forward(out_l2), -1);
     return pred;
 }
 
@@ -29,12 +32,21 @@ torch::Tensor q_network::forward(torch::Tensor input) {
 ////////////////////////
 
 dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
-        agent(state_space, action_space, 10000),
+        agent(state_space, action_space, 100000),
         target_q_network(m_state_space, m_action_space),
         local_q_network(m_state_space, m_action_space),
-        optimizer(torch::optim::Adam(local_q_network.parameters(), 5e-4f)),
-        idx_step(0), batch_size(64), gamma(0.99f), tau(1e-3f), update_every(4),
-        rd_gen(seed), rd_uni(0.f, 1.f) {}
+        optimizer(torch::optim::Adam(local_q_network.parameters(), 1e-5f)),
+        idx_step(0), batch_size(20), gamma(0.95f), tau(1e-3f), update_every(4),
+        rd_gen(seed), rd_uni(0.f, 1.f) {
+    /*target_q_network.l1->weight = local_q_network.l1->weight.clone();
+    target_q_network.l1->bias = local_q_network.l1->bias.clone();
+
+    target_q_network.l2->weight = local_q_network.l2->weight.clone();
+    target_q_network.l2->bias = local_q_network.l2->bias.clone();
+
+    target_q_network.l3->weight = local_q_network.l3->weight.clone();
+    target_q_network.l3->bias = local_q_network.l3->bias.clone();*/
+}
 
 void dqn_agent::step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) {
     memory_buffer.add(state, action, reward, next_state, done);
@@ -69,7 +81,7 @@ torch::Tensor dqn_agent::act(torch::Tensor state, float eps) {
 
     if (rd_uni(rd_gen) > eps) return action_values;
 
-    return torch::rand(m_action_space);
+    return torch::softmax(torch::rand(m_action_space), -1);
 }
 
 void dqn_agent::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor rewards, torch::Tensor next_states,
