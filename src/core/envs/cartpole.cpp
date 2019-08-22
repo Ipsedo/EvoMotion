@@ -4,9 +4,9 @@
 
 #include "cartpole.h"
 
-CartPoleEnvParams::CartPoleEnvParams() : slider_speed(2.5f), chariot_push_force(0.5f),
-        limit_angle(float(M_PI * 0.25)), reset_frame_nb(0),
-        chariot_mass(1.f), pendule_mass(1.15f), slider_force(3e2f) {
+CartPoleEnvParams::CartPoleEnvParams() : slider_speed(5.f), chariot_push_force(0.3f),
+        limit_angle(float(M_PI * 0.25)), reset_frame_nb(1),
+        chariot_mass(1.f), pendule_mass(2.f), slider_force(2e3f) {
 
 }
 
@@ -17,20 +17,12 @@ CartPoleEnv::CartPoleEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f), CartPoleEnv
 }
 
 std::vector<item> CartPoleEnv::init_cartpole() {
-    /**
-     * /!\ BE CAREFUL /!\
-     *
-     * En raison de précision flottante, ne mettre que des multiple de 2^n.
-     *
-     * Sinon les premières itérations de la librairie bullet vont générer un "sursaut"
-     * dans le mouvement des objets pour satisfaire les contraintes physiques (slider et hinge).
-     * Produit une explosion numerique dans le state qui peut entrainer un reset de l'environnement.
-     */
+
     float base_height = 2.f, base_pos = -4.f;
 
-    float pendule_height = 0.5f, pendule_width = 0.0625f;
+    float pendule_height = 0.7f, pendule_width = 0.1f;
 
-    float chariot_height = 0.125f, chariot_width = 0.5f;
+    float chariot_height = 0.25f, chariot_width = 0.5f;
 
     chariot_pos = base_pos + base_height + chariot_height;
     pendule_pos = chariot_pos + chariot_height + pendule_height;
@@ -97,6 +89,7 @@ CartPoleEnv::~CartPoleEnv() {
 void CartPoleEnv::act(torch::Tensor action) {
     int act_idx = action.argmax(-1).item().toInt();
     slider->setTargetLinMotorVelocity((act_idx == 0 ? 1.f : -1.f) * slider_speed);
+    //chariot_rg->applyCentralImpulse(btVector3((act_idx == 0 ? 1.f : -1.f) * slider_speed, 0.f, 0.f));
 }
 
 env_step CartPoleEnv::compute_new_state() {
