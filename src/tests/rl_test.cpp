@@ -19,13 +19,13 @@ void test_reinforcement_learning() {
 	std::cout << "Action space : " << cartpole_env->action_space() << std::endl;
 	std::cout << "State space : " << cartpole_env->state_space() << std::endl;
 
-	int nb_episode = 1000;
+	int nb_episode = 100;
 	int max_episode_step = 300;
 	int consecutive_succes = 0;
 
-	float eps = 0.8f;
-	float eps_decay = 0.99995f;
-	float eps_min = 1e-1f;
+	float eps = 1.f;
+	float eps_decay = 0.9995f;
+	float eps_min = 1e-2f;
 
 	int step = 0;
 
@@ -39,7 +39,7 @@ void test_reinforcement_learning() {
 		while (!state.done && episode_step < max_episode_step) {
 			auto act = ag->act(state.state, eps);
 
-			env_step new_state = cartpole_env->step(1.f / 60.f, act, false);
+			env_step new_state = cartpole_env->step(1.f / 60.f, act, true);
 
 			ag->step(state.state, act, new_state.reward, new_state.state, new_state.done);
 
@@ -47,8 +47,8 @@ void test_reinforcement_learning() {
 
 			cumulative_reward += state.reward;
 
-			eps *= eps_decay;
-			eps = eps < eps_min ? eps_min : eps;
+            eps *= eps_decay;
+            eps = eps < eps_min ? eps_min : eps;
 
 			episode_step++;
 			step++;
