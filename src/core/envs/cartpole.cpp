@@ -4,9 +4,9 @@
 
 #include "cartpole.h"
 
-CartPoleEnvParams::CartPoleEnvParams() : slider_speed(5.f), chariot_push_force(0.3f),
+CartPoleEnvParams::CartPoleEnvParams() : slider_speed(2.5f), chariot_push_force(0.f),
         limit_angle(float(M_PI * 0.25)), reset_frame_nb(1),
-        chariot_mass(1.f), pendule_mass(2.f), slider_force(2e3f) {
+        chariot_mass(1.f), pendule_mass(1e-1f), slider_force(2e2f) {
 
 }
 
@@ -20,12 +20,12 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 
     float base_height = 2.f, base_pos = -4.f;
 
-    float pendule_height = 0.7f, pendule_width = 0.1f;
+    float pendule_height = 0.7f, pendule_width = 0.1f, pendule_offset = pendule_height / 5.f;
 
     float chariot_height = 0.25f, chariot_width = 0.5f;
 
     chariot_pos = base_pos + base_height + chariot_height;
-    pendule_pos = chariot_pos + chariot_height + pendule_height;
+    pendule_pos = chariot_pos + chariot_height + pendule_height - pendule_offset;
 
     item base = create_item_box(glm::vec3(0.f, base_pos, 10.f), glm::mat4(1.f), glm::vec3(10.f, base_height, 10.f), 0.f);
 
@@ -50,9 +50,9 @@ std::vector<item> CartPoleEnv::init_cartpole() {
     slider = new btSliderConstraint(*base.m_rg_body, *chariot.m_rg_body, tr_base, tr_chariot, true);
 
     slider->setEnabled(true);
-    slider->setPoweredLinMotor(true);
-    slider->setMaxLinMotorForce(slider_force);
-    slider->setTargetLinMotorVelocity(0.f);
+    slider->setPoweredLinMotor(false);
+    /*slider->setMaxLinMotorForce(slider_force);
+    slider->setTargetLinMotorVelocity(0.f);*/
     slider->setLowerLinLimit(-10.f);
     slider->setUpperLinLimit(10.f);
 
@@ -60,12 +60,17 @@ std::vector<item> CartPoleEnv::init_cartpole() {
     btVector3 axis(0.f, 0.f, 1.f);
     hinge = new btHingeConstraint(*chariot.m_rg_body, *pendule.m_rg_body,
                                         btVector3(0.f, chariot_height, 0.f),
-                                        btVector3(0.f, -pendule_height, 0.f),
+                                        btVector3(0.f, -pendule_height + pendule_offset, 0.f),
                                         axis, axis, true);
 
     base_rg = base.m_rg_body;
     chariot_rg = chariot.m_rg_body;
     pendule_rg = pendule.m_rg_body;
+
+    btTransform center_of_mass_tr;
+    center_of_mass_tr.setIdentity();
+    center_of_mass_tr.setOrigin(btVector3(0.f, -pendule_height / 2.f, 0.f));
+    pendule_rg->setCenterOfMassTransform(center_of_mass_tr);
 
     chariot_rg->setIgnoreCollisionCheck(pendule_rg, true);
     base_rg->setIgnoreCollisionCheck(chariot_rg, true);
@@ -88,8 +93,17 @@ CartPoleEnv::~CartPoleEnv() {
 
 void CartPoleEnv::act(torch::Tensor action) {
     int act_idx = action.argmax(-1).item().toInt();
-    slider->setTargetLinMotorVelocity((act_idx == 0 ? 1.f : -1.f) * slider_speed);
+
+    float speed;
+    if (act_idx == 0) speed = 1.f;
+    else if (act_idx == 1) speed = -1.f;
+    else speed = 0.f;
+
+    speed *= slider_speed;
+
+    //slider->setTargetLinMotorVelocity((act_idx == 0 ? 1.f : -1.f) * slider_speed);
     //chariot_rg->applyCentralImpulse(btVector3((act_idx == 0 ? 1.f : -1.f) * slider_speed, 0.f, 0.f));
+    chariot_rg->setLinearVelocity(btVector3(speed, 0.f, 0.f));
 }
 
 env_step CartPoleEnv::compute_new_state() {
@@ -102,8 +116,8 @@ env_step CartPoleEnv::compute_new_state() {
     torch::Tensor state = torch::tensor({pos, vel, ang, ang_vel});
 
     bool done = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
-    //float reward = abs(limit_angle - abs(ang) / limit_angle);
-    float reward = done ? 0.f : 1.f;
+    float reward = abs(limit_angle - abs(ang) / limit_angle);
+    //float reward = done ? 0.f : 1.f;
 
     //std::cout << state << std::endl;
     env_step new_state {state, reward, done};
@@ -111,7 +125,12 @@ env_step CartPoleEnv::compute_new_state() {
 }
 
 env_step CartPoleEnv::reset_engine() {
-    slider->setTargetLinMotorVelocity(0.f);
+    m_engine.m_world->removeRigidBody(chariot_rg);
+    m_engine.m_world->removeRigidBody(pendule_rg);
+    m_engine.m_world->removeConstraint(slider);
+    m_engine.m_world->removeConstraint(hinge);
+
+    //slider->setTargetLinMotorVelocity(0.f);
 
     btTransform tr_chariot_reset;
     tr_chariot_reset.setIdentity();
@@ -136,9 +155,14 @@ env_step CartPoleEnv::reset_engine() {
     pendule_rg->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
     pendule_rg->clearForces();
 
+    m_engine.m_world->addRigidBody(chariot_rg);
+    m_engine.m_world->addRigidBody(pendule_rg);
+    m_engine.m_world->addConstraint(slider);
+    m_engine.m_world->addConstraint(hinge);
+
     float rand_force = (rd_uni(rd_gen) * 0.5f + 0.5f) * chariot_push_force ;
-	float dir = rd_uni(rd_gen) > 0.5f ? rand_force : -rand_force;
-	chariot_rg->applyCentralImpulse(btVector3(dir * chariot_push_force, 0.f, 0.f));
+	rand_force = rd_uni(rd_gen) > 0.5f ? rand_force : -rand_force;
+	chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
 
 	for (int i = 0; i < reset_frame_nb; i++)
 	    m_engine.step(1.f / 60.f);
