@@ -4,17 +4,16 @@
 
 #include "engine.h"
 
-engine::engine(std::vector<item> objects) {
-    m_collision_configuration = new btDefaultCollisionConfiguration();
-    m_dispatcher = new btCollisionDispatcher(m_collision_configuration);
-    m_broad_phase = new btDbvtBroadphase();
-    m_constraint_solver = new btSequentialImpulseConstraintSolver();
-
-    m_world = new btDiscreteDynamicsWorld(
+engine::engine(std::vector<item> objects) :
+    m_collision_configuration(new btDefaultCollisionConfiguration()),
+    m_dispatcher(new btCollisionDispatcher(m_collision_configuration)),
+    m_broad_phase(new btDbvtBroadphase()),
+    m_constraint_solver(new btSequentialImpulseConstraintSolver()),
+    m_world(new btDiscreteDynamicsWorld(
             m_dispatcher,
             m_broad_phase,
             m_constraint_solver,
-            m_collision_configuration);
+            m_collision_configuration)) {
     m_world->setGravity(btVector3(0, -9.8f, 0));
 
     for (item t : objects)

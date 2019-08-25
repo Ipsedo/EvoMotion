@@ -10,9 +10,9 @@
 #include "item.h"
 
 struct engine {
-    btBroadphaseInterface *m_broad_phase;
-    btCollisionDispatcher *m_dispatcher;
     btDefaultCollisionConfiguration *m_collision_configuration;
+    btCollisionDispatcher *m_dispatcher;
+    btBroadphaseInterface *m_broad_phase;
     btSequentialImpulseConstraintSolver *m_constraint_solver;
     btDiscreteDynamicsWorld *m_world;
 
