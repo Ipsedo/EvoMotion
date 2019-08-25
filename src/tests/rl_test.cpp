@@ -39,7 +39,7 @@ void test_reinforcement_learning() {
 		while (!state.done && episode_step < max_episode_step) {
 			auto act = ag->act(state.state, eps);
 
-			env_step new_state = cartpole_env->step(1.f / 60.f, act, true);
+			env_step new_state = cartpole_env->step(1.f / 60.f, act, false);
 
 			ag->step(state.state, act, new_state.reward, new_state.state, new_state.done);
 
@@ -48,6 +48,7 @@ void test_reinforcement_learning() {
 			cumulative_reward += state.reward;
 
             eps *= eps_decay;
+            //eps = 1.f / sqrt(step + 1.f);
             eps = eps < eps_min ? eps_min : eps;
 
 			episode_step++;
