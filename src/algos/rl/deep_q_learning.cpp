@@ -15,7 +15,7 @@ q_network::q_network(torch::IntArrayRef state_space, torch::IntArrayRef action_s
     l3 = register_module("l3", torch::nn::Linear(24, action_space[0]));
     torch::nn::init::xavier_normal_(l1->weight);
     torch::nn::init::xavier_normal_(l2->weight);
-    torch::nn::init::xavier_normal_(l3->weight);
+    torch::nn::init::uniform_(l3->weight, -1.f, 1.f);
 }
 
 torch::Tensor q_network::forward(torch::Tensor input) {
@@ -35,7 +35,7 @@ dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRe
         agent(state_space, action_space, 100000),
         target_q_network(m_state_space, m_action_space),
         local_q_network(m_state_space, m_action_space),
-        optimizer(torch::optim::Adam(local_q_network.parameters(), 1e-5f)),
+        optimizer(torch::optim::Adam(local_q_network.parameters(), 1e-3f)),
         idx_step(0), batch_size(20), gamma(0.95f), tau(1e-3f), update_every(4),
         rd_gen(seed), rd_uni(0.f, 1.f) {
     /*target_q_network.l1->weight = local_q_network.l1->weight.clone();
@@ -105,11 +105,21 @@ void dqn_agent::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor
 }
 
 void dqn_agent::soft_update() {
-    for (int i = 0; i < target_q_network.parameters().size(); i++) {
-        auto target_param = target_q_network.parameters()[i];
-        auto local_param = local_q_network.parameters()[i];
+    torch::NoGradGuard no_grad;
+    target_q_network.l1->weight.set_(
+            tau * local_q_network.l1->weight.clone() + (1.f - tau) * target_q_network.l1->weight.clone());
+    target_q_network.l1->bias.set_(
+            tau * local_q_network.l1->bias.clone() + (1.f - tau) * target_q_network.l1->bias.clone());
 
-        target_param = (tau * local_param + (1.f - tau) * target_param).clone();
-    }
+    target_q_network.l2->weight.set_(
+            tau * local_q_network.l2->weight.clone() + (1.f - tau) * target_q_network.l2->weight.clone());
+    target_q_network.l2->bias.set_(
+            tau * local_q_network.l2->bias.clone() + (1.f - tau) * target_q_network.l2->bias.clone());
+
+    target_q_network.l3->weight.set_(
+            tau * local_q_network.l3->weight.clone() + (1.f - tau) * target_q_network.l3->weight.clone());
+    target_q_network.l3->bias.set_(
+            tau * local_q_network.l3->bias.clone() + (1.f - tau) * target_q_network.l3->bias.clone());
+
 }
 
