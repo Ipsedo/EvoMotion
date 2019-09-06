@@ -47,9 +47,9 @@ void test_reinforcement_learning() {
 
 			cumulative_reward += state.reward;
 
-            eps *= eps_decay;
-            //eps = 1.f / sqrt(step + 1.f);
-            eps = eps < eps_min ? eps_min : eps;
+			eps *= eps_decay;
+			//eps = 1.f / sqrt(step + 1.f);
+			eps = eps < eps_min ? eps_min : eps;
 
 			episode_step++;
 			step++;
