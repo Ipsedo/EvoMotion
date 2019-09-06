@@ -5,7 +5,7 @@
 #include "cartpole.h"
 
 CartPoleEnvParams::CartPoleEnvParams() : slider_speed(2.5f), chariot_push_force(0.f),
-        limit_angle(float(M_PI * 0.25)), reset_frame_nb(1),
+        limit_angle(float(M_PI * 0.25)), reset_frame_nb(0),
         chariot_mass(1.f), pendule_mass(1e-1f), slider_force(2e2f) {
 
 }
@@ -20,7 +20,7 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 
     float base_height = 2.f, base_pos = -4.f;
 
-    float pendule_height = 0.7f, pendule_width = 0.1f, pendule_offset = pendule_height / 5.f;
+    float pendule_height = 0.7f, pendule_width = 0.1f, pendule_offset = pendule_height / 4.f;
 
     float chariot_height = 0.25f, chariot_width = 0.5f;
 
