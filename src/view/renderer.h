@@ -14,19 +14,21 @@
 
 struct renderer {
 
-    float m_width_px, m_height_px;
+	float m_width_px, m_height_px;
 
-    GLFWwindow *m_window;
+	GLFWwindow *m_window;
 
-    glm::mat4 m_proj_mat;
-    glm::mat4 m_view_mat;
-    glm::vec3 m_cam_pos;
+	glm::mat4 m_proj_mat;
+	glm::mat4 m_view_mat;
+	glm::vec3 m_cam_pos;
 
-    bool m_is_on;
+	bool m_is_on;
 
-    renderer(int width, int height);
-    void init();
-    void draw(float delta, std::vector<item> to_draw);
+	renderer(int width, int height);
+
+	void init();
+
+	void draw(float delta, std::vector<item> to_draw);
 };
 
 #endif //EVOMOTION_RENDERER_H

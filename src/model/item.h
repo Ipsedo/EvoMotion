@@ -9,9 +9,9 @@
 #include "../view/obj_mtl_vbo.h"
 
 struct item {
-    btRigidBody *m_rg_body;
-    ObjMtlVBO *m_obj_mtl_vbo;
-    glm::vec3 m_obj_mtl_vbo_scale;
+	btRigidBody *m_rg_body;
+	ObjMtlVBO *m_obj_mtl_vbo;
+	glm::vec3 m_obj_mtl_vbo_scale;
 };
 
 btRigidBody::btRigidBodyConstructionInfo

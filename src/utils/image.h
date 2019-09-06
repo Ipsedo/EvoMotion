@@ -8,9 +8,9 @@
 #include <string>
 
 struct img_rgb {
-    int width;
-    int height;
-    unsigned char *colors;
+	int width;
+	int height;
+	unsigned char *colors;
 };
 
 img_rgb load_image(std::string image_file);

@@ -11,13 +11,13 @@
 #include "../coco.h"
 
 typedef struct {
-    size_t number_of_dimensions;
-    size_t current_idx;
-    char **output;
-    size_t previous_dimension;
-    size_t cumulative_evaluations;
-    time_t start_time;
-    time_t overall_start_time;
+	size_t number_of_dimensions;
+	size_t current_idx;
+	char **output;
+	size_t previous_dimension;
+	size_t cumulative_evaluations;
+	time_t start_time;
+	time_t overall_start_time;
 } timing_data_t;
 
 

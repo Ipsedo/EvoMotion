@@ -6,12 +6,13 @@
 #define EVOMOTION_INDIVIDUAL_H
 
 #define ARMA_DONT_PRINT_ERRORS
+
 #include <armadillo>
 
 struct individual {
-    arma::vec geno;
-    arma::vec z;
-    double fitness;
+	arma::vec geno;
+	arma::vec z;
+	double fitness;
 };
 
 #endif //EVOMOTION_INDIVIDUAL_H

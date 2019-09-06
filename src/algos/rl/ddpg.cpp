@@ -5,9 +5,9 @@
 #include "ddpg.h"
 
 ddpg::ddpg(torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
-    agent(state_space,
-          action_space,
-          20000) {
+		agent(state_space,
+		      action_space,
+		      20000) {
 
 }
 
@@ -16,5 +16,5 @@ void ddpg::step(torch::Tensor state, torch::Tensor action, float reward, torch::
 }
 
 at::Tensor ddpg::act(torch::Tensor state, float eps) {
-    return at::Tensor();
+	return at::Tensor();
 }

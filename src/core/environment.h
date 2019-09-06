@@ -12,50 +12,54 @@
 #include "../model/engine.h"
 
 struct env_step {
-    torch::Tensor state;
-    float reward;
-    bool done;
+	torch::Tensor state;
+	float reward;
+	bool done;
 };
 
 class Environment {
 private:
-    int m_step;
+	int m_step;
 
 protected:
-    // Model
-    engine m_engine;
+	// Model
+	engine m_engine;
 
-    // View
-    renderer m_renderer;
+	// View
+	renderer m_renderer;
 
-    // Items
-    std::vector<item> m_items;
+	// Items
+	std::vector<item> m_items;
 
-    /**
-     * Virtual fonction applying action
-     * Need to be overloaded !
-     * @param action
-     */
-    virtual void act(torch::Tensor action) = 0;
+	/**
+	 * Virtual fonction applying action
+	 * Need to be overloaded !
+	 * @param action
+	 */
+	virtual void act(torch::Tensor action) = 0;
 
-    /**
-     * Virtual function to compute next state
-     * @return
-     */
-    virtual env_step compute_new_state() = 0;
+	/**
+	 * Virtual function to compute next state
+	 * @return
+	 */
+	virtual env_step compute_new_state() = 0;
 
-    virtual env_step reset_engine() = 0;
+	virtual env_step reset_engine() = 0;
 
 public:
-    Environment(renderer renderer, std::vector<item> items);
-    virtual torch::IntArrayRef action_space() = 0;
-    virtual torch::IntArrayRef state_space() = 0;
-    const env_step reset();
-    const env_step step(float delta, torch::Tensor action, bool will_draw);
+	Environment(renderer renderer, std::vector<item> items);
 
-    bool is_renderer_on();
+	virtual torch::IntArrayRef action_space() = 0;
 
-    virtual ~Environment();
+	virtual torch::IntArrayRef state_space() = 0;
+
+	const env_step reset();
+
+	const env_step step(float delta, torch::Tensor action, bool will_draw);
+
+	bool is_renderer_on();
+
+	virtual ~Environment();
 
 };
 

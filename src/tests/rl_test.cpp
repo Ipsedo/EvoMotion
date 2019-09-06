@@ -13,8 +13,8 @@ void test_reinforcement_learning() {
 
 	Environment *cartpole_env = new CartPoleEnv(static_cast<int>(time(nullptr)));
 
-    agent *ag = new dqn_agent(static_cast<int>(time(nullptr)),
-    		cartpole_env->state_space(), cartpole_env->action_space());
+	agent *ag = new dqn_agent(static_cast<int>(time(nullptr)),
+	                          cartpole_env->state_space(), cartpole_env->action_space());
 
 	std::cout << "Action space : " << cartpole_env->action_space() << std::endl;
 	std::cout << "State space : " << cartpole_env->state_space() << std::endl;
@@ -61,8 +61,9 @@ void test_reinforcement_learning() {
 		if (consecutive_succes > 10) break;
 
 		std::cout << std::fixed << std::setprecision(5)
-		<< "Episode (" << std::setw(3) << i << ") : cumulative_reward = " << std::setw(9) << cumulative_reward
-		<< ", eps = " << std::setw(6) << eps << ", episode step : " << std::setw(3) << episode_step << std::endl;
+		          << "Episode (" << std::setw(3) << i << ") : cumulative_reward = " << std::setw(9) << cumulative_reward
+		          << ", eps = " << std::setw(6) << eps << ", episode step : " << std::setw(3) << episode_step
+		          << std::endl;
 	}
 
 	int nb_test = 100;

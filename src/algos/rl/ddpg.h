@@ -18,11 +18,11 @@ struct critic : torch::nn::Module {
 };
 
 struct ddpg : agent {
-    ddpg(torch::IntArrayRef state_space, torch::IntArrayRef action_space);
+	ddpg(torch::IntArrayRef state_space, torch::IntArrayRef action_space);
 
-    void step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) override;
+	void step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) override;
 
-    at::Tensor act(torch::Tensor state, float eps) override;
+	at::Tensor act(torch::Tensor state, float eps) override;
 };
 
 

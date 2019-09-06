@@ -10,15 +10,17 @@
 #include "item.h"
 
 struct engine {
-    btDefaultCollisionConfiguration *m_collision_configuration;
-    btCollisionDispatcher *m_dispatcher;
-    btBroadphaseInterface *m_broad_phase;
-    btSequentialImpulseConstraintSolver *m_constraint_solver;
-    btDiscreteDynamicsWorld *m_world;
+	btDefaultCollisionConfiguration *m_collision_configuration;
+	btCollisionDispatcher *m_dispatcher;
+	btBroadphaseInterface *m_broad_phase;
+	btSequentialImpulseConstraintSolver *m_constraint_solver;
+	btDiscreteDynamicsWorld *m_world;
 
-    explicit engine(std::vector<item> objects);
-    void step(float delta);
-    ~engine();
+	explicit engine(std::vector<item> objects);
+
+	void step(float delta);
+
+	~engine();
 };
 
 #endif //EVOMOTION_ENGINE_H
