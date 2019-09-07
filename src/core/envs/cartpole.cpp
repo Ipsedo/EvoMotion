@@ -102,8 +102,8 @@ void CartPoleEnv::act(torch::Tensor action) {
 
 	speed *= slider_speed;
 
-	//slider->setTargetLinMotorVelocity((act_idx == 0 ? 1.f : -1.f) * slider_speed);
-	//chariot_rg->applyCentralImpulse(btVector3((act_idx == 0 ? 1.f : -1.f) * slider_speed, 0.f, 0.f));
+	//slider->setTargetLinMotorVelocity(speed);
+	//chariot_rg->applyCentralImpulse(btVector3(speed, 0.f, 0.f));
 	chariot_rg->setLinearVelocity(btVector3(speed, 0.f, 0.f));
 }
 
