@@ -9,6 +9,9 @@
 #include <deque>
 #include <random>
 
+/**
+ * A struct for representing one sample
+ */
 struct memory {
 	torch::Tensor state;
 	torch::Tensor action;
@@ -18,30 +21,63 @@ struct memory {
 };
 
 struct replay_buffer {
+	// State memory
 	std::deque<memory> mem;
 
+	// The memory max size
 	int max_size;
 
+	// Random stuff
 	std::default_random_engine rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
 
-	explicit replay_buffer(int max_size, unsigned long seed);
+	replay_buffer(int max_size, unsigned long seed);
 
+	/**
+	 * Add step to memory
+	 * @param state The old state
+	 * @param action The action performed on old state
+	 * @param reward The reward gained with the action on old state
+	 * @param next_state The next state
+	 * @param done If next state is episode end
+	 */
 	void add(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done);
 
+	/**
+	 * Return std::tuple : < state, action, reward, next_state, done >
+	 * @param batch_size The batch size, first size of the Tensors retruned
+	 * @return The tuple containing the samples
+	 */
 	std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor>
 	sample(int batch_size);
 };
 
 
 struct agent {
+	// The agent state and action space
 	torch::IntArrayRef m_state_space, m_action_space;
+
+	// The agent replay memory
 	replay_buffer memory_buffer;
 
 	agent(torch::IntArrayRef state_space, torch::IntArrayRef action_space, int buffer_size);
 
+	/**
+	 * Step the agent (update, learn, etc.)
+	 * @param state The old state
+	 * @param action The action to perform with the old state
+	 * @param reward The reward gained when perform "action" on "state"
+	 * @param next_state The next state when "action" is perform on "state"
+	 * @param done If the episode is done int the state "next_state"
+	 */
 	virtual void step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) = 0;
 
+	/**
+	 * Get agent action on the current state
+	 * @param state The current state
+	 * @param eps The epsilon greedy factor
+	 * @return The choosed action
+	 */
 	virtual torch::Tensor act(torch::Tensor state, float eps) = 0;
 };
 

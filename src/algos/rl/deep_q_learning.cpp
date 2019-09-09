@@ -32,29 +32,24 @@ torch::Tensor q_network::forward(torch::Tensor input) {
 ////////////////////////
 
 dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
-		agent(state_space, action_space, 100000),
+		agent(state_space, action_space, 1000),
 		target_q_network(m_state_space, m_action_space),
 		local_q_network(m_state_space, m_action_space),
 		optimizer(torch::optim::Adam(local_q_network.parameters(), 4e-3f)),
 		idx_step(0), batch_size(16), gamma(0.95f), tau(1e-3f), update_every(4),
-		rd_gen(seed), rd_uni(0.f, 1.f) {
-	/*target_q_network.l1->weight = local_q_network.l1->weight.clone();
-	target_q_network.l1->bias = local_q_network.l1->bias.clone();
-
-	target_q_network.l2->weight = local_q_network.l2->weight.clone();
-	target_q_network.l2->bias = local_q_network.l2->bias.clone();
-
-	target_q_network.l3->weight = local_q_network.l3->weight.clone();
-	target_q_network.l3->bias = local_q_network.l3->bias.clone();*/
-}
+		rd_gen(seed), rd_uni(0.f, 1.f) {}
 
 void dqn_agent::step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) {
 	memory_buffer.add(state, action, reward, next_state, done);
 
+	// Step counter
 	idx_step = (idx_step + 1) % update_every;
 
+	// Update every n step
 	if (idx_step == 0) {
+		// If memory size is sufficient
 		if (memory_buffer.mem.size() > batch_size) {
+			// Pick randomly samples
 			auto t = memory_buffer.sample(batch_size);
 
 			torch::Tensor sample_states = std::get<0>(t);
@@ -63,24 +58,31 @@ void dqn_agent::step(torch::Tensor state, torch::Tensor action, float reward, to
 			torch::Tensor sample_next_states = std::get<3>(t);
 			torch::Tensor sample_dones = std::get<4>(t);
 
+			// Learn on those samples
 			learn(sample_states, sample_actions, sample_rewards, sample_next_states, sample_dones);
 		}
 	}
 }
 
 torch::Tensor dqn_agent::act(torch::Tensor state, float eps) {
+	// state.sizes() == (state_space)
+	// state.sizes() == (1, state_space)
 	state = state.unsqueeze(0);
 
 	local_q_network.eval();
 	torch::Tensor action_values;
 	{
+		// No gradient and compute graph
 		torch::NoGradGuard no_grad;
 		action_values = local_q_network.forward(state).squeeze(0);
 	}
 	local_q_network.train();
 
+	// Epsilon greedy
+	// Exploration
 	if (rd_uni(rd_gen) > eps) return action_values;
 
+	// Exploitation
 	return torch::softmax(torch::rand(m_action_space), -1);
 }
 
@@ -98,15 +100,24 @@ void dqn_agent::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor
 
 	torch::Tensor loss_v = torch::mse_loss(q_expected, q_targets);
 
+	// Erase previous gradient
 	optimizer.zero_grad();
+
+	// Perform back propagation
 	loss_v.backward();
+
+	// Update weights
 	optimizer.step();
 
+	// Update target Q-Network
 	soft_update();
 }
 
 void dqn_agent::soft_update() {
 	torch::NoGradGuard no_grad;
+
+	// target_weights = tau * local_weights + (1 - tau) * target_weights
+
 	target_q_network.l1->weight.copy_(
 			tau * local_q_network.l1->weight.clone() + (1.f - tau) * target_q_network.l1->weight.clone());
 	target_q_network.l1->bias.copy_(

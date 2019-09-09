@@ -10,6 +10,9 @@
 #include "item.h"
 
 struct engine {
+	/**
+	 * Bullet stuff
+	 */
 	btDefaultCollisionConfiguration *m_collision_configuration;
 	btCollisionDispatcher *m_dispatcher;
 	btBroadphaseInterface *m_broad_phase;

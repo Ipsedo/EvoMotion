@@ -18,6 +18,7 @@ CartPoleEnv::CartPoleEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f), CartPoleEnv
 
 std::vector<item> CartPoleEnv::init_cartpole() {
 
+	// Compute positions, sizes
 	float base_height = 2.f, base_pos = -4.f;
 
 	float pendule_height = 0.7f, pendule_width = 0.1f, pendule_offset = pendule_height / 4.f;
@@ -27,16 +28,20 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 	chariot_pos = base_pos + base_height + chariot_height;
 	pendule_pos = chariot_pos + chariot_height + pendule_height - pendule_offset;
 
+	// Create items
+	// (init graphical and physical objects)
 	item base = create_item_box(glm::vec3(0.f, base_pos, 10.f), glm::mat4(1.f), glm::vec3(10.f, base_height, 10.f),
 	                            0.f);
 
 	item chariot = create_item_box(glm::vec3(0.f, chariot_pos, 10.f),
 	                               glm::mat4(1.f),
 	                               glm::vec3(chariot_width, chariot_height, chariot_width), chariot_mass);
+
 	item pendule = create_item_box(glm::vec3(0.f, pendule_pos, 10.f),
 	                               glm::mat4(1.f),
 	                               glm::vec3(pendule_width, pendule_height, pendule_width), pendule_mass);
 
+	// Environment item vector
 	std::vector<item> items{base, chariot, pendule};
 
 	// For slider between chariot and base
@@ -81,18 +86,28 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 }
 
 torch::IntArrayRef CartPoleEnv::action_space() {
+	// 3 actions :
+	// - move left
+	// - move right
+	// - stop
 	return torch::IntArrayRef({3});
 }
 
 torch::IntArrayRef CartPoleEnv::state_space() {
+	// 4 features :
+	// - chariot position
+	// - chariot horizontal velocity
+	// - pendule angle
+	// - pendule velocity angle
 	return torch::IntArrayRef({4});
 }
 
 CartPoleEnv::~CartPoleEnv() {
-
+	// TODO
 }
 
 void CartPoleEnv::act(torch::Tensor action) {
+	// Discrete action -> argmax
 	int act_idx = action.argmax(-1).item().toInt();
 
 	float speed;
@@ -126,13 +141,17 @@ env_step CartPoleEnv::compute_new_state() {
 }
 
 env_step CartPoleEnv::reset_engine() {
+	// Remove chariot and pendule rigidbody from bullet world
 	m_engine.m_world->removeRigidBody(chariot_rg);
 	m_engine.m_world->removeRigidBody(pendule_rg);
+
+	// Remove slider and hinge constraint from bullet world
 	m_engine.m_world->removeConstraint(slider);
 	m_engine.m_world->removeConstraint(hinge);
 
 	//slider->setTargetLinMotorVelocity(0.f);
 
+	// Reset chariot position, force and velocity
 	btTransform tr_chariot_reset;
 	tr_chariot_reset.setIdentity();
 	tr_chariot_reset.setOrigin(btVector3(0.f, chariot_pos, 10.f));
@@ -144,7 +163,7 @@ env_step CartPoleEnv::reset_engine() {
 	chariot_rg->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
 	chariot_rg->clearForces();
 
-	// Pendule
+	// Reset pendule position, force and velocity
 	btTransform tr_pendule_reset;
 	tr_pendule_reset.setIdentity();
 	tr_pendule_reset.setOrigin(btVector3(0.f, pendule_pos, 10.f));
@@ -156,11 +175,15 @@ env_step CartPoleEnv::reset_engine() {
 	pendule_rg->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
 	pendule_rg->clearForces();
 
+	// Add chariot, pendule and constraints to bullet world
 	m_engine.m_world->addRigidBody(chariot_rg);
 	m_engine.m_world->addRigidBody(pendule_rg);
 	m_engine.m_world->addConstraint(slider);
 	m_engine.m_world->addConstraint(hinge);
 
+	// Apply random force to chariot for reset_frame_nb steps
+	// To prevent over-fitting
+	// TODO real overfitting prevention
 	float rand_force = (rd_uni(rd_gen) * 0.5f + 0.5f) * chariot_push_force;
 	rand_force = rd_uni(rd_gen) > 0.5f ? rand_force : -rand_force;
 	chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
@@ -168,5 +191,6 @@ env_step CartPoleEnv::reset_engine() {
 	for (int i = 0; i < reset_frame_nb; i++)
 		m_engine.step(1.f / 60.f);
 
+	// Compute initial step
 	return compute_new_state();
 }

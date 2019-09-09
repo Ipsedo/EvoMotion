@@ -32,29 +32,52 @@ protected:
 	std::vector<item> m_items;
 
 	/**
-	 * Virtual fonction applying action
+	 * Virtual method applying action
 	 * Need to be overloaded !
 	 * @param action
 	 */
 	virtual void act(torch::Tensor action) = 0;
 
 	/**
-	 * Virtual function to compute next state
-	 * @return
+	 * Virtual method to compute next state
+	 * @return the new computed state, reward and done infos
 	 */
 	virtual env_step compute_new_state() = 0;
 
+	/**
+	 * Virtual method to reset bullet physical engine
+	 * @return the intial state, reward and done infos
+	 */
 	virtual env_step reset_engine() = 0;
 
 public:
 	Environment(renderer renderer, std::vector<item> items);
 
+	/**
+	 * Get the action shape
+	 * @return a torch::IntArrayRef representing the action shape
+	 */
 	virtual torch::IntArrayRef action_space() = 0;
 
+	/**
+	 * Get the state shape
+	 * @return a torch::IntArrayRef representing the state shape
+	 */
 	virtual torch::IntArrayRef state_space() = 0;
 
+	/**
+	 * Reset the environment
+	 * @return the initial state, reward and done infos
+	 */
 	const env_step reset();
 
+	/**
+	 * Step the environment
+	 * @param delta the time delta in seconds
+	 * @param action the action to perform
+	 * @param will_draw indicate if drawing environment is needed
+	 * @return the next state, reward and done infos
+	 */
 	const env_step step(float delta, torch::Tensor action, bool will_draw);
 
 	bool is_renderer_on();

@@ -15,6 +15,7 @@ void replay_buffer::add(torch::Tensor state, torch::Tensor action, float reward,
 
 	mem.push_back(m);
 
+	// Last first added element if memory size exceed limit
 	if (mem.size() > max_size)
 		mem.pop_front();
 }
@@ -31,6 +32,7 @@ replay_buffer::sample(int batch_size) {
 	std::vector<torch::Tensor> state_list, action_list, reward_list, new_state_list, done_list;
 
 	for (int i = 0; i < batch_size; i++) {
+		// Randomly pick one sample
 		int idx = int(floor(rd_uni(rd_gen) * mem.size()));
 		auto sample = mem[idx];
 
@@ -41,12 +43,14 @@ replay_buffer::sample(int batch_size) {
 		done_list.push_back(torch::tensor({sample.done ? 1.f : 0.f}));
 	}
 
+	// Construct Tensor containing the samples
 	torch::Tensor states = torch::stack(state_list, 0);
 	torch::Tensor actions = torch::stack(action_list, 0);
 	torch::Tensor rewards = torch::stack(reward_list, 0);
 	torch::Tensor new_states = torch::stack(new_state_list, 0);
 	torch::Tensor dones = torch::stack(done_list, 0);
 
+	// Return the tuple containing the samples
 	return std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor>(
 			states, actions, rewards, new_states, dones);
 }

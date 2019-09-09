@@ -9,6 +9,10 @@
 #include <random>
 #include "agent.h"
 
+/**
+ * Basic Q-Network
+ * 3 linear (fully-connected) layers
+ */
 struct q_network : torch::nn::Module {
 
 	q_network(torch::IntArrayRef state_space, torch::IntArrayRef action_space);
@@ -47,9 +51,20 @@ struct dqn_agent : agent {
 
 	torch::Tensor act(torch::Tensor state, float eps) override;
 
+	/**
+	 * Perform forward and backward on Q-Network
+	 * @param states The states
+	 * @param actions The actions
+	 * @param rewards The rewards
+	 * @param next_states The next states
+	 * @param dones The dones indicator
+	 */
 	void learn(torch::Tensor states, torch::Tensor actions, torch::Tensor rewards,
 	           torch::Tensor next_states, torch::Tensor dones);
 
+	/**
+	 * Update target Q-Network
+	 */
 	void soft_update();
 };
 
