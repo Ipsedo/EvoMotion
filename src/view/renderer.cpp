@@ -6,7 +6,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <SOIL/SOIL.h>
 #include "error.h"
+#include "../utils/res.h"
 
 
 renderer::renderer(int width, int height) :
@@ -76,6 +78,7 @@ void renderer::init() {
 		glfwTerminate();
 		exit(0);
 	}
+
 	glfwMakeContextCurrent(m_window);
 	glfwSetErrorCallback(error_callback);
 	glewExperimental = GL_TRUE;
@@ -83,6 +86,11 @@ void renderer::init() {
 		fprintf(stderr, "Failed to initialize GLEW\n");
 		exit(0);
 	}
+
+	GLFWimage icons[1];
+	icons[0].pixels = SOIL_load_image((get_res_folder() + EVOMOTION_SEP + "icon.png").c_str(),
+			&icons[0].width, &icons[0].height, 0, SOIL_LOAD_RGBA);
+	glfwSetWindowIcon(m_window, 1, icons);
 
 	m_cam_pos = glm::vec3(0., 0., -1.);
 	m_proj_mat = glm::frustum(-1.f, 1.f, -m_height_px / m_width_px, m_height_px / m_width_px, 1.0f, 200.0f);
