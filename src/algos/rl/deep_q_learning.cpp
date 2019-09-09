@@ -32,7 +32,7 @@ torch::Tensor q_network::forward(torch::Tensor input) {
 ////////////////////////
 
 dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
-		agent(state_space, action_space, 1000),
+		agent(state_space, action_space, 3000),
 		target_q_network(m_state_space, m_action_space),
 		local_q_network(m_state_space, m_action_space),
 		optimizer(torch::optim::Adam(local_q_network.parameters(), 4e-3f)),
