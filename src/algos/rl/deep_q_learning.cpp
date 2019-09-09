@@ -35,8 +35,8 @@ dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRe
 		agent(state_space, action_space, 100000),
 		target_q_network(m_state_space, m_action_space),
 		local_q_network(m_state_space, m_action_space),
-		optimizer(torch::optim::Adam(local_q_network.parameters(), 1e-3f)),
-		idx_step(0), batch_size(20), gamma(0.95f), tau(1e-3f), update_every(4),
+		optimizer(torch::optim::Adam(local_q_network.parameters(), 4e-3f)),
+		idx_step(0), batch_size(16), gamma(0.95f), tau(1e-3f), update_every(4),
 		rd_gen(seed), rd_uni(0.f, 1.f) {
 	/*target_q_network.l1->weight = local_q_network.l1->weight.clone();
 	target_q_network.l1->bias = local_q_network.l1->bias.clone();
@@ -107,19 +107,19 @@ void dqn_agent::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor
 
 void dqn_agent::soft_update() {
 	torch::NoGradGuard no_grad;
-	target_q_network.l1->weight.set_(
+	target_q_network.l1->weight.copy_(
 			tau * local_q_network.l1->weight.clone() + (1.f - tau) * target_q_network.l1->weight.clone());
-	target_q_network.l1->bias.set_(
+	target_q_network.l1->bias.copy_(
 			tau * local_q_network.l1->bias.clone() + (1.f - tau) * target_q_network.l1->bias.clone());
 
-	target_q_network.l2->weight.set_(
+	target_q_network.l2->weight.copy_(
 			tau * local_q_network.l2->weight.clone() + (1.f - tau) * target_q_network.l2->weight.clone());
-	target_q_network.l2->bias.set_(
+	target_q_network.l2->bias.copy_(
 			tau * local_q_network.l2->bias.clone() + (1.f - tau) * target_q_network.l2->bias.clone());
 
-	target_q_network.l3->weight.set_(
+	target_q_network.l3->weight.copy_(
 			tau * local_q_network.l3->weight.clone() + (1.f - tau) * target_q_network.l3->weight.clone());
-	target_q_network.l3->bias.set_(
+	target_q_network.l3->bias.copy_(
 			tau * local_q_network.l3->bias.clone() + (1.f - tau) * target_q_network.l3->bias.clone());
 
 }

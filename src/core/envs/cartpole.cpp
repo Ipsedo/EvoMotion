@@ -4,8 +4,8 @@
 
 #include "cartpole.h"
 
-CartPoleEnvParams::CartPoleEnvParams() : slider_speed(2.5f), chariot_push_force(0.f),
-                                         limit_angle(float(M_PI * 0.25)), reset_frame_nb(0),
+CartPoleEnvParams::CartPoleEnvParams() : slider_speed(4.f), chariot_push_force(10.f),
+                                         limit_angle(float(M_PI * 0.25)), reset_frame_nb(1),
                                          chariot_mass(1.f), pendule_mass(1e-1f), slider_force(2e2f) {
 
 }
@@ -51,9 +51,9 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 	slider = new btSliderConstraint(*base.m_rg_body, *chariot.m_rg_body, tr_base, tr_chariot, true);
 
 	slider->setEnabled(true);
-	slider->setPoweredLinMotor(false);
-	/*slider->setMaxLinMotorForce(slider_force);
-	slider->setTargetLinMotorVelocity(0.f);*/
+	slider->setPoweredLinMotor(true);
+	slider->setMaxLinMotorForce(slider_force);
+	slider->setTargetLinMotorVelocity(0.f);
 	slider->setLowerLinLimit(-10.f);
 	slider->setUpperLinLimit(10.f);
 
@@ -68,10 +68,10 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 	chariot_rg = chariot.m_rg_body;
 	pendule_rg = pendule.m_rg_body;
 
-	btTransform center_of_mass_tr;
+	/*btTransform center_of_mass_tr;
 	center_of_mass_tr.setIdentity();
 	center_of_mass_tr.setOrigin(btVector3(0.f, -pendule_height / 2.f, 0.f));
-	pendule_rg->setCenterOfMassTransform(center_of_mass_tr);
+	pendule_rg->setCenterOfMassTransform(center_of_mass_tr);*/
 
 	chariot_rg->setIgnoreCollisionCheck(pendule_rg, true);
 	base_rg->setIgnoreCollisionCheck(chariot_rg, true);
@@ -81,7 +81,7 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 }
 
 torch::IntArrayRef CartPoleEnv::action_space() {
-	return torch::IntArrayRef({2});
+	return torch::IntArrayRef({3});
 }
 
 torch::IntArrayRef CartPoleEnv::state_space() {
@@ -102,9 +102,9 @@ void CartPoleEnv::act(torch::Tensor action) {
 
 	speed *= slider_speed;
 
-	//slider->setTargetLinMotorVelocity(speed);
+	slider->setTargetLinMotorVelocity(speed);
 	//chariot_rg->applyCentralImpulse(btVector3(speed, 0.f, 0.f));
-	chariot_rg->setLinearVelocity(btVector3(speed, 0.f, 0.f));
+	//chariot_rg->setLinearVelocity(btVector3(speed, 0.f, 0.f));
 }
 
 env_step CartPoleEnv::compute_new_state() {

@@ -19,12 +19,12 @@ void test_reinforcement_learning() {
 	std::cout << "Action space : " << cartpole_env->action_space() << std::endl;
 	std::cout << "State space : " << cartpole_env->state_space() << std::endl;
 
-	int nb_episode = 100;
+	int nb_episode = 1000;
 	int max_episode_step = 300;
 	int consecutive_succes = 0;
 
 	float eps = 1.f;
-	float eps_decay = 0.9995f;
+	float eps_decay = 0.9999f;
 	float eps_min = 1e-2f;
 
 	int step = 0;
