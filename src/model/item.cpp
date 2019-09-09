@@ -23,7 +23,7 @@ localCreateInfo(btCollisionShape *shape, glm::vec3 pos, glm::mat4 rot_mat, glm::
 
 	btVector3 local_inertia(0, 0, 0);
 	// If dynamic (eg no 0 mass)
-	// compute the object's intertia
+	// compute the object's inertia
 	if (is_dynamic)
 		shape->calculateLocalInertia(mass, local_inertia);
 
