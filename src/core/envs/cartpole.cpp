@@ -16,6 +16,7 @@ CartPoleEnvParams::CartPoleEnvParams() : slider_speed(4.f), chariot_push_force(1
 
 CartPoleEnv::CartPoleEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f), CartPoleEnvParams(),
                                      Environment(renderer(1920 / 2, 1080 / 2), init_cartpole()) {
+	// We can add constraints, Bullet world is initialized
 	m_engine.m_world->addConstraint(slider);
 	m_engine.m_world->addConstraint(hinge);
 }
