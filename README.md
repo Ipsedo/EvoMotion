@@ -52,4 +52,20 @@ $ # Build project with CMake and Makefile
 $ ./build.sh
 ```
 
+## Usage
+Pass the following arguments to programin order to launch specific test :
+* `opengl` : test the graphical part of this project
+* `bullet` : test the physical engine
+* `rl` : test the CartPole environment with RL agent
+
+Below the commands to start this project :
+```bash
+$ # Go to EvoMotion root dir
+$ cd EvoMotion
+$ # Build the project
+$ ./build.sh
+$ # Start Reinforcement Learning test
+$ ./build/EvoMotion rl
+```
+
 
