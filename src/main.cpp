@@ -8,7 +8,6 @@ int main(int argc, char *argv[]) {
 
 	auto err_msg = "Need specify test case :\n"
 	               "- bullet\n"
-	               "- armadillo\n"
 	               "- opengl\n"
 	               "- rl\n"
 	               "Example (launch COCO test) : ./build/EvoMotion coco\n";
