@@ -53,7 +53,7 @@ ddpg::ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_s
 		critic_optim(torch::optim::Adam(m_critic.parameters(), 1e-3)),
 		batch_size(16), update_every(4), current_step(0), gamma(0.95), tau(1e-3),
 		rd_gen(seed), rd_uni(0.f, 1.f) {
-	// Hard copy actor target <- actor
+	// Hard copy : actor target <- actor
 	m_actor_target.l1->weight = m_actor.l1->weight.clone();
 	m_actor_target.l1->bias = m_actor.l1->bias.clone();
 
@@ -102,7 +102,7 @@ void ddpg::step(torch::Tensor state, torch::Tensor action, float reward, torch::
 
 at::Tensor ddpg::act(torch::Tensor state, float eps) {
 	torch::NoGradGuard no_grad;
-	
+
 	if (rd_uni(rd_gen) > eps) return m_actor.forward(state.unsqueeze(0)).squeeze(0);
 
 	return torch::rand(m_action_space) * 2.f - 1.f;
