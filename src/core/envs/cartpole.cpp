@@ -10,6 +10,10 @@ CartPoleEnvParams::CartPoleEnvParams() : slider_speed(4.f), chariot_push_force(1
 
 }
 
+///////////////////////////
+// Cartpole Environment
+///////////////////////////
+
 CartPoleEnv::CartPoleEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f), CartPoleEnvParams(),
                                      Environment(renderer(1920 / 2, 1080 / 2), init_cartpole()) {
 	m_engine.m_world->addConstraint(slider);
@@ -193,4 +197,21 @@ env_step CartPoleEnv::reset_engine() {
 
 	// Compute initial step
 	return compute_new_state();
+}
+
+
+////////////////////////////////////
+// Continous Cartpole Environment
+////////////////////////////////////
+
+ContinuousCartPoleEnv::ContinuousCartPoleEnv(int seed) : CartPoleEnv(seed) {
+
+}
+
+torch::IntArrayRef ContinuousCartPoleEnv::action_space() {
+	return torch::IntArrayRef({1});
+}
+
+void ContinuousCartPoleEnv::act(torch::Tensor action) {
+	slider->setTargetLinMotorVelocity(action[0].item().toFloat() * slider_speed);
 }

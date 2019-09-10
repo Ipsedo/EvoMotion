@@ -40,17 +40,6 @@ private:
 	std::uniform_real_distribution<float> rd_uni;
 
 	/*
-	 * Bullet stuff
-	 */
-
-	btRigidBody *base_rg;
-	btRigidBody *chariot_rg;
-	btRigidBody *pendule_rg;
-
-	btHingeConstraint *hinge;
-	btSliderConstraint *slider;
-
-	/*
 	 * Init cartpole env methods
 	 */
 	std::vector<item> init_cartpole();
@@ -65,11 +54,30 @@ public:
 	~CartPoleEnv() override;
 
 protected:
+	/*
+	 * Bullet stuff
+	 */
+
+	btRigidBody *base_rg;
+	btRigidBody *chariot_rg;
+	btRigidBody *pendule_rg;
+
+	btHingeConstraint *hinge;
+	btSliderConstraint *slider;
+
 	void act(torch::Tensor action) override;
 
 	env_step compute_new_state() override;
 
 	env_step reset_engine() override;
+};
+
+class ContinuousCartPoleEnv : public CartPoleEnv {
+public:
+	torch::IntArrayRef action_space() override;
+	explicit ContinuousCartPoleEnv(int seed);
+protected:
+	void act(torch::Tensor action) override;
 };
 
 #endif //EVOMOTION_CARTPOLE_H
