@@ -9,5 +9,5 @@ rm -rf ppdata/
 echo "Removed ppdata/"
 
 echo "Start Algo"
-./build/EvoMotion coco
+../build/EvoMotion coco
 python -m cocopp exdata/CMA_on_bbob

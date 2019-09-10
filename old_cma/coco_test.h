@@ -8,7 +8,7 @@
 
 
 #include <time.h>
-#include "../coco.h"
+#include "coco.h"
 
 typedef struct {
 	size_t number_of_dimensions;
