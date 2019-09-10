@@ -61,11 +61,6 @@ struct dqn_agent : agent {
 	 */
 	void learn(torch::Tensor states, torch::Tensor actions, torch::Tensor rewards,
 	           torch::Tensor next_states, torch::Tensor dones);
-
-	/**
-	 * Update target Q-Network
-	 */
-	void soft_update();
 };
 
 #endif //EVOMOTION_DEEP_Q_LEARNING_H
