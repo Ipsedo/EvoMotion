@@ -6,7 +6,7 @@
 #define EVOMOTION_DDPG_H
 
 
-#include "agent.h"
+#include "../agent.h"
 #include <torch/torch.h>
 
 struct actor : torch::nn::Module {

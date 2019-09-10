@@ -7,7 +7,7 @@
 
 #include <torch/torch.h>
 #include <random>
-#include "agent.h"
+#include "../agent.h"
 
 /**
  * Basic Q-Network
