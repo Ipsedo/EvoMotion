@@ -6,4 +6,4 @@ ppdata/
 build/
 .idea/
 cmake-build-*/
-src/example_experiment.c
+example_experiment.c
