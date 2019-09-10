@@ -5,28 +5,26 @@
 #include "pendulum.h"
 
 
-PendulumParams::PendulumParams(float pendule_mass, float hinge_force, float hinge_max_speed, int max_step)
-		: pendule_mass(pendule_mass), hinge_force(hinge_force), hinge_max_speed(hinge_max_speed), max_step(max_step) {}
+PendulumParams::PendulumParams()
+		: pendule_mass(1.f), hinge_force(2e2f), hinge_max_speed(5.f), max_step(200) {}
 
 // https://github.com/openai/gym/wiki/Pendulum-v0
-Pendulum::Pendulum(int seed) : rd_gen(seed), rd_uni(0.f, 1.f),
-	PendulumParams(1.f, 2e2f, 5.f, 200), Environment(renderer(1920 / 2, 1080 / 2), init_items()) {
+PendulumEnv::PendulumEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f),
+	PendulumParams(), Environment(renderer(1920 / 2, 1080 / 2), init_items()) {
 	m_engine.m_world->addConstraint(hinge);
 }
 
-torch::IntArrayRef Pendulum::action_space() {
+torch::IntArrayRef PendulumEnv::action_space() {
 	return torch::IntArrayRef({1});
 }
 
-torch::IntArrayRef Pendulum::state_space() {
+torch::IntArrayRef PendulumEnv::state_space() {
 	return torch::IntArrayRef({3});
 }
 
-std::vector<item> Pendulum::init_items() {
-
-
-	float pendule_pos_y = 0.f, pendule_pos_z = 0.f, pendule_height = 4.f, pendule_width = 0.2f;
-	float base_scale = 3.f, base_pos_y = 0.f, base_pos_z = 0.f + pendule_width + base_scale;
+std::vector<item> PendulumEnv::init_items() {
+	float pendule_pos_y = 0.f, pendule_pos_z = 10.f, pendule_height = 2.f, pendule_width = 0.1f;
+	float base_scale = 0.1f, base_pos_y = 0.f, base_pos_z = 10.f + pendule_width + base_scale;
 
 	item base = create_item_box(glm::vec3(0.f, pendule_pos_y, pendule_pos_z),
 			glm::mat4(1.f), glm::vec3(pendule_width, pendule_height, pendule_width), pendule_mass);
@@ -41,19 +39,23 @@ std::vector<item> Pendulum::init_items() {
 			btVector3(0.f, -pendule_height, 0.f), btVector3(0.f, 0.f, -base_scale),
 			axis, axis, true);
 	// TODO enable motor, motor force
+	hinge->setEnabled(true);
+	hinge->setMaxMotorImpulse(hinge_force);
+
+	pendule_rg->setIgnoreCollisionCheck(base.m_rg_body, true);
 
 	return std::vector<item>({pendule, base});
 }
 
-void Pendulum::act(torch::Tensor action) {
-
+void PendulumEnv::act(torch::Tensor action) {
+	hinge->setMotorTargetVelocity(action[0].item().toFloat() * hinge_max_speed);
 }
 
-env_step Pendulum::compute_new_state() {
-	return env_step();
+env_step PendulumEnv::compute_new_state() {
+	return env_step{torch::zeros({3}), 0.f, false};
 }
 
-env_step Pendulum::reset_engine() {
-	return env_step();
+env_step PendulumEnv::reset_engine() {
+	return env_step{torch::zeros({3}), 0.f, false};
 }
 

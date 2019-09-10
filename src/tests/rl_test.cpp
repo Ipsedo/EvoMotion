@@ -13,11 +13,13 @@ void test_reinforcement_learning() {
 
 	// Init environment
 	//Environment *cartpole_env = new CartPoleEnv(static_cast<int>(time(nullptr)));
-	Environment *cartpole_env = new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
+	//Environment *cartpole_env = new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
+	Environment *cartpole_env = new PendulumEnv(static_cast<int>(time(nullptr)));
 
 	// Init agent
 	//agent *ag = new dqn_agent(static_cast<int>(time(nullptr)), cartpole_env->state_space(), cartpole_env->action_space());
-	agent *ag = new ddpg(static_cast<int>(time(nullptr)), cartpole_env->state_space(), cartpole_env->action_space());
+	//agent *ag = new ddpg(static_cast<int>(time(nullptr)), cartpole_env->state_space(), cartpole_env->action_space());
+	agent *ag = new random_agent(cartpole_env->state_space(), cartpole_env->action_space());
 
 	std::cout << "Action space : " << cartpole_env->action_space() << std::endl;
 	std::cout << "State space : " << cartpole_env->state_space() << std::endl;

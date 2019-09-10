@@ -14,16 +14,16 @@ protected:
 	float pendule_mass, hinge_force, hinge_max_speed;
 	int max_step;
 public:
-	PendulumParams(float pendule_mass, float hinge_force, float hinge_max_speed, int max_step);
+	PendulumParams();
 };
 
-class Pendulum : public Environment, public PendulumParams {
+class PendulumEnv : public Environment, public PendulumParams {
 public:
 	torch::IntArrayRef action_space() override;
 
 	torch::IntArrayRef state_space() override;
 
-	explicit Pendulum(int seed);
+	explicit PendulumEnv(int seed);
 
 protected:
 	void act(torch::Tensor action) override;
