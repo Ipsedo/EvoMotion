@@ -7,15 +7,13 @@ The final goal of this project is to implement any kind of optimisation algorith
 We will first try to reproduce the results of the article [Flexible Muscle-Based Locomotion for Bipedal Creatures](https://www.goatstream.com/research/papers/SA2013/SA2013.pdf).
 
 ### Done
-* CMA-ES and [COCO](https://github.com/numbbo/coco) benchmark work well.
+* CMA-ES and [COCO](https://github.com/numbbo/coco) benchmark work well. But is removed from this project (moved to `EvoMotion/old`)
 * RL environments with bullet and OpenGL/GLFW can be created (only cartpole is done for the moment)
-* DQN agent with libtorch is implemented but not functional... 
+* DQN and DDPG agents with libtorch are implemented and functional
 
 
 ## Requirements
 This project requires multiple libraries.
-
-* Linear algebra stuff : LAPACK, BLAS, Boost and Armadillo
 
 * Physic engine stuff : Bullet
 
@@ -28,8 +26,7 @@ This project requires multiple libraries.
 $ # Update
 $ sudo apt-get update
 $ # Install libraries
-$ sudo apt-get install liblapack-dev libblas-dev libboost-dev \
-libarmadillo-dev libbullet-dev libglm-dev libglew-dev libglfw3-dev libsoil-dev
+$ sudo apt-get install libbullet-dev libglm-dev libglew-dev libglfw3-dev libsoil-dev
 ```
 ```bash
 $ # Download libtorch for CUDA 10.0
@@ -43,14 +40,6 @@ __Note__ : if you want to extract LibTorch in a custom directory you need to mod
 First clone this repository :
 ```bash
 $ git clone https://github.com/Ipsedo/EvoMotion.git
-```
-
-Then install coco benchmark platform :
-```bash
-$ # Go to EvoMotion root directory
-$ cd EvoMotion
-$ # Clone and install COCO
-$ ./install_coco.sh
 ```
 
 Finally you are able to build the source
