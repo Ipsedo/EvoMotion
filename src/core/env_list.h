@@ -9,5 +9,6 @@
 
 #include "envs/cartpole.h"
 #include "envs/test.h"
+#include "envs/pendulum.h"
 
 #endif //EVOMOTION_ENV_LIST_H
