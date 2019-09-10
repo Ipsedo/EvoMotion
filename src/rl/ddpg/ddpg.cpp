@@ -46,7 +46,7 @@ torch::Tensor critic::forward(std::tuple<torch::Tensor,torch::Tensor> state_acti
 ///////////////////////////////////////////
 
 ddpg::ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
-		agent(state_space, action_space, 3000),
+		agent(state_space, action_space, 10000),
 		m_actor(state_space, action_space), m_actor_target(state_space, action_space),
 		m_critic(state_space, action_space), m_critic_target(state_space, action_space),
 		actor_optim(torch::optim::Adam(m_actor.parameters(), 1e-3)),
