@@ -4,8 +4,8 @@
 
 #include "rl_test.h"
 #include "../core/env_list.h"
-#include "../algos/rl/deep_q_learning.h"
-#include "../algos/rl/ddpg.h"
+#include "../algos/dqn/deep_q_learning.h"
+#include "../algos/ddpg/ddpg.h"
 #include <chrono>
 
 void test_reinforcement_learning() {
