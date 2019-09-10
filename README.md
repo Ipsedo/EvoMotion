@@ -22,15 +22,17 @@ This project requires multiple libraries.
 * Reinforcement Learning : LibTorch
 
 ### Ubuntu
+Install deb dependencies :
 ```bash
 $ # Update
 $ sudo apt-get update
 $ # Install libraries
 $ sudo apt-get install libbullet-dev libglm-dev libglew-dev libglfw3-dev libsoil-dev
 ```
+Install LibTorch :
 ```bash
 $ # Download libtorch for CUDA 10.0
-$ wget https://download.pytorch.org/libtorch/nightly/cu100/libtorch-shared-with-deps-latest.zip
+$ wget https://download.pytorch.org/libtorch/cu100/libtorch-shared-with-deps-1.2.0.zip
 $ # Unzip libtorch to /opt
 $ sudo unzip libtorch-shared-with-deps-latest.zip -d /opt
 ```
