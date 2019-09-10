@@ -101,10 +101,9 @@ void ddpg::step(torch::Tensor state, torch::Tensor action, float reward, torch::
 }
 
 at::Tensor ddpg::act(torch::Tensor state, float eps) {
-	{
-		torch::NoGradGuard no_grad;
-		if (rd_uni(rd_gen) > eps) return m_actor.forward(state.unsqueeze(0)).squeeze(0);
-	}
+	torch::NoGradGuard no_grad;
+	
+	if (rd_uni(rd_gen) > eps) return m_actor.forward(state.unsqueeze(0)).squeeze(0);
 
 	return torch::rand(m_action_space) * 2.f - 1.f;
 }
