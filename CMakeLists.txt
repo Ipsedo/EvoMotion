@@ -32,7 +32,7 @@ set(CMAKE_PREFIX_PATH "/opt/libtorch")
 find_package(Torch REQUIRED)
 
 # Get all source files
-file(GLOB_RECURSE SRC "src/*.cpp" "src/*.c")
+file(GLOB_RECURSE SRC "src/*.cpp")
 
 # Create EvoMotion executable
 add_executable(EvoMotion ${SRC})
