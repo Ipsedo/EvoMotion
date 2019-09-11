@@ -17,7 +17,7 @@ public:
 	PendulumParams();
 };
 
-class PendulumEnv : public Environment, public PendulumParams {
+class PendulumEnv : public PendulumParams, public Environment {
 public:
 	torch::IntArrayRef action_space() override;
 
