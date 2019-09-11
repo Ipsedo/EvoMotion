@@ -103,7 +103,7 @@ torch::IntArrayRef CartPoleEnv::state_space() {
 	// - chariot position
 	// - chariot horizontal velocity
 	// - pendule angle
-	// - pendule velocity angle
+	// - pendule angle velocity
 	return torch::IntArrayRef({4});
 }
 
