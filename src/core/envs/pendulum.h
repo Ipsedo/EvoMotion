@@ -11,8 +11,8 @@
 
 class PendulumParams {
 protected:
-	float pendule_mass, hinge_force, hinge_max_speed;
-	int max_step;
+	float pendule_mass, hinge_push_force;
+	int max_step, reset_nb_frame;
 public:
 	PendulumParams();
 };
@@ -33,6 +33,9 @@ protected:
 	env_step reset_engine() override;
 
 private:
+	int episode_step;
+	float last_action;
+
 	std::default_random_engine rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
 
