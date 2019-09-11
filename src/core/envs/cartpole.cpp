@@ -4,18 +4,29 @@
 
 #include "cartpole.h"
 
-CartPoleEnvParams::CartPoleEnvParams() : slider_speed(4.f), chariot_push_force(2.5f), // chariot_push_force == 10.f for continuous env (2.5f for discrete)
-                                         limit_angle(float(M_PI * 0.25)), reset_frame_nb(1),
-                                         chariot_mass(1.f), pendule_mass(1e-1f), slider_force(2e2f) {
 
-}
+CartPoleEnvParams::CartPoleEnvParams(float slider_speed, float slider_force, float chariot_push_force,
+									 float limit_angle, int reset_frame_nb,
+									 float chariot_mass, float pendule_mass) : slider_speed(slider_speed),
+																			   slider_force(slider_force),
+																			   chariot_push_force(chariot_push_force),
+																			   limit_angle(limit_angle),
+																			   reset_frame_nb(reset_frame_nb),
+																			   chariot_mass(chariot_mass),
+																			   pendule_mass(pendule_mass) {}
 
 ///////////////////////////
 // Cartpole Environment
 ///////////////////////////
 
-CartPoleEnv::CartPoleEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f), CartPoleEnvParams(),
-                                     Environment(renderer(1920, 1080), init_cartpole()) {
+CartPoleEnv::CartPoleEnv(int seed, float slider_speed, float slider_force, float chariot_push_force,
+						 float limit_angle, int reset_frame_nb,
+						 float chariot_mass, float pendule_mass) :
+						 rd_gen(seed), rd_uni(0.f, 1.f),
+						 CartPoleEnvParams(slider_speed, slider_force, chariot_push_force,
+						 		limit_angle, reset_frame_nb,
+						 		chariot_mass, pendule_mass),
+						 Environment(renderer(1920, 1080), init_cartpole()) {
 	// We can add constraints, Bullet world is initialized
 	m_engine.m_world->addConstraint(slider);
 	m_engine.m_world->addConstraint(hinge);
@@ -90,14 +101,6 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 	return items;
 }
 
-torch::IntArrayRef CartPoleEnv::action_space() {
-	// 3 actions :
-	// - move left
-	// - move right
-	// - stop
-	return torch::IntArrayRef({3});
-}
-
 torch::IntArrayRef CartPoleEnv::state_space() {
 	// 4 features :
 	// - chariot position
@@ -109,22 +112,6 @@ torch::IntArrayRef CartPoleEnv::state_space() {
 
 CartPoleEnv::~CartPoleEnv() {
 	// TODO
-}
-
-void CartPoleEnv::act(torch::Tensor action) {
-	// Discrete action -> argmax
-	int act_idx = action.argmax(-1).item().toInt();
-
-	float speed;
-	if (act_idx == 0) speed = 1.f;
-	else if (act_idx == 1) speed = -1.f;
-	else speed = 0.f;
-
-	speed *= slider_speed;
-
-	slider->setTargetLinMotorVelocity(speed);
-	//chariot_rg->applyCentralImpulse(btVector3(speed, 0.f, 0.f));
-	//chariot_rg->setLinearVelocity(btVector3(speed, 0.f, 0.f));
 }
 
 env_step CartPoleEnv::compute_new_state() {
@@ -205,9 +192,8 @@ env_step CartPoleEnv::reset_engine() {
 // Continous Cartpole Environment
 ////////////////////////////////////
 
-ContinuousCartPoleEnv::ContinuousCartPoleEnv(int seed) : CartPoleEnv(seed) {
-
-}
+ContinuousCartPoleEnv::ContinuousCartPoleEnv(int seed) :
+	CartPoleEnv(seed, 4.f, 2e2f, 10.f, float(M_PI * 0.25), 1, 1.f, 1e-1f) {}
 
 torch::IntArrayRef ContinuousCartPoleEnv::action_space() {
 	return torch::IntArrayRef({1});
@@ -215,4 +201,36 @@ torch::IntArrayRef ContinuousCartPoleEnv::action_space() {
 
 void ContinuousCartPoleEnv::act(torch::Tensor action) {
 	slider->setTargetLinMotorVelocity(action[0].item().toFloat() * slider_speed);
+}
+
+
+//////////////////////////////////
+// Discrete Cartpole Environment
+//////////////////////////////////
+
+DiscreteCartPoleEnv::DiscreteCartPoleEnv(int seed) :
+	CartPoleEnv(seed, 5.f, 2e2f, 2.5f, float(M_PI * 0.25), 1, 1.f, 1e-1f) {}
+
+torch::IntArrayRef DiscreteCartPoleEnv::action_space() {
+	// 3 actions :
+	// - move left
+	// - move right
+	// - stop
+	return torch::IntArrayRef({3});
+}
+
+void DiscreteCartPoleEnv::act(torch::Tensor action) {
+// Discrete action -> argmax
+	int act_idx = action.argmax(-1).item().toInt();
+
+	float speed;
+	if (act_idx == 0) speed = 1.f;
+	else if (act_idx == 1) speed = -1.f;
+	else speed = 0.f;
+
+	speed *= slider_speed;
+
+	slider->setTargetLinMotorVelocity(speed);
+	//chariot_rg->applyCentralImpulse(btVector3(speed, 0.f, 0.f));
+	//chariot_rg->setLinearVelocity(btVector3(speed, 0.f, 0.f));
 }
