@@ -8,10 +8,10 @@
 // Actor
 /////////////
 
-actor::actor(torch::IntArrayRef state_space, torch::IntArrayRef action_space) {
-	l1 = register_module("l1", torch::nn::Linear(state_space[0], 24));
-	l2 = register_module("l2", torch::nn::Linear(24, 24));
-	l3 = register_module("l3", torch::nn::Linear(24, action_space[0]));
+actor::actor(torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size) {
+	l1 = register_module("l1", torch::nn::Linear(state_space[0], hidden_size));
+	l2 = register_module("l2", torch::nn::Linear(hidden_size, hidden_size));
+	l3 = register_module("l3", torch::nn::Linear(hidden_size, action_space[0]));
 }
 
 torch::Tensor actor::forward(torch::Tensor input) {
@@ -25,10 +25,10 @@ torch::Tensor actor::forward(torch::Tensor input) {
 // Critic
 /////////////
 
-critic::critic(torch::IntArrayRef state_space, torch::IntArrayRef action_space)  {
-	l1 = register_module("l1", torch::nn::Linear(state_space[0], 24));
-	l2 = register_module("l2", torch::nn::Linear(24 + action_space[0], 24));
-	l3 = register_module("l3", torch::nn::Linear(24, 1));
+critic::critic(torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size)  {
+	l1 = register_module("l1", torch::nn::Linear(state_space[0], hidden_size));
+	l2 = register_module("l2", torch::nn::Linear(hidden_size + action_space[0], hidden_size));
+	l3 = register_module("l3", torch::nn::Linear(hidden_size, 1));
 }
 
 torch::Tensor critic::forward(std::tuple<torch::Tensor,torch::Tensor> state_action) {
@@ -45,10 +45,10 @@ torch::Tensor critic::forward(std::tuple<torch::Tensor,torch::Tensor> state_acti
 // Deep Deterministic Policy Gradient
 ///////////////////////////////////////////
 
-ddpg::ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
+ddpg::ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size) :
 		agent(state_space, action_space, 30000),
-		m_actor(state_space, action_space), m_actor_target(state_space, action_space),
-		m_critic(state_space, action_space), m_critic_target(state_space, action_space),
+		m_actor(state_space, action_space, hidden_size), m_actor_target(state_space, action_space, hidden_size),
+		m_critic(state_space, action_space, hidden_size), m_critic_target(state_space, action_space, hidden_size),
 		actor_optim(torch::optim::Adam(m_actor.parameters(), 1e-3)),
 		critic_optim(torch::optim::Adam(m_critic.parameters(), 1e-3)),
 		batch_size(16), update_every(4), current_step(0), gamma(0.95), tau(1e-3),

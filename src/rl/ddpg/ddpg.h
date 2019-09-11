@@ -10,7 +10,7 @@
 #include <torch/torch.h>
 
 struct actor : torch::nn::Module {
-	actor(torch::IntArrayRef state_space, torch::IntArrayRef action_space);
+	actor(torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size);
 
 	torch::Tensor forward(torch::Tensor input);
 
@@ -20,7 +20,7 @@ struct actor : torch::nn::Module {
 };
 
 struct critic : torch::nn::Module {
-	critic(torch::IntArrayRef state_space, torch::IntArrayRef action_space);
+	critic(torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size);
 
 	torch::Tensor forward(std::tuple<torch::Tensor,torch::Tensor> state_action);
 
@@ -49,7 +49,7 @@ struct ddpg : agent {
 	float tau, gamma;
 	int batch_size, update_every, current_step;
 
-	ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space);
+	ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size);
 
 	void step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) override;
 
