@@ -4,7 +4,7 @@
 
 #include "cartpole.h"
 
-CartPoleEnvParams::CartPoleEnvParams() : slider_speed(4.f), chariot_push_force(10.f),
+CartPoleEnvParams::CartPoleEnvParams() : slider_speed(4.f), chariot_push_force(2.5f), // chariot_push_force == 10.f for continuous env (2.5f for discrete)
                                          limit_angle(float(M_PI * 0.25)), reset_frame_nb(1),
                                          chariot_mass(1.f), pendule_mass(1e-1f), slider_force(2e2f) {
 
@@ -15,7 +15,7 @@ CartPoleEnvParams::CartPoleEnvParams() : slider_speed(4.f), chariot_push_force(1
 ///////////////////////////
 
 CartPoleEnv::CartPoleEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f), CartPoleEnvParams(),
-                                     Environment(renderer(1920 / 2, 1080 / 2), init_cartpole()) {
+                                     Environment(renderer(1920, 1080), init_cartpole()) {
 	// We can add constraints, Bullet world is initialized
 	m_engine.m_world->addConstraint(slider);
 	m_engine.m_world->addConstraint(hinge);

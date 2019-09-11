@@ -12,19 +12,19 @@ void test_reinforcement_learning() {
 	std::cout << "Reinforcement learning test" << std::endl;
 
 	// Init environment
-	//Environment *cartpole_env = new CartPoleEnv(static_cast<int>(time(nullptr)));
+	Environment *cartpole_env = new CartPoleEnv(static_cast<int>(time(nullptr)));
 	//Environment *cartpole_env = new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
-	Environment *cartpole_env = new PendulumEnv(static_cast<int>(time(nullptr)));
+	//Environment *cartpole_env = new PendulumEnv(static_cast<int>(time(nullptr)));
 
 	// Init agent
-	//agent *ag = new dqn_agent(static_cast<int>(time(nullptr)), cartpole_env->state_space(), cartpole_env->action_space());
+	agent *ag = new dqn_agent(static_cast<int>(time(nullptr)), cartpole_env->state_space(), cartpole_env->action_space());
 	//agent *ag = new ddpg(static_cast<int>(time(nullptr)), cartpole_env->state_space(), cartpole_env->action_space());
-	agent *ag = new random_agent(cartpole_env->state_space(), cartpole_env->action_space());
+	//agent *ag = new random_agent(cartpole_env->state_space(), cartpole_env->action_space());
 
 	std::cout << "Action space : " << cartpole_env->action_space() << std::endl;
 	std::cout << "State space : " << cartpole_env->state_space() << std::endl;
 
-	int nb_episode = 300;
+	int nb_episode = 1000;
 	int max_episode_step = 300;
 	int consecutive_succes = 0;
 
