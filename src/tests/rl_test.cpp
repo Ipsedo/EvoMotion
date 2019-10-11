@@ -24,7 +24,7 @@ void test_reinforcement_learning() {
 	std::cout << "Action space : " << cartpole_env->action_space() << std::endl;
 	std::cout << "State space : " << cartpole_env->state_space() << std::endl;
 
-	int nb_episode = 100;
+	int nb_episode = 300;
 	int max_episode_step = 300;
 	int consecutive_succes = 0;
 
@@ -46,6 +46,7 @@ void test_reinforcement_learning() {
 			auto act = ag->act(state.state, eps);
 
 			// Perform agent's action on environment
+			// And optionally display the env
 			env_step new_state = cartpole_env->step(1.f / 60.f, act, false);
 
 			// Update agent
