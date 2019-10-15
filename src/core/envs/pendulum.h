@@ -33,8 +33,8 @@ protected:
 	env_step reset_engine() override;
 
 private:
-    // /!\ both fields are initialized in init_items method
-    float pendule_pos_y, pendule_pos_z;
+    // /!\ those fields are initialized in init_items method
+    float pendule_pos_y, pendule_pos_z, pendule_height;
 
 	int episode_step;
 	float last_action;
