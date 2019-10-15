@@ -12,19 +12,19 @@ void test_reinforcement_learning() {
 	std::cout << "Reinforcement learning test" << std::endl;
 
 	// Init environment
-	//Environment *cartpole_env = new DiscreteCartPoleEnv(static_cast<int>(time(nullptr)));
-	//Environment *cartpole_env = new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
-	Environment *cartpole_env = new PendulumEnv(static_cast<int>(time(nullptr)));
+	//Environment *env = new DiscreteCartPoleEnv(static_cast<int>(time(nullptr)));
+	Environment *env = new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
+	//Environment *env = new PendulumEnv(static_cast<int>(time(nullptr)));
 
 	// Init agent
 	//agent *ag = new dqn_agent(static_cast<int>(time(nullptr)), cartpole_env->state_space(), cartpole_env->action_space());
-	agent *ag = new ddpg(static_cast<int>(time(nullptr)), cartpole_env->state_space(), cartpole_env->action_space(), 8); // hidden_size = 24 (cartpole), 8 (pendulum)
+	agent *ag = new ddpg(static_cast<int>(time(nullptr)), env->state_space(), env->action_space(), 24); // hidden_size = 24 (cartpole), 8 (pendulum)
 	//agent *ag = new random_agent(cartpole_env->state_space(), cartpole_env->action_space());
 
-	std::cout << "Action space : " << cartpole_env->action_space() << std::endl;
-	std::cout << "State space : " << cartpole_env->state_space() << std::endl;
+	std::cout << "Action space : " << env->action_space() << std::endl;
+	std::cout << "State space : " << env->state_space() << std::endl;
 
-	int nb_episode = 300;
+	int nb_episode = 200;
 	int max_episode_step = 300;
 	int consecutive_succes = 0;
 
@@ -34,7 +34,7 @@ void test_reinforcement_learning() {
 
 	for (int i = 0; i < nb_episode; i++) {
 		// Reset env and get initial step
-		env_step state = cartpole_env->reset();
+		env_step state = env->reset();
 
 		float cumulative_reward = 0.f;
 
@@ -47,7 +47,7 @@ void test_reinforcement_learning() {
 
 			// Perform agent's action on environment
 			// And optionally display the env
-			env_step new_state = cartpole_env->step(1.f / 60.f, act, false);
+			env_step new_state = env->step(1.f / 60.f, act, false);
 
 			// Update agent
 			ag->step(state.state, act, new_state.reward, new_state.state, new_state.done);
@@ -83,7 +83,7 @@ void test_reinforcement_learning() {
 	for (int i = 0; i < nb_test; i++) {
 
 		// Reset environment
-		env_step state = cartpole_env->reset();
+		env_step state = env->reset();
 
 		std::cout << "New test episode" << std::endl;
 
@@ -95,7 +95,7 @@ void test_reinforcement_learning() {
 			auto act = ag->act(state.state, 0.f);
 
 			// Compute new state
-			state = cartpole_env->step(1.f / 60.f, act, true);
+			state = env->step(1.f / 60.f, act, true);
 
 			std::cout << "step : " << std::setw(4) << step << "\r" << std::flush;
 			step++;
@@ -103,6 +103,6 @@ void test_reinforcement_learning() {
 		std::cout << std::endl;
 	}
 
-	delete cartpole_env;
+	delete env;
 	delete ag;
 }
