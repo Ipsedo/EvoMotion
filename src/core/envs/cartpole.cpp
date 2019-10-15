@@ -7,13 +7,14 @@
 
 CartPoleEnvParams::CartPoleEnvParams(float slider_speed, float slider_force, float chariot_push_force,
 									 float limit_angle, int reset_frame_nb,
-									 float chariot_mass, float pendule_mass) : slider_speed(slider_speed),
-																			   slider_force(slider_force),
-																			   chariot_push_force(chariot_push_force),
-																			   limit_angle(limit_angle),
-																			   reset_frame_nb(reset_frame_nb),
-																			   chariot_mass(chariot_mass),
-																			   pendule_mass(pendule_mass) {}
+									 float chariot_mass, float pendule_mass) :
+									 slider_speed(slider_speed),
+									 slider_force(slider_force),
+									 chariot_push_force(chariot_push_force),
+									 limit_angle(limit_angle),
+									 reset_frame_nb(reset_frame_nb),
+									 chariot_mass(chariot_mass),
+									 pendule_mass(pendule_mass) {}
 
 ///////////////////////////
 // Cartpole Environment
@@ -193,7 +194,7 @@ env_step CartPoleEnv::reset_engine() {
 ////////////////////////////////////
 
 ContinuousCartPoleEnv::ContinuousCartPoleEnv(int seed) :
-	CartPoleEnv(seed, 4.f, 2e2f, 10.f, float(M_PI * 0.25), 1, 1.f, 1e-1f) {}
+	CartPoleEnv(seed, 4.f, 2e2f, 15.f, float(M_PI * 0.25), 1, 1.f, 1e-1f) {}
 
 torch::IntArrayRef ContinuousCartPoleEnv::action_space() {
 	return torch::IntArrayRef({1});
