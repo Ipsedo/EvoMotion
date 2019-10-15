@@ -10,7 +10,7 @@
 #include <random>
 
 /**
- * A struct for representing one sample
+ * A struct representing one sample
  */
 struct memory {
 	torch::Tensor state;
