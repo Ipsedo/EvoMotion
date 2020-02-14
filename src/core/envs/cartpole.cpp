@@ -125,7 +125,7 @@ env_step CartPoleEnv::compute_new_state() {
 	torch::Tensor state = torch::tensor({pos, vel, ang, ang_vel});
 
 	bool done = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
-	float reward = abs(limit_angle - abs(ang) / limit_angle);
+	float reward = done ? 0 : abs(limit_angle - abs(ang) / limit_angle);
 	//float reward = done ? 0.f : 1.f;
 
 	//std::cout << state << std::endl;
@@ -195,7 +195,7 @@ env_step CartPoleEnv::reset_engine() {
 ////////////////////////////////////
 
 ContinuousCartPoleEnv::ContinuousCartPoleEnv(int seed) :
-	CartPoleEnv(seed, 4.f, 2e2f, 8.f, float(M_PI * 0.25), 2, 1.f, 1e-1f) {}
+	CartPoleEnv(seed, 5.f, 2e2f, 8.f, float(M_PI * 0.25), 2, 1.f, 1e-1f) {}
 
 torch::IntArrayRef ContinuousCartPoleEnv::action_space() {
 	return torch::IntArrayRef({1});
