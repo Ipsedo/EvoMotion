@@ -11,31 +11,41 @@
 
 Environment *get_env(std::string env_name) {
 	if (env_name == "DiscreteCartpole") return new DiscreteCartPoleEnv(static_cast<int>(time(nullptr)));
-	else if (env_name == "ContinousCartPole") return new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
-	else if (env_name == "PendulumEnv") return new PendulumEnv(static_cast<int>(time(nullptr)));
+	else if (env_name == "ContinuousCartpole") return new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
+	else if (env_name == "Pendulum") return new PendulumEnv(static_cast<int>(time(nullptr)));
 	else {
 		std::cerr << "Unrecognized Environment !" << std::endl
-		<< "Choices = {DiscreteCartpole, ContinousCartPole, PendulumEnv}" << std::endl;
+		<< "Choices = {DiscreteCartpole, ContinuousCartpole, Pendulum}" << std::endl;
 		exit(2);
 	}
 }
 
-agent *get_agent(std::string agent_name) {
-	return nullptr;
+agent *get_agent(std::string& agent_name, Environment *env, std::string& env_name) {
+	if (agent_name == "DQN") return new dqn_agent(static_cast<int>(time(nullptr)), env->state_space(), env->action_space());
+	else if (agent_name == "DDPG") return new ddpg(static_cast<int>(time(nullptr)), env->state_space(), env->action_space(), env_name == "Pendulum" ? 8 : 24);
+    else if (agent_name == "RANDOM") return new random_agent(env->state_space(), env->action_space());
+    else {
+		std::cerr << "Unrecognized Agent !" << std::endl
+				  << "Choices = {DQN, DDPG, RANDOM}" << std::endl;
+		exit(2);
+    }
 }
 
 void train_reinforcement_learning(rl_train_info train_info) {
 	std::cout << "Reinforcement learning train" << std::endl;
 
 	// Init environment
-	Environment *env = new DiscreteCartPoleEnv(static_cast<int>(time(nullptr)));
-	//Environment *env = new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
-	//Environment *env = new PendulumEnv(static_cast<int>(time(nullptr)));
+	Environment *env = get_env(train_info.env_name);
 
 	// Init agent
-	agent *ag = new dqn_agent(static_cast<int>(time(nullptr)), env->state_space(), env->action_space());
-	//agent *ag = new ddpg(static_cast<int>(time(nullptr)), env->state_space(), env->action_space(), 24); // hidden_size = 24 (cartpole), 8 (pendulum)
-	//agent *ag = new random_agent(cartpole_env->state_space(), cartpole_env->action_space());
+	agent *ag = get_agent(train_info.agent_name, env, train_info.env_name);
+
+	if (env->is_action_discrete() != ag->is_discrete()) {
+		std::cerr << "Agent (" << train_info.agent_name << ".discrete = " << ag->is_discrete() << ")"
+		<< " is different of Environment (" << train_info.env_name << ".discrete = " << env->is_action_discrete() << ")."
+		<< std::endl;
+		exit(2);
+	}
 
 	std::cout << "Action space : " << env->action_space() << std::endl;
 	std::cout << "State space : " << env->state_space() << std::endl;
@@ -99,14 +109,17 @@ void test_reinforcement_learning(rl_test_info test_info) {
 	std::cout << "Reinforcement learning test" << std::endl;
 
 	// Init environment
-	Environment *env = new DiscreteCartPoleEnv(static_cast<int>(time(nullptr)));
-	//Environment *env = new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
-	//Environment *env = new PendulumEnv(static_cast<int>(time(nullptr)));
+	Environment *env = get_env(test_info.env_name);
 
 	// Init agent
-	agent *ag = new dqn_agent(static_cast<int>(time(nullptr)), env->state_space(), env->action_space());
-	//agent *ag = new ddpg(static_cast<int>(time(nullptr)), env->state_space(), env->action_space(), 24); // hidden_size = 24 (cartpole), 8 (pendulum)
-	//agent *ag = new random_agent(cartpole_env->state_space(), cartpole_env->action_space());
+	agent *ag = get_agent(test_info.agent_name, env, test_info.env_name);
+
+	if (env->is_action_discrete() != ag->is_discrete()) {
+		std::cerr << "Agent (" << test_info.agent_name << ".discrete = " << ag->is_discrete() << ")"
+				  << " is different of Environment (" << test_info.env_name << ".discrete = " << env->is_action_discrete() << ")."
+				  << std::endl;
+		exit(2);
+	}
 
 	std::cout << "Action space : " << env->action_space() << std::endl;
 	std::cout << "State space : " << env->state_space() << std::endl;
