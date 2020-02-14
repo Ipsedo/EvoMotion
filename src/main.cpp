@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
                 if (std::find(env_choices.begin(), env_choices.end(), env_value) != env_choices.end())
                     return std::string("");
 
-                std::string msg("RL Env must be = {");
+                std::string msg("RL environment must be = {");
                 for (const std::string &e : env_choices)
                     msg.append(e + ", ");
                 return msg.substr(0, msg.length() - 2).append("}.");
@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
                 if (std::find(agent_choices.begin(), agent_choices.end(), value) != agent_choices.end())
                     return std::string("");
 
-                std::string msg("RL Env must be = {");
+                std::string msg("RL agent must be = {");
                 for (const std::string &a : agent_choices)
                     msg.append(a + ", ");
                 return msg.substr(0, msg.length() - 2).append("}.");
