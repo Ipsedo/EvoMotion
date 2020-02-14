@@ -42,7 +42,7 @@ item create_item_box(glm::vec3 pos, glm::mat4 rot_mat, glm::vec3 scale, float ma
 	auto rg_body = new btRigidBody(localCreateInfo(box_shape, pos, rot_mat, scale, mass));
 
 	// Create OpenGL box
-	auto obj_mtl_vbo = new ObjMtlVBO(
+	auto obj_mtl_vbo = std::make_shared<ObjMtlVBO>(
 			get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "cube.obj",
 			get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "cube.mtl",
 			true);

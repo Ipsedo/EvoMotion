@@ -6,6 +6,7 @@
 #define EVOMOTION_ITEM_H
 
 #include <btBulletDynamicsCommon.h>
+#include <memory>
 #include "../view/obj_mtl_vbo.h"
 
 /**
@@ -17,7 +18,7 @@
  */
 struct item {
 	btRigidBody *m_rg_body;
-	ObjMtlVBO *m_obj_mtl_vbo;
+	std::shared_ptr<ObjMtlVBO> m_obj_mtl_vbo;
 	glm::vec3 m_obj_mtl_vbo_scale;
 };
 
