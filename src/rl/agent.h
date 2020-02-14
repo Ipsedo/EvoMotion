@@ -79,6 +79,22 @@ struct agent {
 	 * @return The choosed action
 	 */
 	virtual torch::Tensor act(torch::Tensor state, float eps) = 0;
+
+	/**
+	 *
+	 * @param out_path
+	 */
+	virtual void save(std::string out_folder_path) = 0;
+
+	/**
+	 *
+	 * @param input_folder_path
+	 */
+	virtual void load(std::string input_folder_path) = 0;
+
+	virtual bool is_discrete() = 0;
+
+	virtual ~agent();
 };
 
 

@@ -60,6 +60,7 @@ agent::agent(torch::IntArrayRef state_space, torch::IntArrayRef action_space, in
 		m_state_space(state_space), m_action_space(action_space),
 		memory_buffer(buffer_size, static_cast<unsigned long>(time(nullptr))) {}
 
+agent::~agent() {}
 
 // Random agent
 random_agent::random_agent(torch::IntArrayRef state_space,
