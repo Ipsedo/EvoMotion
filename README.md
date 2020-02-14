@@ -38,6 +38,15 @@ $ sudo unzip libtorch-shared-with-deps-latest.zip -d /opt
 ```
 __Note__ : if you want to extract LibTorch in a custom directory you need to modify EvoMotion's `CMakeLists.txt`.
 
+Install CLI11 :
+```bash
+$ # Clone CLI11
+$ git clone --single-branch --branch v1.5 https://github.com/CLIUtils/CLI11.git
+$ # Copy CLI11 headers to /usr/local/include
+$ sudo cp CLI11/include/CLI /usr/local/include
+```
+__Note__ : if you want to place CLI11 headers in a different folder, just add `include_directories("/path/to/CLI11/include")` to `CMakeLists.txt`.
+
 ## Installation
 First clone this repository :
 ```bash
