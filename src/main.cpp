@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cstring>
-#include <argparse.hpp>
 #include <CLI/CLI.hpp>
 
 #include "tests/bullet_test.h"
