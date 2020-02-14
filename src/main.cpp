@@ -1,5 +1,3 @@
-#include <iostream>
-#include <cstring>
 #include <CLI/CLI.hpp>
 
 #include "tests/bullet_test.h"
@@ -83,6 +81,9 @@ int main(int argc, char *argv[]) {
 
     test_rl->add_option("-i,--input-folder", input_folder, "Agent input folder")->required(true);
 
+    /*
+     * Parse args
+     */
 
     CLI11_PARSE(app, argc, argv);
 
