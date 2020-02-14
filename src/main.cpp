@@ -18,11 +18,11 @@ int main(int argc, char *argv[]) {
      * RL parsing stuff
      */
 
-    std::vector<std::string> env_choices {
-        EnvEnum::CONTINUOUS_CARTPOLE().get_name(),
-        EnvEnum::DISCRETE_CARTPOLE().get_name(),
-        EnvEnum::PENDULUM().get_name(),
-        EnvEnum::HUNTING().get_name()
+    std::vector<std::string> env_choices{
+            EnvEnum::CONTINUOUS_CARTPOLE().get_name(),
+            EnvEnum::DISCRETE_CARTPOLE().get_name(),
+            EnvEnum::PENDULUM().get_name(),
+            EnvEnum::HUNTING().get_name()
     };
 
     std::vector<std::string> agent_choices = {"DQN", "DDPG", "RANDOM"};
@@ -101,22 +101,22 @@ int main(int argc, char *argv[]) {
     else if (rl_sc->parsed()) {
 
         if (train_rl->parsed()) {
-            rl_train_info train_info {
-                agent, env,
-                nb_episode, max_episode_step, max_cons_success,
-                epsilon, epsilon_decay, epsilon_min,
-                view == 1,
-                output_folder
+            rl_train_info train_info{
+                    agent, env,
+                    nb_episode, max_episode_step, max_cons_success,
+                    epsilon, epsilon_decay, epsilon_min,
+                    view == 1,
+                    output_folder
             };
 
             train_reinforcement_learning(train_info);
 
         } else if (test_rl->parsed()) {
             rl_test_info test_info{
-                agent, env,
-                nb_episode,
-                view == 1,
-                input_folder
+                    agent, env,
+                    nb_episode,
+                    view == 1,
+                    input_folder
             };
 
             test_reinforcement_learning(test_info);
