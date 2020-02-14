@@ -4,8 +4,8 @@
 
 #include "rl_test.h"
 #include "../core/env_list.h"
-#include "../rl/dqn/deep_q_learning.h"
-#include "../rl/ddpg/ddpg.h"
+#include "../rl/deep_q_learning.h"
+#include "../rl/ddpg.h"
 #include <chrono>
 #include <sys/stat.h>
 
