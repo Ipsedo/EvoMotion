@@ -8,7 +8,7 @@
 // https://github.com/openai/gym/wiki/Pendulum-v0
 
 PendulumParams::PendulumParams()
-		: pendule_mass(1.f), hinge_push_force(7.f), max_step(200), reset_nb_frame(1) {}
+		: pendule_mass(1.f), hinge_push_force(3.f), max_step(200), reset_nb_frame(1) {}
 
 PendulumEnv::PendulumEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f),
 	PendulumParams(), Environment(renderer(1920, 1080), init_items()), episode_step(0), last_action(0.f) {
@@ -20,7 +20,7 @@ torch::IntArrayRef PendulumEnv::action_space() {
 }
 
 torch::IntArrayRef PendulumEnv::state_space() {
-	return torch::IntArrayRef({3});
+	return torch::IntArrayRef({4});
 }
 
 std::vector<item> PendulumEnv::init_items() {
@@ -53,7 +53,7 @@ void PendulumEnv::act(torch::Tensor action) {
 
 	last_action = action[0].item().toFloat();
 
-	pendule_rg->applyTorque(btVector3(0.f, 0.f, last_action * hinge_push_force));
+	pendule_rg->applyTorqueImpulse(btVector3(0.f, 0.f, last_action * hinge_push_force));
 
 	//float theta = hinge->getHingeAngle();
 	//btVector3 impulse(cos(theta), sin(theta), 0);
@@ -77,11 +77,13 @@ env_step PendulumEnv::compute_new_state() {
 	float theta_dt = pendule_rg->getAngularVelocity().z();
 
 	// last_action * hinge_push_force ?
-	float reward = -float((pow(theta, 2.) + 1e-1 * pow(theta_dt, 2.) + 1e-3 * pow(last_action, 2.)));
+	float reward = -float((pow(theta / M_PI, 2.) + 1e-1 * pow(theta_dt / M_PI, 2.) + 1e-3 * pow(last_action, 2.)));
 	//float reward = -float((pow(theta, 2.) + 1e-3 * pow(theta_dt, 2.) + 1e-5 * pow(last_action, 2.)));
 	//float reward = -abs(theta) - 1e-1f * abs(theta_dt);
 
-	torch::Tensor state = torch::tensor({cos_theta, sin_theta, theta_dt});
+	torch::Tensor state = torch::tensor({cos_theta, sin_theta, theta_dt, theta_dt - last_theta_dt});
+
+	last_theta_dt = theta_dt;
 
 	return env_step{state, reward, episode_step >= max_step};
 }

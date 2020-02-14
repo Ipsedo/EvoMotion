@@ -40,6 +40,7 @@ private:
 
 	int episode_step;
 	float last_action;
+	float last_theta_dt;
 
 	std::default_random_engine rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
