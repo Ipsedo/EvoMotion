@@ -9,16 +9,6 @@
 #include <chrono>
 #include <sys/stat.h>
 
-Environment *get_env(std::string env_name) {
-	if (env_name == "DiscreteCartpole") return new DiscreteCartPoleEnv(static_cast<int>(time(nullptr)));
-	else if (env_name == "ContinuousCartpole") return new ContinuousCartPoleEnv(static_cast<int>(time(nullptr)));
-	else if (env_name == "Pendulum") return new PendulumEnv(static_cast<int>(time(nullptr)));
-	else {
-		std::cerr << "Unrecognized Environment !" << std::endl
-		<< "Choices = {DiscreteCartpole, ContinuousCartpole, Pendulum}" << std::endl;
-		exit(2);
-	}
-}
 
 agent *get_agent(std::string& agent_name, Environment *env, std::string& env_name) {
 	if (agent_name == "DQN") return new dqn_agent(static_cast<int>(time(nullptr)), env->state_space(), env->action_space());
@@ -35,7 +25,7 @@ void train_reinforcement_learning(rl_train_info train_info) {
 	std::cout << "Reinforcement learning train" << std::endl;
 
 	// Init environment
-	Environment *env = get_env(train_info.env_name);
+	Environment *env = EnvEnum::from_str(train_info.env_name).get_env();
 
 	// Init agent
 	agent *ag = get_agent(train_info.agent_name, env, train_info.env_name);
@@ -89,7 +79,7 @@ void train_reinforcement_learning(rl_train_info train_info) {
 		else consecutive_succes = 0;
 
 		// If maximum step is reached 10 consecutive times
-		if (consecutive_succes > 10) break;
+		if (consecutive_succes > train_info.max_consecutive_success) break;
 
 		std::cout << std::fixed << std::setprecision(5)
 		          << "Episode (" << std::setw(3) << i << ") : cumulative_reward = " << std::setw(9) << cumulative_reward
@@ -109,7 +99,7 @@ void test_reinforcement_learning(rl_test_info test_info) {
 	std::cout << "Reinforcement learning test" << std::endl;
 
 	// Init environment
-	Environment *env = get_env(test_info.env_name);
+	Environment *env = EnvEnum::from_str(test_info.env_name).get_env();
 
 	// Init agent
 	agent *ag = get_agent(test_info.agent_name, env, test_info.env_name);
