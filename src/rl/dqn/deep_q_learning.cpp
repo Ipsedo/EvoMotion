@@ -136,3 +136,59 @@ void dqn_agent::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor
 			tau * local_q_network.l3->bias.clone() + (1.f - tau) * target_q_network.l3->bias.clone());
 }
 
+
+void dqn_agent::save(std::string out_folder_path) {
+	// Network files
+	std::string local_dqn_file = out_folder_path + "/" + "local_dqn.th";
+	std::string target_dqn_file = out_folder_path + "/" + "target_dqn.th";
+
+	torch::serialize::OutputArchive local_dqn_archive;
+	torch::serialize::OutputArchive target_qdn_archive;
+
+	// Save networks
+	local_q_network.save(local_dqn_archive);
+	target_q_network.save(target_qdn_archive);
+
+	local_dqn_archive.save_to(local_dqn_file);
+	target_qdn_archive.save_to(target_dqn_file);
+
+	// Optimizer files
+	std::string optim_file = out_folder_path + "/" + "optim.th";
+
+	torch::serialize::OutputArchive optim_ouput_archive;
+
+	// Save optimizers
+	optimizer.save(optim_ouput_archive);
+
+	optim_ouput_archive.save_to(optim_file);
+}
+
+void dqn_agent::load(std::string input_folder_path) {
+	// Network files
+	std::string local_dqn_file = input_folder_path + "/" + "local_dqn.th";
+	std::string target_dqn_file = input_folder_path + "/" + "target_dqn.th";
+
+	torch::serialize::InputArchive local_dqn_archive;
+	torch::serialize::InputArchive target_qdn_archive;
+
+	// Load networks
+	local_dqn_archive.load_from(local_dqn_file);
+	target_qdn_archive.load_from(target_dqn_file);
+
+	local_q_network.load(local_dqn_archive);
+	target_q_network.load(target_qdn_archive);
+
+	// Optimizer file
+	std::string optim_file = input_folder_path + "/" + "optim.th";
+
+	torch::serialize::InputArchive optim_ouput_archive;
+
+	// Load optimizer
+	optim_ouput_archive.load_from(optim_file);
+
+	optimizer.load(optim_ouput_archive);
+}
+
+bool dqn_agent::is_discrete() {
+    return true;
+}

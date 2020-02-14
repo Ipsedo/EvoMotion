@@ -37,7 +37,7 @@ torch::Tensor critic::forward(std::tuple<torch::Tensor,torch::Tensor> state_acti
 
 	auto out_l1 = torch::relu(l1->forward(state));
 	auto out_l2 = torch::relu(l2->forward(torch::cat({out_l1, action}, -1)));
-	auto pred = l3->forward(out_l2);
+	auto pred = torch::tanh(l3->forward(out_l2));
 	return pred;
 }
 
@@ -146,4 +146,82 @@ void ddpg::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor rewa
 	m_critic_target.l1->bias.copy_(tau * m_critic.l1->bias + (1 - tau) * m_critic.l1->bias);
 	m_critic_target.l2->bias.copy_(tau * m_critic.l2->bias + (1 - tau) * m_critic.l2->bias);
 	m_critic_target.l3->bias.copy_(tau * m_critic.l3->bias + (1 - tau) * m_critic.l3->bias);
+}
+
+void ddpg::save(std::string out_folder_path) {
+	// Network files
+    std::string actor_target_file = out_folder_path + "/" + "actor_target.th";
+    std::string critic_target_file = out_folder_path + "/" + "critic_target.th";
+
+    std::string actor_file = out_folder_path + "/" + "actor.th";
+    std::string critic_file = out_folder_path + "/" + "critic.th";
+
+	torch::serialize::OutputArchive actor_output_archive;
+	torch::serialize::OutputArchive critic_output_archive;
+	torch::serialize::OutputArchive actor_target_output_archive;
+	torch::serialize::OutputArchive critic_target_output_archive;
+
+    // Save networks
+    m_actor.save(actor_output_archive);
+    m_critic.save(critic_output_archive);
+    m_actor_target.save(actor_target_output_archive);
+    m_critic_target.save(critic_target_output_archive);
+
+	actor_output_archive.save_to(actor_file);
+	critic_output_archive.save_to(critic_file);
+	actor_target_output_archive.save_to(actor_target_file);
+	critic_target_output_archive.save_to(critic_target_file);
+
+    // Optimizer files
+	std::string critic_optim_file = out_folder_path + "/" + "critic_optim.th";
+	std::string actor_optim_file = out_folder_path + "/" + "actor_optim.th";
+
+	torch::serialize::OutputArchive critic_optim_ouput_archive;
+	torch::serialize::OutputArchive actor_optim_ouput_archive;
+
+	// Save optimizers
+	actor_optim.save(actor_optim_ouput_archive);
+	critic_optim.save(critic_optim_ouput_archive);
+
+	critic_optim_ouput_archive.save_to(critic_optim_file);
+	actor_optim_ouput_archive.save_to(actor_optim_file);
+}
+
+void ddpg::load(std::string input_folder_path) {
+	std::string actor_target_file = input_folder_path + "/" + "actor_target.th";
+	std::string critic_target_file = input_folder_path + "/" + "critic_target.th";
+
+	std::string actor_file = input_folder_path + "/" + "actor.th";
+	std::string critic_file = input_folder_path + "/" + "critic.th";
+
+	torch::serialize::InputArchive actor_input_archive;
+	torch::serialize::InputArchive critic_input_archive;
+	torch::serialize::InputArchive actor_target_input_archive;
+	torch::serialize::InputArchive critic_target_input_archive;
+
+	actor_input_archive.load_from(actor_file);
+	critic_input_archive.load_from(critic_file);
+	actor_target_input_archive.load_from(actor_target_file);
+	critic_target_input_archive.load_from(critic_target_file);
+
+	m_actor.load(actor_input_archive);
+	m_critic.load(critic_input_archive);
+	m_actor_target.load(actor_target_input_archive);
+	m_critic_target.load(critic_target_input_archive);
+
+	std::string critic_optim_file = input_folder_path + "/" + "critic_optim.th";
+	std::string actor_optim_file = input_folder_path + "/" + "actor_optim.th";
+
+	torch::serialize::InputArchive actor_optim_input_archive;
+	torch::serialize::InputArchive critic_optim_input_archive;
+
+	actor_optim_input_archive.load_from(actor_optim_file);
+	critic_optim_input_archive.load_from(critic_optim_file);
+
+	actor_optim.load(actor_optim_input_archive);
+	critic_optim.load(critic_optim_input_archive);
+}
+
+bool ddpg::is_discrete() {
+	return false;
 }

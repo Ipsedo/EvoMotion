@@ -61,6 +61,12 @@ struct dqn_agent : agent {
 	 */
 	void learn(torch::Tensor states, torch::Tensor actions, torch::Tensor rewards,
 	           torch::Tensor next_states, torch::Tensor dones);
+
+	void save(std::string out_folder_path) override;
+
+	void load(std::string input_folder_path) override;
+
+	bool is_discrete() override;
 };
 
 #endif //EVOMOTION_DEEP_Q_LEARNING_H
