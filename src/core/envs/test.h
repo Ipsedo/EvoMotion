@@ -17,6 +17,8 @@ public:
 
 	TestEnv(int seed);
 
+    bool is_action_discrete() override;
+
 protected:
 	void act(torch::Tensor action) override;
 

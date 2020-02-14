@@ -43,11 +43,11 @@ const env_step Environment::reset() {
 }
 
 Environment::~Environment() {
-	for (auto i = m_items.size() - 1; i >= 0; i--) {
+	/*for (auto i = m_items.size() - 1; i >= 0; i--) {
 		item it = m_items[i];
 		// Only remove graphical object
 		// Bullet's rigidbody is deleted in engine struct
 		delete it.m_obj_mtl_vbo;
-	}
+	}*/
 }
 

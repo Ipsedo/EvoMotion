@@ -90,6 +90,9 @@ class ContinuousCartPoleEnv : public CartPoleEnv {
 public:
 	torch::IntArrayRef action_space() override;
 	explicit ContinuousCartPoleEnv(int seed);
+
+	bool is_action_discrete() override;
+
 protected:
 	void act(torch::Tensor action) override;
 };
@@ -98,6 +101,9 @@ class DiscreteCartPoleEnv : public CartPoleEnv {
 public:
     torch::IntArrayRef action_space() override;
     explicit DiscreteCartPoleEnv(int seed);
+
+	bool is_action_discrete() override;
+
 protected:
     void act(torch::Tensor action) override;
 };

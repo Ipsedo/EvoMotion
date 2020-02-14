@@ -180,6 +180,7 @@ env_step CartPoleEnv::reset_engine() {
 	float rand_force = (rd_uni(rd_gen) * 0.5f + 0.5f) * chariot_push_force;
 	rand_force = rd_uni(rd_gen) > 0.5f ? rand_force : -rand_force;
 	chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
+	//chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 
 	for (int i = 0; i < reset_frame_nb; i++)
 		m_engine.step(1.f / 60.f);
@@ -194,7 +195,7 @@ env_step CartPoleEnv::reset_engine() {
 ////////////////////////////////////
 
 ContinuousCartPoleEnv::ContinuousCartPoleEnv(int seed) :
-	CartPoleEnv(seed, 4.f, 2e2f, 15.f, float(M_PI * 0.25), 1, 1.f, 1e-1f) {}
+	CartPoleEnv(seed, 4.f, 2e2f, 8.f, float(M_PI * 0.25), 2, 1.f, 1e-1f) {}
 
 torch::IntArrayRef ContinuousCartPoleEnv::action_space() {
 	return torch::IntArrayRef({1});
@@ -204,13 +205,17 @@ void ContinuousCartPoleEnv::act(torch::Tensor action) {
 	slider->setTargetLinMotorVelocity(action[0].item().toFloat() * slider_speed);
 }
 
+bool ContinuousCartPoleEnv::is_action_discrete() {
+	return false;
+}
+
 
 //////////////////////////////////
 // Discrete Cartpole Environment
 //////////////////////////////////
 
 DiscreteCartPoleEnv::DiscreteCartPoleEnv(int seed) :
-	CartPoleEnv(seed, 5.f, 2e2f, 2.5f, float(M_PI * 0.25), 1, 1.f, 1e-1f) {}
+	CartPoleEnv(seed, 5.f, 2e2f, 8.f, float(M_PI * 0.25), 2, 1.f, 1e-1f) {}
 
 torch::IntArrayRef DiscreteCartPoleEnv::action_space() {
 	// 3 actions :
@@ -234,4 +239,8 @@ void DiscreteCartPoleEnv::act(torch::Tensor action) {
 	slider->setTargetLinMotorVelocity(speed);
 	//chariot_rg->applyCentralImpulse(btVector3(speed, 0.f, 0.f));
 	//chariot_rg->setLinearVelocity(btVector3(speed, 0.f, 0.f));
+}
+
+bool DiscreteCartPoleEnv::is_action_discrete() {
+	return true;
 }

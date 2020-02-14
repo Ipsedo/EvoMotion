@@ -35,7 +35,7 @@ torch::IntArrayRef TestEnv::action_space() {
 }
 
 torch::IntArrayRef TestEnv::state_space() {
-	torch::IntArrayRef({1});
+	return torch::IntArrayRef({1});
 }
 
 TestEnv::~TestEnv() {
@@ -52,5 +52,9 @@ env_step TestEnv::compute_new_state() {
 
 env_step TestEnv::reset_engine() {
 	return env_step();
+}
+
+bool TestEnv::is_action_discrete() {
+	return false;
 }
 

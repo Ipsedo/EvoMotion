@@ -8,7 +8,7 @@
 // https://github.com/openai/gym/wiki/Pendulum-v0
 
 PendulumParams::PendulumParams()
-		: pendule_mass(1.f), hinge_push_force(1e-1f), max_step(200), reset_nb_frame(1) {}
+		: pendule_mass(1.f), hinge_push_force(7.f), max_step(200), reset_nb_frame(1) {}
 
 PendulumEnv::PendulumEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f),
 	PendulumParams(), Environment(renderer(1920, 1080), init_items()), episode_step(0), last_action(0.f) {
@@ -53,11 +53,13 @@ void PendulumEnv::act(torch::Tensor action) {
 
 	last_action = action[0].item().toFloat();
 
-	//pendule_rg->applyTorque(btVector3(0.f, 0.f, last_action * hinge_push_force));
+	pendule_rg->applyTorque(btVector3(0.f, 0.f, last_action * hinge_push_force));
 
-	//pendule_rg->applyImpulse(btVector3(last_action * hinge_push_force, 0.f, 0.f), btVector3(0.f, pendule_pos_y + pendule_height, pendule_pos_z));
+	//float theta = hinge->getHingeAngle();
+	//btVector3 impulse(cos(theta), sin(theta), 0);
+	//pendule_rg->applyImpulse(hinge_push_force * last_action * impulse, btVector3(0.f, pendule_pos_y + pendule_height, pendule_pos_z));
 
-	pendule_rg->applyTorqueImpulse(btVector3(0.f, 0.f, last_action * hinge_push_force));
+	//pendule_rg->applyTorqueImpulse(btVector3(0.f, 0.f, last_action * hinge_push_force));
 
 	//hinge->setMaxMotorImpulse(last_action * hinge_push_force);
 
@@ -77,6 +79,7 @@ env_step PendulumEnv::compute_new_state() {
 	// last_action * hinge_push_force ?
 	float reward = -float((pow(theta, 2.) + 1e-1 * pow(theta_dt, 2.) + 1e-3 * pow(last_action, 2.)));
 	//float reward = -float((pow(theta, 2.) + 1e-3 * pow(theta_dt, 2.) + 1e-5 * pow(last_action, 2.)));
+	//float reward = -abs(theta) - 1e-1f * abs(theta_dt);
 
 	torch::Tensor state = torch::tensor({cos_theta, sin_theta, theta_dt});
 
@@ -99,15 +102,7 @@ env_step PendulumEnv::reset_engine() {
 
 	last_action = 0.f;
 	for (int i = 0; i < reset_nb_frame; i++) {
-		last_action = rd_uni(rd_gen) * 2.f - 1.f;
-
-		pendule_rg->applyTorqueImpulse(btVector3(0.f, 0.f, last_action * hinge_push_force));
-
-		//pendule_rg->applyTorque(btVector3(0.f, 0.f, last_action * hinge_push_force));
-
-        //pendule_rg->applyImpulse(btVector3(last_action * hinge_push_force, 0.f, 0.f), btVector3(0.f, pendule_pos_y + pendule_height, pendule_pos_z));
-
-		//hinge->setMaxMotorImpulse(last_action * hinge_push_force);
+		PendulumEnv::act(torch::tensor({rd_uni(rd_gen) * 2.f - 1.f}));
 
 		m_engine.m_world->stepSimulation(1.f / 60.f);
 	}
@@ -115,3 +110,6 @@ env_step PendulumEnv::reset_engine() {
     return compute_new_state();
 }
 
+bool PendulumEnv::is_action_discrete() {
+	return false;
+}

@@ -82,6 +82,8 @@ public:
 
 	bool is_renderer_on();
 
+	virtual bool is_action_discrete() = 0;
+
 	virtual ~Environment();
 
 };
