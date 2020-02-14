@@ -15,6 +15,7 @@ struct rl_train_info {
 
     int nb_episode;
     int max_episode_step;
+    int max_consecutive_success;
     float eps;
     float eps_decay;
     float eps_min;
@@ -33,8 +34,6 @@ struct rl_test_info {
 
     std::string in_model_folder;
 };
-
-Environment* get_env(std::string env_name);
 
 agent* get_agent(std::string agent_name);
 
