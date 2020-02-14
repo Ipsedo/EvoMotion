@@ -44,4 +44,14 @@ localCreateInfo(btCollisionShape *collision_shape, glm::vec3 pos, glm::mat4 rot_
  */
 item create_item_box(glm::vec3 pos, glm::mat4 rot_mat, glm::vec3 scale, float mass);
 
+/**
+ * Create a item sphere
+ * @param pos The center sphere position
+ * @param rot_mat The sphere rotation matrix
+ * @param radius The sphere scale
+ * @param mass The sphere mass
+ * @return The item sphere (physical and graphical object)
+ */
+item create_item_sphere(glm::vec3 pos, glm::mat4 rot_mat, float radius, float mass);
+
 #endif //EVOMOTION_ITEM_H

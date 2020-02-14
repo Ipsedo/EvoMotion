@@ -50,3 +50,20 @@ item create_item_box(glm::vec3 pos, glm::mat4 rot_mat, glm::vec3 scale, float ma
 	// Return the new item box
 	return {rg_body, obj_mtl_vbo, scale};
 }
+
+item create_item_sphere(glm::vec3 pos, glm::mat4 rot_mat, float radius, float mass) {
+	// Sphere shape
+	auto box_shape = new btSphereShape(radius);
+
+	// Bullet rigidbody
+	auto rg_body = new btRigidBody(localCreateInfo(box_shape, pos, rot_mat, glm::vec3(radius), mass));
+
+	// Create OpenGL sphere
+	auto obj_mtl_vbo = std::make_shared<ObjMtlVBO>(
+			exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "sphere.obj",
+			exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "sphere.mtl",
+			true);
+
+	// Return the new item box
+	return {rg_body, obj_mtl_vbo, glm::vec3(radius)};
+}
