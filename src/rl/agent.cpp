@@ -78,3 +78,15 @@ void random_agent::step(torch::Tensor state, torch::Tensor action, float reward,
 torch::Tensor random_agent::act(torch::Tensor state, float eps) {
 	return torch::rand(m_action_space);
 }
+
+void random_agent::save(std::string out_folder_path) {
+
+}
+
+void random_agent::load(std::string input_folder_path) {
+
+}
+
+bool random_agent::is_discrete() {
+	return false;
+}

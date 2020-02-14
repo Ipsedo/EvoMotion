@@ -104,6 +104,12 @@ struct random_agent : agent {
 	void step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) override;
 
 	torch::Tensor act(torch::Tensor state, float eps) override;
+
+    void save(std::string out_folder_path) override;
+
+    void load(std::string input_folder_path) override;
+
+    bool is_discrete() override;
 };
 
 
