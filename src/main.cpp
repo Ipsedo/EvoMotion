@@ -3,6 +3,7 @@
 #include "tests/bullet_test.h"
 #include "tests/opengl_test.h"
 #include "tests/rl_test.h"
+#include "core/env_list.h"
 
 int main(int argc, char *argv[]) {
     CLI::App app{"EvoMotion"};
@@ -17,7 +18,13 @@ int main(int argc, char *argv[]) {
      * RL parsing stuff
      */
 
-    std::vector<std::string> env_choices = {"ContinuousCartpole", "DiscreteCartpole", "Pendulum"};
+    std::vector<std::string> env_choices {
+        EnvEnum::CONTINUOUS_CARTPOLE().get_name(),
+        EnvEnum::DISCRETE_CARTPOLE().get_name(),
+        EnvEnum::PENDULUM().get_name(),
+        EnvEnum::HUNTING().get_name()
+    };
+
     std::vector<std::string> agent_choices = {"DQN", "DDPG", "RANDOM"};
 
     int nb_episode;
@@ -33,18 +40,18 @@ int main(int argc, char *argv[]) {
                 std::string msg("RL environment must be = {");
                 for (const std::string &e : env_choices)
                     msg.append(e + ", ");
-                return msg.substr(0, msg.length() - 2).append("}.");
+                return msg.substr(0, msg.length() - 2).append("}. current = ").append(env_value);
             })->required(true);
 
     rl_sc->add_option<std::string>("-a,--agent", agent)->check(
-            [agent_choices](const std::string value) {
-                if (std::find(agent_choices.begin(), agent_choices.end(), value) != agent_choices.end())
+            [agent_choices](const std::string agent_value) {
+                if (std::find(agent_choices.begin(), agent_choices.end(), agent_value) != agent_choices.end())
                     return std::string("");
 
                 std::string msg("RL agent must be = {");
                 for (const std::string &a : agent_choices)
                     msg.append(a + ", ");
-                return msg.substr(0, msg.length() - 2).append("}.");
+                return msg.substr(0, msg.length() - 2).append("}. current = ").append(agent_value);
             })->required(true);
 
     rl_sc->add_flag("-v,--view", view, "Enable OpenGL view");
@@ -58,7 +65,7 @@ int main(int argc, char *argv[]) {
     auto train_rl = rl_sc->add_subcommand("train", "Reinforcement Learning (train) mode");
 
     float epsilon, epsilon_decay, epsilon_min;
-    int max_episode_step;
+    int max_episode_step, max_cons_success;
     std::string output_folder;
 
     train_rl->add_option<float>("--epsilon", epsilon, "Epsilon value for training")
@@ -69,6 +76,8 @@ int main(int argc, char *argv[]) {
             ->set_default_val("5e-3");
     train_rl->add_option<int>("--max-episode-step", max_episode_step, "Max episode step number")
             ->set_default_val("1000");
+    train_rl->add_option<int>("--max-cons-success", max_cons_success, "Max consecutive success")
+            ->set_default_val("10");
     train_rl->add_option("-o,--output-folder", output_folder, "Agent output folder")->required(true);
 
     /*
@@ -94,7 +103,7 @@ int main(int argc, char *argv[]) {
         if (train_rl->parsed()) {
             rl_train_info train_info {
                 agent, env,
-                nb_episode, max_episode_step,
+                nb_episode, max_episode_step, max_cons_success,
                 epsilon, epsilon_decay, epsilon_min,
                 view == 1,
                 output_folder
