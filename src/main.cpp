@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
             test_reinforcement_learning(test_info);
         }
 
-    } else throw std::logic_error("Error during parsing mode !");
+    }
 
     return 0;
 }
