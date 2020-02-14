@@ -1,32 +1,120 @@
 #include <iostream>
 #include <cstring>
+#include <argparse.hpp>
+#include <CLI/CLI.hpp>
+
 #include "tests/bullet_test.h"
 #include "tests/opengl_test.h"
 #include "tests/rl_test.h"
 
 int main(int argc, char *argv[]) {
+    CLI::App app{"EvoMotion"};
 
-	auto err_msg = "Need specify test case :\n"
-	               "- bullet\n"
-	               "- opengl\n"
-	               "- rl\n"
-	               "Example (launch COCO test) : ./build/EvoMotion coco\n";
+    app.require_subcommand(1, 1);
 
-	if (argc <= 1) {
-		std::cout << err_msg;
-		return 1;
-	}
+    auto bullet_sc = app.add_subcommand("bullet", "Bullet test mode");
+    auto opengl_sc = app.add_subcommand("opengl", "OpenGL test mode");
+    auto rl_sc = app.add_subcommand("rl", "Reinforcement Learning mode");
 
-	auto arg = std::string(argv[1]);
+    /*
+     * RL parsing stuff
+     */
 
-	if (arg == "bullet") test_bullet();
-	else if (arg == "opengl") test_opengl();
-	else if (arg == "rl") test_reinforcement_learning();
-	else {
-		std::cout << "Unrecognized arg : " << arg << std::endl;
-		std::cout << err_msg;
-		return 1;
-	}
+    std::vector<std::string> rl_choices = {"train", "test"};
+    std::vector<std::string> env_choices = {"ContinuousCartpole", "DiscreteCartpole", "Pendulum"};
+    std::vector<std::string> agent_choices = {"DQN", "DDPG"};
 
-	return 0;
+    int nb_episode;
+    std::string env, agent;
+    bool view;
+
+    rl_sc->add_option<int>("-n,--nb-episode", nb_episode)->set_default_val("1000");
+    rl_sc->add_option<std::string>("-e,--env", env)->check(
+            [env_choices](const std::string env_value) {
+                if (std::find(env_choices.begin(), env_choices.end(), env_value) != env_choices.end())
+                    return std::string("");
+
+                std::string msg("RL Env must be = {");
+                for (const std::string &e : env_choices)
+                    msg.append(e + ", ");
+                return msg.substr(0, msg.length() - 2).append("}.");
+            })->required(true);
+
+    rl_sc->add_option<std::string>("-a,--agent", agent)->check(
+            [agent_choices](const std::string value) {
+                if (std::find(agent_choices.begin(), agent_choices.end(), value) != agent_choices.end())
+                    return std::string("");
+
+                std::string msg("RL Env must be = {");
+                for (const std::string &a : agent_choices)
+                    msg.append(a + ", ");
+                return msg.substr(0, msg.length() - 2).append("}.");
+            })->required(true);
+
+    rl_sc->add_flag("-v,--view", view, "Enable OpenGL view");
+
+    rl_sc->require_subcommand(1, 1);
+
+    /*
+     * Train rl parsing stuff
+     */
+
+    auto train_rl = rl_sc->add_subcommand("train", "Reinforcement Learning (train) mode");
+
+    float epsilon, epsilon_decay, epsilon_min;
+    int max_episode_step;
+    std::string output_folder;
+
+    train_rl->add_option<float>("--epsilon", epsilon, "Epsilon value for training")
+            ->set_default_val("0.7");
+    train_rl->add_option<float>("--epsilon-decay", epsilon_decay, "Epsilon decay")
+            ->set_default_val("0.9999");
+    train_rl->add_option<float>("--epsilon-min", epsilon_min, "Minimum epsilon value")
+            ->set_default_val("5e-3");
+    train_rl->add_option<int>("--max-episode-step", max_episode_step, "Max episode step number")
+            ->set_default_val("1000");
+    train_rl->add_option("-o,--output-folder", output_folder, "Agent output folder")->required(true);
+
+    /*
+     * Test rl parsing stuff
+     */
+
+    auto test_rl = rl_sc->add_subcommand("test", "Reinforcement Learning (train) mode");
+
+    std::string input_folder;
+
+    test_rl->add_option("-i,--input-folder", input_folder, "Agent input folder")->required(true);
+
+
+    CLI11_PARSE(app, argc, argv);
+
+    if (bullet_sc->parsed()) test_bullet();
+    else if (opengl_sc->parsed()) test_opengl();
+    else if (rl_sc->parsed()) {
+
+        if (train_rl->parsed()) {
+            rl_train_info train_info {
+                agent, env,
+                nb_episode, max_episode_step,
+                epsilon, epsilon_decay, epsilon_min,
+                view == 1,
+                output_folder
+            };
+
+            train_reinforcement_learning(train_info);
+
+        } else if (test_rl->parsed()) {
+            rl_test_info test_info{
+                agent, env,
+                nb_episode,
+                view == 1,
+                input_folder
+            };
+
+            test_reinforcement_learning(test_info);
+        }
+
+    } else throw std::logic_error("Error during parsing mode !");
+
+    return 0;
 }
