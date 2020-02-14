@@ -19,7 +19,6 @@ int main(int argc, char *argv[]) {
      * RL parsing stuff
      */
 
-    std::vector<std::string> rl_choices = {"train", "test"};
     std::vector<std::string> env_choices = {"ContinuousCartpole", "DiscreteCartpole", "Pendulum"};
     std::vector<std::string> agent_choices = {"DQN", "DDPG"};
 
