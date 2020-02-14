@@ -88,7 +88,7 @@ void renderer::init() {
 	}
 
 	GLFWimage icons[1];
-	icons[0].pixels = SOIL_load_image((get_res_folder() + EVOMOTION_SEP + "icon.png").c_str(),
+	icons[0].pixels = SOIL_load_image((exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "icon.png").c_str(),
 			&icons[0].width, &icons[0].height, 0, SOIL_LOAD_RGBA);
 	glfwSetWindowIcon(m_window, 1, icons);
 

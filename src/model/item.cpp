@@ -43,8 +43,8 @@ item create_item_box(glm::vec3 pos, glm::mat4 rot_mat, glm::vec3 scale, float ma
 
 	// Create OpenGL box
 	auto obj_mtl_vbo = std::make_shared<ObjMtlVBO>(
-			get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "cube.obj",
-			get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "cube.mtl",
+			exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "cube.obj",
+			exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "cube.mtl",
 			true);
 
 	// Return the new item box

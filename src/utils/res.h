@@ -13,8 +13,8 @@
 #define EVOMOTION_SEP '/'
 #endif
 
-std::string get_res_folder();
+std::string init_exec_root(char *argv);
 
-std::string get_shader_folder();
+extern std::string exec_root;
 
 #endif //EVOMOTION_RES_H

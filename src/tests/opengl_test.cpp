@@ -44,9 +44,9 @@ void test_opengl() {
 	/*ObjMtlVBO objMtlVBO(get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "whale.obj",
 						get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "whale.mtl",
 						true);*/
-	NormalMapObj square_map(get_res_folder() + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "sphere.obj",
-	                        get_res_folder() + EVOMOTION_SEP + "tex" + EVOMOTION_SEP + "alien_color.png",
-	                        get_res_folder() + EVOMOTION_SEP + "tex" + EVOMOTION_SEP + "alien_norm.png");
+	NormalMapObj square_map(exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "obj" + EVOMOTION_SEP + "sphere.obj",
+	                        exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "tex" + EVOMOTION_SEP + "alien_color.png",
+	                        exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "tex" + EVOMOTION_SEP + "alien_norm.png");
 
 	glm::mat4 projectionMatrix = glm::frustum(-1.f, 1.f, -768.f / 1024.f, 768.f / 1024.f, 1.0f, 50.0f);
 	glm::mat4 viewMatrix = glm::lookAt(
