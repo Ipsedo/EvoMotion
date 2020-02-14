@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
      */
 
     std::vector<std::string> env_choices = {"ContinuousCartpole", "DiscreteCartpole", "Pendulum"};
-    std::vector<std::string> agent_choices = {"DQN", "DDPG"};
+    std::vector<std::string> agent_choices = {"DQN", "DDPG", "RANDOM"};
 
     int nb_episode;
     std::string env, agent;
