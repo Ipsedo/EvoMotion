@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(EvoMotion)
 
-set(CMAKE_CXX_STANDARD 11)
-
 # Bullet
 find_package(Bullet REQUIRED)
 include_directories(${BULLET_INCLUDE_DIRS})
@@ -30,6 +28,9 @@ find_library(SOIL SOIL lib/libsoil.a)
 # LibTorch
 set(CMAKE_PREFIX_PATH "/opt/libtorch")
 find_package(Torch REQUIRED)
+
+# CLI11
+# https://github.com/CLIUtils/CLI11
 
 # Get all source files
 file(GLOB_RECURSE SRC "src/*.cpp")
