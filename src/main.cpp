@@ -11,8 +11,6 @@ std::string exec_root;
 int main(int argc, char *argv[]) {
     exec_root = init_exec_root(argv[0]);
 
-    std::cout << exec_root << std::endl;
-
     CLI::App app{"EvoMotion"};
 
     app.require_subcommand(1, 1);
