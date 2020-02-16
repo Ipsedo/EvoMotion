@@ -3,6 +3,8 @@
 //
 
 #include "agent.h"
+#include "deep_q_learning.h"
+#include "ddpg.h"
 #include <random>
 
 replay_buffer::replay_buffer(int max_size, unsigned long seed) :

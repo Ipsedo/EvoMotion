@@ -112,5 +112,4 @@ struct random_agent : agent {
     bool is_discrete() override;
 };
 
-
 #endif //EVOMOTION_AGENT_H
