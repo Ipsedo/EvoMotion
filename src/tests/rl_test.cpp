@@ -3,23 +3,11 @@
 //
 
 #include "rl_test.h"
-#include "../core/env_list.h"
-#include "../rl/deep_q_learning.h"
-#include "../rl/ddpg.h"
+#include "../core/env_enum.h"
+#include "../rl/agent_enum.h"
 #include <chrono>
 #include <sys/stat.h>
 
-
-agent *get_agent(std::string& agent_name, Environment *env, std::string& env_name) {
-	if (agent_name == "DQN") return new dqn_agent(static_cast<int>(time(nullptr)), env->state_space(), env->action_space());
-	else if (agent_name == "DDPG") return new ddpg(static_cast<int>(time(nullptr)), env->state_space(), env->action_space(), env_name == "Pendulum" ? 8 : 24);
-    else if (agent_name == "RANDOM") return new random_agent(env->state_space(), env->action_space());
-    else {
-		std::cerr << "Unrecognized Agent !" << std::endl
-				  << "Choices = {DQN, DDPG, RANDOM}" << std::endl;
-		exit(2);
-    }
-}
 
 void train_reinforcement_learning(rl_train_info train_info) {
 	std::cout << "Reinforcement learning train" << std::endl;
@@ -28,7 +16,8 @@ void train_reinforcement_learning(rl_train_info train_info) {
 	Environment *env = EnvEnum::from_str(train_info.env_name).get_env();
 
 	// Init agent
-	agent *ag = get_agent(train_info.agent_name, env, train_info.env_name);
+	agent *ag = AgentEnum::from_str(train_info.agent_name)
+			.get_agent(train_info.hidden_size, env->state_space(), env->action_space());
 
 	if (env->is_action_discrete() != ag->is_discrete()) {
 		std::cerr << "Agent (" << train_info.agent_name << ".discrete = " << ag->is_discrete() << ")"
@@ -83,6 +72,7 @@ void train_reinforcement_learning(rl_train_info train_info) {
 
 		std::cout << std::fixed << std::setprecision(5)
 		          << "Episode (" << std::setw(3) << i << ") : cumulative_reward = " << std::setw(9) << cumulative_reward
+		          << " (" << std::setw(6) << cumulative_reward / episode_step << " $/step)"
 		          << ", eps = " << std::setw(6) << train_info.eps << ", episode step : " << std::setw(3) << episode_step
 		          << std::endl;
 	}
@@ -102,7 +92,8 @@ void test_reinforcement_learning(rl_test_info test_info) {
 	Environment *env = EnvEnum::from_str(test_info.env_name).get_env();
 
 	// Init agent
-	agent *ag = get_agent(test_info.agent_name, env, test_info.env_name);
+	agent *ag = AgentEnum::from_str(test_info.agent_name)
+			.get_agent(test_info.hidden_size, env->state_space(), env->action_space());
 
 	if (env->is_action_discrete() != ag->is_discrete()) {
 		std::cerr << "Agent (" << test_info.agent_name << ".discrete = " << ag->is_discrete() << ")"
@@ -133,7 +124,7 @@ void test_reinforcement_learning(rl_test_info test_info) {
 			auto act = ag->act(state.state, 0.f);
 
 			// Compute new state
-			state = env->step(1.f / 60.f, act, true);
+			state = env->step(1.f / 60.f, act, test_info.view);
 
 			std::cout << "step : " << std::setw(4) << step << "\r" << std::flush;
 			step++;

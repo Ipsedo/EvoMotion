@@ -3,8 +3,9 @@
 #include "tests/bullet_test.h"
 #include "tests/opengl_test.h"
 #include "tests/rl_test.h"
-#include "core/env_list.h"
 #include "utils/res.h"
+#include "core/env_enum.h"
+#include "rl/agent_enum.h"
 
 std::string exec_root;
 
@@ -13,7 +14,7 @@ int main(int argc, char *argv[]) {
 
     CLI::App app{"EvoMotion"};
 
-    app.require_subcommand(1, 1);
+    app.require_subcommand(1);
 
     auto bullet_sc = app.add_subcommand("bullet", "Bullet test mode");
     auto opengl_sc = app.add_subcommand("opengl", "OpenGL test mode");
@@ -23,22 +24,17 @@ int main(int argc, char *argv[]) {
      * RL parsing stuff
      */
 
-    std::vector<std::string> env_choices{
-            EnvEnum::CONTINUOUS_CARTPOLE().get_name(),
-            EnvEnum::DISCRETE_CARTPOLE().get_name(),
-            EnvEnum::PENDULUM().get_name(),
-            EnvEnum::HUNTING().get_name()
-    };
-
-    std::vector<std::string> agent_choices = {"DQN", "DDPG", "RANDOM"};
-
     int nb_episode;
     std::string env, agent;
+    int hidden_size;
     bool view;
 
     rl_sc->add_option<int>("-n,--nb-episode", nb_episode)->set_default_val("1000");
-    rl_sc->add_option<std::string>("-e,--env", env)->check(
-            [env_choices](const std::string env_value) {
+    rl_sc->add_option<std::string>("-e,--env", env)
+            ->check(
+            [](const std::string env_value) {
+                auto env_choices = EnvEnum::get_names();
+
                 if (std::find(env_choices.begin(), env_choices.end(), env_value) != env_choices.end())
                     return std::string("");
 
@@ -48,8 +44,11 @@ int main(int argc, char *argv[]) {
                 return msg.substr(0, msg.length() - 2).append("}. current = ").append(env_value);
             })->required(true);
 
-    rl_sc->add_option<std::string>("-a,--agent", agent)->check(
-            [agent_choices](const std::string agent_value) {
+    rl_sc->add_option<std::string>("-a,--agent", agent)
+            ->check(
+            [](const std::string agent_value) {
+                auto agent_choices = AgentEnum::get_names();
+
                 if (std::find(agent_choices.begin(), agent_choices.end(), agent_value) != agent_choices.end())
                     return std::string("");
 
@@ -61,7 +60,9 @@ int main(int argc, char *argv[]) {
 
     rl_sc->add_flag("-v,--view", view, "Enable OpenGL view");
 
-    rl_sc->require_subcommand(1, 1);
+    rl_sc->add_option<int>("--hidden-size", hidden_size)->set_default_val("24");
+
+    rl_sc->require_subcommand(1);
 
     /*
      * Train rl parsing stuff
@@ -106,23 +107,31 @@ int main(int argc, char *argv[]) {
     else if (rl_sc->parsed()) {
 
         if (train_rl->parsed()) {
-            rl_train_info train_info{
-                    agent, env,
-                    nb_episode, max_episode_step, max_cons_success,
-                    epsilon, epsilon_decay, epsilon_min,
-                    view == 1,
-                    output_folder
-            };
+            rl_train_info train_info;
+
+            train_info.env_name = env;
+            train_info.agent_name = agent;
+            train_info.nb_episode = nb_episode;
+            train_info.view = view == 1;
+            train_info.hidden_size = hidden_size;
+            train_info.max_episode_step = max_episode_step;
+            train_info.max_consecutive_success = max_cons_success;
+            train_info.eps = epsilon;
+            train_info.eps_decay = epsilon_decay;
+            train_info.eps_min = epsilon_min;
+            train_info.out_model_folder = output_folder;
 
             train_reinforcement_learning(train_info);
 
         } else if (test_rl->parsed()) {
-            rl_test_info test_info{
-                    agent, env,
-                    nb_episode,
-                    view == 1,
-                    input_folder
-            };
+            rl_test_info test_info;
+
+            test_info.env_name = env;
+            test_info.agent_name = agent;
+            test_info.nb_episode = nb_episode;
+            test_info.view = view == 1;
+            test_info.hidden_size = hidden_size;
+            test_info.in_model_folder = input_folder;
 
             test_reinforcement_learning(test_info);
         }
