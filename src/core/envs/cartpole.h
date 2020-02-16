@@ -49,9 +49,9 @@ private:
 
 public:
 
-	explicit CartPoleEnv(int seed, float slider_speed, float slider_force, float chariot_push_force,
-                         float limit_angle, int reset_frame_nb,
-                         float chariot_mass, float pendule_mass);
+	explicit CartPoleEnv(long seed, float slider_speed, float slider_force, float chariot_push_force,
+						 float limit_angle, int reset_frame_nb,
+						 float chariot_mass, float pendule_mass);
 
 	torch::IntArrayRef state_space() override;
 
@@ -89,7 +89,7 @@ protected:
 class ContinuousCartPoleEnv : public CartPoleEnv {
 public:
 	torch::IntArrayRef action_space() override;
-	explicit ContinuousCartPoleEnv(int seed);
+	explicit ContinuousCartPoleEnv(long seed);
 
 	bool is_action_discrete() override;
 
@@ -100,7 +100,7 @@ protected:
 class DiscreteCartPoleEnv : public CartPoleEnv {
 public:
     torch::IntArrayRef action_space() override;
-    explicit DiscreteCartPoleEnv(int seed);
+    explicit DiscreteCartPoleEnv(long seed);
 
 	bool is_action_discrete() override;
 

@@ -4,8 +4,9 @@
 
 #include "hunt.h"
 
-HuntingEnv::HuntingEnv(int seed)
-: Environment(renderer(1920, 1080), get_items()) {
+HuntingEnv::HuntingEnv(long seed)
+: rd_gen(static_cast<unsigned long>(time(nullptr))), rd_uni(0.f, 1.f),
+Environment(renderer(1920, 1080), create_items()) {
 
 }
 
@@ -47,6 +48,6 @@ env_step HuntingEnv::reset_engine() {
     return compute_new_state();
 }
 
-std::vector<item> HuntingEnv::get_items() {
+std::vector<item> HuntingEnv::create_items() {
     return std::vector<item>();
 }

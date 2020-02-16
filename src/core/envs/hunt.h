@@ -17,7 +17,7 @@ public:
 
     bool is_action_discrete() override;
 
-    explicit HuntingEnv(int seed);
+    explicit HuntingEnv(long seed);
 
 protected:
     void act(torch::Tensor action) override;
@@ -39,7 +39,7 @@ private:
      * Env init stuff
      */
 
-    std::vector<item> get_items();
+    std::vector<item> create_items();
 };
 
 

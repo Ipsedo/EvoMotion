@@ -20,7 +20,7 @@ CartPoleEnvParams::CartPoleEnvParams(float slider_speed, float slider_force, flo
 // Cartpole Environment
 ///////////////////////////
 
-CartPoleEnv::CartPoleEnv(int seed, float slider_speed, float slider_force, float chariot_push_force,
+CartPoleEnv::CartPoleEnv(long seed, float slider_speed, float slider_force, float chariot_push_force,
 						 float limit_angle, int reset_frame_nb,
 						 float chariot_mass, float pendule_mass) :
 						 rd_gen(seed), rd_uni(0.f, 1.f),
@@ -194,7 +194,7 @@ env_step CartPoleEnv::reset_engine() {
 // Continous Cartpole Environment
 ////////////////////////////////////
 
-ContinuousCartPoleEnv::ContinuousCartPoleEnv(int seed) :
+ContinuousCartPoleEnv::ContinuousCartPoleEnv(long seed) :
 	CartPoleEnv(seed, 5.f, 2e2f, 8.f, float(M_PI * 0.25), 2, 1.f, 1e-1f) {}
 
 torch::IntArrayRef ContinuousCartPoleEnv::action_space() {
@@ -214,7 +214,7 @@ bool ContinuousCartPoleEnv::is_action_discrete() {
 // Discrete Cartpole Environment
 //////////////////////////////////
 
-DiscreteCartPoleEnv::DiscreteCartPoleEnv(int seed) :
+DiscreteCartPoleEnv::DiscreteCartPoleEnv(long seed) :
 	CartPoleEnv(seed, 5.f, 2e2f, 8.f, float(M_PI * 0.25), 2, 1.f, 1e-1f) {}
 
 torch::IntArrayRef DiscreteCartPoleEnv::action_space() {
