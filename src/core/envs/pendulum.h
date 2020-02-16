@@ -23,7 +23,7 @@ public:
 
 	torch::IntArrayRef state_space() override;
 
-	explicit PendulumEnv(int seed);
+	explicit PendulumEnv(long seed);
 
     bool is_action_discrete() override;
 

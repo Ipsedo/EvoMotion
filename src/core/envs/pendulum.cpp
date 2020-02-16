@@ -2,16 +2,19 @@
 // Created by samuel on 10/09/19.
 //
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "pendulum.h"
 
 // All params (physical params, reward, state features, actions) are picked from :
 // https://github.com/openai/gym/wiki/Pendulum-v0
 
 PendulumParams::PendulumParams()
-		: pendule_mass(1.f), hinge_push_force(3.f), max_step(200), reset_nb_frame(1) {}
+		: pendule_mass(1.f), hinge_push_force(5e-2f), max_step(400), reset_nb_frame(10) {}
 
-PendulumEnv::PendulumEnv(int seed) : rd_gen(seed), rd_uni(0.f, 1.f),
-	PendulumParams(), Environment(renderer(1920, 1080), init_items()), episode_step(0), last_action(0.f) {
+PendulumEnv::PendulumEnv(long seed) : rd_gen(seed), rd_uni(0.f, 1.f),
+									  PendulumParams(), Environment(renderer(1920, 1080), init_items()), episode_step(0), last_action(0.f) {
 	m_engine.m_world->addConstraint(hinge);
 }
 
@@ -20,7 +23,7 @@ torch::IntArrayRef PendulumEnv::action_space() {
 }
 
 torch::IntArrayRef PendulumEnv::state_space() {
-	return torch::IntArrayRef({4});
+	return torch::IntArrayRef({5});
 }
 
 std::vector<item> PendulumEnv::init_items() {
@@ -53,7 +56,7 @@ void PendulumEnv::act(torch::Tensor action) {
 
 	last_action = action[0].item().toFloat();
 
-	pendule_rg->applyTorqueImpulse(btVector3(0.f, 0.f, last_action * hinge_push_force));
+	//pendule_rg->applyTorque(btVector3(0.f, 0.f, last_action * hinge_push_force));
 
 	//float theta = hinge->getHingeAngle();
 	//btVector3 impulse(cos(theta), sin(theta), 0);
@@ -63,25 +66,39 @@ void PendulumEnv::act(torch::Tensor action) {
 
 	//hinge->setMaxMotorImpulse(last_action * hinge_push_force);
 
+    /*btScalar tmp[16];
+    btTransform tr;
+    pendule_rg->getMotionState()->getWorldTransform(tr);
+    tr.getOpenGLMatrix(tmp);
+
+    glm::vec4 ortho = glm::make_mat4(tmp) * glm::vec4(1.f, 0.f, 0.f, 0.f);*/
+
+    pendule_rg->applyImpulse(btVector3(last_action * hinge_push_force, 0, 0), btVector3(0.f, -pendule_height, 0));
+
 	episode_step++;
 }
 
 env_step PendulumEnv::compute_new_state() {
 	float theta = hinge->getHingeAngle();
-	theta += theta > 0.f ? -M_PI : M_PI;
 
 	float cos_theta = cos(theta);
 	float sin_theta = sin(theta);
+
+	theta = (theta > 0 ? 1.f : -1.f ) * (float(M_PI) + (theta > 0 ? -theta : theta));
 
     // Theta dot : derivative of angular velocity
 	float theta_dt = pendule_rg->getAngularVelocity().z();
 
 	// last_action * hinge_push_force ?
-	float reward = -float((pow(theta / M_PI, 2.) + 1e-1 * pow(theta_dt / M_PI, 2.) + 1e-3 * pow(last_action, 2.)));
+	//std::cout << theta << " " << pow(theta, 2.) << ", " << theta_dt << " " << pow(theta_dt, 2.) << ", " << last_action << " " << pow(last_action, 2.) << std::endl;
+	float reward = - float(pow(theta, 2.) + 2e-3 * pow(theta_dt, 2.) + 2e-5 * pow(last_action, 2.));
+	//float reward = - float(pow(theta, 2.) + pow(theta_dt, 2.) + pow(last_action, 2.));
 	//float reward = -float((pow(theta, 2.) + 1e-3 * pow(theta_dt, 2.) + 1e-5 * pow(last_action, 2.)));
 	//float reward = -abs(theta) - 1e-1f * abs(theta_dt);
 
-	torch::Tensor state = torch::tensor({cos_theta, sin_theta, theta_dt, theta_dt - last_theta_dt});
+	float torque = pendule_rg->getTotalTorque().z();
+
+	torch::Tensor state = torch::tensor({cos_theta, sin_theta, theta_dt, theta_dt - last_theta_dt, torque});
 
 	last_theta_dt = theta_dt;
 
@@ -102,12 +119,49 @@ env_step PendulumEnv::reset_engine() {
 	pendule_rg->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
 	pendule_rg->clearForces();
 
+	float torque = (rd_uni(rd_gen) * 0.5f + 0.5f) * 100.f;
+	if (rd_uni(rd_gen) > 0.5f)
+	    torque *= -1.f;
+
+	pendule_rg->applyTorque(btVector3(0.f, 0.f, torque));
+
 	last_action = 0.f;
 	for (int i = 0; i < reset_nb_frame; i++) {
-		PendulumEnv::act(torch::tensor({rd_uni(rd_gen) * 2.f - 1.f}));
+		//PendulumEnv::act(torch::tensor({rd_uni(rd_gen) * hinge_push_force - hinge_push_force * 0.5f}));
 
 		m_engine.m_world->stepSimulation(1.f / 60.f);
 	}
+	episode_step = 0;
+
+	/*PendulumEnv::act(torch::tensor({0.f}));
+	btTransform tr_pendule_init;
+	pendule_rg->getMotionState()->getWorldTransform(tr_pendule_init);
+
+	btTransform translation_1;
+	translation_1.setIdentity();
+	translation_1.setOrigin(btVector3(0.f, pendule_height, 0.f));
+
+	btTransform rot;
+	rot.setIdentity();
+
+	btQuaternion q;
+	float angle = rd_uni(rd_gen) * 2.f * float(M_PI) - float(M_PI);
+	q.setRotation(btVector3(0, 0, 1), angle);
+
+	rot.setRotation(q);
+
+    btTransform translation_2;
+    translation_2.setIdentity();
+    translation_2.setOrigin(btVector3(0.f, -pendule_height, 0.f));
+
+	btTransform res = translation_2 * rot * translation_1 * tr_pendule_init;
+
+	pendule_rg->getMotionState()->setWorldTransform(res);*/
+
+    /*float torque = (rd_uni(rd_gen) * 0.5f + 0.5f) * 20.f;
+    if (rd_uni(rd_gen) > 0.5f)
+        torque *= -1.f;*/
+
 
     return compute_new_state();
 }
