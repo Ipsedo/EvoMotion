@@ -51,6 +51,3 @@ Environment::~Environment() {
 		delete it.m_obj_mtl_vbo;
 	}*/
 }
-
-
-
