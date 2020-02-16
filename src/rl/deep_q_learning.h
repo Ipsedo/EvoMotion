@@ -15,7 +15,7 @@
  */
 struct q_network : torch::nn::Module {
 
-	q_network(torch::IntArrayRef state_space, torch::IntArrayRef action_space);
+	q_network(torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size);
 
 	torch::Tensor forward(torch::Tensor input);
 
@@ -44,7 +44,7 @@ struct dqn_agent : agent {
 	int update_every;
 	int idx_step;
 
-	dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space);
+	dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size);
 
 	void step(torch::Tensor state, torch::Tensor action, float reward,
 	          torch::Tensor next_state, bool done) override;

@@ -9,10 +9,10 @@
 // Q-Network
 ////////////////////////
 
-q_network::q_network(torch::IntArrayRef state_space, torch::IntArrayRef action_space) {
-	l1 = register_module("l1", torch::nn::Linear(state_space[0], 24));
-	l2 = register_module("l2", torch::nn::Linear(24, 24));
-	l3 = register_module("l3", torch::nn::Linear(24, action_space[0]));
+q_network::q_network(torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size) {
+	l1 = register_module("l1", torch::nn::Linear(state_space[0], hidden_size));
+	l2 = register_module("l2", torch::nn::Linear(hidden_size, hidden_size));
+	l3 = register_module("l3", torch::nn::Linear(hidden_size, action_space[0]));
 	torch::nn::init::xavier_normal_(l1->weight);
 	torch::nn::init::xavier_normal_(l2->weight);
 	torch::nn::init::uniform_(l3->weight, -1.f, 1.f);
@@ -31,10 +31,10 @@ torch::Tensor q_network::forward(torch::Tensor input) {
 // https://github.com/udacity/deep-reinforcement-learning/tree/master/dqn
 ////////////////////////
 
-dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space) :
+dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size) :
 		agent(state_space, action_space, 3000),
-		target_q_network(m_state_space, m_action_space),
-		local_q_network(m_state_space, m_action_space),
+		target_q_network(m_state_space, m_action_space, hidden_size),
+		local_q_network(m_state_space, m_action_space, hidden_size),
 		optimizer(torch::optim::Adam(local_q_network.parameters(), 4e-3f)),
 		idx_step(0), batch_size(16), gamma(0.95f), tau(1e-3f), update_every(4),
 		rd_gen(seed), rd_uni(0.f, 1.f) {
