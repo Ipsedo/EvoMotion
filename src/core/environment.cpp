@@ -4,6 +4,7 @@
 
 #include "environment.h"
 
+
 Environment::Environment(renderer renderer, std::vector<item> items) :
 		m_items(std::move(items)), m_renderer(renderer), m_engine(items), m_step(0) {
 
@@ -11,7 +12,7 @@ Environment::Environment(renderer renderer, std::vector<item> items) :
 
 const env_step Environment::step(float delta, torch::Tensor action, bool will_draw) {
 	// Perform action
-	act(action);
+	act(std::move(action));
 
 	// Step bullet physical world
 	m_engine.step(delta);
@@ -50,4 +51,6 @@ Environment::~Environment() {
 		delete it.m_obj_mtl_vbo;
 	}*/
 }
+
+
 
