@@ -29,7 +29,7 @@ struct q_network : torch::nn::Module {
 struct dqn_agent : agent {
 
 	// Random
-	std::default_random_engine rd_gen;
+	std::mt19937 rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
 
 	// LibTorch stuff

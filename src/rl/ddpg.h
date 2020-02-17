@@ -33,7 +33,7 @@ struct critic : torch::nn::Module {
 struct ddpg : agent {
 
 	// Random stuff
-	std::default_random_engine rd_gen;
+	std::mt19937 rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
 
 	// Torch stuff

@@ -28,7 +28,7 @@ struct replay_buffer {
 	int max_size;
 
 	// Random stuff
-	std::default_random_engine rd_gen;
+	std::mt19937 rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
 
 	replay_buffer(int max_size, unsigned long seed);
