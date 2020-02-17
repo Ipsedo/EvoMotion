@@ -114,9 +114,8 @@ void test_reinforcement_learning(rl_test_info test_info) {
 		// Reset environment
 		env_step state = env->reset();
 
-		std::cout << "New test episode" << std::endl;
-
 		int step = 0;
+		float cumulative_reward = 0.f;
 
 		// Loop while episode is not finished
 		while (!state.done) {
@@ -126,10 +125,10 @@ void test_reinforcement_learning(rl_test_info test_info) {
 			// Compute new state
 			state = env->step(1.f / 60.f, act, test_info.view);
 
-			std::cout << "step : " << std::setw(4) << step << "\r" << std::flush;
+			cumulative_reward += state.reward;
 			step++;
 		}
-		std::cout << std::endl;
+		std::cout << "Episode (" << i << ") " << "Cumulative reward : " << cumulative_reward << " (" << cumulative_reward / step << " $/step)" << std::endl;
 	}
 
 	delete env;
