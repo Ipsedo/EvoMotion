@@ -90,6 +90,10 @@ std::vector<item> CartPoleEnv::init_cartpole() {
 	chariot_rg = chariot.m_rg_body;
 	pendule_rg = pendule.m_rg_body;
 
+	base_rg->setActivationState(DISABLE_DEACTIVATION);
+	chariot_rg->setActivationState(DISABLE_DEACTIVATION);
+	pendule_rg->setActivationState(DISABLE_DEACTIVATION);
+
 	/*btTransform center_of_mass_tr;
 	center_of_mass_tr.setIdentity();
 	center_of_mass_tr.setOrigin(btVector3(0.f, -pendule_height / 2.f, 0.f));

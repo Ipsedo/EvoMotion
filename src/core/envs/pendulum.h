@@ -13,6 +13,9 @@ class PendulumParams {
 protected:
 	float pendule_mass, hinge_push_force;
 	int max_step, reset_nb_frame;
+
+    float pendule_pos_y, pendule_pos_z, pendule_height;
+    float base_pos_y, base_pos_z;
 public:
 	PendulumParams();
 };
@@ -36,15 +39,15 @@ protected:
 
 private:
     // /!\ those fields are initialized in init_items method
-    float pendule_pos_y, pendule_pos_z, pendule_height;
 
 	int episode_step;
 	float last_action;
 	float last_theta_dt;
 
-	std::default_random_engine rd_gen;
+	std::mt19937 rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
 
+	btRigidBody *base_rg;
 	btRigidBody *pendule_rg;
 	btHingeConstraint *hinge;
 

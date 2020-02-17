@@ -10,7 +10,7 @@ TestEnv::TestEnv(int seed) : Environment(renderer(1920, 1080), init_test(seed)) 
 }
 
 std::vector<item> TestEnv::init_test(int seed) {
-	std::default_random_engine rd_gen(seed);
+	std::mt19937 rd_gen(seed);
 	std::uniform_real_distribution<float> rd_uni(0.f, 1.f);
 
 	int nb_box = 10;
