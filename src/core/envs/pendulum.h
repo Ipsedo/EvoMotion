@@ -38,11 +38,11 @@ protected:
 	env_step reset_engine() override;
 
 private:
+    float theta;
     // /!\ those fields are initialized in init_items method
 
 	int episode_step;
 	float last_action;
-	float last_theta_dt;
 
 	std::mt19937 rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
