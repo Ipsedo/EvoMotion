@@ -60,8 +60,6 @@ int main(int argc, char *argv[]) {
 
     rl_sc->add_flag("-v,--view", view, "Enable OpenGL view");
 
-    rl_sc->add_option<int>("--hidden-size", hidden_size)->set_default_val("24");
-
     rl_sc->require_subcommand(1);
 
     /*
@@ -85,6 +83,7 @@ int main(int argc, char *argv[]) {
     train_rl->add_option<int>("--max-cons-success", max_cons_success, "Max consecutive success")
             ->set_default_val("10");
     train_rl->add_option("-o,--output-folder", output_folder, "Agent output folder")->required(true);
+    train_rl->add_option<int>("--hidden-size", hidden_size)->set_default_val("24");
 
     /*
      * Test rl parsing stuff
@@ -130,7 +129,6 @@ int main(int argc, char *argv[]) {
             test_info.agent_name = agent;
             test_info.nb_episode = nb_episode;
             test_info.view = view == 1;
-            test_info.hidden_size = hidden_size;
             test_info.in_model_folder = input_folder;
 
             test_reinforcement_learning(test_info);
