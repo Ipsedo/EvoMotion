@@ -48,6 +48,7 @@ struct ddpg : agent {
 
 	float tau, gamma;
 	int batch_size, update_every, current_step;
+	bool is_cuda;
 
 	ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size);
 
@@ -63,6 +64,10 @@ struct ddpg : agent {
 	void load(std::string input_folder_path) override;
 
     bool is_discrete() override;
+
+    void cuda() override;
+
+    void cpu() override;
 };
 
 

@@ -92,3 +92,11 @@ void random_agent::load(std::string input_folder_path) {
 bool random_agent::is_discrete() {
 	return false;
 }
+
+void random_agent::cuda() {
+
+}
+
+void random_agent::cpu() {
+
+}

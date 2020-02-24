@@ -46,33 +46,32 @@ torch::Tensor critic::forward(std::tuple<torch::Tensor,torch::Tensor> state_acti
 ///////////////////////////////////////////
 
 ddpg::ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size) :
-		agent(state_space, action_space, 10000),
+		agent(state_space, action_space, 100000),
 		m_actor(state_space, action_space, hidden_size), m_actor_target(state_space, action_space, hidden_size),
 		m_critic(state_space, action_space, hidden_size), m_critic_target(state_space, action_space, hidden_size),
-		actor_optim(torch::optim::Adam(m_actor.parameters(), 1e-3)),
+		actor_optim(torch::optim::Adam(m_actor.parameters(), 1e-4)),
 		critic_optim(torch::optim::Adam(m_critic.parameters(), 1e-3)),
-		batch_size(16), update_every(4), current_step(0), gamma(0.95), tau(1e-3),
+		batch_size(64), update_every(4), current_step(0), gamma(0.95), tau(1e-3),
 		rd_gen(seed), rd_uni(0.f, 1.f) {
 	// Hard copy : actor target <- actor
-	m_actor_target.l1->weight = m_actor.l1->weight.clone();
-	m_actor_target.l1->bias = m_actor.l1->bias.clone();
+	m_actor_target.l1->weight.data().copy_(m_actor.l1->weight.data());
+	m_actor_target.l1->bias.data().copy_(m_actor.l1->bias.data());
 
-	m_actor_target.l2->weight = m_actor.l2->weight.clone();
-	m_actor_target.l2->bias = m_actor.l2->bias.clone();
+	m_actor_target.l2->weight.data().copy_(m_actor.l2->weight.data());
+	m_actor_target.l2->bias.data().copy_(m_actor.l2->bias.data());
 
-	m_actor_target.l3->weight = m_actor.l3->weight.clone();
-	m_actor_target.l3->bias = m_actor.l3->bias.clone();
+	m_actor_target.l3->weight.data().copy_(m_actor.l3->weight.data());
+	m_actor_target.l3->bias.data().copy_(m_actor.l3->bias.data());
 
 	// Hard copy : critic target <- critic
-	m_critic_target.l1->weight = m_critic.l1->weight.clone();
-	m_critic_target.l1->bias = m_critic.l1->bias.clone();
+	m_critic_target.l1->weight.data().copy_(m_critic.l1->weight.data());
+	m_critic_target.l1->bias.data().copy_(m_critic.l1->bias.data());
 
-	m_critic_target.l2->weight = m_critic.l2->weight.clone();
-	m_critic_target.l2->bias = m_critic.l2->bias.clone();
+	m_critic_target.l2->weight.data().copy_(m_critic.l2->weight.data());
+	m_critic_target.l2->bias.data().copy_(m_critic.l2->bias.data());
 
-	m_critic_target.l3->weight = m_critic.l3->weight.clone();
-	m_critic_target.l3->bias = m_critic.l3->bias.clone();
-
+	m_critic_target.l3->weight.data().copy_(m_critic.l3->weight.data());
+	m_critic_target.l3->bias.data().copy_(m_critic.l3->bias.data());
 }
 
 void ddpg::step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) {
@@ -94,6 +93,14 @@ void ddpg::step(torch::Tensor state, torch::Tensor action, float reward, torch::
 			torch::Tensor sample_next_states = std::get<3>(t);
 			torch::Tensor sample_dones = std::get<4>(t);
 
+			if (is_cuda) {
+				sample_states = sample_states.to(torch::Device(torch::kCUDA));
+				sample_actions = sample_actions.to(torch::Device(torch::kCUDA));
+				sample_rewards = sample_rewards.to(torch::Device(torch::kCUDA));
+				sample_next_states = sample_next_states.to(torch::Device(torch::kCUDA));
+				sample_dones = sample_dones.to(torch::Device(torch::kCUDA));
+			}
+
 			// Learn on those samples
 			learn(sample_states, sample_actions, sample_rewards, sample_next_states, sample_dones);
 		}
@@ -103,7 +110,15 @@ void ddpg::step(torch::Tensor state, torch::Tensor action, float reward, torch::
 at::Tensor ddpg::act(torch::Tensor state, float eps) {
 	torch::NoGradGuard no_grad;
 
-	if (rd_uni(rd_gen) > eps) return m_actor.forward(state.unsqueeze(0)).squeeze(0);
+	if (rd_uni(rd_gen) > eps)  {
+        if (is_cuda) state = state.to(torch::Device(torch::kCUDA));
+
+	    auto act = m_actor.forward(state.unsqueeze(0)).squeeze(0);
+
+        if (is_cuda) act = act.to(torch::Device(torch::kCPU));
+
+        return act;
+	}
 
 	return torch::rand(m_action_space) * 2.f - 1.f;
 }
@@ -131,21 +146,21 @@ void ddpg::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor rewa
 	actor_optim.step();
 
 	// Soft Update
-	m_actor_target.l1->weight.copy_(tau * m_actor.l1->weight + (1 - tau) * m_actor.l1->weight);
-	m_actor_target.l2->weight.copy_(tau * m_actor.l2->weight + (1 - tau) * m_actor.l2->weight);
-	m_actor_target.l3->weight.copy_(tau * m_actor.l3->weight + (1 - tau) * m_actor.l3->weight);
+	m_actor_target.l1->weight.data().copy_(tau * m_actor.l1->weight.data() + (1 - tau) * m_actor.l1->weight.data());
+	m_actor_target.l2->weight.data().copy_(tau * m_actor.l2->weight.data() + (1 - tau) * m_actor.l2->weight.data());
+	m_actor_target.l3->weight.data().copy_(tau * m_actor.l3->weight.data() + (1 - tau) * m_actor.l3->weight.data());
 
-	m_actor_target.l1->bias.copy_(tau * m_actor.l1->bias + (1 - tau) * m_actor.l1->bias);
-	m_actor_target.l2->bias.copy_(tau * m_actor.l2->bias + (1 - tau) * m_actor.l2->bias);
-	m_actor_target.l3->bias.copy_(tau * m_actor.l3->bias + (1 - tau) * m_actor.l3->bias);
+	m_actor_target.l1->bias.data().copy_(tau * m_actor.l1->bias.data() + (1 - tau) * m_actor.l1->bias.data());
+	m_actor_target.l2->bias.data().copy_(tau * m_actor.l2->bias.data() + (1 - tau) * m_actor.l2->bias.data());
+	m_actor_target.l3->bias.data().copy_(tau * m_actor.l3->bias.data() + (1 - tau) * m_actor.l3->bias.data());
 
-	m_critic_target.l1->weight.copy_(tau * m_critic.l1->weight + (1 - tau) * m_critic.l1->weight);
-	m_critic_target.l2->weight.copy_(tau * m_critic.l2->weight + (1 - tau) * m_critic.l2->weight);
-	m_critic_target.l3->weight.copy_(tau * m_critic.l3->weight + (1 - tau) * m_critic.l3->weight);
+	m_critic_target.l1->weight.data().copy_(tau * m_critic.l1->weight.data() + (1 - tau) * m_critic.l1->weight.data());
+	m_critic_target.l2->weight.data().copy_(tau * m_critic.l2->weight.data() + (1 - tau) * m_critic.l2->weight.data());
+	m_critic_target.l3->weight.data().copy_(tau * m_critic.l3->weight.data() + (1 - tau) * m_critic.l3->weight.data());
 
-	m_critic_target.l1->bias.copy_(tau * m_critic.l1->bias + (1 - tau) * m_critic.l1->bias);
-	m_critic_target.l2->bias.copy_(tau * m_critic.l2->bias + (1 - tau) * m_critic.l2->bias);
-	m_critic_target.l3->bias.copy_(tau * m_critic.l3->bias + (1 - tau) * m_critic.l3->bias);
+	m_critic_target.l1->bias.data().copy_(tau * m_critic.l1->bias.data() + (1 - tau) * m_critic.l1->bias.data());
+	m_critic_target.l2->bias.data().copy_(tau * m_critic.l2->bias.data() + (1 - tau) * m_critic.l2->bias.data());
+	m_critic_target.l3->bias.data().copy_(tau * m_critic.l3->bias.data() + (1 - tau) * m_critic.l3->bias.data());
 }
 
 void ddpg::save(std::string out_folder_path) {
@@ -224,4 +239,24 @@ void ddpg::load(std::string input_folder_path) {
 
 bool ddpg::is_discrete() {
 	return false;
+}
+
+void ddpg::cuda() {
+    is_cuda = true;
+
+	m_actor.to(torch::Device(torch::kCUDA));
+	m_critic.to(torch::Device(torch::kCUDA));
+
+	m_actor_target.to(torch::Device(torch::kCUDA));
+	m_critic_target.to(torch::Device(torch::kCUDA));
+}
+
+void ddpg::cpu() {
+    is_cuda = false;
+
+	m_actor.to(torch::Device(torch::kCPU));
+	m_critic.to(torch::Device(torch::kCPU));
+
+	m_actor_target.to(torch::Device(torch::kCPU));
+	m_critic_target.to(torch::Device(torch::kCPU));
 }

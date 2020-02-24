@@ -94,6 +94,9 @@ struct agent {
 
 	virtual bool is_discrete() = 0;
 
+	virtual void cuda() = 0;
+	virtual void cpu() = 0;
+
 	virtual ~agent();
 };
 
@@ -110,6 +113,10 @@ struct random_agent : agent {
     void load(std::string input_folder_path) override;
 
     bool is_discrete() override;
+
+	void cuda() override;
+
+	void cpu() override;
 };
 
 #endif //EVOMOTION_AGENT_H
