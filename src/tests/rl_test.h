@@ -15,11 +15,10 @@ struct rl_info {
 
     int nb_episode;
     bool view;
-
-    int hidden_size;
 };
 
 struct rl_train_info : rl_info {
+    int hidden_size;
     int max_episode_step;
     int max_consecutive_success;
     float eps;

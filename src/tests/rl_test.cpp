@@ -5,6 +5,7 @@
 #include "rl_test.h"
 #include "../core/env_enum.h"
 #include "../rl/agent_enum.h"
+#include "../utils/timer.h"
 #include <chrono>
 #include <sys/stat.h>
 
@@ -18,6 +19,7 @@ void train_reinforcement_learning(rl_train_info train_info) {
 	// Init agent
 	agent *ag = AgentEnum::from_str(train_info.agent_name)
 			.get_agent(train_info.hidden_size, env->state_space(), env->action_space());
+	ag->cuda();
 
 	if (env->is_action_discrete() != ag->is_discrete()) {
 		std::cerr << "Agent (" << train_info.agent_name << ".discrete = " << ag->is_discrete() << ")"
@@ -36,8 +38,11 @@ void train_reinforcement_learning(rl_train_info train_info) {
 		env_step state = env->reset();
 
 		float cumulative_reward = 0.f;
+		float best_reward = -std::numeric_limits<float>::max();
 
 		int episode_step = 0;
+
+		Timer timer;
 
 		// While episode is not finished and max step is not reached
 		while (!state.done && episode_step < train_info.max_episode_step) {
@@ -55,6 +60,7 @@ void train_reinforcement_learning(rl_train_info train_info) {
 			state = new_state;
 
 			cumulative_reward += state.reward;
+			best_reward = state.reward > best_reward ? state.reward : best_reward;
 
 			// Decay epsilon threshold
 			train_info.eps *= train_info.eps_decay;
@@ -71,14 +77,17 @@ void train_reinforcement_learning(rl_train_info train_info) {
 		if (consecutive_succes > train_info.max_consecutive_success) break;
 
 		std::cout << std::fixed << std::setprecision(5)
-		          << "Episode (" << std::setw(3) << i << ") : cumulative_reward = " << std::setw(9) << cumulative_reward
-		          << " (" << std::setw(6) << cumulative_reward / episode_step << " $/step)"
+		          << "Episode (" << std::setw(3) << i << ") in " << timer.elapsed() << "sec "
+		          << ": cumulative_reward = " << std::setw(6) << cumulative_reward
+		          << " (" << std::setw(6) << cumulative_reward / episode_step << " $/step, "
+		          << "max : " << std::setw(6) << best_reward << ")"
 		          << ", eps = " << std::setw(6) << train_info.eps << ", episode step : " << std::setw(3) << episode_step
 		          << std::endl;
 	}
 
 	mkdir(train_info.out_model_folder.c_str(), 0755);
 
+	ag->cpu();
 	ag->save(train_info.out_model_folder);
 
 	delete env;
@@ -91,9 +100,10 @@ void test_reinforcement_learning(rl_test_info test_info) {
 	// Init environment
 	Environment *env = EnvEnum::from_str(test_info.env_name).get_env();
 
+	int default_hidden_size = 24;
 	// Init agent
 	agent *ag = AgentEnum::from_str(test_info.agent_name)
-			.get_agent(test_info.hidden_size, env->state_space(), env->action_space());
+			.get_agent(default_hidden_size, env->state_space(), env->action_space());
 
 	if (env->is_action_discrete() != ag->is_discrete()) {
 		std::cerr << "Agent (" << test_info.agent_name << ".discrete = " << ag->is_discrete() << ")"
