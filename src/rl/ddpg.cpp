@@ -52,7 +52,7 @@ ddpg::ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_s
 		actor_optim(torch::optim::Adam(m_actor.parameters(), 1e-4)),
 		critic_optim(torch::optim::Adam(m_critic.parameters(), 1e-3)),
 		batch_size(64), update_every(4), current_step(0), gamma(0.95), tau(1e-3),
-		rd_gen(seed), rd_uni(0.f, 1.f) {
+		rd_gen(seed), rd_uni(0.f, 1.f), is_cuda(false) {
 	// Hard copy : actor target <- actor
 	m_actor_target.l1->weight.data().copy_(m_actor.l1->weight.data());
 	m_actor_target.l1->bias.data().copy_(m_actor.l1->bias.data());

@@ -37,16 +37,16 @@ dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRe
 		local_q_network(m_state_space, m_action_space, hidden_size),
 		optimizer(torch::optim::Adam(local_q_network.parameters(), 4e-3f)),
 		idx_step(0), batch_size(16), gamma(0.95f), tau(1e-3f), update_every(4),
-		rd_gen(seed), rd_uni(0.f, 1.f) {
+		rd_gen(seed), rd_uni(0.f, 1.f), is_cuda(false) {
 	// Hard copy target <- local
-	target_q_network.l1->weight = local_q_network.l1->weight.clone();
-	target_q_network.l1->bias = local_q_network.l1->bias.clone();
+	target_q_network.l1->weight.data().copy_(local_q_network.l1->weight.data());
+	target_q_network.l1->bias.data().copy_(local_q_network.l1->bias.data());
 
-	target_q_network.l2->weight = local_q_network.l2->weight.clone();
-	target_q_network.l2->bias = local_q_network.l2->bias.clone();
+	target_q_network.l2->weight.data().copy_(local_q_network.l2->weight.data());
+	target_q_network.l2->bias.data().copy_(local_q_network.l2->bias.data());
 
-	target_q_network.l3->weight = local_q_network.l3->weight.clone();
-	target_q_network.l3->bias = local_q_network.l3->bias.clone();
+	target_q_network.l3->weight.data().copy_(local_q_network.l3->weight.data());
+	target_q_network.l3->bias.data().copy_(local_q_network.l3->bias.data());
 }
 
 void dqn_agent::step(torch::Tensor state, torch::Tensor action, float reward, torch::Tensor next_state, bool done) {
@@ -68,6 +68,14 @@ void dqn_agent::step(torch::Tensor state, torch::Tensor action, float reward, to
 			torch::Tensor sample_next_states = std::get<3>(t);
 			torch::Tensor sample_dones = std::get<4>(t);
 
+			if (is_cuda) {
+				sample_states = sample_states.to(torch::Device(torch::kCUDA));
+				sample_actions = sample_actions.to(torch::Device(torch::kCUDA));
+				sample_rewards = sample_rewards.to(torch::Device(torch::kCUDA));
+				sample_next_states = sample_next_states.to(torch::Device(torch::kCUDA));
+				sample_dones = sample_dones.to(torch::Device(torch::kCUDA));
+			}
+
 			// Learn on those samples
 			learn(sample_states, sample_actions, sample_rewards, sample_next_states, sample_dones);
 		}
@@ -84,7 +92,12 @@ torch::Tensor dqn_agent::act(torch::Tensor state, float eps) {
 	{
 		// No gradient and compute graph
 		torch::NoGradGuard no_grad;
+
+		if (is_cuda) state = state.to(torch::Device(torch::kCUDA));
+
 		action_values = local_q_network.forward(state).squeeze(0);
+
+		if (is_cuda) action_values = action_values.to(torch::Device(torch::kCPU));
 	}
 	local_q_network.train();
 
@@ -120,20 +133,20 @@ void dqn_agent::learn(torch::Tensor states, torch::Tensor actions, torch::Tensor
 	optimizer.step();
 
 	// Update target Q-Network
-	target_q_network.l1->weight.copy_(
-			tau * local_q_network.l1->weight.clone() + (1.f - tau) * target_q_network.l1->weight.clone());
-	target_q_network.l1->bias.copy_(
-			tau * local_q_network.l1->bias.clone() + (1.f - tau) * target_q_network.l1->bias.clone());
+	target_q_network.l1->weight.data().copy_(
+			tau * local_q_network.l1->weight.data() + (1.f - tau) * target_q_network.l1->weight.data());
+	target_q_network.l1->bias.data().copy_(
+			tau * local_q_network.l1->bias.data() + (1.f - tau) * target_q_network.l1->bias.data());
 
-	target_q_network.l2->weight.copy_(
-			tau * local_q_network.l2->weight.clone() + (1.f - tau) * target_q_network.l2->weight.clone());
-	target_q_network.l2->bias.copy_(
-			tau * local_q_network.l2->bias.clone() + (1.f - tau) * target_q_network.l2->bias.clone());
+	target_q_network.l2->weight.data().copy_(
+			tau * local_q_network.l2->weight.data() + (1.f - tau) * target_q_network.l2->weight.data());
+	target_q_network.l2->bias.data().copy_(
+			tau * local_q_network.l2->bias.data() + (1.f - tau) * target_q_network.l2->bias.data());
 
 	target_q_network.l3->weight.copy_(
-			tau * local_q_network.l3->weight.clone() + (1.f - tau) * target_q_network.l3->weight.clone());
-	target_q_network.l3->bias.copy_(
-			tau * local_q_network.l3->bias.clone() + (1.f - tau) * target_q_network.l3->bias.clone());
+			tau * local_q_network.l3->weight.data() + (1.f - tau) * target_q_network.l3->weight.data());
+	target_q_network.l3->bias.data().copy_(
+			tau * local_q_network.l3->bias.data() + (1.f - tau) * target_q_network.l3->bias.data());
 }
 
 
@@ -191,4 +204,18 @@ void dqn_agent::load(std::string input_folder_path) {
 
 bool dqn_agent::is_discrete() {
     return true;
+}
+
+void dqn_agent::cuda() {
+	is_cuda = true;
+
+	local_q_network.to(torch::kCUDA);
+	target_q_network.to(torch::kCUDA);
+}
+
+void dqn_agent::cpu() {
+	is_cuda = false;
+
+	local_q_network.to(torch::kCPU);
+	target_q_network.to(torch::kCPU);
 }

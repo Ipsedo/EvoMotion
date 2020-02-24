@@ -37,6 +37,8 @@ struct dqn_agent : agent {
 	q_network target_q_network;
 	torch::optim::Adam optimizer;
 
+	bool is_cuda;
+
 	// Algo hyper-params
 	int batch_size;
 	float gamma;
@@ -67,6 +69,10 @@ struct dqn_agent : agent {
 	void load(std::string input_folder_path) override;
 
 	bool is_discrete() override;
+
+    void cuda() override;
+
+    void cpu() override;
 };
 
 #endif //EVOMOTION_DEEP_Q_LEARNING_H
