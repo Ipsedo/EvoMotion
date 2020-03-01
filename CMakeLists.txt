@@ -58,3 +58,13 @@ add_custom_command(
         DEPENDS ${destination}
         COMMENT "symbolic link resources folder from ${source} => ${destination}"
 )
+
+# Add shader folder to binary dir
+set (source "${CMAKE_SOURCE_DIR}/shaders")
+set (destination "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
+        DEPENDS ${destination}
+        COMMENT "symbolic link resources folder from ${source} => ${destination}"
+)
