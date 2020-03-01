@@ -3,7 +3,7 @@
 //
 
 #include "rl_test.h"
-#include "../core/env_enum.h"
+#include "../env/env_enum.h"
 #include "../rl/agent_enum.h"
 #include "../utils/timer.h"
 #include <chrono>

@@ -6,7 +6,7 @@
 #define EVOMOTION_RL_TEST_H
 
 #include <string>
-#include "../core/environment.h"
+#include "../env/environment.h"
 #include "../rl/agent.h"
 
 struct rl_info {

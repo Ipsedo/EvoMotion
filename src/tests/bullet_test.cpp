@@ -4,7 +4,8 @@
 
 #include "bullet_test.h"
 
-#include "../core/envs/test.h"
+#include "../env/test.h"
+
 #include <iostream>
 
 void test_bullet() {
