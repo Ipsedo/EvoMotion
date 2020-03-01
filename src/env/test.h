@@ -5,7 +5,7 @@
 #ifndef EVOMOTION_TEST_H
 #define EVOMOTION_TEST_H
 
-#include "../environment.h"
+#include "environment.h"
 
 class TestEnv : public Environment {
 public:

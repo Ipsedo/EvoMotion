@@ -3,9 +3,9 @@
 //
 
 #include "env_enum.h"
-#include "envs/cartpole.h"
-#include "envs/pendulum.h"
-#include "envs/hunt.h"
+#include "cartpole.h"
+#include "pendulum.h"
+#include "hunt.h"
 
 EnvEnum::EnvEnum(std::string name, std::function<Environment *()> get_env_fun)
         : name(std::move(name)), get_env_fun(std::move(get_env_fun)) {}

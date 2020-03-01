@@ -7,7 +7,7 @@
 
 
 #include <random>
-#include "../environment.h"
+#include "environment.h"
 
 class HuntingEnv : public Environment {
 public:

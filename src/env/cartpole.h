@@ -6,7 +6,7 @@
 #define EVOMOTION_CARTPOLE_H
 
 #include <random>
-#include "../environment.h"
+#include "environment.h"
 
 class CartPoleEnvParams {
 protected:
