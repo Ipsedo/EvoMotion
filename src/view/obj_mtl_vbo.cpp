@@ -40,8 +40,8 @@ void ObjMtlVBO::kill() {
 void ObjMtlVBO::create_program() {
 	m_program = glCreateProgram();
 
-	m_vertex_shader = load_shader(GL_VERTEX_SHADER, exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "shaders" + EVOMOTION_SEP + "specular_vs.glsl");
-	m_fragment_shader = load_shader(GL_FRAGMENT_SHADER, exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "shaders" + EVOMOTION_SEP + "specular_fs.glsl");
+	m_vertex_shader = load_shader(GL_VERTEX_SHADER, exec_root + EVOMOTION_SEP + "shaders" + EVOMOTION_SEP + "specular_vs.glsl");
+	m_fragment_shader = load_shader(GL_FRAGMENT_SHADER, exec_root + EVOMOTION_SEP + "shaders" + EVOMOTION_SEP + "specular_fs.glsl");
 
 	glAttachShader(m_program, m_vertex_shader);
 	glAttachShader(m_program, m_fragment_shader);

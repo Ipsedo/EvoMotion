@@ -51,8 +51,8 @@ void NormalMapObj::init_tex(std::string texture_file, std::string normals_file) 
 
 void NormalMapObj::init_prgm() {
 	m_program = glCreateProgram();
-	GLuint vs = load_shader(GL_VERTEX_SHADER, exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "shaders" + EVOMOTION_SEP + "normal_map_vs.glsl");
-	GLuint fs = load_shader(GL_FRAGMENT_SHADER, exec_root + EVOMOTION_SEP + "res" + EVOMOTION_SEP + "shaders" + EVOMOTION_SEP + "normal_map_fs.glsl");
+	GLuint vs = load_shader(GL_VERTEX_SHADER, exec_root + EVOMOTION_SEP + "shaders" + EVOMOTION_SEP + "normal_map_vs.glsl");
+	GLuint fs = load_shader(GL_FRAGMENT_SHADER, exec_root + EVOMOTION_SEP + "shaders" + EVOMOTION_SEP + "normal_map_fs.glsl");
 	glAttachShader(m_program, vs);
 	glAttachShader(m_program, fs);
 	glLinkProgram(m_program);
