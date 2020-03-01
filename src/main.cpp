@@ -4,7 +4,7 @@
 #include "tests/opengl_test.h"
 #include "tests/rl_test.h"
 #include "utils/res.h"
-#include "core/env_enum.h"
+#include "env/env_enum.h"
 #include "rl/agent_enum.h"
 
 std::string exec_root;
