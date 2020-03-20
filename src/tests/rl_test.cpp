@@ -22,8 +22,8 @@ void train_reinforcement_learning(rl_train_info train_info) {
 	ag->cuda();
 
 	if (env->is_action_discrete() != ag->is_discrete()) {
-		std::cerr << "Agent (" << train_info.agent_name << ".discrete = " << ag->is_discrete() << ")"
-		<< " is different of Environment (" << train_info.env_name << ".discrete = " << env->is_action_discrete() << ")."
+		std::cerr << "Agent (" << train_info.agent_name << "discrete = " << ag->is_discrete() << ")"
+		<< " is different of Environment (" << train_info.env_name << "discrete = " << env->is_action_discrete() << ")."
 		<< std::endl;
 		exit(2);
 	}
