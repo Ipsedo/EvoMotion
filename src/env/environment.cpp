@@ -6,9 +6,7 @@
 
 
 Environment::Environment(renderer renderer, std::vector<item> items) :
-		m_items(std::move(items)), m_renderer(renderer), m_engine(items), m_step(0) {
-
-}
+		m_items(std::move(items)), m_renderer(renderer), m_engine(items), m_step(0) {}
 
 const env_step Environment::step(float delta, torch::Tensor action, bool will_draw) {
 	// Perform action

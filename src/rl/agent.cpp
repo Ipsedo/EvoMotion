@@ -35,7 +35,7 @@ replay_buffer::sample(int batch_size) {
 
 	for (int i = 0; i < batch_size; i++) {
 		// Randomly pick one sample
-		int idx = int(floor(rd_uni(rd_gen) * mem.size()));
+		int idx = int(floorf(rd_uni(rd_gen) * mem.size()));
 		auto sample = mem[idx];
 
 		state_list.push_back(sample.state);

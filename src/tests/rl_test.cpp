@@ -77,11 +77,12 @@ void train_reinforcement_learning(rl_train_info train_info) {
 		if (consecutive_succes > train_info.max_consecutive_success) break;
 
 		std::cout << std::fixed << std::setprecision(5)
-		          << "Episode (" << std::setw(3) << i << ") in " << timer.elapsed() << "sec "
+		          << "Episode (" << std::setw(4) << i << ") in " << timer.elapsed() << "sec "
 		          << ": cumulative_reward = " << std::setw(6) << cumulative_reward
-		          << " (" << std::setw(6) << cumulative_reward / episode_step << " $/step, "
+		          << " (" << std::setw(7) << cumulative_reward / episode_step << " $/step, "
 		          << "max : " << std::setw(6) << best_reward << ")"
-		          << ", eps = " << std::setw(6) << train_info.eps << ", episode step : " << std::setw(3) << episode_step
+		          << ", eps = " << std::setw(6) << train_info.eps << ", episode step : "
+		          << std::setw(3) << episode_step
 		          << std::endl;
 	}
 
