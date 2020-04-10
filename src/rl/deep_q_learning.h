@@ -29,12 +29,13 @@ struct q_network : torch::nn::Module {
 struct dqn_agent : agent {
 
 	// Random
-	std::mt19937 rd_gen;
+	std::default_random_engine rd_gen;
 	std::uniform_real_distribution<float> rd_uni;
 
 	// LibTorch stuff
 	q_network local_q_network;
 	q_network target_q_network;
+
 	torch::optim::Adam optimizer;
 
 	bool is_cuda;
