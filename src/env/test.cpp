@@ -17,7 +17,7 @@ std::vector<item> TestEnv::init_test(int seed) {
 
 	float max_height = 10.f, min_height = 5.f, max_scale = 0.1f;
 
-	auto rend = renderer(1920, 1080);
+	//auto rend = renderer(1920, 1080);
 
 	std::vector<item> items;
 	for (int i = 0; i < nb_box; i++) {

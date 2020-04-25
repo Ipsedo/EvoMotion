@@ -14,7 +14,7 @@
 
 ObjMtlVBO::ObjMtlVBO(std::string obj_file_name, std::string mtl_file_name, bool will_random_color) :
 		m_obj_file_name(std::move(obj_file_name)), m_mtl_file_name(std::move(mtl_file_name)),
-		random_color(will_random_color), light_coef(1.f), distance_coef(0.f), is_init(false) {
+		light_coef(1.f), distance_coef(0.f), is_init(false), random_color(will_random_color) {
 }
 
 void ObjMtlVBO::init() {
@@ -175,7 +175,7 @@ std::vector<float> ObjMtlVBO::parse_obj(std::string obj_file_name, std::string m
 
 	nb_vertex = 0;
 
-	for (int i = 0; i < all_vertex_draw_order_list.size(); i++) {
+	for (long unsigned int i = 0; i < all_vertex_draw_order_list.size(); i++) {
 		glm::vec3 amb = glm::vec3(0.f);
 		glm::vec3 diff = glm::vec3(0.f);
 		glm::vec3 spec = glm::vec3(0.f);
@@ -190,7 +190,7 @@ std::vector<float> ObjMtlVBO::parse_obj(std::string obj_file_name, std::string m
 			spec = spec_color.find(mtl_to_use[i])->second;
 		}
 
-		for (int j = 0; j < all_vertex_draw_order_list[i].size(); j++) {
+		for (long unsigned int j = 0; j < all_vertex_draw_order_list[i].size(); j++) {
 			res.push_back(curr_vertex_list[(all_vertex_draw_order_list[i][j] - 1) * 3]);
 			res.push_back(curr_vertex_list[(all_vertex_draw_order_list[i][j] - 1) * 3 + 1]);
 			res.push_back(curr_vertex_list[(all_vertex_draw_order_list[i][j] - 1) * 3 + 2]);

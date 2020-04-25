@@ -47,12 +47,14 @@ torch::Tensor critic::forward(std::tuple<torch::Tensor,torch::Tensor> state_acti
 
 ddpg::ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size) :
 		agent(state_space, action_space, 100000),
-		m_actor(state_space, action_space, hidden_size), m_actor_target(state_space, action_space, hidden_size),
-		m_critic(state_space, action_space, hidden_size), m_critic_target(state_space, action_space, hidden_size),
+        rd_gen(seed), rd_uni(0.f, 1.f),
+		m_actor(state_space, action_space, hidden_size), m_critic(state_space, action_space, hidden_size),
+		m_actor_target(state_space, action_space, hidden_size),m_critic_target(state_space, action_space, hidden_size),
 		actor_optim(torch::optim::Adam(m_actor.parameters(), 1e-4)),
 		critic_optim(torch::optim::Adam(m_critic.parameters(), 1e-3)),
-		batch_size(64), update_every(4), current_step(0), gamma(0.95), tau(1e-3),
-		rd_gen(seed), rd_uni(0.f, 1.f), is_cuda(false) {
+		tau(1e-3), gamma(0.95),  batch_size(64),
+		update_every(4), current_step(0),
+		is_cuda(false) {
 	// Hard copy : actor target <- actor
 	m_actor_target.l1->weight.data().copy_(m_actor.l1->weight.data());
 	m_actor_target.l1->bias.data().copy_(m_actor.l1->bias.data());

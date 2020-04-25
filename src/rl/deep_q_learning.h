@@ -41,7 +41,7 @@ struct dqn_agent : agent {
 	bool is_cuda;
 
 	// Algo hyper-params
-	int batch_size;
+	long unsigned int batch_size;
 	float gamma;
 	float tau;
 	int update_every;

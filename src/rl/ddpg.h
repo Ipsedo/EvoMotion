@@ -47,7 +47,8 @@ struct ddpg : agent {
 	torch::optim::Adam critic_optim;
 
 	float tau, gamma;
-	int batch_size, update_every, current_step;
+	long unsigned int batch_size;
+	int update_every, current_step;
 	bool is_cuda;
 
 	ddpg(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size);

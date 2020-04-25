@@ -194,7 +194,7 @@ std::vector<float> NormalMapObj::parse_obj(std::string obj_file_name) {
 	in.close();
 
 	std::vector<float> packed_data;
-	for (int i = 0; i < vertex_draw_order.size(); i++) {
+	for (long unsigned int i = 0; i < vertex_draw_order.size(); i++) {
 		packed_data.push_back(vertex_list[(vertex_draw_order[i] - 1) * 3]);
 		packed_data.push_back(vertex_list[(vertex_draw_order[i] - 1) * 3 + 1]);
 		packed_data.push_back(vertex_list[(vertex_draw_order[i] - 1) * 3 + 2]);

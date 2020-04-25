@@ -21,11 +21,11 @@ struct memory {
 };
 
 struct replay_buffer {
+    // The memory max size
+    unsigned long max_size;
+
 	// State memory
 	std::deque<memory> mem;
-
-	// The memory max size
-	int max_size;
 
 	// Random stuff
 	std::default_random_engine rd_gen;

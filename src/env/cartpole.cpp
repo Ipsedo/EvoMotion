@@ -23,11 +23,11 @@ CartPoleEnvParams::CartPoleEnvParams(float slider_speed, float slider_force, flo
 CartPoleEnv::CartPoleEnv(long seed, float slider_speed, float slider_force, float chariot_push_force,
 						 float limit_angle, int reset_frame_nb,
 						 float chariot_mass, float pendule_mass) :
-						 rd_gen(seed), rd_uni(0.f, 1.f),
 						 CartPoleEnvParams(slider_speed, slider_force, chariot_push_force,
 						 		limit_angle, reset_frame_nb,
 						 		chariot_mass, pendule_mass),
-						 Environment(renderer(1920, 1080), init_cartpole()) {
+						 Environment(renderer(1920, 1080), init_cartpole()),
+                         rd_gen(seed), rd_uni(0.f, 1.f) {
 	// We can add constraints, Bullet world is initialized
 	m_engine.m_world->addConstraint(slider);
 	m_engine.m_world->addConstraint(hinge);
@@ -146,8 +146,6 @@ env_step CartPoleEnv::reset_engine() {
 	m_engine.m_world->removeConstraint(slider);
 	m_engine.m_world->removeConstraint(hinge);
 
-	//slider->setTargetLinMotorVelocity(0.f);
-
 	// Reset chariot position, force and velocity
 	btTransform tr_chariot_reset;
 	tr_chariot_reset.setIdentity();
@@ -178,16 +176,20 @@ env_step CartPoleEnv::reset_engine() {
 	m_engine.m_world->addConstraint(slider);
 	m_engine.m_world->addConstraint(hinge);
 
+	slider->setPoweredLinMotor(false);
+
 	// Apply random force to chariot for reset_frame_nb steps
 	// To prevent over-fitting
 	// TODO real overfitting prevention
-	float rand_force = (rd_uni(rd_gen) * 0.5f + 0.5f) * chariot_push_force;
+	float rand_force = rd_uni(rd_gen) * chariot_push_force;
 	rand_force = rd_uni(rd_gen) > 0.5f ? rand_force : -rand_force;
 	chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
 	//chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 
 	for (int i = 0; i < reset_frame_nb; i++)
 		m_engine.step(1.f / 60.f);
+
+	slider->setPoweredLinMotor(true);
 
 	// Compute initial step
 	return compute_new_state();
@@ -219,7 +221,7 @@ bool ContinuousCartPoleEnv::is_action_discrete() {
 //////////////////////////////////
 
 DiscreteCartPoleEnv::DiscreteCartPoleEnv(long seed) :
-	CartPoleEnv(seed, 5.f, 2e2f, 8.f, float(M_PI * 0.25), 2, 1.f, 1e-1f) {}
+	CartPoleEnv(seed, 5.f, 2e2f, 10.f, float(M_PI * 0.25), 3, 1.f, 1e-1f) {}
 
 torch::IntArrayRef DiscreteCartPoleEnv::action_space() {
 	// 3 actions :

@@ -32,12 +32,12 @@ torch::Tensor q_network::forward(torch::Tensor input) {
 ////////////////////////
 
 dqn_agent::dqn_agent(int seed, torch::IntArrayRef state_space, torch::IntArrayRef action_space, int hidden_size) :
-        agent(state_space, action_space, 8000),
-        target_q_network(m_state_space, m_action_space, hidden_size),
+        agent(state_space, action_space, 3000),
+        rd_gen(seed), rd_uni(0.f, 1.f),
         local_q_network(m_state_space, m_action_space, hidden_size),
+        target_q_network(m_state_space, m_action_space, hidden_size),
         optimizer(torch::optim::Adam(local_q_network.parameters(), 4e-3f)),
-        idx_step(0), batch_size(16), gamma(0.95f), tau(1e-3f), update_every(4),
-        rd_gen(seed), rd_uni(0.f, 1.f), is_cuda(false) {
+        is_cuda(false), batch_size(16), gamma(0.95f), tau(1e-3f), update_every(4),idx_step(0)  {
     // Hard copy target <- local
     torch::NoGradGuard ng;
     target_q_network.l1->weight.data().copy_(local_q_network.l1->weight.data());

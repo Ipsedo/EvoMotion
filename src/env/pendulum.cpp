@@ -16,9 +16,9 @@ PendulumParams::PendulumParams()
           base_pos_y(pendule_pos_y + pendule_height), base_pos_z(pendule_pos_z) {}
 
 PendulumEnv::PendulumEnv(long seed)
-        : rd_gen(seed), rd_uni(0.f, 1.f),
+        :
           PendulumParams(), Environment(renderer(1920, 1080), init_items()),
-          episode_step(0), last_action(0.f), theta(0.f) {
+          theta(0.f), episode_step(0), last_action(0.f), rd_gen(seed), rd_uni(0.f, 1.f) {
     m_engine.m_world->addConstraint(hinge, true);
 }
 

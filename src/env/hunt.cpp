@@ -5,8 +5,9 @@
 #include "hunt.h"
 
 HuntingEnv::HuntingEnv(long seed)
-: rd_gen(static_cast<unsigned long>(time(nullptr))), rd_uni(0.f, 1.f),
-Environment(renderer(1920, 1080), create_items()) {
+:
+Environment(renderer(1920, 1080), create_items()),
+rd_gen(static_cast<unsigned long>(time(nullptr))), rd_uni(0.f, 1.f) {
 
 }
 
