@@ -1,1 +1,3 @@
-.idea/\nbuild/\ncmake-build-*/
+.idea/
+build/
+cmake-build-*/
