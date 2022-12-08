@@ -1,9 +1,4 @@
-coco/
-coco.h
-coco.c
-exdata/
-ppdata/
-build/
+__pycache__/
 .idea/
-cmake-build-*/
-example_experiment.c
+venv/
+out/
