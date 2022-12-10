@@ -3,7 +3,9 @@ from typing import Dict, List, Tuple
 import numpy as np
 from glm import mat4, vec3, vec4
 from OpenGL import GL
+from OpenGL.arrays.vbo import VBO
 from OpenGL.constant import IntConstant
+from OpenGL.GL import shaders
 
 from .constants import BYTES_PER_FLOAT
 
@@ -19,18 +21,11 @@ class Program:
         uniform_1f: List[str],
         buffers: Dict[str, Tuple[List[str], np.ndarray]],
     ) -> None:
-        self.__program = GL.glCreateProgram()
 
-        GL.glAttachShader(
-            self.__program,
+        self.__program = shaders.compileProgram(
             Program.__load_shader(GL.GL_VERTEX_SHADER, vertex_shader_path),
-        )
-        GL.glAttachShader(
-            self.__program,
             Program.__load_shader(GL.GL_FRAGMENT_SHADER, fragment_shader_path),
         )
-
-        GL.glLinkProgram(self.__program)
 
         self.__uniform_mat_4fv: Dict[str, int] = {
             m: GL.glGetUniformLocation(self.__program, m)
@@ -49,9 +44,14 @@ class Program:
             f: GL.glGetUniformLocation(self.__program, f) for f in uniform_1f
         }
 
-        self.__buffers: Dict[str, Tuple[int, Dict[str, int]]] = {
+        self.__buffers: Dict[str, Tuple[VBO, Dict[str, int]]] = {
             b: (
-                Program.__gen_buffer(buffers[b][1]),
+                VBO(
+                    buffers[b][1],
+                    target=GL.GL_ARRAY_BUFFER,
+                    usage=GL.GL_STATIC_DRAW,
+                    size=buffers[b][1].shape[0],
+                ),
                 {
                     a: GL.glGetAttribLocation(self.__program, a)
                     for a in buffers[b][0]
@@ -71,32 +71,33 @@ class Program:
         stride: int,
         offset: int,
     ) -> None:
-        buffer_id, attrib_handles = self.__buffers[buffer_name]
+        vbo, attrib_handles = self.__buffers[buffer_name]
+        attrib = attrib_handles[name]
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, buffer_id)
+        vbo.bind()
 
-        GL.glEnableVertexAttribArray(attrib_handles[name])
+        GL.glEnableVertexAttribArray(attrib)
         GL.glVertexAttribPointer(
-            attrib_handles[name],
+            attrib,
             data_size,
             GL.GL_FLOAT,
             GL.GL_FALSE,
             stride,
-            offset,
+            vbo + offset,
         )
 
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+        vbo.unbind()
 
     def uniform_mat_4fv(self, name: str, mat: mat4) -> None:
         GL.glUniformMatrix4fv(
-            self.__uniform_mat_4fv[name], 1, GL.GL_FALSE, mat
+            self.__uniform_mat_4fv[name], 1, GL.GL_FALSE, mat.to_list()
         )
 
     def uniform_4fv(self, name: str, vec: vec4) -> None:
-        GL.glUniform4fv(self.__uniform_4fv[name], 1, vec)
+        GL.glUniform4fv(self.__uniform_4fv[name], 1, vec.to_list())
 
     def uniform_3fv(self, name: str, vec: vec3) -> None:
-        GL.glUniform3fv(self.__uniform_3fv[name], 1, vec)
+        GL.glUniform3fv(self.__uniform_3fv[name], 1, vec.to_list())
 
     def uniform_1f(self, name: str, f: float) -> None:
         GL.glUniform1f(self.__uniform_1f[name], f)
@@ -114,14 +115,8 @@ class Program:
     @staticmethod
     def __load_shader(shader_type: IntConstant, glsl_file_path: str) -> int:
         with open(glsl_file_path, mode="r", encoding="utf-8") as glsl_file:
-            shader_source = "".join(glsl_file.readlines())
-
-            shader_ptr: int = GL.glCreateShader(shader_type)
-            GL.glShaderSource(shader_ptr, shader_source)
-
-            print(shader_source)
-
-            return shader_ptr
+            shader_source = glsl_file.readlines()
+            return int(shaders.compileShader(shader_source, shader_type))
 
     @staticmethod
     def __gen_buffer(data: np.ndarray) -> int:

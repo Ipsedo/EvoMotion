@@ -30,7 +30,8 @@ class SpecularObj(Drawable):
                 d
                 for v, n in zip(vertices, normals)
                 for d in [v[0], v[1], v[2], n[0], n[1], n[2]]
-            ]
+            ],
+            dtype=np.float32,
         )
 
         self.__nb_vertices = len(vertices)
@@ -80,6 +81,7 @@ class SpecularObj(Drawable):
             self.__stride,
             0,
         )
+
         self.__program.attrib(
             "vertices_normals_buffer",
             "a_normal",

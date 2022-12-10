@@ -24,7 +24,12 @@ class Renderer:
         )
 
         self.__proj_matrix = frustum(
-            -1.0, 1.0, -height / width, height / width, 1.0, 200.0
+            -1.0,
+            1.0,
+            -height / width,
+            height / width,
+            1.0,
+            200.0,
         )
 
         self.__width = width
@@ -38,13 +43,20 @@ class Renderer:
         if not glfw.init():
             raise RuntimeError("GLFW init failed")
 
+        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 2)
+        glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+        glfw.window_hint(glfw.OPENGL_DEBUG_CONTEXT, GL.GL_TRUE)
+
+        glfw.set_error_callback(Renderer.__error_callback)
+
         self.__window = glfw.create_window(
             self.__width, self.__height, self.__title, None, None
         )
 
         if not self.__window:
             glfw.terminate()
-            raise RuntimeError("GLFW can't be opened")
+            raise RuntimeError("GLFW window can't be opened")
 
         glfw.make_context_current(self.__window)
 
@@ -64,6 +76,7 @@ class Renderer:
 
     def draw(self, model_matrix: Dict[str, mat4]) -> None:
         if glfw.window_should_close(self.__window):
+            self.__is_open = False
             pass
 
         glfw.poll_events()
@@ -89,3 +102,7 @@ class Renderer:
 
     def is_close(self) -> bool:
         return not self.__is_open
+
+    @staticmethod
+    def __error_callback(err: Exception, description: str) -> None:
+        raise RuntimeError(f"GLFW error ({err}): {description}")
