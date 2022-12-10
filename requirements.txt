@@ -1,7 +1,9 @@
 pybullet
 torch
 PyOpenGL
+glfw
 PyGLM
+numpy
 
 # pre-commit
 pre-commit
