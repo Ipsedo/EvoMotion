@@ -74,7 +74,11 @@ class SpecularObj(Drawable):
         self.__program.use()
 
         self.__program.attrib(
-            "vertices_normals_buffer", "a_position", 3, self.__stride, 0
+            "vertices_normals_buffer",
+            "a_position",
+            3,
+            self.__stride,
+            0,
         )
         self.__program.attrib(
             "vertices_normals_buffer",
