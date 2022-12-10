@@ -29,6 +29,7 @@ class Program:
             self.__program,
             Program.__load_shader(GL.GL_FRAGMENT_SHADER, fragment_shader_path),
         )
+
         GL.glLinkProgram(self.__program)
 
         self.__uniform_mat_4fv: Dict[str, int] = {
@@ -58,31 +59,6 @@ class Program:
             )
             for b in buffers
         }
-
-    @staticmethod
-    def __load_shader(shader_type: IntConstant, glsl_file_path: str) -> int:
-        with open(glsl_file_path, mode="r", encoding="utf-8") as glsl_file:
-            shader_source = "\n".join(glsl_file.readlines())
-
-            shader_ptr: int = GL.glCreateShader(shader_type)
-            GL.glShaderSource(shader_ptr, 1, shader_source, None)
-
-            return shader_ptr
-
-    @staticmethod
-    def __gen_buffer(data: np.ndarray) -> int:
-        buffer_id: int = GL.glGenBuffers(1)
-
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, buffer_id)
-        GL.glBufferData(
-            GL.GL_ARRAY_BUFFER,
-            len(data) * BYTES_PER_FLOAT,
-            data,
-            GL.GL_STATIC_DRAW,
-        )
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-
-        return buffer_id
 
     def use(self) -> None:
         GL.glUseProgram(self.__program)
@@ -117,7 +93,7 @@ class Program:
         )
 
     def uniform_4fv(self, name: str, vec: vec4) -> None:
-        GL.glUniform4fv(self.__uniform_4fv[name], 1, GL.GL_FALSE, vec)
+        GL.glUniform4fv(self.__uniform_4fv[name], 1, vec)
 
     def uniform_3fv(self, name: str, vec: vec3) -> None:
         GL.glUniform3fv(self.__uniform_3fv[name], 1, vec)
@@ -134,6 +110,33 @@ class Program:
             GL.glDisableVertexAttribArray(
                 self.__buffers[buffer_name][1][attrib_name]
             )
+
+    @staticmethod
+    def __load_shader(shader_type: IntConstant, glsl_file_path: str) -> int:
+        with open(glsl_file_path, mode="r", encoding="utf-8") as glsl_file:
+            shader_source = "".join(glsl_file.readlines())
+
+            shader_ptr: int = GL.glCreateShader(shader_type)
+            GL.glShaderSource(shader_ptr, shader_source)
+
+            print(shader_source)
+
+            return shader_ptr
+
+    @staticmethod
+    def __gen_buffer(data: np.ndarray) -> int:
+        buffer_id: int = GL.glGenBuffers(1)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, buffer_id)
+        GL.glBufferData(
+            GL.GL_ARRAY_BUFFER,
+            len(data) * BYTES_PER_FLOAT,
+            data,
+            GL.GL_STATIC_DRAW,
+        )
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+        return buffer_id
 
 
 class ProgramBuilder:

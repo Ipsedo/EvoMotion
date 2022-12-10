@@ -4,8 +4,10 @@ precision mediump float;
 
 uniform vec3 u_cam_pos;
 uniform vec3 u_light_pos;
+
 uniform float u_distance_coef;
 uniform float u_light_coef;
+
 uniform vec4 u_ambient_color;
 uniform vec4 u_diffuse_color;
 uniform vec4 u_specular_color;
