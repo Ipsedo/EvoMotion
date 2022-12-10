@@ -1,6 +1,7 @@
 pybullet
 torch
 PyOpenGL
+PyGLM
 
 # pre-commit
 pre-commit
