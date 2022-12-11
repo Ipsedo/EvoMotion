@@ -43,6 +43,7 @@ class Item:
     def collision_shape(self) -> int:
         return self.__shape_id
 
+    @property
     def shape(self) -> Shape:
         return self.__shape
 

@@ -28,8 +28,8 @@ def main() -> None:
 
     for item in env_config.items:
         s = SpecularObj(
-            item.shape().get_vertices(),
-            item.shape().get_normals(),
+            item.shape.get_vertices(),
+            item.shape.get_normals(),
             vec4(random(), random(), random(), 1.0),
             vec4(random(), random(), random(), 1.0),
             vec4(random(), random(), random(), 1.0),
