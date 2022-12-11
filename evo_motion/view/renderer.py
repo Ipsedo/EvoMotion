@@ -103,6 +103,10 @@ class Renderer:
     def is_close(self) -> bool:
         return not self.__is_open
 
+    def close(self) -> None:
+        glfw.set_window_should_close(self.__window, True)
+        self.__is_open = False
+
     @staticmethod
     def __error_callback(err: Exception, description: str) -> None:
         raise RuntimeError(f"GLFW error ({err}): {description}")

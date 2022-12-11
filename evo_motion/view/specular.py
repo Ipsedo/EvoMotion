@@ -1,5 +1,5 @@
 from os.path import join
-from typing import List, Tuple
+from typing import Final, List, Tuple
 
 import numpy as np
 from glm import mat4, vec3, vec4
@@ -7,10 +7,14 @@ from OpenGL.GL import GL_TRIANGLES
 
 from .constants import BYTES_PER_FLOAT, SHADER_ROOT_PATH
 from .drawable import Drawable
-from .program import Program, ProgramBuilder
+from .program import Program
 
 
 class SpecularObj(Drawable):
+    POSITION_SIZE: Final[int] = 3
+    NORMAL_SIZE: Final[int] = 3
+    STRIDE: Final[int] = (POSITION_SIZE + NORMAL_SIZE) * BYTES_PER_FLOAT
+
     def __init__(
         self,
         vertices: List[Tuple[float, float, float]],
@@ -36,26 +40,24 @@ class SpecularObj(Drawable):
 
         self.__nb_vertices = len(vertices)
 
-        self.__stride = BYTES_PER_FLOAT * (3 + 3)
-
         self.__program: Program = (
-            ProgramBuilder(
+            Program.Builder(
                 join(SHADER_ROOT_PATH, "specular_vs.glsl"),
                 join(SHADER_ROOT_PATH, "specular_fs.glsl"),
             )
-            .uniform_mat_4fv("u_mvp_matrix")
-            .uniform_mat_4fv("u_mv_matrix")
-            .uniform_4fv("u_ambient_color")
-            .uniform_4fv("u_diffuse_color")
-            .uniform_4fv("u_specular_color")
-            .uniform_3fv("u_light_pos")
-            .uniform_1f("u_distance_coef")
-            .uniform_1f("u_light_coef")
-            .uniform_1f("u_shininess")
-            .uniform_3fv("u_cam_pos")
-            .buffer("vertices_normals_buffer", vbo_data)
-            .attrib("a_position")
-            .attrib("a_normal")
+            .add_uniform_mat_4fv("u_mvp_matrix")
+            .add_uniform_mat_4fv("u_mv_matrix")
+            .add_uniform_4fv("u_ambient_color")
+            .add_uniform_4fv("u_diffuse_color")
+            .add_uniform_4fv("u_specular_color")
+            .add_uniform_3fv("u_light_pos")
+            .add_uniform_1f("u_distance_coef")
+            .add_uniform_1f("u_light_coef")
+            .add_uniform_1f("u_shininess")
+            .add_uniform_3fv("u_cam_pos")
+            .new_buffer("vertices_normals_buffer", vbo_data)
+            .add_attrib("a_position")
+            .add_attrib("a_normal")
             .build_buffer()
             .build_program()
         )
@@ -77,17 +79,17 @@ class SpecularObj(Drawable):
         self.__program.attrib(
             "vertices_normals_buffer",
             "a_position",
-            3,
-            self.__stride,
+            SpecularObj.POSITION_SIZE,
+            SpecularObj.STRIDE,
             0,
         )
 
         self.__program.attrib(
             "vertices_normals_buffer",
             "a_normal",
-            3,
-            self.__stride,
-            3 * BYTES_PER_FLOAT,
+            SpecularObj.NORMAL_SIZE,
+            SpecularObj.STRIDE,
+            SpecularObj.POSITION_SIZE * BYTES_PER_FLOAT,
         )
 
         self.__program.uniform_mat_4fv("u_mvp_matrix", mvp_matrix)

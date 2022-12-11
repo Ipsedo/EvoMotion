@@ -13,7 +13,9 @@ class ObjShape(Shape):
 
         with open(obj_file_path, mode="r", encoding="utf-8") as obj_file:
             for line in obj_file:
+
                 line_split = line.split(" ")
+
                 match line_split[0]:
                     case "vn":
                         normals_ref.append(
