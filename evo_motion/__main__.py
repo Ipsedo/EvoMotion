@@ -45,7 +45,9 @@ def main() -> None:
     while not r.is_close():
         rotation_matrix = rotate(mat4(1), angle, axis)
         model_mat = mat4(1) * translate_mat * rotation_matrix * scale_mat
+
         r.draw({"cube": model_mat})
+
         angle += 0.01
         angle %= 360.0
 
