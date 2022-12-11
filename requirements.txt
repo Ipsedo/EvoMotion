@@ -4,6 +4,10 @@ PyOpenGL
 glfw
 PyGLM
 numpy
+pydantic
+
+# jupyter
+jupyter
 
 # pre-commit
 pre-commit

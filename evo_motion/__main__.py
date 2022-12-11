@@ -1,9 +1,11 @@
 from random import random
 
-from glm import mat4, normalize, rotate, scale, translate, vec3, vec4
+import torch as th
+from glm import normalize, vec3, vec4
 from OpenGL import GL
 
-from .model import ObjShape
+from .envs import cartpole
+from .model import Environment
 from .view import Renderer, SpecularObj, StaticCamera
 
 
@@ -11,45 +13,36 @@ def main() -> None:
     GL.errcheck = True
 
     camera = StaticCamera(
-        vec3(0, 0, -1),
-        vec3(0, 0, 1),
+        vec3(0, 1, -1),
+        normalize(vec3(0, -0.1, 1)),
         vec3(0, 1, 0),
     )
 
     r = Renderer("evo_motion", 1600, 900, camera)
     r.open_window()
 
-    obj = ObjShape(
-        "/home/samuel/PycharmProjects/EvoMotion/resources/obj/cube.obj"
+    env_config = cartpole.create_cartpole_env_args(
+        "/home/samuel/PycharmProjects/EvoMotion/resources/"
     )
+    env = Environment(env_config)
 
-    s = SpecularObj(
-        obj.get_vertices(),
-        obj.get_normals(),
-        vec4(1.0, 0.0, 0.0, 1.0),
-        vec4(0.0, 1.0, 0.0, 1.0),
-        vec4(1.0, 1.0, 1.0, 1.0),
-        300.0,
-    )
+    for item in env_config.items:
+        s = SpecularObj(
+            item.shape().get_vertices(),
+            item.shape().get_normals(),
+            vec4(random(), random(), random(), 1.0),
+            vec4(random(), random(), random(), 1.0),
+            vec4(random(), random(), random(), 1.0),
+            300.0,
+        )
 
-    r.add_drawable("cube", s)
-
-    translate_mat = translate(mat4(1), vec3(0.0, 0.0, 1.0))
-    scale_mat = scale(mat4(1), vec3(0.25, 0.25, 0.25))
-
-    angle = 0.0
-    axis = normalize(
-        vec3(random() * 2 - 1, random() * 2 - 1, random() * 2 - 1)
-    )
+        r.add_drawable(item.name, s)
 
     while not r.is_close():
-        rotation_matrix = rotate(mat4(1), angle, axis)
-        model_mat = mat4(1) * translate_mat * rotation_matrix * scale_mat
 
-        r.draw({"cube": model_mat})
+        env.step(th.rand(*env_config.action_space) * 40 - 20)
 
-        angle += 0.01
-        angle %= 360.0
+        r.draw({item.name: item.model_matrix() for item in env_config.items})
 
 
 if __name__ == "__main__":

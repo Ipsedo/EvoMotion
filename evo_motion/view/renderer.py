@@ -45,6 +45,7 @@ class Renderer:
             raise RuntimeError("GLFW init failed")
 
         glfw.window_hint(glfw.OPENGL_DEBUG_CONTEXT, GL.GL_TRUE)
+        glfw.window_hint(glfw.SAMPLES, 4)
 
         glfw.set_error_callback(Renderer.__error_callback)
 
@@ -65,6 +66,7 @@ class Renderer:
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glEnable(GL.GL_CULL_FACE)
         GL.glEnable(GL.GL_DEBUG_OUTPUT)
+        GL.glEnable(GL.GL_MULTISAMPLE)
 
         GL.glDepthFunc(GL.GL_LEQUAL)
 
