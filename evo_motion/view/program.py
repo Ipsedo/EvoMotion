@@ -1,9 +1,9 @@
+import ctypes
 from typing import Dict, List, Tuple
 
 import numpy as np
 from glm import mat4, vec3, vec4
 from OpenGL import GL
-from OpenGL.arrays.vbo import VBO
 from OpenGL.constant import IntConstant
 from OpenGL.GL import shaders
 
@@ -41,14 +41,9 @@ class Program:
             for f in builder.uniform_1f
         }
 
-        self.__buffers: Dict[str, Tuple[VBO, Dict[str, int]]] = {
+        self.__buffers: Dict[str, Tuple[int, Dict[str, int]]] = {
             b: (
-                VBO(
-                    builder.buffers[b][1],
-                    target=GL.GL_ARRAY_BUFFER,
-                    usage=GL.GL_STATIC_DRAW,
-                    size=builder.buffers[b][1].shape[0] * BYTES_PER_FLOAT,
-                ),
+                Program.__gen_buffer(builder.buffers[b][1]),
                 {
                     a: GL.glGetAttribLocation(self.__program, a)
                     for a in builder.buffers[b][0]
@@ -68,23 +63,22 @@ class Program:
         stride: int,
         offset: int,
     ) -> None:
-        vbo, attrib_handles = self.__buffers[buffer_name]
+        buffer_id, attrib_handles = self.__buffers[buffer_name]
         attrib = attrib_handles[name]
 
-        vbo.bind()
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, buffer_id)
 
         GL.glEnableVertexAttribArray(attrib)
-
         GL.glVertexAttribPointer(
             attrib,
             data_size,
             GL.GL_FLOAT,
             GL.GL_FALSE,
             stride,
-            vbo + offset,
+            ctypes.c_void_p(offset),
         )
 
-        vbo.unbind()
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
     def uniform_mat_4fv(self, name: str, mat: mat4) -> None:
         GL.glUniformMatrix4fv(
@@ -115,6 +109,21 @@ class Program:
         with open(glsl_file_path, mode="r", encoding="utf-8") as glsl_file:
             shader_source = glsl_file.readlines()
             return int(shaders.compileShader(shader_source, shader_type))
+
+    @staticmethod
+    def __gen_buffer(data: np.ndarray) -> int:
+        buffer: int = GL.glGenBuffers(1)
+
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, buffer)
+        GL.glBufferData(
+            GL.GL_ARRAY_BUFFER,
+            data.shape[0] * BYTES_PER_FLOAT,
+            data,
+            GL.GL_STATIC_DRAW,
+        )
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+        return buffer
 
     class Builder:
         def __init__(

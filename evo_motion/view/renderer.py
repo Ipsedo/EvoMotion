@@ -4,24 +4,25 @@ import glfw
 from glm import frustum, lookAt, mat4, vec3
 from OpenGL import GL
 
+from .camera import Camera
 from .drawable import Drawable
 
 
 class Renderer:
-    def __init__(self, title: str, width: int, height: int) -> None:
+    def __init__(
+        self,
+        title: str,
+        width: int,
+        height: int,
+        camera: Camera,
+    ) -> None:
         self.__title = title
         self.__window = None
 
         self.__drawables: Dict[str, Drawable] = {}
 
-        self.__cam_pos = vec3(0.0, 0.0, -1.0)
+        self.__camera = camera
         self.__light_pos = vec3(0.0, 0.0, -1.0)
-
-        self.__view_matrix = lookAt(
-            vec3(0.0, 0.0, 0.0),
-            vec3(0.0, 0.0, 1.0),
-            vec3(0, 1, 0),
-        )
 
         self.__proj_matrix = frustum(
             -1.0,
@@ -43,9 +44,6 @@ class Renderer:
         if not glfw.init():
             raise RuntimeError("GLFW init failed")
 
-        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
-        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 2)
-        glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
         glfw.window_hint(glfw.OPENGL_DEBUG_CONTEXT, GL.GL_TRUE)
 
         glfw.set_error_callback(Renderer.__error_callback)
@@ -61,12 +59,15 @@ class Renderer:
         glfw.make_context_current(self.__window)
 
         GL.glViewport(0, 0, self.__width, self.__height)
+
         GL.glClearColor(0.5, 0.0, 0.0, 1.0)
 
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glEnable(GL.GL_CULL_FACE)
         GL.glEnable(GL.GL_DEBUG_OUTPUT)
+
         GL.glDepthFunc(GL.GL_LEQUAL)
+
         GL.glDepthMask(GL.GL_TRUE)
 
         self.__is_open = True
@@ -91,11 +92,20 @@ class Renderer:
 
             m_matrix = model_matrix[drawable_name]
 
-            mv_matrix = self.__view_matrix * m_matrix
+            view_matrix = lookAt(
+                self.__camera.pos(),
+                self.__camera.look_vec(),
+                self.__camera.up(),
+            )
+
+            mv_matrix = view_matrix * m_matrix
             mvp_matrix = self.__proj_matrix * mv_matrix
 
             self.__drawables[drawable_name].draw(
-                mvp_matrix, mv_matrix, self.__light_pos, self.__cam_pos
+                mvp_matrix,
+                mv_matrix,
+                self.__light_pos,
+                self.__camera.pos(),
             )
 
         glfw.swap_buffers(self.__window)

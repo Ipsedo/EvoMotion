@@ -11,9 +11,9 @@ from .program import Program
 
 
 class SpecularObj(Drawable):
-    POSITION_SIZE: Final[int] = 3
-    NORMAL_SIZE: Final[int] = 3
-    STRIDE: Final[int] = (POSITION_SIZE + NORMAL_SIZE) * BYTES_PER_FLOAT
+    __POSITION_SIZE: Final[int] = 3
+    __NORMAL_SIZE: Final[int] = 3
+    __STRIDE: Final[int] = (__POSITION_SIZE + __NORMAL_SIZE) * BYTES_PER_FLOAT
 
     def __init__(
         self,
@@ -79,17 +79,17 @@ class SpecularObj(Drawable):
         self.__program.attrib(
             "vertices_normals_buffer",
             "a_position",
-            SpecularObj.POSITION_SIZE,
-            SpecularObj.STRIDE,
+            SpecularObj.__POSITION_SIZE,
+            SpecularObj.__STRIDE,
             0,
         )
 
         self.__program.attrib(
             "vertices_normals_buffer",
             "a_normal",
-            SpecularObj.NORMAL_SIZE,
-            SpecularObj.STRIDE,
-            SpecularObj.POSITION_SIZE * BYTES_PER_FLOAT,
+            SpecularObj.__NORMAL_SIZE,
+            SpecularObj.__STRIDE,
+            SpecularObj.__POSITION_SIZE * BYTES_PER_FLOAT,
         )
 
         self.__program.uniform_mat_4fv("u_mvp_matrix", mvp_matrix)
