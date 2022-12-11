@@ -9,14 +9,14 @@ from evo_motion.controller import Controller
 from evo_motion.model import Environment, Item, ObjShape, Step
 
 
-class Chariot(Item, Controller):
+class _Chariot(Item, Controller):
     force = 20.0
 
     def on_input(self, action: Tensor) -> None:
         pb.applyExternalForce(
             objectUniqueId=self.body,
             linkIndex=-1,
-            forceObj=vec3(action[0].item() * Chariot.force, 0, 0),
+            forceObj=vec3(action[0].item() * _Chariot.force, 0, 0),
             posObj=vec3(0),
             flags=pb.LINK_FRAME,
         )
@@ -73,8 +73,8 @@ class CartPole(Environment):
             0.0,
         )
 
-    def __get_chariot(self) -> Chariot:
-        return Chariot(
+    def __get_chariot(self) -> _Chariot:
+        return _Chariot(
             "chariot",
             self.__obj,
             vec3(0.0, CartPole.chariot_pos, 10.0),
