@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from torch import Tensor
+from torch import Tensor, rand
 
 
 class Agent(ABC):
@@ -21,6 +21,25 @@ class Agent(ABC):
     def act(self, state: Tensor) -> Tensor:
         pass
 
+    @property
     @abstractmethod
     def is_continuous(self) -> bool:
         pass
+
+
+class DiscreteRandomAgent(Agent):
+    def act(self, state: Tensor) -> Tensor:
+        return (rand(*self.action_space) * 2.0 - 1.0) > 0
+
+    @property
+    def is_continuous(self) -> bool:
+        return False
+
+
+class ContinuousRandomAgent(Agent):
+    def act(self, state: Tensor) -> Tensor:
+        return rand(*self.action_space) * 2.0 - 1.0
+
+    @property
+    def is_continuous(self) -> bool:
+        return True

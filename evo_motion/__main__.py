@@ -1,10 +1,11 @@
 from random import random
 
-import torch as th
 from glm import normalize, vec3, vec4
 from OpenGL import GL
 
+from .core import Agent, ContinuousRandomAgent
 from .envs import cartpole
+from .model import Environment
 from .view import Renderer, SpecularObj, StaticCamera
 
 
@@ -20,9 +21,13 @@ def main() -> None:
     r = Renderer("evo_motion", 1600, 900, camera)
     r.open_window()
 
-    env = cartpole.CartPole(
+    env: Environment = cartpole.CartPole(
         "/home/samuel/PycharmProjects/EvoMotion/resources/"
     )
+
+    agent: Agent = ContinuousRandomAgent(env.state_space, env.action_space)
+
+    assert agent.is_continuous == env.is_continuous
 
     for name in env.items:
         item = env.items[name]
@@ -38,16 +43,19 @@ def main() -> None:
         r.add_drawable(item.name, s)
 
     i = 0
+
+    step = env.reset()
+
     while not r.is_close():
 
-        if i % 1000 == 0:
-            env.reset()
-
-        env.step(th.rand(*env.action_space) * 40 - 20)
+        step = env.step(agent.act(step.state))
 
         r.draw({name: item.model_matrix() for name, item in env.items.items()})
 
         i += 1
+
+        if i % 1000 == 0:
+            step = env.reset()
 
 
 if __name__ == "__main__":

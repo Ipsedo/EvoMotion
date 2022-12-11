@@ -77,3 +77,7 @@ class Environment(ABC):
     @property
     def action_space(self) -> List[int]:
         return self.__action_space
+
+    @property
+    def is_continuous(self) -> bool:
+        return self.__is_continuous
