@@ -5,7 +5,6 @@ from glm import normalize, vec3, vec4
 from OpenGL import GL
 
 from .envs import cartpole
-from .model import Environment
 from .view import Renderer, SpecularObj, StaticCamera
 
 
@@ -21,12 +20,12 @@ def main() -> None:
     r = Renderer("evo_motion", 1600, 900, camera)
     r.open_window()
 
-    env_config = cartpole.create_cartpole_env_args(
+    env = cartpole.CartPole(
         "/home/samuel/PycharmProjects/EvoMotion/resources/"
     )
-    env = Environment(env_config)
 
-    for item in env_config.items:
+    for name in env.items:
+        item = env.items[name]
         s = SpecularObj(
             item.shape.get_vertices(),
             item.shape.get_normals(),
@@ -38,11 +37,17 @@ def main() -> None:
 
         r.add_drawable(item.name, s)
 
+    i = 0
     while not r.is_close():
 
-        env.step(th.rand(*env_config.action_space) * 40 - 20)
+        if i % 1000 == 0:
+            env.reset()
 
-        r.draw({item.name: item.model_matrix() for item in env_config.items})
+        env.step(th.rand(*env.action_space) * 40 - 20)
+
+        r.draw({name: item.model_matrix() for name, item in env.items.items()})
+
+        i += 1
 
 
 if __name__ == "__main__":
