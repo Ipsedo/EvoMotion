@@ -5,7 +5,6 @@
 #ifndef EVO_MOTION_PROGRAM_H
 #define EVO_MOTION_PROGRAM_H
 
-#include <functional>
 #include <map>
 #include <string>
 #include <typeindex>
