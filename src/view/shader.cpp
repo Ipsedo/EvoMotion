@@ -8,7 +8,7 @@
 
 #include "./view/shader.h"
 
-unsigned long getFileLength(std::ifstream &file) {
+unsigned long get_file_length(std::ifstream &file) {
     if (!file.good()) return 0;
 
     file.seekg(0, std::ios::end);
@@ -26,7 +26,7 @@ uint load_shader(GLenum type, const std::string &filename) {
     std::ifstream file;
     file.open(filename.c_str(), std::ios::in);
 
-    len = getFileLength(file);
+    len = get_file_length(file);
 
     shaderSource = new char[len + 1];
 
@@ -44,6 +44,7 @@ uint load_shader(GLenum type, const std::string &filename) {
     file.close();
 
     glShaderSource(shader, 1, (const char **) &shaderSource, nullptr);
+    glCompileShader(shader);
 
     delete[] shaderSource;
 

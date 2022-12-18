@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
+#include <iostream>
 
 #include "./view/constants.h"
 #include "./view/program.h"
@@ -29,7 +30,8 @@ Program::Builder::Builder(
         vertex_shader_path(std::move(vertex_shader_path)),
         fragment_shader_path(std::move(fragment_shader_path)),
         uniforms(uniforms),
-        attributes(attributes) {
+        attributes(attributes),
+        buffers(buffers) {
 
 }
 
@@ -49,7 +51,7 @@ Program::Builder Program::Builder::add_buffer(const std::string &name, const std
 }
 
 Program Program::Builder::build() {
-    Program program;
+    Program program{};
 
     program.program_id = glCreateProgram();
 
@@ -61,13 +63,11 @@ Program Program::Builder::build() {
 
     glLinkProgram(program.program_id);
 
-    for (const auto &name_data : buffers) {
-        std::string name = std::get<0>(name_data);
-        std::vector<float> data = std::get<1>(name_data);
-
+    for (const auto &[name, data] : buffers) {
         program.buffer_ids.insert({name, 0});
 
         glGenBuffers(1, &program.buffer_ids[name]);
+
         glBindBuffer(GL_ARRAY_BUFFER, program.buffer_ids[name]);
         glBufferData(GL_ARRAY_BUFFER, int(data.size()) * BYTES_PER_FLOAT, &data[0], GL_STATIC_DRAW);
 
@@ -87,14 +87,18 @@ Program Program::Builder::build() {
  * Program
  */
 
-Program::~Program() {
+void Program::kill() {
     glDeleteShader(vertex_shader_id);
     glDeleteShader(fragment_shader_id);
 
-    for (auto name_buffer_id : buffer_ids)
-        glDeleteBuffers(1, &std::get<1>(name_buffer_id));
+    for (auto [name, buffer_id] : buffer_ids)
+        glDeleteBuffers(1, &buffer_id);
 
     glDeleteProgram(program_id);
+}
+
+void Program::use() const {
+    glUseProgram(program_id);
 }
 
 template<typename F, class... T>
@@ -125,4 +129,9 @@ void Program::attrib(const std::string &name, const std::string &buffer_name, in
     glVertexAttribPointer(attribute_handles[name], data_size, GL_FLOAT, GL_FALSE, stride, (char *) nullptr + offset);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Program::disable_attrib_array() {
+    for (auto [name, attrib_id] : attribute_handles)
+        glDisableVertexAttribArray(attrib_id);
 }

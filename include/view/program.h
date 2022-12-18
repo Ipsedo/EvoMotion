@@ -6,6 +6,7 @@
 #define EVO_MOTION_PROGRAM_H
 
 #include <map>
+#include <memory>
 #include <string>
 #include <typeindex>
 #include <vector>
@@ -49,20 +50,22 @@ public:
 
 private:
 
-    uint program_id;
-    uint vertex_shader_id;
-    uint fragment_shader_id;
+    GLuint program_id;
+    GLuint vertex_shader_id;
+    GLuint fragment_shader_id;
 
-    std::map<std::string, uint> uniform_handles;
-    std::map<std::string, uint> attribute_handles;
+    std::map<std::string, GLuint> uniform_handles;
+    std::map<std::string, GLuint> attribute_handles;
 
-    std::map<std::string, uint> buffer_ids;
+    std::map<std::string, GLuint> buffer_ids;
 
     template<typename F, class... T>
     void _uniform(F uniform_fun, const std::string &name, T... args);
 
 protected:
 public:
+    void use() const;
+
     void uniform_mat4(const std::string &name, glm::mat4 mat4);
 
     void uniform_vec4(const std::string &name, glm::vec4 vec4);
@@ -73,7 +76,9 @@ public:
 
     void attrib(const std::string &name, const std::string &buffer_name, int data_size, int stride, int offset);
 
-    ~Program();
+    void disable_attrib_array();
+
+    void kill();
 };
 
 #endif //EVO_MOTION_PROGRAM_H
