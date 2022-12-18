@@ -35,22 +35,25 @@ Renderer::Renderer(
 
         title(title),
         width(width), height(height),
-        drawables(),
+        drawables({}),
         camera(std::move(camera)),
         is_open(false),
         window(nullptr),
         light_pos(glm::vec3(0.f, 0.f, -1.f)) {
-    glfwSetErrorCallback(error_callback);
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
         exit(1);
     }
 
+    //glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_REFRESH_RATE, 60);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
+    std::cout << "avant " << width << " " << height << " " << title.c_str() << std::endl;
     window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+    std::cout << "apres" << std::endl;
 
     if (!window) {
         std::cerr << "GLFW window initialization failed" << std::endl;

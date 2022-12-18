@@ -12,6 +12,7 @@
 #include <vector>
 
 #include <glm/glm.hpp>
+#include <GL/glew.h>
 
 
 class Program {
@@ -77,6 +78,8 @@ public:
     void attrib(const std::string &name, const std::string &buffer_name, int data_size, int stride, int offset);
 
     void disable_attrib_array();
+
+    static void draw_arrays(GLenum type, int from, int nb_vertices);
 
     void kill();
 };

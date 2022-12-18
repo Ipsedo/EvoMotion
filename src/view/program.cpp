@@ -5,7 +5,6 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
-#include <iostream>
 
 #include "./view/constants.h"
 #include "./view/program.h"
@@ -134,4 +133,8 @@ void Program::attrib(const std::string &name, const std::string &buffer_name, in
 void Program::disable_attrib_array() {
     for (auto [name, attrib_id] : attribute_handles)
         glDisableVertexAttribArray(attrib_id);
+}
+
+void Program::draw_arrays(GLenum type, int from, int nb_vertices) {
+    glDrawArrays(type, from, nb_vertices);
 }

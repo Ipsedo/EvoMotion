@@ -2,9 +2,6 @@
 // Created by samuel on 17/12/22.
 //
 
-#include <iostream>
-#include <GL/glew.h>
-
 #include "./view/constants.h"
 #include "./view/specular.h"
 
@@ -83,7 +80,11 @@ OBjSpecular::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 light_pos
     program.uniform_float("u_light_coef", 1.f);
     program.uniform_float("u_shininess", shininess);
 
-    glDrawArrays(GL_TRIANGLES, 0, nb_vertices);
+    Program::draw_arrays(GL_TRIANGLES, 0, nb_vertices);
 
     program.disable_attrib_array();
+}
+
+OBjSpecular::~OBjSpecular() {
+    program.kill();
 }
