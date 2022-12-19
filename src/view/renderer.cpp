@@ -46,14 +46,12 @@ Renderer::Renderer(
         exit(1);
     }
 
-    //glfwDefaultWindowHints();
+    glfwDefaultWindowHints();
     glfwWindowHint(GLFW_REFRESH_RATE, 60);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-    std::cout << "avant " << width << " " << height << " " << title.c_str() << std::endl;
     window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
-    std::cout << "apres" << std::endl;
 
     if (!window) {
         std::cerr << "GLFW window initialization failed" << std::endl;
