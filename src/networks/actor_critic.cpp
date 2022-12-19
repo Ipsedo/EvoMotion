@@ -47,7 +47,8 @@ void ActorCritic::train() {
 
     auto advantage = returns - values;
 
-    auto prob = 1.f / torch::sqrt(2. * M_PI * sigmas) * torch::exp(-torch::pow(actions - mus, 2.f) / (2.f * sigmas));
+    auto prob = torch::exp(-0.5f * torch::pow((actions - mus) / sigmas, 2.f))
+            / (sigmas * sqrt(2. * M_PI));
     auto log_prob = torch::log(prob);
 
     auto actor_loss = -log_prob * advantage.detach();
