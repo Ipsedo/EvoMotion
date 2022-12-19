@@ -1,10 +1,4 @@
-coco/
-coco.h
-coco.c
-exdata/
-ppdata/
 build/
 .idea/
 cmake-build-*/
-example_experiment.c
-lib/
+out/

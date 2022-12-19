@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <vector>
+#include <random>
 
 #include <torch/torch.h>
 #include <torch/nn.h>
@@ -41,6 +42,9 @@ private:
 
     std::vector<a2c_response> results_buffer;
     std::vector<float> rewards_buffer;
+    std::vector<torch::Tensor> actions_buffer;
+
+    std::mt19937 rng;
 
     void train();
 public:

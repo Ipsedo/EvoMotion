@@ -2,6 +2,8 @@
 // Created by samuel on 19/12/22.
 //
 
+#include <torch/torch.h>
+
 #include "./networks/actor_critic.h"
 
 torch::Tensor ActorCritic::act(step step) {
@@ -10,22 +12,25 @@ torch::Tensor ActorCritic::act(step step) {
     auto response = networks->forward(step.state);
     results_buffer.push_back(response);
 
-    return response.mu + torch::randn(response.mu.sizes()) * response.sigma.sqrt();
+    auto action = response.mu + torch::randn(response.mu.sizes()) * response.sigma.sqrt();
+    actions_buffer.push_back(action);
+
+    return action;
 }
 
 void ActorCritic::train() {
     rewards_buffer.erase(rewards_buffer.begin());
 
-    std::vector<torch::Tensor> values_tmp;
     std::vector<torch::Tensor> mus_tmp;
     std::vector<torch::Tensor> sigmas_tmp;
+    std::vector<torch::Tensor> values_tmp;
 
     for (auto [mu, sigma, value] : results_buffer) {
-        values_tmp.push_back(value);
         mus_tmp.push_back(mu);
         sigmas_tmp.push_back(sigma);
+        values_tmp.push_back(value);
     }
-
+    auto actions = torch::cat(actions_buffer);
     auto values = torch::cat(values_tmp);
     auto mus = torch::cat(mus_tmp);
     auto sigmas = torch::cat(sigmas_tmp);
@@ -34,22 +39,28 @@ void ActorCritic::train() {
     auto t_steps = torch::arange(int(rewards_buffer.size()));
 
     auto returns = rewards * torch::pow(gamma, t_steps);
+    returns = returns.flip({0})
+            .cumsum(0)
+            .flip({0})
+            / torch::pow(gamma, t_steps);
     returns = (returns - returns.mean()) / (returns.std() + 1e-8f);
 
     auto advantage = returns - values;
 
-    auto prob = at::normal(mus, sigmas);
+    auto prob = 1.f / torch::sqrt(2. * M_PI * sigmas) * torch::exp(-torch::pow(actions - mus, 2.f) / (2.f * sigmas));
     auto log_prob = torch::log(prob);
 
     auto actor_loss = -log_prob * advantage.detach();
 
     auto critic_loss = torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None);
 
-    auto loss = (actor_loss + critic_loss).sum(0).mean();
+    auto loss = (actor_loss + critic_loss).sum(0);
 
     optimizer.zero_grad();
     loss.backward();
     optimizer.step();
+
+    std::cout << "policy " << actor_loss.sum().item() << " critic " << critic_loss.sum().item() << std::endl;
 }
 
 void ActorCritic::done(step step) {
@@ -59,6 +70,7 @@ void ActorCritic::done(step step) {
 
     results_buffer.clear();
     rewards_buffer.clear();
+    actions_buffer.clear();
 }
 
 ActorCritic::ActorCritic(
@@ -71,7 +83,9 @@ ActorCritic::ActorCritic(
         networks(std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
         rewards_buffer(),
         results_buffer(),
-        optimizer(networks->parameters(), lr) {
+        actions_buffer(),
+        optimizer(networks->parameters(), lr),
+        rng(1234) {
 
 }
 

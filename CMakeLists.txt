@@ -31,6 +31,15 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 find_package(glfw3 REQUIRED)
 include_directories(${GLFW_INCLUDE_DIRS})
 
+# argparse
+# fetch latest argparse
+include(FetchContent)
+FetchContent_Declare(
+        argparse
+        GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+)
+FetchContent_MakeAvailable(argparse)
+
 # evo_motion part
 # Get all source files
 file(GLOB_RECURSE SRC "./src/*.cpp")
@@ -50,6 +59,7 @@ target_link_libraries(
         OpenGL
         GLEW
         ${TORCH_LIBRARIES}
+        argparse
 )
 
 set(source "${CMAKE_SOURCE_DIR}/shaders")
