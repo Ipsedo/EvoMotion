@@ -4,8 +4,8 @@
 
 #include "./model/environment.h"
 
-Environment::Environment(torch::IntArrayRef state_space, torch::IntArrayRef action_space, bool is_continuous) :
-        state_space(state_space), action_space(action_space), continuous(is_continuous),
+Environment::Environment(const std::vector<int64_t>& state_space, const std::vector<int64_t>& action_space, bool continuous) :
+        state_space(state_space), action_space(action_space), continuous(continuous),
         m_collision_configuration(new btDefaultCollisionConfiguration()),
         m_dispatcher(new btCollisionDispatcher(m_collision_configuration)),
         m_broad_phase(new btDbvtBroadphase()),
@@ -38,11 +38,11 @@ step Environment::reset() {
     return compute_step();
 }
 
-torch::IntArrayRef Environment::get_state_space() {
+std::vector<int64_t> Environment::get_state_space() {
     return state_space;
 }
 
-torch::IntArrayRef Environment::get_action_space() {
+std::vector<int64_t> Environment::get_action_space() {
     return action_space;
 }
 

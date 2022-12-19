@@ -12,10 +12,11 @@
 
 class SliderController : public Controller {
 public:
-    explicit SliderController(btSliderConstraint *slider);
+    explicit SliderController(btSliderConstraint *slider, float slider_speed);
     void on_input(torch::Tensor action) override;
 private:
     btSliderConstraint *slider;
+    float slider_speed;
 };
 
 class CartPole : public Environment {

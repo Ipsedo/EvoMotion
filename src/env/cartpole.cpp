@@ -5,12 +5,12 @@
 #include "./model/item.h"
 #include "./env/cartpole.h"
 
-SliderController::SliderController(btSliderConstraint *slider) : slider(slider) {
+SliderController::SliderController(btSliderConstraint *slider, float slider_speed) : slider(slider), slider_speed(slider_speed) {
 
 }
 
 void SliderController::on_input(torch::Tensor action) {
-    slider->setTargetLinMotorVelocity(action[0].item().toFloat());
+    slider->setTargetLinMotorVelocity(action[0].item().toFloat() * slider_speed);
 }
 
 CartPole::CartPole(int seed) :
@@ -75,7 +75,7 @@ rng(seed) {
 
     slider = new btSliderConstraint(*base.get_body(), *chariot.get_body(), tr_base, tr_chariot, true);
 
-    controllers.push_back(std::make_shared<SliderController>(slider));
+    controllers.push_back(std::make_shared<SliderController>(slider, slider_speed));
 
     slider->setEnabled(true);
     slider->setPoweredLinMotor(true);
@@ -102,6 +102,9 @@ rng(seed) {
     chariot_rg->setIgnoreCollisionCheck(pendulum_rg, true);
     base_rg->setIgnoreCollisionCheck(chariot_rg, true);
     base_rg->setIgnoreCollisionCheck(pendulum_rg, true);
+
+    m_world->addConstraint(slider);
+    m_world->addConstraint(hinge);
 }
 
 std::vector<Item> CartPole::get_items() {

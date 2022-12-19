@@ -4,20 +4,15 @@
 
 #include <iostream>
 #include <memory>
+#include <random>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
+#include "./networks/actor_critic.h"
 #include "./view/camera.h"
 #include "./view/renderer.h"
 #include "./view/specular.h"
 #include "./env/cartpole.h"
 
 int main(int argc, char **argv) {
-    std::cout << "init" << std::endl;
-    glewInit();
-    glfwInit();
-    std::cout << "window" << std::endl;
 
     std::shared_ptr<Camera> camera = std::make_shared<StaticCamera>(
             glm::vec3(0.f, 0.f, -1.f),
@@ -25,36 +20,45 @@ int main(int argc, char **argv) {
             glm::vec3(0.f, 1.f, 0.f)
     );
 
-    std::cout << "mtn" << std::endl;
     Renderer renderer("evo_motion", 1024, 1024, camera);
-    std::cout << "mtn mtn" << std::endl;
-
-    std::cout << "ici" << std::endl;
 
     CartPole cart_pole(1234);
 
-    std::cout << "la" << std::endl;
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     for (auto i : cart_pole.get_items()) {
         std::cout << i.get_name() << std::endl;
         std::shared_ptr<OBjSpecular> specular = std::make_shared<OBjSpecular>(
                 i.get_shape()->get_vertices(),
                 i.get_shape()->get_normals(),
-                glm::vec4(0.f, 0.f, 1.f, 1.f),
-                glm::vec4(0.f, 1.f, 0.f, 1.f),
-                glm::vec4(1.f, 1.f, 1.f, 1.f),
+                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
                 300.f
         );
 
         renderer.add_drawable(i.get_name(), specular);
     }
 
-    std::cout << cart_pole.get_action_space() << std::endl;
+    ActorCritic a2c(
+            cart_pole.get_state_space(),
+            cart_pole.get_action_space(),
+            32,
+            1e-4f
+            );
+
+    step s = cart_pole.reset();
 
     while (!renderer.is_close()) {
+        if (s.done) {
+            a2c.done(s);
+            s = cart_pole.reset();
+        }
         std::map<std::string, glm::mat4> model_matrix;
 
-        step s = cart_pole.do_step(torch::rand(cart_pole.get_action_space()), 1.f / 60.f);
+        s = cart_pole.do_step(a2c.act(s), 1.f / 60.f);
 
         for (auto i : cart_pole.get_items())
             model_matrix.insert({i.get_name(), i.model_matrix()});

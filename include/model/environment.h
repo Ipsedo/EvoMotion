@@ -7,7 +7,6 @@
 
 #include <vector>
 
-#include <torch/torch.h>
 #include <btBulletDynamicsCommon.h>
 
 #include "./controller/controller.h"
@@ -21,8 +20,8 @@ struct step {
 
 class Environment {
 private:
-    torch::IntArrayRef state_space;
-    torch::IntArrayRef action_space;
+    std::vector<int64_t> state_space;
+    std::vector<int64_t> action_space;
 
     bool continuous;
 
@@ -39,7 +38,7 @@ protected:
 
     void add_item(Item item);
 public:
-    Environment(torch::IntArrayRef state_space, torch::IntArrayRef action_space, bool continuous);
+    Environment(const std::vector<int64_t>& state_space, const std::vector<int64_t>& action_space, bool continuous);
 
     virtual std::vector<Item> get_items() = 0;
     virtual std::vector<std::shared_ptr<Controller>> get_controllers() = 0;
@@ -48,8 +47,8 @@ public:
 
     step reset();
 
-    torch::IntArrayRef get_state_space();
-    torch::IntArrayRef get_action_space();
+    std::vector<int64_t> get_state_space();
+    std::vector<int64_t> get_action_space();
     bool is_continuous();
 };
 
