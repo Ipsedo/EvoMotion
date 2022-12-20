@@ -1,0 +1,19 @@
+//
+// Created by samuel on 20/12/22.
+//
+
+#ifndef EVO_MOTION_TRAIN_H
+#define EVO_MOTION_TRAIN_H
+
+#include <string>
+
+struct train_params {
+    float learning_rate;
+
+    int nb_saves;
+    int nb_episodes;
+};
+
+void train(int seed, const std::string &output_folder_path, train_params params);
+
+#endif //EVO_MOTION_TRAIN_H

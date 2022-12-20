@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.5)
 
 project(evo_motion)
 
+set(CMAKE_CXX_STANDARD 17)
+
+# Bullet
+find_package(Bullet REQUIRED)
+include_directories(${BULLET_INCLUDE_DIRS})
+
+# Torch
+list(APPEND CMAKE_PREFIX_PATH "/opt/libtorch/share/cmake")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+find_package(Torch REQUIRED)
+include_directories(${TORCH_INCLUDE_DIRS})
+
 # GLM
 find_package(glm REQUIRED)
 include_directories(${GLM_INCLUDE_DIRS})
@@ -19,24 +31,42 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 find_package(glfw3 REQUIRED)
 include_directories(${GLFW_INCLUDE_DIRS})
 
+# argparse
+include(FetchContent)
+FetchContent_Declare(
+        argparse
+        GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+)
+FetchContent_MakeAvailable(argparse)
+
+# indicators
+FetchContent_Declare(
+        indicators
+        GIT_REPOSITORY https://github.com/p-ranav/indicators.git
+)
+FetchContent_MakeAvailable(indicators)
+
 # evo_motion part
-
-# Include headers
-include_directories("./include")
-
 # Get all source files
 file(GLOB_RECURSE SRC "./src/*.cpp")
 
 # Create EvoMotion executable
 add_executable(evo_motion ${SRC})
 
+# Include headers
+include_directories(evo_motion PUBLIC "./include")
+
 # Link libraries
 target_link_libraries(
         evo_motion
+        ${BULLET_LIBRARIES}
         glm
         glfw
         OpenGL
         GLEW
+        ${TORCH_LIBRARIES}
+        argparse
+        indicators
 )
 
 set(source "${CMAKE_SOURCE_DIR}/shaders")

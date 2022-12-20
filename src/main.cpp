@@ -2,48 +2,96 @@
 // Created by samuel on 15/12/22.
 //
 
+#include <filesystem>
 #include <iostream>
+#include <memory>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <argparse/argparse.hpp>
 
-#include "./view/camera.h"
-#include "./view/renderer.h"
-#include "./view/specular.h"
-#include "./model/shapes.h"
+#include "./train.h"
+#include "./run.h"
 
 int main(int argc, char **argv) {
+    argparse::ArgumentParser parser("evo_motion");
 
-    ObjShape shape("/home/samuel/CLionProjects/EvoMotion/resources/obj/cube.obj");
+    /*
+     * Train parser
+     */
 
-    std::shared_ptr<Camera> camera = std::make_shared<StaticCamera>(
-            glm::vec3(0.f, 0.f, -1.f),
-            glm::vec3(0.f, 0.f, 1.f),
-            glm::vec3(0.f, 1.f, 0.f)
-            );
-    Renderer renderer("evo_motion", 1024, 1024, camera);
+    argparse::ArgumentParser train_parser("train");
 
-    std::shared_ptr<OBjSpecular> specular = std::make_shared<OBjSpecular>(
-            shape.get_vertices(),
-            shape.get_normals(),
-            glm::vec4(0.f, 0.f, 1.f, 1.f),
-            glm::vec4(0.f, 1.f, 0.f, 1.f),
-            glm::vec4(1.f, 1.f, 1.f, 1.f),
-            300.f
-            );
+    train_parser.add_argument("output_path")
+            .required()
+            .help("output folder path (for models, metrics, etc)");
 
-    renderer.add_drawable("cube", specular);
+    train_parser.add_argument("-e", "--episodes")
+            .scan<'i', int>()
+            .default_value(1000)
+            .help("episode number per save");
 
-    float angle = 0;
+    train_parser.add_argument("-n", "--nb_saves")
+            .scan<'i', int>()
+            .default_value(1000)
+            .help("number of save when training");
 
-    while (!renderer.is_close()) {
-        glm::mat4 model_matrix =
-                glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 10.f)) *
-                glm::rotate(glm::mat4(1.f), float(angle), glm::normalize(glm::vec3(0.5f, 0.5f, 0.5f)));
+    train_parser.add_argument("-l", "--learning_rate")
+            .scan<'g', float>()
+            .default_value(1e-4f)
+            .help("agent learning rate");
 
-        renderer.draw(std::map<std::string, glm::mat4>({{"cube", model_matrix}}));
+    /*
+     * Run parser
+     */
 
-        angle += 0.01f;
+    argparse::ArgumentParser run_parser("run");
+
+    run_parser.add_argument("input_folder")
+            .required()
+            .help("input folder containing .th file");
+
+    run_parser.add_argument("-w", "--width")
+            .scan<'i', int>()
+            .default_value(1024)
+            .help("window width");
+
+    run_parser.add_argument("-h", "--height")
+            .scan<'i', int>()
+            .default_value(1024)
+            .help("window height");
+
+    parser.add_subparser(run_parser);
+    parser.add_subparser(train_parser);
+
+    try {
+        parser.parse_args(argc, argv);
+    }
+    catch (const std::runtime_error &err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << parser;
+        std::exit(1);
+    }
+
+    if (parser.is_subcommand_used(train_parser))
+        train(
+                1234,
+                train_parser.get<std::string>("output_path"),
+                {
+                        train_parser.get<float>("learning_rate"),
+                        train_parser.get<int>("nb_saves"),
+                        train_parser.get<int>("episodes")
+                }
+        );
+    else if (parser.is_subcommand_used(run_parser))
+        infer(1234,
+              {
+                      run_parser.get<std::string>("input_folder"),
+                      run_parser.get<int>("width"),
+                      run_parser.get<int>("height"),
+              }
+        );
+    else {
+        std::cerr << "must enter a subcommand" << std::endl << parser.help().str() << std::endl;
+        exit(1);
     }
 
     return 0;
