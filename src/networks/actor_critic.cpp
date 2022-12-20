@@ -31,7 +31,7 @@ void ActorCritic::train() {
         sigmas_tmp.push_back(sigma);
         values_tmp.push_back(value);
     }
-    
+
     auto actions = torch::cat(actions_buffer);
     auto values = torch::cat(values_tmp);
     auto mus = torch::cat(mus_tmp);
