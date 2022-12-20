@@ -15,7 +15,7 @@ torch::Tensor ActorCritic::act(step step) {
     rewards_buffer.push_back(step.reward);
     results_buffer.push_back(response);
     actions_buffer.push_back(action);
-
+    
     return action;
 }
 
