@@ -20,7 +20,7 @@ CartPole::CartPole(int seed) :
         slider_force(2e2f),
         chariot_push_force(1.f),
         limit_angle(float(M_PI * 0.25)),
-        reset_frame_nb(8),
+        reset_frame_nb(4),
         chariot_mass(1.f),
         pendulum_mass(0.5f),
         rng(seed),
@@ -135,7 +135,7 @@ step CartPole::compute_step() {
 
     torch::Tensor state = torch::tensor({pos, vel, vel - last_vel, ang, ang_vel, ang_vel - last_ang_vel});
 
-    bool done = pos > 10.f || pos < -10.f || ang > limit_angle * 2 || ang < -limit_angle * 2 || step_idx > max_steps;
+    bool done = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle || step_idx > max_steps;
     float reward = 1.f - abs(ang) / limit_angle;
 
     last_vel = vel;
@@ -190,7 +190,7 @@ void CartPole::reset_engine() {
     // Apply random force to chariot for reset_frame_nb steps
     // To prevent over-fitting
 
-    float rand_force = rd_uni(rng) * chariot_push_force * 2 - chariot_push_force;
+    float rand_force = rd_uni(rng) * chariot_push_force * 2.f - chariot_push_force;
     chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
     //chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 
