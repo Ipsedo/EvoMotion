@@ -9,12 +9,11 @@
 #include "./networks/actor_critic.h"
 
 torch::Tensor ActorCritic::act(step step) {
-    rewards_buffer.push_back(step.reward);
-
     auto response = networks->forward(step.state);
-    results_buffer.push_back(response);
-
     auto action = response.mu + torch::randn(response.mu.sizes()) * response.sigma.sqrt();
+
+    rewards_buffer.push_back(step.reward);
+    results_buffer.push_back(response);
     actions_buffer.push_back(action);
 
     return action;
@@ -32,6 +31,7 @@ void ActorCritic::train() {
         sigmas_tmp.push_back(sigma);
         values_tmp.push_back(value);
     }
+    
     auto actions = torch::cat(actions_buffer);
     auto values = torch::cat(values_tmp);
     auto mus = torch::cat(mus_tmp);
