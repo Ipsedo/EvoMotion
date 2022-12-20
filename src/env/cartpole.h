@@ -8,7 +8,7 @@
 #include <random>
 #include <btBulletDynamicsCommon.h>
 
-#include "./model/environment.h"
+#include "../model/environment.h"
 
 class SliderController : public Controller {
 public:

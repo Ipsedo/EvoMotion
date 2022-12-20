@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "./model/shapes.h"
+#include "shapes.h"
 
 std::vector<std::string> split(const std::string &s, char delim) {
     std::stringstream ss(s);

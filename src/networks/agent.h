@@ -9,7 +9,7 @@
 
 #include <torch/torch.h>
 
-#include "./model/environment.h"
+#include "../model/environment.h"
 
 class Agent {
 public:

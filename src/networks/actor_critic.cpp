@@ -6,7 +6,7 @@
 
 #include <torch/torch.h>
 
-#include "./networks/actor_critic.h"
+#include "actor_critic.h"
 
 torch::Tensor ActorCritic::act(step step) {
     auto response = networks->forward(step.state);

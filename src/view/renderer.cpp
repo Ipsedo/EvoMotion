@@ -9,7 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
 
-#include "./view/renderer.h"
+#include "renderer.h"
 
 void error_callback(int error, const char *description) {
     std::cerr << error << " " << description << std::endl;

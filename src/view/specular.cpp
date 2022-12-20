@@ -2,8 +2,8 @@
 // Created by samuel on 17/12/22.
 //
 
-#include "./view/constants.h"
-#include "./view/specular.h"
+#include "constants.h"
+#include "specular.h"
 
 OBjSpecular::OBjSpecular(const std::vector<std::tuple<float, float, float>> &vertices,
                          const std::vector<std::tuple<float, float, float>> &normals,

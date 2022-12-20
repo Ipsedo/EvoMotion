@@ -8,9 +8,9 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-#include "./view/constants.h"
-#include "./view/program.h"
-#include "./view/drawable.h"
+#include "constants.h"
+#include "program.h"
+#include "drawable.h"
 
 class OBjSpecular : public Drawable {
 private:

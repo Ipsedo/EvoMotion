@@ -11,7 +11,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <glm/glm.hpp>
 
-#include "./model/shapes.h"
+#include "shapes.h"
 
 class Item {
 public:

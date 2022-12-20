@@ -54,7 +54,7 @@ file(GLOB_RECURSE SRC "./src/*.cpp")
 add_executable(evo_motion ${SRC})
 
 # Include headers
-include_directories(evo_motion PUBLIC "./include")
+#include_directories(evo_motion PUBLIC "./include")
 
 # Link libraries
 target_link_libraries(

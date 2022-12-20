@@ -2,7 +2,7 @@
 // Created by samuel on 18/12/22.
 //
 
-#include "./model/environment.h"
+#include "environment.h"
 
 Environment::Environment(const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
                          bool continuous) :

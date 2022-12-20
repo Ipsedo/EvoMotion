@@ -2,8 +2,8 @@
 // Created by samuel on 18/12/22.
 //
 
-#include "./model/item.h"
-#include "./env/cartpole.h"
+#include "../model/item.h"
+#include "cartpole.h"
 
 SliderController::SliderController(btSliderConstraint *slider, float slider_speed) :
         slider(slider), slider_speed(slider_speed) {

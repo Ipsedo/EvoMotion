@@ -6,9 +6,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <utility>
 
-#include "./view/constants.h"
-#include "./view/program.h"
-#include "./view/shader.h"
+#include "constants.h"
+#include "program.h"
+#include "shader.h"
 
 /*
  * Buffer builder

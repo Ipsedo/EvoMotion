@@ -13,8 +13,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "./view/drawable.h"
-#include "./view/camera.h"
+#include "drawable.h"
+#include "camera.h"
 
 class Renderer {
 public:

@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "./view/shader.h"
+#include "shader.h"
 
 unsigned long get_file_length(std::ifstream &file) {
     if (!file.good()) return 0;

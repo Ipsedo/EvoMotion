@@ -12,7 +12,7 @@
 #include <torch/torch.h>
 #include <torch/nn.h>
 
-#include "./networks/agent.h"
+#include "agent.h"
 
 struct a2c_response {
     torch::Tensor mu;

@@ -7,7 +7,7 @@
 #include <utility>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "model/item.h"
+#include "item.h"
 
 Item::Item(std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale, float mass)
         : name(std::move(name)), shape(shape), scale(scale) {

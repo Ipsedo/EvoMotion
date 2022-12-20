@@ -9,8 +9,8 @@
 
 #include <btBulletDynamicsCommon.h>
 
-#include "./controller/controller.h"
-#include "./model/item.h"
+#include "../controller/controller.h"
+#include "item.h"
 
 struct step {
     torch::Tensor state;
