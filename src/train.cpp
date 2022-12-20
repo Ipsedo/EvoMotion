@@ -25,7 +25,7 @@ void train(int seed, const std::string &output_path, train_params params) {
     ActorCritic a2c(
             cart_pole.get_state_space(),
             cart_pole.get_action_space(),
-            32,
+            16,
             params.learning_rate
     );
 
@@ -37,7 +37,7 @@ void train(int seed, const std::string &output_path, train_params params) {
     for (int s = 0; s < params.nb_saves; s++) {
 
         int pb_bar_length = 100;
-        int tick_every = params.nb_episodes / pb_bar_length;
+        int tick_every = ceil(float(params.nb_episodes) / float(pb_bar_length));
 
         indicators::ProgressBar p_bar{
                 indicators::option::BarWidth(pb_bar_length),
@@ -50,9 +50,8 @@ void train(int seed, const std::string &output_path, train_params params) {
 
         for (int e = 0; e < params.nb_episodes; e++) {
 
-            while (!step.done) {
+            while (!step.done)
                 step = cart_pole.do_step(a2c.act(step), 1.f / 60.f);
-            }
 
             a2c.done(step);
             step = cart_pole.reset();
