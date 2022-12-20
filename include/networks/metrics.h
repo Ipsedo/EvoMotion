@@ -15,18 +15,22 @@ private:
 
 protected:
     std::vector<R> results;
+
     virtual R process_value(I... inputs) = 0;
 
 public:
     explicit Meter(std::optional<int> window_size);
+
     virtual void add(I... inputs);
-    void set_window_size(std::optional<int> new_window_size);
+
+    virtual void set_window_size(std::optional<int> new_window_size);
 };
 
 
 class LossMeter : public Meter<float, float> {
 public:
     explicit LossMeter(std::optional<int> window_size);
+
     float loss();
 
 protected:

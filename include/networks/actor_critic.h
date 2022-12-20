@@ -23,7 +23,7 @@ struct a2c_response {
 struct a2c_networks : torch::nn::Module {
     a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
 
-    a2c_response forward(const torch::Tensor& state);
+    a2c_response forward(const torch::Tensor &state);
 
     torch::nn::Linear head{nullptr};
 
@@ -48,13 +48,15 @@ private:
     float episode_critic_loss;
 
     void train();
+
 public:
     ActorCritic(
-            const std::vector<int64_t>& state_space,
-            const std::vector<int64_t>& action_space,
+            const std::vector<int64_t> &state_space,
+            const std::vector<int64_t> &action_space,
             int hidden_size,
             float lr
-            );
+    );
+
     torch::Tensor act(step step) override;
 
     void done(step step) override;

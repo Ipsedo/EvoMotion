@@ -5,7 +5,8 @@
 #include "./model/item.h"
 #include "./env/cartpole.h"
 
-SliderController::SliderController(btSliderConstraint *slider, float slider_speed) : slider(slider), slider_speed(slider_speed) {
+SliderController::SliderController(btSliderConstraint *slider, float slider_speed) :
+        slider(slider), slider_speed(slider_speed) {
 
 }
 
@@ -14,25 +15,27 @@ void SliderController::on_input(torch::Tensor action) {
 }
 
 CartPole::CartPole(int seed) :
-Environment({4}, {1}, true),
-slider_speed(2.5f),
-slider_force(2e2f),
-chariot_push_force(1.f),
-limit_angle(float(M_PI * 0.25)),
-reset_frame_nb(8),
-chariot_mass(1.f),
-pendulum_mass(0.5f),
-rng(seed),
-step_idx(0),
-max_steps(60 * 60){
+        Environment({6}, {1}, true),
+        slider_speed(2.5f),
+        slider_force(2e2f),
+        chariot_push_force(1.f),
+        limit_angle(float(M_PI * 0.25)),
+        reset_frame_nb(8),
+        chariot_mass(1.f),
+        pendulum_mass(0.5f),
+        rng(seed),
+        step_idx(0),
+        max_steps(60 * 60),
+        last_ang_vel(0.f),
+        last_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;
 
-    float pendule_height = 0.7f, pendule_width = 0.1f, pendule_offset = pendule_height / 4.f;
+    float pendulum_height = 0.7f, pendulum_width = 0.1f, pendulum_offset = pendulum_height / 4.f;
 
     float chariot_height = 0.25f, chariot_width = 0.5f;
 
     chariot_pos = base_pos + base_height + chariot_height;
-    pendulum_pos = chariot_pos + chariot_height + pendule_height - pendule_offset;
+    pendulum_pos = chariot_pos + chariot_height + pendulum_height - pendulum_offset;
 
     // Create items
     // (init graphical and physical objects)
@@ -56,7 +59,7 @@ max_steps(60 * 60){
             "pendulum",
             std::make_shared<ObjShape>("/home/samuel/CLionProjects/EvoMotion/resources/obj/cube.obj"),
             glm::vec3(0.f, pendulum_pos, 10.f),
-            glm::vec3(pendule_width, pendule_height, pendule_width),
+            glm::vec3(pendulum_width, pendulum_height, pendulum_width),
             pendulum_mass
     );
 
@@ -75,7 +78,13 @@ max_steps(60 * 60){
     tr_chariot.setIdentity();
     tr_chariot.setOrigin(btVector3(0.f, -chariot_height, 0.f));
 
-    slider = new btSliderConstraint(*base.get_body(), *chariot.get_body(), tr_base, tr_chariot, true);
+    slider = new btSliderConstraint(
+            *base.get_body(),
+            *chariot.get_body(),
+            tr_base,
+            tr_chariot,
+            true
+    );
 
     controllers.push_back(std::make_shared<SliderController>(slider, slider_speed));
 
@@ -90,7 +99,7 @@ max_steps(60 * 60){
     btVector3 axis(0.f, 0.f, 1.f);
     hinge = new btHingeConstraint(*chariot.get_body(), *pendulum.get_body(),
                                   btVector3(0.f, chariot_height, 0.f),
-                                  btVector3(0.f, -pendule_height + pendule_offset, 0.f),
+                                  btVector3(0.f, -pendulum_height + pendulum_offset, 0.f),
                                   axis, axis, true);
 
     base_rg = base.get_body();
@@ -124,10 +133,13 @@ step CartPole::compute_step() {
     float ang = pendulum_rg->getWorldTransform().getRotation().getAngle();
     float ang_vel = pendulum_rg->getAngularVelocity().z();
 
-    torch::Tensor state = torch::tensor({pos, vel, ang, ang_vel});
+    torch::Tensor state = torch::tensor({pos, vel, vel - last_vel, ang, ang_vel, ang_vel - last_ang_vel});
 
     bool done = pos > 10.f || pos < -10.f || ang > limit_angle * 2 || ang < -limit_angle * 2 || step_idx > max_steps;
     float reward = 1.f - abs(ang) / limit_angle;
+
+    last_vel = vel;
+    last_ang_vel = ang_vel;
 
     step_idx += 1;
 
@@ -135,7 +147,7 @@ step CartPole::compute_step() {
 }
 
 void CartPole::reset_engine() {
-// Remove chariot and pendule rigidbody from bullet world
+    // Remove chariot and pendulum rigid body from bullet world
     m_world->removeRigidBody(chariot_rg);
     m_world->removeRigidBody(pendulum_rg);
 
@@ -178,8 +190,7 @@ void CartPole::reset_engine() {
     // Apply random force to chariot for reset_frame_nb steps
     // To prevent over-fitting
 
-    float rand_force = rd_uni(rng) * chariot_push_force;
-    rand_force = rd_uni(rng) > 0.5f ? rand_force : -rand_force;
+    float rand_force = rd_uni(rng) * chariot_push_force * 2 - chariot_push_force;
     chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
     //chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 

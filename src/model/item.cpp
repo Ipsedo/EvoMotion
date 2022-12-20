@@ -9,11 +9,12 @@
 
 #include "model/item.h"
 
-Item::Item(std::string name, const std::shared_ptr<Shape>& shape, glm::vec3 position, glm::vec3 scale, float mass) : name(std::move(name)), shape(shape), scale(scale) {
+Item::Item(std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale, float mass)
+        : name(std::move(name)), shape(shape), scale(scale) {
 
     auto *convex_hull_shape = new btConvexHullShape();
 
-    for (auto [x, y, z] : shape->get_vertices())
+    for (auto [x, y, z]: shape->get_vertices())
         convex_hull_shape->addPoint(btVector3(x, y, z));
 
     collision_shape = convex_hull_shape;
@@ -22,7 +23,7 @@ Item::Item(std::string name, const std::shared_ptr<Shape>& shape, glm::vec3 posi
 
     btVector3 local_inertia(0, 0, 0);
     if (mass != 0.f)
-        collision_shape->calculateLocalInertia(mass,local_inertia);
+        collision_shape->calculateLocalInertia(mass, local_inertia);
 
     btTransform original_tr;
     original_tr.setIdentity();

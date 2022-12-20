@@ -27,7 +27,7 @@ void ActorCritic::train() {
     std::vector<torch::Tensor> sigmas_tmp;
     std::vector<torch::Tensor> values_tmp;
 
-    for (auto [mu, sigma, value] : results_buffer) {
+    for (auto [mu, sigma, value]: results_buffer) {
         mus_tmp.push_back(mu);
         sigmas_tmp.push_back(sigma);
         values_tmp.push_back(value);
@@ -42,18 +42,19 @@ void ActorCritic::train() {
 
     auto returns = rewards * torch::pow(gamma, t_steps);
     returns = returns.flip({0})
-            .cumsum(0)
-            .flip({0})
-            / torch::pow(gamma, t_steps);
+                      .cumsum(0)
+                      .flip({0})
+              / torch::pow(gamma, t_steps);
     returns = (returns - returns.mean()) / (returns.std() + 1e-8f);
 
     auto advantage = returns - values;
 
     auto prob = torch::exp(-0.5f * torch::pow((actions - mus) / (sigmas + 1e-8f), 2.f))
-            / (sigmas * sqrt(2. * M_PI) + 1e-8f);
+                / (sigmas * sqrt(2. * M_PI) + 1e-8f);
     auto log_prob = torch::log(prob + 1e-8);
+    auto entropy = 0.5f * torch::log(2 * M_PI * torch::pow(sigmas, 2.f)) + 0.5f;
 
-    auto actor_loss = -log_prob * advantage.detach();
+    auto actor_loss = -(log_prob * advantage.detach() + 0.1 * entropy);
 
     auto critic_loss = torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None);
 
@@ -78,11 +79,11 @@ void ActorCritic::done(step step) {
 }
 
 ActorCritic::ActorCritic(
-        const std::vector<int64_t>& state_space,
-        const std::vector<int64_t>& action_space,
+        const std::vector<int64_t> &state_space,
+        const std::vector<int64_t> &action_space,
         int hidden_size,
         float lr
-        ) :
+) :
         gamma(0.95),
         networks(std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
         rewards_buffer(),
@@ -90,8 +91,7 @@ ActorCritic::ActorCritic(
         actions_buffer(),
         optimizer(networks->parameters(), lr),
         episode_actor_loss(0.f),
-        episode_critic_loss(0.f)
-        {
+        episode_critic_loss(0.f) {
 
 }
 
@@ -129,7 +129,8 @@ void ActorCritic::load(const std::string &input_folder_path) {
 }
 
 std::map<std::string, float> ActorCritic::get_metrics() {
-    return {{"actor_loss", episode_actor_loss}, {"critic_loss", episode_critic_loss}};
+    return {{"actor_loss",  episode_actor_loss},
+            {"critic_loss", episode_critic_loss}};
 }
 
 /*
@@ -146,13 +147,13 @@ a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t
     sigma = register_module("sigma", torch::nn::Linear(hidden_size, action_space[0]));
 }
 
-a2c_response a2c_networks::forward(const torch::Tensor& state) {
+a2c_response a2c_networks::forward(const torch::Tensor &state) {
     auto head_out = torch::relu(head->forward(state));
 
     return {
-        torch::tanh(mu->forward(head_out)),
-        torch::softplus(sigma->forward(head_out)),
-        critic->forward(head_out)
+            torch::tanh(mu->forward(head_out)),
+            torch::softplus(sigma->forward(head_out)),
+            critic->forward(head_out)
     };
 }
 

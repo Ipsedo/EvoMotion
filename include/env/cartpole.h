@@ -13,7 +13,9 @@
 class SliderController : public Controller {
 public:
     explicit SliderController(btSliderConstraint *slider, float slider_speed);
+
     void on_input(torch::Tensor action) override;
+
 private:
     btSliderConstraint *slider;
     float slider_speed;
@@ -31,6 +33,7 @@ protected:
     step compute_step() override;
 
     void reset_engine() override;
+
 private:
     float slider_speed;
     float slider_force;
@@ -62,6 +65,9 @@ private:
 
     int step_idx;
     int max_steps;
+
+    float last_vel;
+    float last_ang_vel;
 
 };
 

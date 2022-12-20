@@ -20,7 +20,7 @@ class Renderer {
 public:
     Renderer(const std::string &title, int width, int height, std::shared_ptr<Camera> camera);
 
-    void add_drawable(const std::string &name, const std::shared_ptr<Drawable>& drawable);
+    void add_drawable(const std::string &name, const std::shared_ptr<Drawable> &drawable);
 
     bool is_close() const;
 

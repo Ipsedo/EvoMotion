@@ -29,7 +29,6 @@ LossMeter::LossMeter(std::optional<int> window_size) : Meter(window_size) {
 }
 
 
-
 float LossMeter::loss() {
     float sum = std::accumulate(results.begin(), results.end(), 0.f);
     return sum / (float) results.size();

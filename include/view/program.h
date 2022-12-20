@@ -38,7 +38,7 @@ public:
                 const std::vector<std::string> &attributes,
 
                 const std::map<std::string, std::vector<float>> &buffers
-                );
+        );
 
         std::string vertex_shader_path;
         std::string fragment_shader_path;

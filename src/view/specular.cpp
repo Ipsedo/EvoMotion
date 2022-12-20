@@ -51,11 +51,11 @@ OBjSpecular::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 light_pos
     program.use();
 
     program.attrib(
-        "a_position",
-        "vertices_normals_buffer",
-        POSITION_SIZE,
-        STRIDE,
-        0
+            "a_position",
+            "vertices_normals_buffer",
+            POSITION_SIZE,
+            STRIDE,
+            0
     );
 
     program.attrib(

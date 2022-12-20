@@ -4,7 +4,8 @@
 
 #include "./model/environment.h"
 
-Environment::Environment(const std::vector<int64_t>& state_space, const std::vector<int64_t>& action_space, bool continuous) :
+Environment::Environment(const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+                         bool continuous) :
         state_space(state_space), action_space(action_space), continuous(continuous),
         m_collision_configuration(new btDefaultCollisionConfiguration()),
         m_dispatcher(new btCollisionDispatcher(m_collision_configuration)),
@@ -24,8 +25,8 @@ void Environment::add_item(Item item) {
     m_world->addRigidBody(item.get_body());
 }
 
-step Environment::do_step(const torch::Tensor& action, float delta) {
-    for (const auto& c : get_controllers())
+step Environment::do_step(const torch::Tensor &action, float delta) {
+    for (const auto &c: get_controllers())
         c->on_input(action);
 
     m_world->stepSimulation(delta);

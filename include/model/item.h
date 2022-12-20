@@ -15,7 +15,7 @@
 
 class Item {
 public:
-    Item(std::string name, const std::shared_ptr<Shape>& shape, glm::vec3 position, glm::vec3 scale, float mass);
+    Item(std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale, float mass);
 
     std::shared_ptr<Shape> get_shape();
 
@@ -23,7 +23,8 @@ public:
 
     glm::mat4 model_matrix();
 
-    btRigidBody * get_body();
+    btRigidBody *get_body();
+
 private:
     std::string name;
 

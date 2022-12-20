@@ -14,7 +14,7 @@ public:
             glm::mat4 mv_matrix,
             glm::vec3 light_pos_from_camera,
             glm::vec3 camera_pos
-            ) = 0;
+    ) = 0;
 };
 
 #endif //EVO_MOTION_DRAWABLE_H

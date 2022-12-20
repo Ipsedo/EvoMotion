@@ -62,7 +62,7 @@ Program Program::Builder::build() {
 
     glLinkProgram(program.program_id);
 
-    for (const auto &[name, data] : buffers) {
+    for (const auto &[name, data]: buffers) {
         program.buffer_ids.insert({name, 0});
 
         glGenBuffers(1, &program.buffer_ids[name]);
@@ -73,10 +73,10 @@ Program Program::Builder::build() {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    for (const auto &name : uniforms)
+    for (const auto &name: uniforms)
         program.uniform_handles.insert({name, glGetUniformLocation(program.program_id, name.c_str())});
 
-    for (const auto &name : attributes)
+    for (const auto &name: attributes)
         program.attribute_handles.insert({name, glGetAttribLocation(program.program_id, name.c_str())});
 
     return program;
@@ -90,7 +90,7 @@ void Program::kill() {
     glDeleteShader(vertex_shader_id);
     glDeleteShader(fragment_shader_id);
 
-    for (auto [name, buffer_id] : buffer_ids)
+    for (auto [name, buffer_id]: buffer_ids)
         glDeleteBuffers(1, &buffer_id);
 
     glDeleteProgram(program_id);
@@ -131,7 +131,7 @@ void Program::attrib(const std::string &name, const std::string &buffer_name, in
 }
 
 void Program::disable_attrib_array() {
-    for (auto [name, attrib_id] : attribute_handles)
+    for (auto [name, attrib_id]: attribute_handles)
         glDisableVertexAttribArray(attrib_id);
 }
 

@@ -10,7 +10,9 @@
 class Camera {
 public:
     virtual glm::vec3 pos() = 0;
+
     virtual glm::vec3 look() = 0;
+
     virtual glm::vec3 up() = 0;
 };
 
@@ -20,7 +22,7 @@ public:
             glm::vec3 pos,
             glm::vec3 look,
             glm::vec3 up
-            );
+    );
 
     glm::vec3 pos() override;
 
