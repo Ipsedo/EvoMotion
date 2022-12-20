@@ -8,10 +8,7 @@ We will first try to reproduce the results of the article [Flexible Muscle-Based
 
 ## Requirements
 This project requires multiple libraries.
-
-* Physic engine stuff : Bullet
-
-* Graphic stuff : OpenGL, GLM, GLEW, GLFW and SOIL
-
-* Reinforcement Learning : LibTorch
-
+* physic engine stuff : Bullet
+* graphic stuff : OpenGL, GLM, GLEW, GLFW
+* reinforcement learning : LibTorch
+* utils stuff : [argparse](https://github.com/p-ranav/argparse), [indicators](https://github.com/p-ranav/indicators)
