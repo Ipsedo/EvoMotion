@@ -60,6 +60,9 @@ private:
     std::mt19937 rng;
     std::uniform_real_distribution<float> rd_uni;
 
+    int step_idx;
+    int max_steps;
+
 };
 
 #endif //EVO_MOTION_CARTPOLE_H

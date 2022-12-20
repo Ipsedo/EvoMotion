@@ -2,6 +2,8 @@
 // Created by samuel on 19/12/22.
 //
 
+#include <filesystem>
+
 #include <torch/torch.h>
 
 #include "./networks/actor_critic.h"
@@ -49,7 +51,7 @@ void ActorCritic::train() {
 
     auto prob = torch::exp(-0.5f * torch::pow((actions - mus) / sigmas, 2.f))
             / (sigmas * sqrt(2. * M_PI));
-    auto log_prob = torch::log(prob);
+    auto log_prob = torch::log(prob + 1e-8);
 
     auto actor_loss = -log_prob * advantage.detach();
 
@@ -61,7 +63,8 @@ void ActorCritic::train() {
     loss.backward();
     optimizer.step();
 
-    std::cout << "policy " << actor_loss.sum().item() << " critic " << critic_loss.sum().item() << std::endl;
+    episode_actor_loss = actor_loss.sum().item().toFloat();
+    episode_critic_loss = critic_loss.sum().item().toFloat();
 }
 
 void ActorCritic::done(step step) {
@@ -86,9 +89,52 @@ ActorCritic::ActorCritic(
         results_buffer(),
         actions_buffer(),
         optimizer(networks->parameters(), lr),
-        rng(1234) {
+        episode_actor_loss(0.f),
+        episode_critic_loss(0.f)
+        {
 
 }
+
+void ActorCritic::save(const std::string &output_folder_path) {
+    std::filesystem::path path(output_folder_path);
+
+    auto networks_file = path / "networks.th";
+    auto optimizer_file = path / "optimizer.th";
+
+    torch::serialize::OutputArchive networks_archive;
+    torch::serialize::OutputArchive optimizer_archive;
+
+    // Save networks
+    networks->save(networks_archive);
+    optimizer.save(optimizer_archive);
+
+    networks_archive.save_to(networks_file);
+    optimizer_archive.save_to(optimizer_file);
+}
+
+void ActorCritic::load(const std::string &input_folder_path) {
+    std::filesystem::path path(input_folder_path);
+
+    auto networks_file = path / "networks.th";
+    auto optimizer_file = path / "optimizer.th";
+
+    torch::serialize::InputArchive networks_archive;
+    torch::serialize::InputArchive optimizer_archive;
+
+    networks_archive.load_from(networks_file);
+    optimizer_archive.load_from(optimizer_file);
+
+    networks->load(networks_archive);
+    optimizer.load(optimizer_archive);
+}
+
+std::map<std::string, float> ActorCritic::get_metrics() {
+    return {{"actor_loss", episode_actor_loss}, {"critic_loss", episode_critic_loss}};
+}
+
+/*
+ * torch Module
+ */
 
 a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t> action_space,
                            int hidden_size) {
@@ -98,7 +144,6 @@ a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t
 
     mu = register_module("mu", torch::nn::Linear(hidden_size, action_space[0]));
     sigma = register_module("sigma", torch::nn::Linear(hidden_size, action_space[0]));
-
 }
 
 a2c_response a2c_networks::forward(const torch::Tensor& state) {

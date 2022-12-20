@@ -44,7 +44,8 @@ private:
     std::vector<float> rewards_buffer;
     std::vector<torch::Tensor> actions_buffer;
 
-    std::mt19937 rng;
+    float episode_actor_loss;
+    float episode_critic_loss;
 
     void train();
 public:
@@ -58,6 +59,11 @@ public:
 
     void done(step step) override;
 
+    void save(const std::string &output_folder_path) override;
+
+    void load(const std::string &input_folder_path) override;
+
+    std::map<std::string, float> get_metrics() override;
 };
 
 

@@ -32,13 +32,19 @@ find_package(glfw3 REQUIRED)
 include_directories(${GLFW_INCLUDE_DIRS})
 
 # argparse
-# fetch latest argparse
 include(FetchContent)
 FetchContent_Declare(
         argparse
         GIT_REPOSITORY https://github.com/p-ranav/argparse.git
 )
 FetchContent_MakeAvailable(argparse)
+
+# indicators
+FetchContent_Declare(
+        indicators
+        GIT_REPOSITORY https://github.com/p-ranav/indicators.git
+)
+FetchContent_MakeAvailable(indicators)
 
 # evo_motion part
 # Get all source files
@@ -48,7 +54,7 @@ file(GLOB_RECURSE SRC "./src/*.cpp")
 add_executable(evo_motion ${SRC})
 
 # Include headers
-target_include_directories(evo_motion PUBLIC "./include")
+include_directories(evo_motion PUBLIC "./include")
 
 # Link libraries
 target_link_libraries(
@@ -60,6 +66,7 @@ target_link_libraries(
         GLEW
         ${TORCH_LIBRARIES}
         argparse
+        indicators
 )
 
 set(source "${CMAKE_SOURCE_DIR}/shaders")

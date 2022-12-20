@@ -17,12 +17,14 @@ CartPole::CartPole(int seed) :
 Environment({4}, {1}, true),
 slider_speed(5.f),
 slider_force(2e2f),
-chariot_push_force(8.f),
+chariot_push_force(4.f),
 limit_angle(float(M_PI * 0.25)),
 reset_frame_nb(2),
 chariot_mass(1.f),
 pendulum_mass(1e-1f),
-rng(seed) {
+rng(seed),
+step_idx(0),
+max_steps(10 * 60){
     float base_height = 2.f, base_pos = -4.f;
 
     float pendule_height = 0.7f, pendule_width = 0.1f, pendule_offset = pendule_height / 4.f;
@@ -124,8 +126,10 @@ step CartPole::compute_step() {
 
     torch::Tensor state = torch::tensor({pos, vel, ang, ang_vel});
 
-    bool done = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
-    float reward = done ? 0 : abs(limit_angle - abs(ang) / limit_angle);
+    bool done = pos > 8.f || pos < -8.f || ang > limit_angle * 2 || ang < -limit_angle * 2 || step_idx > max_steps;
+    float reward = (limit_angle - abs(ang)) / limit_angle;
+
+    step_idx += 1;
 
     return {state, reward, done};
 }
@@ -183,4 +187,6 @@ void CartPole::reset_engine() {
         m_world->stepSimulation(1.f / 60.f);
 
     slider->setPoweredLinMotor(true);
+
+    step_idx = 0;
 }
