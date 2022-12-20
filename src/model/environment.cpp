@@ -47,6 +47,6 @@ std::vector<int64_t> Environment::get_action_space() {
     return action_space;
 }
 
-bool Environment::is_continuous() {
+bool Environment::is_continuous() const {
     return continuous;
 }

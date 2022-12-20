@@ -54,7 +54,7 @@ public:
 
     std::vector<int64_t> get_action_space();
 
-    bool is_continuous();
+    bool is_continuous() const;
 };
 
 #endif //EVO_MOTION_ENVIRONMENT_H
