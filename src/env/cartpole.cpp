@@ -15,16 +15,16 @@ void SliderController::on_input(torch::Tensor action) {
 
 CartPole::CartPole(int seed) :
 Environment({4}, {1}, true),
-slider_speed(5.f),
+slider_speed(2.5f),
 slider_force(2e2f),
-chariot_push_force(4.f),
+chariot_push_force(1.f),
 limit_angle(float(M_PI * 0.25)),
-reset_frame_nb(2),
+reset_frame_nb(8),
 chariot_mass(1.f),
-pendulum_mass(1e-1f),
+pendulum_mass(0.5f),
 rng(seed),
 step_idx(0),
-max_steps(10 * 60){
+max_steps(60 * 60){
     float base_height = 2.f, base_pos = -4.f;
 
     float pendule_height = 0.7f, pendule_width = 0.1f, pendule_offset = pendule_height / 4.f;
@@ -126,8 +126,8 @@ step CartPole::compute_step() {
 
     torch::Tensor state = torch::tensor({pos, vel, ang, ang_vel});
 
-    bool done = pos > 8.f || pos < -8.f || ang > limit_angle * 2 || ang < -limit_angle * 2 || step_idx > max_steps;
-    float reward = (limit_angle - abs(ang)) / limit_angle;
+    bool done = pos > 10.f || pos < -10.f || ang > limit_angle * 2 || ang < -limit_angle * 2 || step_idx > max_steps;
+    float reward = 1.f - abs(ang) / limit_angle;
 
     step_idx += 1;
 
