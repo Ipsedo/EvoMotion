@@ -148,10 +148,10 @@ a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t
 }
 
 a2c_response a2c_networks::forward(const torch::Tensor &state) {
-    auto head_out = torch::relu(head->forward(state));
+    auto head_out = torch::gelu(head->forward(state));
 
     return {
-            torch::tanh(mu->forward(head_out)),
+            mu->forward(head_out),
             torch::softplus(sigma->forward(head_out)),
             critic->forward(head_out)
     };
