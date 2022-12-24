@@ -31,8 +31,10 @@ include_directories(${OPENGL_INCLUDE_DIRS})
 find_package(glfw3 REQUIRED)
 include_directories(${GLFW_INCLUDE_DIRS})
 
-# argparse
+# FetchContent -> get libraries from git
 include(FetchContent)
+
+# argparse
 FetchContent_Declare(
         argparse
         GIT_REPOSITORY https://github.com/p-ranav/argparse.git
@@ -53,9 +55,6 @@ file(GLOB_RECURSE SRC "./src/*.cpp")
 # Create EvoMotion executable
 add_executable(evo_motion ${SRC})
 
-# Include headers
-#include_directories(evo_motion PUBLIC "./include")
-
 # Link libraries
 target_link_libraries(
         evo_motion
@@ -69,11 +68,14 @@ target_link_libraries(
         indicators
 )
 
-set(source "${CMAKE_SOURCE_DIR}/shaders")
-set(destination "${CMAKE_CURRENT_BINARY_DIR}/shaders")
-add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
-        DEPENDS ${destination}
-        COMMENT "symbolic link resources folder from ${source} => ${destination}"
-)
+function(add_extra_folder source destination)
+    add_custom_command(
+            TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
+            DEPENDS ${destination}
+            COMMENT "symbolic link resources folder from ${source} => ${destination}"
+    )
+endfunction()
+
+add_extra_folder("${CMAKE_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+add_extra_folder("${CMAKE_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources")

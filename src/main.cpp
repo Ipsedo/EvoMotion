@@ -14,6 +14,16 @@
 int main(int argc, char **argv) {
     argparse::ArgumentParser parser("evo_motion");
 
+    parser.add_argument("--seed")
+            .scan<'i', int>()
+            .default_value(1234)
+            .help("seed for RNG");
+
+    parser.add_argument("--cuda")
+            .default_value(false)
+            .implicit_value(true)
+            .help("enable cuda for neural networks");
+
     /*
      * Train parser
      */
@@ -73,16 +83,18 @@ int main(int argc, char **argv) {
 
     if (parser.is_subcommand_used(train_parser))
         train(
-                1234,
-                train_parser.get<std::string>("output_path"),
+                parser.get<int>("seed"),
+                parser.get<bool>("cuda"),
                 {
+                        train_parser.get<std::string>("output_path"),
                         train_parser.get<float>("learning_rate"),
                         train_parser.get<int>("nb_saves"),
                         train_parser.get<int>("episodes")
                 }
         );
     else if (parser.is_subcommand_used(run_parser))
-        infer(1234,
+        infer(parser.get<int>("seed"),
+              parser.get<bool>("cuda"),
               {
                       run_parser.get<std::string>("input_folder"),
                       run_parser.get<int>("width"),

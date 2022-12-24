@@ -25,16 +25,17 @@ struct a2c_networks : torch::nn::Module {
 
     a2c_response forward(const torch::Tensor &state);
 
-    torch::nn::Linear head{nullptr};
-
-    torch::nn::Linear critic{nullptr};
-
+    torch::nn::Sequential actor{nullptr};
     torch::nn::Linear mu{nullptr};
     torch::nn::Linear sigma{nullptr};
+
+    torch::nn::Sequential critic{nullptr};
 };
 
 class ActorCritic : public Agent {
 private:
+    torch::DeviceType curr_device;
+
     float gamma;
 
     std::shared_ptr<a2c_networks> networks;
@@ -51,6 +52,7 @@ private:
 
 public:
     ActorCritic(
+            int seed,
             const std::vector<int64_t> &state_space,
             const std::vector<int64_t> &action_space,
             int hidden_size,
@@ -66,7 +68,8 @@ public:
     void load(const std::string &input_folder_path) override;
 
     std::map<std::string, float> get_metrics() override;
-};
 
+    void to(torch::DeviceType device) override;
+};
 
 #endif //EVO_MOTION_ACTOR_CRITIC_H

@@ -10,8 +10,8 @@
 #include "./view/renderer.h"
 #include "./view/specular.h"
 
-void infer(int seed, const run_params &params) {
-    CartPole cart_pole(1234);
+void infer(int seed, bool cuda, const run_params &params) {
+    CartPole cart_pole(seed);
 
     std::shared_ptr<Camera> camera = std::make_shared<StaticCamera>(
             glm::vec3(0.f, 0.f, -1.f),
@@ -44,14 +44,19 @@ void infer(int seed, const run_params &params) {
         renderer.add_drawable(i.get_name(), specular);
     }
 
-    ActorCritic a2c(
-            cart_pole.get_state_space(),
-            cart_pole.get_action_space(),
-            32,
-            1e-4f
+    ActorCritic a2c(0,
+                    cart_pole.get_state_space(),
+                    cart_pole.get_action_space(),
+                    32,
+                    1e-4f
     );
 
     a2c.load(params.input_folder);
+
+    if (cuda) {
+        a2c.to(torch::kCUDA);
+        cart_pole.to(torch::kCUDA);
+    }
 
     step step = cart_pole.reset();
     while (!renderer.is_close()) {
@@ -66,6 +71,7 @@ void infer(int seed, const run_params &params) {
 
         if (step.done) {
             step = cart_pole.reset();
+            std::cout << "reset" << std::endl;
         }
     }
 }

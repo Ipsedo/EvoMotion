@@ -14,6 +14,6 @@ struct run_params {
     int window_height;
 };
 
-void infer(int seed, const run_params &params);
+void infer(int seed, bool cuda, const run_params &params);
 
 #endif //EVO_MOTION_RUN_H

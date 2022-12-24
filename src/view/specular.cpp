@@ -28,8 +28,8 @@ OBjSpecular::OBjSpecular(const std::vector<std::tuple<float, float, float>> &ver
     }
 
     program = Program::Builder(
-            "/home/samuel/CLionProjects/EvoMotion/shaders/specular_vs.glsl",
-            "/home/samuel/CLionProjects/EvoMotion/shaders/specular_fs.glsl"
+            "./shaders/specular_vs.glsl",
+            "./shaders/specular_fs.glsl"
     ).add_uniform("u_mvp_matrix")
             .add_uniform("u_mv_matrix")
             .add_uniform("u_ambient_color")

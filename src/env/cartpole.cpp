@@ -16,14 +16,15 @@ void SliderController::on_input(torch::Tensor action) {
 
 CartPole::CartPole(int seed) :
         Environment({6}, {1}, true),
-        slider_speed(2.5f),
-        slider_force(2e2f),
-        chariot_push_force(1.f),
+        slider_speed(8.f),
+        slider_force(16.f),
+        chariot_push_force(4.f),
         limit_angle(float(M_PI * 0.25)),
-        reset_frame_nb(4),
+        reset_frame_nb(8),
         chariot_mass(1.f),
-        pendulum_mass(0.5f),
+        pendulum_mass(0.25f),
         rng(seed),
+        rd_uni(0.f, 1.f),
         step_idx(0),
         max_steps(60 * 60),
         last_ang_vel(0.f),
@@ -41,7 +42,7 @@ CartPole::CartPole(int seed) :
     // (init graphical and physical objects)
     Item base = Item(
             "base",
-            std::make_shared<ObjShape>("/home/samuel/CLionProjects/EvoMotion/resources/obj/cube.obj"),
+            std::make_shared<ObjShape>("./resources/obj/cube.obj"),
             glm::vec3(0.f, base_pos, 10.f),
             glm::vec3(10.f, base_height, 10.f),
             0.f
@@ -49,7 +50,7 @@ CartPole::CartPole(int seed) :
 
     Item chariot = Item(
             "chariot",
-            std::make_shared<ObjShape>("/home/samuel/CLionProjects/EvoMotion/resources/obj/cube.obj"),
+            std::make_shared<ObjShape>("./resources/obj/cube.obj"),
             glm::vec3(0.f, chariot_pos, 10.f),
             glm::vec3(chariot_width, chariot_height, chariot_width),
             chariot_mass
@@ -133,10 +134,16 @@ step CartPole::compute_step() {
     float ang = pendulum_rg->getWorldTransform().getRotation().getAngle();
     float ang_vel = pendulum_rg->getAngularVelocity().z();
 
-    torch::Tensor state = torch::tensor({pos, vel, vel - last_vel, ang, ang_vel, ang_vel - last_ang_vel});
+    torch::Tensor state = torch::tensor(
+            {pos, vel, vel - last_vel, ang, ang_vel, ang_vel - last_ang_vel},
+            at::TensorOptions().device(curr_device)
+    );
 
-    bool done = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle || step_idx > max_steps;
+    bool fail = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
+    bool win = step_idx > max_steps;
+    bool done = fail || win;
     float reward = 1.f - abs(ang) / limit_angle;
+    reward = fail ? -1.f : (win ? 1.f : reward);
 
     last_vel = vel;
     last_ang_vel = ang_vel;

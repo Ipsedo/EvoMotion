@@ -6,6 +6,7 @@
 
 Environment::Environment(const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
                          bool continuous) :
+        curr_device(torch::kCPU),
         state_space(state_space), action_space(action_space), continuous(continuous),
         m_collision_configuration(new btDefaultCollisionConfiguration()),
         m_dispatcher(new btCollisionDispatcher(m_collision_configuration)),
@@ -49,4 +50,8 @@ std::vector<int64_t> Environment::get_action_space() {
 
 bool Environment::is_continuous() const {
     return continuous;
+}
+
+void Environment::to(torch::DeviceType device) {
+    curr_device = device;
 }

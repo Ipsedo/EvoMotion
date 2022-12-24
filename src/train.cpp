@@ -11,28 +11,34 @@
 #include "./networks/actor_critic.h"
 #include "./train.h"
 
-void train(int seed, const std::string &output_path, train_params params) {
+void train(int seed, bool cuda, const train_params &params) {
 
-    if (!std::filesystem::exists(output_path))
-        std::filesystem::create_directory(output_path);
-    else if (!std::filesystem::is_directory(output_path)) {
-        std::cerr << "'" << output_path << "' is not a directory" << std::endl;
+    if (!std::filesystem::exists(params.output_path))
+        std::filesystem::create_directory(params.output_path);
+    else if (!std::filesystem::is_directory(params.output_path)) {
+        std::cerr << "'" << params.output_path << "' is not a directory" << std::endl;
         exit(1);
     }
 
     CartPole cart_pole(seed);
 
-    ActorCritic a2c(
-            cart_pole.get_state_space(),
-            cart_pole.get_action_space(),
-            16,
-            params.learning_rate
+    ActorCritic a2c(0,
+                    cart_pole.get_state_space(),
+                    cart_pole.get_action_space(),
+                    16,
+                    params.learning_rate
     );
+
+    if (cuda) {
+        a2c.to(torch::kCUDA);
+        cart_pole.to(torch::kCUDA);
+    }
 
     step step = cart_pole.reset();
 
     LossMeter actor_loss_meter(32);
     LossMeter critic_loss_meter(32);
+
 
     for (int s = 0; s < params.nb_saves; s++) {
 
@@ -73,7 +79,7 @@ void train(int seed, const std::string &output_path, train_params params) {
         }
 
         // save agent
-        auto save_folder_path = std::filesystem::path(output_path) / ("save_" + std::to_string(s));
+        auto save_folder_path = std::filesystem::path(params.output_path) / ("save_" + std::to_string(s));
         std::filesystem::create_directory(save_folder_path);
         a2c.save(save_folder_path);
     }

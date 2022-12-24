@@ -27,6 +27,8 @@ private:
 
 
 protected:
+    torch::DeviceType curr_device;
+
     btDefaultCollisionConfiguration *m_collision_configuration;
     btCollisionDispatcher *m_dispatcher;
     btBroadphaseInterface *m_broad_phase;
@@ -55,6 +57,8 @@ public:
     std::vector<int64_t> get_action_space();
 
     bool is_continuous() const;
+
+    void to(torch::DeviceType device);
 };
 
 #endif //EVO_MOTION_ENVIRONMENT_H
