@@ -14,6 +14,10 @@
 int main(int argc, char **argv) {
     argparse::ArgumentParser parser("evo_motion");
 
+    parser.add_argument("environment")
+            .default_value("cartpole")
+            .help("the environment");
+
     parser.add_argument("--seed")
             .scan<'i', int>()
             .default_value(1234)
@@ -86,6 +90,7 @@ int main(int argc, char **argv) {
                 parser.get<int>("seed"),
                 parser.get<bool>("cuda"),
                 {
+                        parser.get<std::string>("environment"),
                         train_parser.get<std::string>("output_path"),
                         train_parser.get<float>("learning_rate"),
                         train_parser.get<int>("nb_saves"),
@@ -93,13 +98,15 @@ int main(int argc, char **argv) {
                 }
         );
     else if (parser.is_subcommand_used(run_parser))
-        infer(parser.get<int>("seed"),
-              parser.get<bool>("cuda"),
-              {
-                      run_parser.get<std::string>("input_folder"),
-                      run_parser.get<int>("width"),
-                      run_parser.get<int>("height"),
-              }
+        infer(
+                parser.get<int>("seed"),
+                parser.get<bool>("cuda"),
+                {
+                        parser.get<std::string>("environment"),
+                        run_parser.get<std::string>("input_folder"),
+                        run_parser.get<int>("width"),
+                        run_parser.get<int>("height"),
+                }
         );
     else {
         std::cerr << "must enter a subcommand" << std::endl << parser.help().str() << std::endl;

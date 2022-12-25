@@ -2,23 +2,15 @@
 // Created by samuel on 18/12/22.
 //
 
+#include "../controller/slider.h"
 #include "../model/item.h"
 #include "cartpole.h"
-
-SliderController::SliderController(btSliderConstraint *slider, float slider_speed) :
-        slider(slider), slider_speed(slider_speed) {
-
-}
-
-void SliderController::on_input(torch::Tensor action) {
-    slider->setTargetLinMotorVelocity(action[0].item().toFloat() * slider_speed);
-}
 
 CartPole::CartPole(int seed) :
         Environment({6}, {1}, true),
         slider_speed(8.f),
-        slider_force(16.f),
-        chariot_push_force(4.f),
+        slider_force(32.f),
+        chariot_push_force(2.f),
         limit_angle(float(M_PI * 0.25)),
         reset_frame_nb(8),
         chariot_mass(1.f),
@@ -87,7 +79,7 @@ CartPole::CartPole(int seed) :
             true
     );
 
-    controllers.push_back(std::make_shared<SliderController>(slider, slider_speed));
+    controllers.push_back(std::make_shared<SliderController>(0, slider, slider_speed));
 
     slider->setEnabled(true);
     slider->setPoweredLinMotor(true);
@@ -142,7 +134,7 @@ step CartPole::compute_step() {
     bool fail = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
     bool win = step_idx > max_steps;
     bool done = fail || win;
-    float reward = 1.f - abs(ang) / limit_angle;
+    float reward = 1.f - (abs(ang) / limit_angle) * (abs(pos) / 8.f);
     reward = fail ? -1.f : (win ? 1.f : reward);
 
     last_vel = vel;

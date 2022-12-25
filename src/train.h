@@ -8,6 +8,8 @@
 #include <string>
 
 struct train_params {
+    std::string env_name;
+
     std::string output_path;
 
     float learning_rate;

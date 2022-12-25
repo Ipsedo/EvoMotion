@@ -25,11 +25,12 @@ struct a2c_networks : torch::nn::Module {
 
     a2c_response forward(const torch::Tensor &state);
 
-    torch::nn::Sequential actor{nullptr};
+    torch::nn::Sequential head{nullptr};
+
     torch::nn::Linear mu{nullptr};
     torch::nn::Linear sigma{nullptr};
 
-    torch::nn::Sequential critic{nullptr};
+    torch::nn::Linear critic{nullptr};
 };
 
 class ActorCritic : public Agent {

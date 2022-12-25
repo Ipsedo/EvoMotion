@@ -8,6 +8,8 @@
 #include <string>
 
 struct run_params {
+    std::string env_name;
+
     std::string input_folder;
 
     int window_width;

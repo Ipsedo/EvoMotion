@@ -7,7 +7,7 @@
 #include <indicators/progress_bar.hpp>
 
 #include "./networks/metrics.h"
-#include "./env/cartpole.h"
+#include "./env/builder.h"
 #include "./networks/actor_critic.h"
 #include "./train.h"
 
@@ -20,21 +20,22 @@ void train(int seed, bool cuda, const train_params &params) {
         exit(1);
     }
 
-    CartPole cart_pole(seed);
+    EnvBuilder env_builder(seed, params.env_name);
+    std::shared_ptr<Environment> env = env_builder.get();
 
     ActorCritic a2c(0,
-                    cart_pole.get_state_space(),
-                    cart_pole.get_action_space(),
+                    env->get_state_space(),
+                    env->get_action_space(),
                     16,
                     params.learning_rate
     );
 
     if (cuda) {
         a2c.to(torch::kCUDA);
-        cart_pole.to(torch::kCUDA);
+        env->to(torch::kCUDA);
     }
 
-    step step = cart_pole.reset();
+    step step = env->reset();
 
     LossMeter actor_loss_meter(32);
     LossMeter critic_loss_meter(32);
@@ -57,10 +58,10 @@ void train(int seed, bool cuda, const train_params &params) {
         for (int e = 0; e < params.nb_episodes; e++) {
 
             while (!step.done)
-                step = cart_pole.do_step(a2c.act(step), 1.f / 60.f);
+                step = env->do_step(a2c.act(step), 1.f / 60.f);
 
             a2c.done(step);
-            step = cart_pole.reset();
+            step = env->reset();
 
             auto metrics = a2c.get_metrics();
 
