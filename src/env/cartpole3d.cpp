@@ -8,7 +8,7 @@
 CartPole3d::CartPole3d(int seed) :
         Environment({17}, {2}, true),
         slider_speed(8.f),
-        slider_force(32.f),
+        slider_force(16.f),
         chariot_push_force(1.f),
         reset_frame_nb(8),
         limit_angle(float(M_PI * 0.25)),

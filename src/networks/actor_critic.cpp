@@ -71,8 +71,7 @@ void ActorCritic::train() {
 
     auto critic_loss = torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None);
 
-    // sum over steps, mean over actions
-    auto loss = (actor_loss + critic_loss.unsqueeze(-1)).sum(0).mean();
+    auto loss = (actor_loss + critic_loss.unsqueeze(-1)).sum();
 
     optimizer.zero_grad();
     loss.backward();
