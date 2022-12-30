@@ -19,7 +19,7 @@ ActorCritic::ActorCritic(int seed, const std::vector<int64_t> &state_space, cons
         optimizer(networks->parameters(), lr),
         episode_actor_loss(0.f),
         episode_critic_loss(0.f) {
-
+    at::manual_seed(seed);
 }
 
 torch::Tensor ActorCritic::act(step step) {
@@ -147,18 +147,33 @@ a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t
             torch::nn::GELU()
     ));
 
-    mu = register_module("mu", torch::nn::Linear(hidden_size, action_space[0]));
-    sigma = register_module("sigma", torch::nn::Linear(hidden_size, action_space[0]));
+    mu = register_module("mu", torch::nn::Sequential(
+            torch::nn::Linear(hidden_size, hidden_size),
+            torch::nn::GELU(),
+            torch::nn::Linear(hidden_size, action_space[0]),
+            torch::nn::Tanh()
+    ));
 
-    critic = register_module("critic", torch::nn::Linear(hidden_size, 1));
+    sigma = register_module("sigma", torch::nn::Sequential(
+            torch::nn::Linear(hidden_size, hidden_size),
+            torch::nn::GELU(),
+            torch::nn::Linear(hidden_size, action_space[0]),
+            torch::nn::Softplus()
+    ));
+
+    critic = register_module("critic", torch::nn::Sequential(
+            torch::nn::Linear(hidden_size, hidden_size),
+            torch::nn::GELU(),
+            torch::nn::Linear(hidden_size, 1)
+    ));
 }
 
 a2c_response a2c_networks::forward(const torch::Tensor &state) {
     auto head_out = head->forward(state);
 
     return {
-            torch::tanh(mu->forward(head_out)),
-            torch::softplus(sigma->forward(head_out)),
+            mu->forward(head_out),
+            sigma->forward(head_out),
             critic->forward(head_out)
     };
 }

@@ -16,6 +16,8 @@ struct train_params {
 
     int nb_saves;
     int nb_episodes;
+
+    int hidden_size;
 };
 
 void train(int seed, bool cuda, const train_params &params);

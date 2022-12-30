@@ -27,10 +27,10 @@ struct a2c_networks : torch::nn::Module {
 
     torch::nn::Sequential head{nullptr};
 
-    torch::nn::Linear mu{nullptr};
-    torch::nn::Linear sigma{nullptr};
+    torch::nn::Sequential mu{nullptr};
+    torch::nn::Sequential sigma{nullptr};
 
-    torch::nn::Linear critic{nullptr};
+    torch::nn::Sequential critic{nullptr};
 };
 
 class ActorCritic : public Agent {

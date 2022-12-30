@@ -48,7 +48,7 @@ void infer(int seed, bool cuda, const run_params &params) {
     ActorCritic a2c(0,
                     env->get_state_space(),
                     env->get_action_space(),
-                    32,
+                    params.hidden_size,
                     1e-4f
     );
 

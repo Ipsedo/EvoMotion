@@ -14,6 +14,8 @@ struct run_params {
 
     int window_width;
     int window_height;
+
+    int hidden_size;
 };
 
 void infer(int seed, bool cuda, const run_params &params);

@@ -63,7 +63,16 @@ private:
 
     float last_vel_x;
     float last_vel_z;
-    btVector3 last_ang_vel;
+
+    float last_ang;
+    float last_ang_vel;
+    btVector3 last_ang_vel_vec;
+
+    float last_vert_ang;
+    float last_vert_ang_vel;
+
+    float last_plan_ang;
+    float last_plan_ang_vec;
 
     float limit_angle;
 

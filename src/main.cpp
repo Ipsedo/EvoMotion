@@ -28,6 +28,11 @@ int main(int argc, char **argv) {
             .implicit_value(true)
             .help("enable cuda for neural networks");
 
+    parser.add_argument("--hidden_size")
+            .default_value(32)
+            .scan<'i', int>()
+            .help("neural network hidden size");
+
     /*
      * Train parser
      */
@@ -94,7 +99,8 @@ int main(int argc, char **argv) {
                         train_parser.get<std::string>("output_path"),
                         train_parser.get<float>("learning_rate"),
                         train_parser.get<int>("nb_saves"),
-                        train_parser.get<int>("episodes")
+                        train_parser.get<int>("episodes"),
+                        parser.get<int>("hidden_size")
                 }
         );
     else if (parser.is_subcommand_used(run_parser))
@@ -106,6 +112,7 @@ int main(int argc, char **argv) {
                         run_parser.get<std::string>("input_folder"),
                         run_parser.get<int>("width"),
                         run_parser.get<int>("height"),
+                        parser.get<int>("hidden_size")
                 }
         );
     else {
