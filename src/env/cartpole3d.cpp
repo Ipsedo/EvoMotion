@@ -8,7 +8,7 @@
 CartPole3d::CartPole3d(int seed) :
         Environment({28}, {2}, true),
         slider_speed(16.f),
-        slider_force(64.f),
+        slider_force(32.f),
         chariot_push_force(2.f),
         reset_frame_nb(8),
         limit_angle(float(M_PI) * 0.25f),
@@ -220,7 +220,7 @@ step CartPole3d::compute_step() {
 
     bool done = fail || win;
 
-    float reward = 1.f - (abs(ang) / limit_angle) * (center_distance / 8.f);
+    float reward = (1.f - abs(ang) / limit_angle / 2.f) + (1.f - center_distance / 8.f / 2.f);
     reward = fail ? -1.f : (win ? 1.f : reward);
 
     last_vel_x = vel_x;
