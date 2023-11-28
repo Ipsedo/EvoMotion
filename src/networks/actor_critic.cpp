@@ -134,6 +134,11 @@ void ActorCritic::to(torch::DeviceType device) {
     networks->to(curr_device);
 }
 
+void ActorCritic::set_eval(bool eval) {
+    if (eval) networks->eval();
+    else networks->train();
+}
+
 /*
  * torch Module
  */
@@ -142,39 +147,44 @@ a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t
                            int hidden_size) {
     head = register_module("head", torch::nn::Sequential(
             torch::nn::Linear(state_space[0], hidden_size),
-            torch::nn::GELU(),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
             torch::nn::Linear(hidden_size, hidden_size),
-            torch::nn::GELU()
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5))
     ));
 
     mu = register_module("mu", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, hidden_size),
-            torch::nn::GELU(),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
             torch::nn::Linear(hidden_size, action_space[0]),
             torch::nn::Tanh()
     ));
 
     sigma = register_module("sigma", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, hidden_size),
-            torch::nn::GELU(),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
             torch::nn::Linear(hidden_size, action_space[0]),
             torch::nn::Softplus()
     ));
 
     critic = register_module("critic", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, hidden_size),
-            torch::nn::GELU(),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
             torch::nn::Linear(hidden_size, 1)
     ));
 }
 
 a2c_response a2c_networks::forward(const torch::Tensor &state) {
-    auto head_out = head->forward(state);
+    auto head_out = head->forward(state.unsqueeze(0));
 
     return {
-            mu->forward(head_out),
-            sigma->forward(head_out),
-            critic->forward(head_out)
+            mu->forward(head_out).squeeze(0),
+            sigma->forward(head_out).squeeze(0),
+            critic->forward(head_out).squeeze(0)
     };
 }
 

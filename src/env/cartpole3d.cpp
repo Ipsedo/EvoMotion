@@ -8,10 +8,10 @@
 CartPole3d::CartPole3d(int seed) :
         Environment({28}, {2}, true),
         slider_speed(16.f),
-        slider_force(32.f),
+        slider_force(64.f),
         chariot_push_force(2.f),
         reset_frame_nb(8),
-        limit_angle(float(M_PI) * 0.25f),
+        limit_angle(float(M_PI) / 2.f),
         base_scale(10.f, 1.f, 10.f),
         cart_x_scale(0.5f, 0.125f, 0.5f),
         cart_z_scale(0.5f, 0.125f, 0.5f),
@@ -23,7 +23,7 @@ CartPole3d::CartPole3d(int seed) :
         base_mass(0.f),
         cart_x_mass(1.f),
         cart_z_mass(1.f),
-        pole_mass(0.5f),
+        pole_mass(1.f),
         last_vel_x(0.f),
         last_vel_z(0.f),
         last_ang_vel_vec(0.f, 0.f, 0.f),
@@ -102,6 +102,8 @@ CartPole3d::CartPole3d(int seed) :
     slider_x->setTargetLinMotorVelocity(0.f);
     slider_x->setLowerLinLimit(-10.f);
     slider_x->setUpperLinLimit(10.f);
+    slider_x->setSoftnessLimAng(0.f);
+    slider_x->setSoftnessLimLin(0.f);
 
     controllers.push_back(std::make_shared<SliderController>(0, slider_x, slider_speed));
 
@@ -128,6 +130,8 @@ CartPole3d::CartPole3d(int seed) :
     slider_z->setTargetLinMotorVelocity(0.f);
     slider_z->setLowerLinLimit(-10.f);
     slider_z->setUpperLinLimit(10.f);
+    slider_z->setSoftnessLimAng(0.f);
+    slider_z->setSoftnessLimLin(0.f);
 
     controllers.push_back(std::make_shared<SliderController>(1, slider_z, slider_speed));
 
@@ -171,6 +175,8 @@ step CartPole3d::compute_step() {
     float vel_z = cart_z_rg->getLinearVelocity().z();
 
     float center_distance = sqrt(pow(cart_z_pos.x() - pos_x, 2.f) + pow(cart_z_pos.z() - pos_z, 2.f));
+    pos_x = pos_x - cart_z_pos.x();
+    pos_z = pos_z - cart_z_pos.z();
 
     auto ang_quaternion = pole_rg->getWorldTransform().getRotation();
     float ang_x = 0.f, ang_y = 0.f, ang_z = 0.f;
@@ -201,26 +207,28 @@ step CartPole3d::compute_step() {
 
     torch::Tensor state = torch::tensor(
             {
-                    center_distance,
-                    pos_x, vel_x, vel_x - last_vel_x,
-                    pos_z, vel_z, vel_z - last_vel_z,
-                    ang_x, ang_y, ang_z,
-                    ang, ang_vel, ang_vel - last_ang_vel,
+                    center_distance / base_scale.x(),
+                    pos_x / base_scale.x(), vel_x, vel_x - last_vel_x,
+                    pos_z / base_scale.z(), vel_z, vel_z - last_vel_z,
+                    ang_x / float(M_PI), ang_y / float(M_PI), ang_z / float(M_PI),
+                    ang / float(2. * M_PI) - 1.f, ang_vel, ang_vel - last_ang_vel,
                     ang_vel_vec.x(), ang_vel_vec.y(), ang_vel_vec.z(),
                     ang_acc_vec.x(), ang_acc_vec.y(), ang_acc_vec.z(),
                     axis.x(), axis.y(), axis.z(),
-                    plan_ang, plan_ang_vel, plan_ang_vel - last_plan_ang_vec,
-                    vertical_ang, vertical_ang_vel, vertical_ang_vel - last_vert_ang_vel
+                    plan_ang / float(M_PI), plan_ang_vel, plan_ang_vel - last_plan_ang_vec,
+                    vertical_ang / float(M_PI), vertical_ang_vel, vertical_ang_vel - last_vert_ang_vel
             },
             at::TensorOptions().device(curr_device)
     );
 
-    bool fail = center_distance > 8.f || abs(ang) > limit_angle;
+    bool fail = center_distance > base_scale.x() || abs(ang) > limit_angle;
     bool win = step_idx > max_steps;
 
     bool done = fail || win;
 
-    float reward = (1.f - abs(ang) / limit_angle / 2.f) + (1.f - center_distance / 8.f / 2.f);
+
+    float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f) *
+                   pow((base_scale.x() - center_distance) / base_scale.x(), 2.f);
     reward = fail ? -1.f : (win ? 1.f : reward);
 
     last_vel_x = vel_x;
