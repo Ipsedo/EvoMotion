@@ -8,7 +8,7 @@
 CartPole3d::CartPole3d(int seed) :
         Environment({28}, {2}, true),
         slider_speed(16.f),
-        slider_force(64.f),
+        slider_force_per_kg(32.f),
         chariot_push_force(2.f),
         reset_frame_nb(8),
         limit_angle(float(M_PI) / 2.f),
@@ -98,12 +98,18 @@ CartPole3d::CartPole3d(int seed) :
 
     slider_x->setEnabled(true);
     slider_x->setPoweredLinMotor(true);
-    slider_x->setMaxLinMotorForce(slider_force);
+    slider_x->setMaxLinMotorForce(slider_force_per_kg * (cart_x_mass + cart_z_mass + pole_mass));
     slider_x->setTargetLinMotorVelocity(0.f);
-    slider_x->setLowerLinLimit(-10.f);
-    slider_x->setUpperLinLimit(10.f);
-    slider_x->setSoftnessLimAng(0.f);
-    slider_x->setSoftnessLimLin(0.f);
+
+    slider_x->setLowerLinLimit(-100.f);
+    slider_x->setUpperLinLimit(100.f);
+
+    slider_x->setSoftnessOrthoLin(2.f);
+    slider_x->setSoftnessOrthoAng(2.f);
+    slider_x->setSoftnessDirLin(2.f);
+    slider_x->setSoftnessDirAng(2.f);
+    slider_x->setSoftnessLimLin(2.f);
+    slider_x->setSoftnessLimAng(2.f);
 
     controllers.push_back(std::make_shared<SliderController>(0, slider_x, slider_speed));
 
@@ -126,12 +132,18 @@ CartPole3d::CartPole3d(int seed) :
 
     slider_z->setEnabled(true);
     slider_z->setPoweredLinMotor(true);
-    slider_z->setMaxLinMotorForce(slider_force);
+    slider_z->setMaxLinMotorForce(slider_force_per_kg * (cart_z_mass + pole_mass));
     slider_z->setTargetLinMotorVelocity(0.f);
-    slider_z->setLowerLinLimit(-10.f);
-    slider_z->setUpperLinLimit(10.f);
-    slider_z->setSoftnessLimAng(0.f);
-    slider_z->setSoftnessLimLin(0.f);
+
+    slider_z->setLowerLinLimit(-100.f);
+    slider_z->setUpperLinLimit(100.f);
+
+    slider_z->setSoftnessOrthoLin(2.f);
+    slider_z->setSoftnessOrthoAng(2.f);
+    slider_z->setSoftnessDirLin(2.f);
+    slider_z->setSoftnessDirAng(2.f);
+    slider_z->setSoftnessLimLin(2.f);
+    slider_z->setSoftnessLimAng(2.f);
 
     controllers.push_back(std::make_shared<SliderController>(1, slider_z, slider_speed));
 
@@ -227,9 +239,9 @@ step CartPole3d::compute_step() {
     bool done = fail || win;
 
 
-    float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f) *
-                   pow((base_scale.x() - center_distance) / base_scale.x(), 2.f);
-    reward = fail ? -1.f : (win ? 1.f : reward);
+    float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f)
+                   + pow((base_scale.x() - center_distance) / base_scale.x(), 2.f);
+    reward = fail ? -2.f : (win ? 2.f : reward);
 
     last_vel_x = vel_x;
     last_vel_z = vel_z;

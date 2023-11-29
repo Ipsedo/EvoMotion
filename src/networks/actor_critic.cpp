@@ -11,7 +11,7 @@
 ActorCritic::ActorCritic(int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
                          int hidden_size, float lr) :
         curr_device(torch::kCPU),
-        gamma(0.95f),
+        gamma(0.99f),
         networks(std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
         rewards_buffer(),
         results_buffer(),
