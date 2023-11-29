@@ -1,34 +1,47 @@
 //
-// Created by samuel on 11/08/19.
+// Created by samuel on 17/12/22.
 //
 
-#ifndef EVOMOTION_RENDERER_H
-#define EVOMOTION_RENDERER_H
+#ifndef EVO_MOTION_RENDERER_H
+#define EVO_MOTION_RENDERER_H
 
-#include <vector>
-#include <thread>
-#include <glm/glm.hpp>
-#include "obj_mtl_vbo.h"
+#include <string>
+#include <memory>
+#include <map>
+
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "../model/item.h"
+#include <glm/glm.hpp>
 
-struct renderer {
+#include "drawable.h"
+#include "camera.h"
 
-	float m_width_px, m_height_px;
+class Renderer {
+public:
+    Renderer(const std::string &title, int width, int height, std::shared_ptr<Camera> camera);
 
-	GLFWwindow *m_window;
+    void add_drawable(const std::string &name, const std::shared_ptr<Drawable> &drawable);
 
-	glm::mat4 m_proj_mat;
-	glm::mat4 m_view_mat;
-	glm::vec3 m_cam_pos;
+    bool is_close() const;
 
-	bool m_is_on;
+    void close();
 
-	renderer(int width, int height);
+    void draw(std::map<std::string, glm::mat4> model_matrix);
 
-	void init();
+private:
+    std::string title;
 
-	void draw(float delta, std::vector<item> to_draw);
+    int width;
+    int height;
+
+    bool is_open;
+
+    glm::vec3 light_pos;
+    std::shared_ptr<Camera> camera;
+
+    std::map<std::string, std::shared_ptr<Drawable>> drawables;
+
+    GLFWwindow *window;
 };
 
-#endif //EVOMOTION_RENDERER_H
+#endif //EVO_MOTION_RENDERER_H

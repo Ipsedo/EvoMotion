@@ -1,140 +1,124 @@
-#include <CLI/CLI.hpp>
+//
+// Created by samuel on 15/12/22.
+//
 
-#include "tests/bullet_test.h"
-#include "tests/opengl_test.h"
-#include "tests/rl_test.h"
-#include "utils/res.h"
-#include "env/env_enum.h"
-#include "rl/agent_enum.h"
+#include <filesystem>
+#include <iostream>
+#include <memory>
 
-std::string exec_root;
+#include <argparse/argparse.hpp>
 
-int main(int argc, char *argv[]) {
-    exec_root = init_exec_root(argv[0]);
+#include "./train.h"
+#include "./run.h"
 
-    CLI::App app{"EvoMotion"};
+int main(int argc, char **argv) {
+    argparse::ArgumentParser parser("evo_motion");
 
-    app.require_subcommand(1);
+    parser.add_argument("environment")
+            .default_value("cartpole")
+            .help("the environment");
 
-    auto bullet_sc = app.add_subcommand("bullet", "Bullet test mode");
-    auto opengl_sc = app.add_subcommand("opengl", "OpenGL test mode");
-    auto rl_sc = app.add_subcommand("rl", "Reinforcement Learning mode");
+    parser.add_argument("--seed")
+            .scan<'i', int>()
+            .default_value(1234)
+            .help("seed for RNG");
 
-    /*
-     * RL parsing stuff
-     */
+    parser.add_argument("--cuda")
+            .default_value(false)
+            .implicit_value(true)
+            .help("enable cuda for neural networks");
 
-    int nb_episode;
-    std::string env, agent;
-    int hidden_size;
-    bool view;
-
-    rl_sc->add_option<int>("-n,--nb-episode", nb_episode)->set_default_val("1000");
-    rl_sc->add_option<std::string>("-e,--env", env)
-            ->check(
-            [](const std::string env_value) {
-                auto env_choices = EnvEnum::get_names();
-
-                if (std::find(env_choices.begin(), env_choices.end(), env_value) != env_choices.end())
-                    return std::string("");
-
-                std::string msg("RL environment must be = {");
-                for (const std::string &e : env_choices)
-                    msg.append(e + ", ");
-                return msg.substr(0, msg.length() - 2).append("}. current = ").append(env_value);
-            })->required(true);
-
-    rl_sc->add_option<std::string>("-a,--agent", agent)
-            ->check(
-            [](const std::string agent_value) {
-                auto agent_choices = AgentEnum::get_names();
-
-                if (std::find(agent_choices.begin(), agent_choices.end(), agent_value) != agent_choices.end())
-                    return std::string("");
-
-                std::string msg("RL agent must be = {");
-                for (const std::string &a : agent_choices)
-                    msg.append(a + ", ");
-                return msg.substr(0, msg.length() - 2).append("}. current = ").append(agent_value);
-            })->required(true);
-
-    rl_sc->add_flag("-v,--view", view, "Enable OpenGL view");
-
-    rl_sc->require_subcommand(1);
+    parser.add_argument("--hidden_size")
+            .default_value(32)
+            .scan<'i', int>()
+            .help("neural network hidden size");
 
     /*
-     * Train rl parsing stuff
+     * Train parser
      */
 
-    auto train_rl = rl_sc->add_subcommand("train", "Reinforcement Learning (train) mode");
+    argparse::ArgumentParser train_parser("train");
 
-    float epsilon, epsilon_decay, epsilon_min;
-    int max_episode_step, max_cons_success;
-    std::string output_folder;
+    train_parser.add_argument("output_path")
+            .required()
+            .help("output folder path (for models, metrics, etc)");
 
-    train_rl->add_option<float>("--epsilon", epsilon, "Epsilon value for training")
-            ->set_default_val("0.7");
-    train_rl->add_option<float>("--epsilon-decay", epsilon_decay, "Epsilon decay")
-            ->set_default_val("0.9999");
-    train_rl->add_option<float>("--epsilon-min", epsilon_min, "Minimum epsilon value")
-            ->set_default_val("5e-3");
-    train_rl->add_option<int>("--max-episode-step", max_episode_step, "Max episode step number")
-            ->set_default_val("1000");
-    train_rl->add_option<int>("--max-cons-success", max_cons_success, "Max consecutive success")
-            ->set_default_val("10");
-    train_rl->add_option("-o,--output-folder", output_folder, "Agent output folder")->required(true);
-    train_rl->add_option<int>("--hidden-size", hidden_size)->set_default_val("24");
+    train_parser.add_argument("-e", "--episodes")
+            .scan<'i', int>()
+            .default_value(1000)
+            .help("episode number per save");
+
+    train_parser.add_argument("-n", "--nb_saves")
+            .scan<'i', int>()
+            .default_value(1000)
+            .help("number of save when training");
+
+    train_parser.add_argument("-l", "--learning_rate")
+            .scan<'g', float>()
+            .default_value(1e-4f)
+            .help("agent learning rate");
 
     /*
-     * Test rl parsing stuff
+     * Run parser
      */
 
-    auto test_rl = rl_sc->add_subcommand("test", "Reinforcement Learning (train) mode");
+    argparse::ArgumentParser run_parser("run");
 
-    std::string input_folder;
+    run_parser.add_argument("input_folder")
+            .required()
+            .help("input folder containing .th file");
 
-    test_rl->add_option("-i,--input-folder", input_folder, "Agent input folder")->required(true);
+    run_parser.add_argument("-w", "--width")
+            .scan<'i', int>()
+            .default_value(1024)
+            .help("window width");
 
-    /*
-     * Parse args
-     */
+    run_parser.add_argument("-h", "--height")
+            .scan<'i', int>()
+            .default_value(1024)
+            .help("window height");
 
-    CLI11_PARSE(app, argc, argv);
+    parser.add_subparser(run_parser);
+    parser.add_subparser(train_parser);
 
-    if (bullet_sc->parsed()) test_bullet();
-    else if (opengl_sc->parsed()) test_opengl();
-    else if (rl_sc->parsed()) {
-
-        if (train_rl->parsed()) {
-            rl_train_info train_info;
-
-            train_info.env_name = env;
-            train_info.agent_name = agent;
-            train_info.nb_episode = nb_episode;
-            train_info.view = view == 1;
-            train_info.hidden_size = hidden_size;
-            train_info.max_episode_step = max_episode_step;
-            train_info.max_consecutive_success = max_cons_success;
-            train_info.eps = epsilon;
-            train_info.eps_decay = epsilon_decay;
-            train_info.eps_min = epsilon_min;
-            train_info.out_model_folder = output_folder;
-
-            train_reinforcement_learning(train_info);
-
-        } else if (test_rl->parsed()) {
-            rl_test_info test_info;
-
-            test_info.env_name = env;
-            test_info.agent_name = agent;
-            test_info.nb_episode = nb_episode;
-            test_info.view = view == 1;
-            test_info.in_model_folder = input_folder;
-
-            test_reinforcement_learning(test_info);
-        }
-
+    try {
+        parser.parse_args(argc, argv);
+    }
+    catch (const std::runtime_error &err) {
+        std::cerr << err.what() << std::endl;
+        std::cerr << parser;
+        std::exit(1);
     }
 
-    return EXIT_SUCCESS;
+    if (parser.is_subcommand_used(train_parser))
+        train(
+                parser.get<int>("seed"),
+                parser.get<bool>("cuda"),
+                {
+                        parser.get<std::string>("environment"),
+                        train_parser.get<std::string>("output_path"),
+                        train_parser.get<float>("learning_rate"),
+                        train_parser.get<int>("nb_saves"),
+                        train_parser.get<int>("episodes"),
+                        parser.get<int>("hidden_size")
+                }
+        );
+    else if (parser.is_subcommand_used(run_parser))
+        infer(
+                parser.get<int>("seed"),
+                parser.get<bool>("cuda"),
+                {
+                        parser.get<std::string>("environment"),
+                        run_parser.get<std::string>("input_folder"),
+                        run_parser.get<int>("width"),
+                        run_parser.get<int>("height"),
+                        parser.get<int>("hidden_size")
+                }
+        );
+    else {
+        std::cerr << "must enter a subcommand" << std::endl << parser.help().str() << std::endl;
+        exit(1);
+    }
+
+    return 0;
 }

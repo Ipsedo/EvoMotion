@@ -1,30 +1,16 @@
-uniform mat4 u_MVPMatrix;
-uniform mat4 u_MVMatrix;
+#version 150
 
-attribute vec4 a_Position;
-attribute vec4 a_material_ambient_Color;
-attribute vec4 a_material_diffuse_Color;
-attribute vec4 a_material_specular_Color;
-attribute vec3 a_Normal;
-attribute float a_material_shininess;
+uniform mat4 u_mvp_matrix;
+uniform mat4 u_mv_matrix;
 
-varying vec3 v_Position;
-varying vec4 v_material_ambient_Color;
-varying vec4 v_material_diffuse_Color;
-varying vec4 v_material_specular_Color;
-varying vec3 v_Normal;
-varying float v_material_shininess;
+attribute vec3 a_position;
+attribute vec3 a_normal;
+
+varying vec3 v_position;
+varying vec3 v_normal;
 
 void main(){
-    v_Position = vec3(u_MVMatrix * a_Position);
-
-    v_material_ambient_Color = a_material_ambient_Color;
-    v_material_diffuse_Color = a_material_diffuse_Color;
-    v_material_specular_Color = a_material_specular_Color;
-
-    v_Normal = normalize(vec3(u_MVMatrix * vec4(a_Normal, 0.0)));
-
-    v_material_shininess = a_material_shininess;
-
-    gl_Position = u_MVPMatrix * a_Position;
+    v_position = vec3(u_mv_matrix * vec4(a_position, 1.0));
+    v_normal = normalize(vec3(u_mv_matrix * vec4(a_normal, 0.0)));
+    gl_Position = u_mvp_matrix * vec4(a_position, 1.0);
 }

@@ -1,111 +1,63 @@
 //
-// Created by samuel on 13/08/19.
+// Created by samuel on 18/12/22.
 //
 
-#ifndef EVOMOTION_CARTPOLE_H
-#define EVOMOTION_CARTPOLE_H
+#ifndef EVO_MOTION_CARTPOLE_H
+#define EVO_MOTION_CARTPOLE_H
 
 #include <random>
-#include "environment.h"
+#include <btBulletDynamicsCommon.h>
 
-class CartPoleEnvParams {
-protected:
-	/*
-	 * Env params
-	 */
-	float slider_speed;
-	float slider_force;
+#include "../model/environment.h"
 
-	float chariot_push_force;
-
-	float limit_angle;
-
-	int reset_frame_nb;
-
-	float chariot_mass;
-	float pendule_mass;
-
-protected:
+class CartPole : public Environment {
 public:
-    CartPoleEnvParams(float slider_speed, float slider_force, float chariot_push_force,
-            float limit_angle, int reset_frame_nb, float chariot_mass, float pendule_mass);
-};
+    explicit CartPole(int seed);
 
-class CartPoleEnv : public CartPoleEnvParams, public Environment {
+    std::vector<Item> get_items() override;
+
+    std::vector<std::shared_ptr<Controller>> get_controllers() override;
+
+protected:
+    step compute_step() override;
+
+    void reset_engine() override;
+
 private:
+    float slider_speed;
+    float slider_force;
 
-	/*
-	 * Random stuff
-	 */
+    float chariot_push_force;
 
-	std::default_random_engine rd_gen;
-	std::uniform_real_distribution<float> rd_uni;
+    float limit_angle;
 
-	/*
-	 * Init cartpole env methods
-	 */
+    int reset_frame_nb;
 
-	std::vector<item> init_cartpole();
-
-public:
-
-	explicit CartPoleEnv(long seed, float slider_speed, float slider_force, float chariot_push_force,
-						 float limit_angle, int reset_frame_nb,
-						 float chariot_mass, float pendule_mass);
-
-	torch::IntArrayRef state_space() override;
-
-	~CartPoleEnv() override;
-
-protected:
-
-    /*
-     * Env params
-     */
+    float chariot_mass;
+    float pendulum_mass;
 
     float chariot_pos;
-    float pendule_pos;
+    float pendulum_pos;
 
-	/*
-	 * Bullet stuff
-	 */
+    std::vector<Item> items;
+    std::vector<std::shared_ptr<Controller>> controllers;
 
-	btRigidBody *base_rg;
-	btRigidBody *chariot_rg;
-	btRigidBody *pendule_rg;
+    btHingeConstraint *hinge;
+    btSliderConstraint *slider;
 
-	btHingeConstraint *hinge;
-	btSliderConstraint *slider;
+    btRigidBody *base_rg;
+    btRigidBody *chariot_rg;
+    btRigidBody *pendulum_rg;
 
-	/*
-	 * Environment stuff
-	 */
+    std::mt19937 rng;
+    std::uniform_real_distribution<float> rd_uni;
 
-	env_step compute_new_state() override;
+    int step_idx;
+    int max_steps;
 
-	env_step reset_engine() override;
+    float last_vel;
+    float last_ang_vel;
+
 };
 
-class ContinuousCartPoleEnv : public CartPoleEnv {
-public:
-	torch::IntArrayRef action_space() override;
-	explicit ContinuousCartPoleEnv(long seed);
-
-	bool is_action_discrete() override;
-
-protected:
-	void act(torch::Tensor action) override;
-};
-
-class DiscreteCartPoleEnv : public CartPoleEnv {
-public:
-    torch::IntArrayRef action_space() override;
-    explicit DiscreteCartPoleEnv(long seed);
-
-	bool is_action_discrete() override;
-
-protected:
-    void act(torch::Tensor action) override;
-};
-
-#endif //EVOMOTION_CARTPOLE_H
+#endif //EVO_MOTION_CARTPOLE_H

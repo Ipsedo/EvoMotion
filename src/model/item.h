@@ -1,57 +1,39 @@
 //
-// Created by samuel on 11/08/19.
+// Created by samuel on 18/12/22.
 //
 
-#ifndef EVOMOTION_ITEM_H
-#define EVOMOTION_ITEM_H
+#ifndef EVO_MOTION_ITEM_H
+#define EVO_MOTION_ITEM_H
+
+#include <memory>
+#include <string>
 
 #include <btBulletDynamicsCommon.h>
-#include <memory>
-#include "../view/obj_mtl_vbo.h"
+#include <glm/glm.hpp>
 
-/**
- * The base struct for all items
- * Contains :
- * - a Bullet physical object (btRigidBody)
- * - a OpenGL graphical object (ObjMtlVBO)
- * - a glm::vec3 scale
- */
-struct item {
-	btRigidBody *m_rg_body;
-	std::shared_ptr<ObjMtlVBO> m_obj_mtl_vbo;
-	glm::vec3 m_obj_mtl_vbo_scale;
+#include "shapes.h"
+
+class Item {
+public:
+    Item(std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale, float mass);
+
+    std::shared_ptr<Shape> get_shape();
+
+    std::string get_name();
+
+    glm::mat4 model_matrix();
+
+    btRigidBody *get_body();
+
+private:
+    std::string name;
+
+    std::shared_ptr<Shape> shape;
+
+    btRigidBody *body;
+    btCollisionShape *collision_shape;
+
+    glm::vec3 scale;
 };
 
-/**
- * Compute Bullet rigidbody infos
- * @param collision_shape The shape of the futur rigidbody
- * @param pos The intial position
- * @param rot_mat The initial rotation matrix
- * @param scale The object scale
- * @param mass The object mass
- * @return
- */
-btRigidBody::btRigidBodyConstructionInfo
-localCreateInfo(btCollisionShape *collision_shape, glm::vec3 pos, glm::mat4 rot_mat, glm::vec3 scale, float mass);
-
-/**
- * Create a item box
- * @param pos The box position
- * @param rot_mat The box rotation matrix
- * @param scale The box scale
- * @param mass The box mass
- * @return The item box (physical and graphical object)
- */
-item create_item_box(glm::vec3 pos, glm::mat4 rot_mat, glm::vec3 scale, float mass);
-
-/**
- * Create a item sphere
- * @param pos The center sphere position
- * @param rot_mat The sphere rotation matrix
- * @param radius The sphere scale
- * @param mass The sphere mass
- * @return The item sphere (physical and graphical object)
- */
-item create_item_sphere(glm::vec3 pos, glm::mat4 rot_mat, float radius, float mass);
-
-#endif //EVOMOTION_ITEM_H
+#endif //EVO_MOTION_ITEM_H
