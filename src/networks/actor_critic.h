@@ -71,6 +71,8 @@ public:
     std::map<std::string, float> get_metrics() override;
 
     void to(torch::DeviceType device) override;
+
+    void set_eval(bool eval) override;
 };
 
 #endif //EVO_MOTION_ACTOR_CRITIC_H

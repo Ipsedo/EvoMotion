@@ -59,6 +59,8 @@ void infer(int seed, bool cuda, const run_params &params) {
         env->to(torch::kCUDA);
     }
 
+    a2c.set_eval(true);
+
     step step = env->reset();
     while (!renderer.is_close()) {
         step = env->do_step(a2c.act(step), 1.f / 60.f);

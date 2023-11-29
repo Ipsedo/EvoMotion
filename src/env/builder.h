@@ -13,6 +13,7 @@
 class EnvBuilder {
 public:
     std::shared_ptr<Environment> get();
+
     explicit EnvBuilder(int seed, std::string env_name);
 
 private:

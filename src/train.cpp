@@ -35,6 +35,8 @@ void train(int seed, bool cuda, const train_params &params) {
         env->to(torch::kCUDA);
     }
 
+    a2c.set_eval(false);
+
     step step = env->reset();
 
     LossMeter actor_loss_meter(32);
@@ -53,6 +55,9 @@ void train(int seed, bool cuda, const train_params &params) {
                 indicators::option::Lead{">"},
                 indicators::option::Remainder{" "},
                 indicators::option::End{"]"},
+                indicators::option::ShowPercentage{true},
+                indicators::option::ShowElapsedTime{true},
+                indicators::option::ShowRemainingTime{true}
         };
 
         for (int e = 0; e < params.nb_episodes; e++) {
@@ -69,7 +74,7 @@ void train(int seed, bool cuda, const train_params &params) {
             critic_loss_meter.add(metrics["critic_loss"]);
 
             std::string p_bar_description =
-                    "Save " + std::to_string(s)
+                    "Save " + std::to_string(s - 1)
                     + ", actor = " + std::to_string(actor_loss_meter.loss())
                     + ", critic = " + std::to_string(critic_loss_meter.loss());
 

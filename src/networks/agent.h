@@ -24,6 +24,8 @@ public:
     virtual std::map<std::string, float> get_metrics() = 0;
 
     virtual void to(torch::DeviceType device) = 0;
+
+    virtual void set_eval(bool eval) = 0;
 };
 
 #endif //EVO_MOTION_AGENT_H

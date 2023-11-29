@@ -25,7 +25,7 @@ protected:
 private:
     int reset_frame_nb;
 
-    float slider_force;
+    float slider_force_per_kg;
     float slider_speed;
 
     float chariot_push_force;
