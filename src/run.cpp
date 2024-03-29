@@ -5,7 +5,7 @@
 #include <random>
 
 #include "./run.h"
-#include "./networks/actor_critic.h"
+#include "./networks/actor_critic_liquid.h"
 #include "./env/builder.h"
 #include "./view/renderer.h"
 #include "./view/specular.h"
@@ -46,10 +46,10 @@ void infer(int seed, bool cuda, const run_params &params) {
     }
 
     ActorCriticLiquid a2c(0,
-                    env->get_state_space(),
-                    env->get_action_space(),
-                    params.hidden_size,
-                    1e-4f
+                          env->get_state_space(),
+                          env->get_action_space(),
+                          params.hidden_size,
+                          1e-4f
     );
 
     a2c.load(params.input_folder);
