@@ -7,14 +7,14 @@
 #include "cartpole.h"
 
 CartPole::CartPole(int seed) :
-        Environment({6}, {1}, true),
-        slider_speed(8.f),
-        slider_force(32.f),
+        Environment({7}, {1}, true),
+        slider_speed(16.f),
+        slider_force(64.f),
         chariot_push_force(2.f),
-        limit_angle(float(M_PI * 0.25)),
+        limit_angle(float(M_PI * 0.5)),
         reset_frame_nb(8),
         chariot_mass(1.f),
-        pendulum_mass(0.25f),
+        pendulum_mass(1.f),
         rng(seed),
         rd_uni(0.f, 1.f),
         step_idx(0),
@@ -50,7 +50,7 @@ CartPole::CartPole(int seed) :
 
     Item pendulum = Item(
             "pendulum",
-            std::make_shared<ObjShape>("/home/samuel/CLionProjects/EvoMotion/resources/obj/cube.obj"),
+            std::make_shared<ObjShape>("./resources/obj/cube.obj"),
             glm::vec3(0.f, pendulum_pos, 10.f),
             glm::vec3(pendulum_width, pendulum_height, pendulum_width),
             pendulum_mass
@@ -121,21 +121,25 @@ std::vector<std::shared_ptr<Controller>> CartPole::get_controllers() {
 
 step CartPole::compute_step() {
     float pos = chariot_rg->getWorldTransform().getOrigin().x();
+    float base_pos = base_rg->getWorldTransform().getOrigin().x();
+    float center_distance = abs(pos - base_pos);
     float vel = chariot_rg->getLinearVelocity().x();
 
     float ang = pendulum_rg->getWorldTransform().getRotation().getAngle();
     float ang_vel = pendulum_rg->getAngularVelocity().z();
 
     torch::Tensor state = torch::tensor(
-            {pos, vel, vel - last_vel, ang, ang_vel, ang_vel - last_ang_vel},
+            {center_distance / 10.f,
+             (pos - base_pos) / 10.f, vel, vel - last_vel,
+             ang / float(2. * M_PI) - 1.f, ang_vel, ang_vel - last_ang_vel},
             at::TensorOptions().device(curr_device)
     );
 
-    bool fail = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
+    bool fail = pos > 10.f || pos < -10.f || ang > limit_angle || ang < -limit_angle;
     bool win = step_idx > max_steps;
     bool done = fail || win;
-    float reward = 1.f - (abs(ang) / limit_angle) * (abs(pos) / 8.f);
-    reward = fail ? -1.f : (win ? 1.f : reward);
+    float reward = (limit_angle - abs(ang)) / limit_angle + (10.f - center_distance) / 10.f;
+    reward = fail ? -2.f : (win ? 2.f : reward);
 
     last_vel = vel;
     last_ang_vel = ang_vel;
