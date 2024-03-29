@@ -22,18 +22,18 @@ An internet connexion is also required in order to download dependencies inside 
 3. Run training on 3D cartpole
     ```bash
    $ cd /path/to/EvoMotion/build
-   $ evo_motion cartpole3d --seed 1234 --cuda --hidden_size 64 train ./out/cartpole3d_a2c --episodes 1024 --nb_saves 1024 --learning_rate 1e-5
+   $ evo_motion cartpole3d --seed 1234 --cuda --hidden_size 32 train ./out/cartpole3d_a2c --episodes 1024 --nb_saves 1024 --learning_rate 1e-3
    ```
 4. Evaluate agent (here the 20th model save) with GLFW window of 1920 * 1024 pixels
    ```bash
-   $ evo_motion cartpole3d --seed 1234 --hidden_size 64 --cuda run ./out/cartpole3d_a2c/save_20 -w 1920 -h 1024
+   $ evo_motion cartpole3d --seed 1234 --hidden_size 32 --cuda run ./out/cartpole3d_a2c/save_20 -w 1920 -h 1024
    ```
 
 ## Requirements
 This project requires multiple libraries.
 * physic engine stuff : Bullet
 * graphic stuff : OpenGL, GLM, GLEW, GLFW
-* reinforcement learning : LibTorch
+* reinforcement learning : LibTorch (put libtorch folder in `/opt/`, see cmake file)
 * utils stuff : [argparse](https://github.com/p-ranav/argparse), [indicators](https://github.com/p-ranav/indicators)
 
 ## References
