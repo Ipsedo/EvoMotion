@@ -23,7 +23,7 @@ void train(int seed, bool cuda, const train_params &params) {
     EnvBuilder env_builder(seed, params.env_name);
     std::shared_ptr<Environment> env = env_builder.get();
 
-    ActorCritic a2c(seed,
+    ActorCriticLiquid a2c(seed,
                     env->get_state_space(),
                     env->get_action_space(),
                     params.hidden_size,

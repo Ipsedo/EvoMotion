@@ -16,7 +16,7 @@ ActorCritic::ActorCritic(int seed, const std::vector<int64_t> &state_space, cons
         rewards_buffer(),
         results_buffer(),
         actions_buffer(),
-        optimizer(networks->parameters(), lr),
+        optimizer(std::make_shared<torch::optim::Adam>(networks->parameters(), lr)),
         episode_actor_loss(0.f),
         episode_critic_loss(0.f) {
     at::manual_seed(seed);
@@ -73,9 +73,9 @@ void ActorCritic::train() {
 
     auto loss = (actor_loss + critic_loss.unsqueeze(-1)).sum();
 
-    optimizer.zero_grad();
+    optimizer->zero_grad();
     loss.backward();
-    optimizer.step();
+    optimizer->step();
 
     episode_actor_loss = actor_loss.sum().item().toFloat();
     episode_critic_loss = critic_loss.sum().item().toFloat();
@@ -102,7 +102,7 @@ void ActorCritic::save(const std::string &output_folder_path) {
 
     // Save networks
     networks->save(networks_archive);
-    optimizer.save(optimizer_archive);
+    optimizer->save(optimizer_archive);
 
     networks_archive.save_to(networks_file);
     optimizer_archive.save_to(optimizer_file);
@@ -121,7 +121,7 @@ void ActorCritic::load(const std::string &input_folder_path) {
     optimizer_archive.load_from(optimizer_file);
 
     networks->load(networks_archive);
-    optimizer.load(optimizer_archive);
+    optimizer->load(optimizer_archive);
 }
 
 std::map<std::string, float> ActorCritic::get_metrics() {
@@ -191,52 +191,80 @@ a2c_response a2c_networks::forward(const torch::Tensor &state) {
 
 a2c_liquid_networks::a2c_liquid_networks(std::vector<int64_t> state_space,
                                          std::vector<int64_t> action_space,
-                                         int hidden_size, int unfolding_steps) {
+                                         int neuron_number, int unfolding_steps) {
+    hidden_size = neuron_number;
+    steps = unfolding_steps;
 
     weight = register_module(
-            "weight", torch::nn::Linear(state_space[0], hidden_size)
+            "weight", torch::nn::Linear(torch::nn::LinearOptions(state_space[0], hidden_size).bias(false))
             );
 
     recurrent_weight = register_module(
-            "recurrent_weight", torch::nn::Linear(hidden_size, hidden_size)
+            "recurrent_weight", torch::nn::Linear(torch::nn::LinearOptions(hidden_size, hidden_size).bias(false))
             );
 
     bias = register_parameter("bias", torch::randn({1, hidden_size}));
 
+    a = register_parameter("a", torch::ones({1, hidden_size}));
+    tau = register_parameter("tau", torch::ones({1, hidden_size}));
+
     mu = register_module("mu", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size),
-            torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
             torch::nn::Linear(hidden_size, action_space[0]),
             torch::nn::Tanh()
     ));
 
     sigma = register_module("sigma", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size),
-            torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-            torch::nn::Linear(hidden_size, action_space[0]),
+           torch::nn::Linear(hidden_size, action_space[0]),
             torch::nn::Softplus()
     ));
 
-    critic = register_module("critic", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size),
-            torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-            torch::nn::Linear(hidden_size, 1)
-    ));
+    critic = register_module("critic", torch::nn::Linear(hidden_size, 1));
 
-    steps = unfolding_steps;
+    x_t = register_buffer("x_t", torch::mish(torch::randn({1, hidden_size})));
+}
 
+torch::Tensor a2c_liquid_networks::compute_step(const torch::Tensor &x_t_curr,
+                                                const torch::Tensor &i_t) {
+    return torch::mish(
+            weight(i_t)
+            + recurrent_weight(x_t_curr)
+            + bias
+            );
 }
 
 a2c_response a2c_liquid_networks::forward(const torch::Tensor &state) {
-    auto head_out = head->forward(state.unsqueeze(0));
+    auto batched_state = state.unsqueeze(0);
+
+    float delta_t = 1.f / float(steps);
+
+    for (int i = 0; i < steps; i++)
+        x_t = (x_t + delta_t * compute_step(x_t, batched_state) * a)
+                / (1.f + delta_t * (1.f / tau + compute_step(x_t, batched_state)));
 
     return {
-            mu->forward(head_out).squeeze(0),
-            sigma->forward(head_out).squeeze(0),
-            critic->forward(head_out).squeeze(0)
+            mu->forward(x_t).squeeze(0),
+            sigma->forward(x_t).squeeze(0),
+            critic->forward(x_t).squeeze(0)
     };
+}
+
+void a2c_liquid_networks::reset_x_t() {
+    x_t = torch::mish(torch::randn({1, hidden_size}, torch::TensorOptions().device(weight->weight.device())));
+}
+
+ActorCriticLiquid::ActorCriticLiquid(int seed,
+                                     const std::vector<int64_t> &state_space,
+                                     const std::vector<int64_t> &action_space,
+                                     int hidden_size, float lr) : ActorCritic(
+        seed, state_space, action_space, hidden_size, lr) {
+
+    networks = std::make_shared<a2c_liquid_networks>(state_space, action_space, hidden_size, 6);
+    optimizer = std::make_shared<torch::optim::Adam>(networks->parameters(), lr);
+}
+
+void ActorCriticLiquid::done(step step) {
+    ActorCritic::done(step);
+
+    std::dynamic_pointer_cast<a2c_liquid_networks>(networks)->reset_x_t();
 }
 
