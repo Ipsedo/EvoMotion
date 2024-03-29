@@ -75,4 +75,30 @@ public:
     void set_eval(bool eval) override;
 };
 
+
+struct a2c_liquid_networks : torch::nn::Module {
+    a2c_liquid_networks(
+            std::vector<int64_t> state_space,
+            std::vector<int64_t> action_space,
+            int hidden_size,
+            int unfolding_steps
+            );
+
+    void reset_x_t();
+    a2c_response forward(const torch::Tensor &state);
+
+    int steps;
+
+    torch::nn::Linear weight{nullptr};
+    torch::nn::Linear recurrent_weight{nullptr};
+    torch::Tensor bias;
+
+    torch::nn::Sequential mu{nullptr};
+    torch::nn::Sequential sigma{nullptr};
+
+    torch::nn::Sequential critic{nullptr};
+
+    torch::Tensor x_t;
+};
+
 #endif //EVO_MOTION_ACTOR_CRITIC_H

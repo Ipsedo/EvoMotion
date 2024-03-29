@@ -188,3 +188,55 @@ a2c_response a2c_networks::forward(const torch::Tensor &state) {
     };
 }
 
+
+a2c_liquid_networks::a2c_liquid_networks(std::vector<int64_t> state_space,
+                                         std::vector<int64_t> action_space,
+                                         int hidden_size, int unfolding_steps) {
+
+    weight = register_module(
+            "weight", torch::nn::Linear(state_space[0], hidden_size)
+            );
+
+    recurrent_weight = register_module(
+            "recurrent_weight", torch::nn::Linear(hidden_size, hidden_size)
+            );
+
+    bias = register_parameter("bias", torch::randn({1, hidden_size}));
+
+    mu = register_module("mu", torch::nn::Sequential(
+            torch::nn::Linear(hidden_size, hidden_size),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+            torch::nn::Linear(hidden_size, action_space[0]),
+            torch::nn::Tanh()
+    ));
+
+    sigma = register_module("sigma", torch::nn::Sequential(
+            torch::nn::Linear(hidden_size, hidden_size),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+            torch::nn::Linear(hidden_size, action_space[0]),
+            torch::nn::Softplus()
+    ));
+
+    critic = register_module("critic", torch::nn::Sequential(
+            torch::nn::Linear(hidden_size, hidden_size),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+            torch::nn::Linear(hidden_size, 1)
+    ));
+
+    steps = unfolding_steps;
+
+}
+
+a2c_response a2c_liquid_networks::forward(const torch::Tensor &state) {
+    auto head_out = head->forward(state.unsqueeze(0));
+
+    return {
+            mu->forward(head_out).squeeze(0),
+            sigma->forward(head_out).squeeze(0),
+            critic->forward(head_out).squeeze(0)
+    };
+}
+

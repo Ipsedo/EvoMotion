@@ -59,7 +59,7 @@ add_executable(evo_motion ${SRC})
 target_link_libraries(
         evo_motion
         ${BULLET_LIBRARIES}
-        glm
+        ${GLM_LIBRARIES}
         glfw
         OpenGL
         GLEW
