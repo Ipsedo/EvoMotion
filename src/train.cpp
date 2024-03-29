@@ -8,7 +8,7 @@
 
 #include "./networks/metrics.h"
 #include "./env/builder.h"
-#include "./networks/actor_critic.h"
+#include "./networks/actor_critic_liquid.h"
 #include "./train.h"
 
 void train(int seed, bool cuda, const train_params &params) {
@@ -23,11 +23,11 @@ void train(int seed, bool cuda, const train_params &params) {
     EnvBuilder env_builder(seed, params.env_name);
     std::shared_ptr<Environment> env = env_builder.get();
 
-    ActorCritic a2c(seed,
-                    env->get_state_space(),
-                    env->get_action_space(),
-                    params.hidden_size,
-                    params.learning_rate
+    ActorCriticLiquid a2c(seed,
+                          env->get_state_space(),
+                          env->get_action_space(),
+                          params.hidden_size,
+                          params.learning_rate
     );
 
     if (cuda) {

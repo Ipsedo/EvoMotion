@@ -20,10 +20,14 @@ struct a2c_response {
     torch::Tensor critic_value;
 };
 
-struct a2c_networks : torch::nn::Module {
+struct abstract_a2c_networks : torch::nn::Module {
+    virtual a2c_response forward(const torch::Tensor &state) = 0;
+};
+
+struct a2c_networks : abstract_a2c_networks {
     a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
 
-    a2c_response forward(const torch::Tensor &state);
+    a2c_response forward(const torch::Tensor &state) override;
 
     torch::nn::Sequential head{nullptr};
 
@@ -34,13 +38,14 @@ struct a2c_networks : torch::nn::Module {
 };
 
 class ActorCritic : public Agent {
+protected:
+    std::shared_ptr<abstract_a2c_networks> networks;
+    std::shared_ptr<torch::optim::Adam> optimizer;
+
 private:
     torch::DeviceType curr_device;
 
     float gamma;
-
-    std::shared_ptr<a2c_networks> networks;
-    torch::optim::Adam optimizer;
 
     std::vector<a2c_response> results_buffer;
     std::vector<float> rewards_buffer;

@@ -16,7 +16,7 @@ ActorCritic::ActorCritic(int seed, const std::vector<int64_t> &state_space, cons
         rewards_buffer(),
         results_buffer(),
         actions_buffer(),
-        optimizer(networks->parameters(), lr),
+        optimizer(std::make_shared<torch::optim::Adam>(networks->parameters(), lr)),
         episode_actor_loss(0.f),
         episode_critic_loss(0.f) {
     at::manual_seed(seed);
@@ -73,9 +73,9 @@ void ActorCritic::train() {
 
     auto loss = (actor_loss + critic_loss.unsqueeze(-1)).sum();
 
-    optimizer.zero_grad();
+    optimizer->zero_grad();
     loss.backward();
-    optimizer.step();
+    optimizer->step();
 
     episode_actor_loss = actor_loss.sum().item().toFloat();
     episode_critic_loss = critic_loss.sum().item().toFloat();
@@ -102,7 +102,7 @@ void ActorCritic::save(const std::string &output_folder_path) {
 
     // Save networks
     networks->save(networks_archive);
-    optimizer.save(optimizer_archive);
+    optimizer->save(optimizer_archive);
 
     networks_archive.save_to(networks_file);
     optimizer_archive.save_to(optimizer_file);
@@ -121,7 +121,7 @@ void ActorCritic::load(const std::string &input_folder_path) {
     optimizer_archive.load_from(optimizer_file);
 
     networks->load(networks_archive);
-    optimizer.load(optimizer_archive);
+    optimizer->load(optimizer_archive);
 }
 
 std::map<std::string, float> ActorCritic::get_metrics() {
@@ -187,4 +187,3 @@ a2c_response a2c_networks::forward(const torch::Tensor &state) {
             critic->forward(head_out).squeeze(0)
     };
 }
-
