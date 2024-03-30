@@ -194,7 +194,14 @@ step CartPole3d::compute_step() {
     float ang_x = 0.f, ang_y = 0.f, ang_z = 0.f;
     ang_quaternion.getEulerZYX(ang_x, ang_y, ang_z);
 
-    float ang = pole_rg->getWorldTransform().getRotation().getAngle();
+    btTransform identity;
+    identity.setIdentity();
+    identity.setOrigin(pole_pos);
+    btVector3 origin = btVector3(0, 1, 0).rotate(identity.getRotation().getAxis(), identity.getRotation().getAngle());
+    btVector3 rotated_ang = btVector3(0, 1, 0).rotate(pole_rg->getWorldTransform().getRotation().getAxis(),
+                                                      pole_rg->getWorldTransform().getRotation().getAngle());
+
+    float ang = acos(origin.dot(rotated_ang) / (origin.norm() * rotated_ang.norm()));
     float ang_vel = ang - last_ang;
 
     auto ang_vel_vec = pole_rg->getAngularVelocity();
