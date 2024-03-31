@@ -9,10 +9,10 @@
 
 struct a2c_liquid_networks : abstract_a2c_networks {
     a2c_liquid_networks(
-            std::vector<int64_t> state_space,
-            std::vector<int64_t> action_space,
-            int hidden_size,
-            int unfolding_steps
+        std::vector<int64_t> state_space,
+        std::vector<int64_t> action_space,
+        int hidden_size,
+        int unfolding_steps
     );
 
     void reset_x_t();
@@ -41,11 +41,11 @@ struct a2c_liquid_networks : abstract_a2c_networks {
 class ActorCriticLiquid : public ActorCritic {
 public:
     ActorCriticLiquid(
-            int seed,
-            const std::vector<int64_t> &state_space,
-            const std::vector<int64_t> &action_space,
-            int hidden_size,
-            float lr
+        int seed,
+        const std::vector<int64_t> &state_space,
+        const std::vector<int64_t> &action_space,
+        int hidden_size,
+        float lr
     );
 
     void done(step step) override;
