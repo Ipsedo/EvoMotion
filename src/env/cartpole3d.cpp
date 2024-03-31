@@ -11,7 +11,7 @@ CartPole3d::CartPole3d(int seed) :
         slider_force_per_kg(32.f),
         chariot_push_force(2.f),
         reset_frame_nb(8),
-        limit_angle(float(M_PI) * 2.f / 3.f),
+        limit_angle(float(M_PI) / 2.f),
         base_scale(10.f, 1.f, 10.f),
         cart_x_scale(0.5f, 0.125f, 0.5f),
         cart_z_scale(0.5f, 0.125f, 0.5f),
