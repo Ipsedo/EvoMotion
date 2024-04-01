@@ -28,7 +28,7 @@ public:
 
     glm::mat4 model_matrix();
 
-    glm::mat4 get_last_model_matrix();
+    glm::mat4 model_matrix_without_scale();
 
     btRigidBody *get_body();
 

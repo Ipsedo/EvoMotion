@@ -35,7 +35,6 @@ Item::Item(std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 mode
     btRigidBody::btRigidBodyConstructionInfo body_info(mass, motion_state, collision_shape, local_inertia);
 
     body = new btRigidBody(body_info);
-
 }
 
 Item::Item(std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::quat rotation,
@@ -63,6 +62,10 @@ btRigidBody *Item::get_body() {
 }
 
 glm::mat4 Item::model_matrix() {
+    return model_matrix_without_scale() * glm::scale(glm::mat4(1.f), scale);
+}
+
+glm::mat4 Item::model_matrix_without_scale() {
     btScalar tmp[16];
     btTransform tr;
 
@@ -70,20 +73,14 @@ glm::mat4 Item::model_matrix() {
 
     tr.getOpenGLMatrix(tmp);
 
-    curr_model_matrix = glm::make_mat4(tmp);
-
-    return curr_model_matrix * glm::scale(glm::mat4(1.f), scale);
-}
-
-glm::mat4 Item::get_last_model_matrix() {
-    return curr_model_matrix;
+    return glm::make_mat4(tmp);
 }
 
 std::tuple<Item, btHingeConstraint *>
 Item::attach_item_hinge(glm::mat4 model_in_parent, glm::mat4 attach_in_parent, glm::mat4 attach_in_sub,
                         glm::vec3 hinge_axis, std::string sub_name,
                         const std::shared_ptr<Shape> &sub_shape, glm::vec3 sub_scale, float mass) {
-    glm::mat4 sub_mat = get_last_model_matrix() * model_in_parent;
+    glm::mat4 sub_mat = model_matrix_without_scale() * model_in_parent;
 
     Item sub_item(std::move(sub_name), sub_shape, sub_mat, sub_scale, mass);
 
@@ -112,7 +109,7 @@ std::tuple<Item, btFixedConstraint *>
 Item::attach_item_fixed(glm::mat4 model_in_parent, glm::mat4 attach_in_parent, glm::mat4 attach_in_sub,
                         std::string sub_name,
                         const std::shared_ptr<Shape> &sub_shape, glm::vec3 sub_scale, float mass) {
-    glm::mat4 sub_mat = get_last_model_matrix() * model_in_parent;
+    glm::mat4 sub_mat = model_matrix_without_scale() * model_in_parent;
 
     Item sub_item(std::move(sub_name), sub_shape, sub_mat, sub_scale, mass);
 

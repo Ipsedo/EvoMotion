@@ -16,12 +16,12 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
               glm::translate(glm::mat4(1), glm::vec3(0.f, -5.f, 5.f)),
               glm::vec3(10.f, 1.f, 10.f), 0.f);
 
-    float fixed_angle = float(M_PI) / 4.f;
+    float fixed_angle = M_PI - M_PI / 4.f;
     glm::vec3 base_rot_point(0, -1, 0);
     glm::vec3 base_member_pos(0, 2, 0);
 
     glm::mat4 translation_to_origin = glm::translate(glm::mat4(1.0f), -base_rot_point);
-    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), fixed_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), fixed_angle, glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 translation_back = glm::translate(glm::mat4(1.0f), base_rot_point);
     glm::mat4 translation_to_position = glm::translate(glm::mat4(1.0f), base_member_pos);
 
@@ -88,6 +88,9 @@ std::vector<std::shared_ptr<Controller>> MuscleEnv::get_controllers() {
 }
 
 step MuscleEnv::compute_step() {
+    Item member = items[2];
+
+
     return {
         torch::zeros({1}), 1, false
     };
