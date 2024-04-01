@@ -18,15 +18,12 @@ public:
     std::vector<Item> get_items();
     std::vector<btTypedConstraint *> get_constraints();
 private:
-    glm::vec3 item_a_pos;
-    glm::vec3 item_b_pos;
-
-    Item attach_a;
-    Item attach_b;
+    std::shared_ptr<Item> attach_a;
+    std::shared_ptr<Item> attach_b;
 
     btSliderConstraint *muscle_slider_constraint;
-    btPoint2PointConstraint *attach_a_constraint;
-    btPoint2PointConstraint *attach_b_constraint;
+    btConeTwistConstraint *attach_a_constraint;
+    btConeTwistConstraint *attach_b_constraint;
 
 };
 

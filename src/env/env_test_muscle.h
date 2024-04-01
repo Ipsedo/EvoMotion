@@ -22,10 +22,10 @@ protected:
     void reset_engine() override;
 
 private:
-    Item base;
-    Item member_base;
-    Item member;
-    Muscle muscle;
+    std::vector<Item> items;
+    std::shared_ptr<Muscle> muscle;
+
+    std::vector<std::shared_ptr<Controller>> controllers;
 
 };
 

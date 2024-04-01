@@ -36,9 +36,9 @@ void test_muscle(muscle_params params) {
         std::shared_ptr<OBjSpecular> specular = std::make_shared<OBjSpecular>(
                 i.get_shape()->get_vertices(),
                 i.get_shape()->get_normals(),
-                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
-                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
-                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                glm::vec4(dist(rng), dist(rng), dist(rng), .5f),
+                glm::vec4(dist(rng), dist(rng), dist(rng), .5f),
+                glm::vec4(dist(rng), dist(rng), dist(rng), .5f),
                 300.f
         );
 
@@ -47,7 +47,7 @@ void test_muscle(muscle_params params) {
 
     step step = env->reset();
     while (!renderer.is_close()) {
-        step = env->do_step(torch::zeros({1}), 1.f / 60.f);
+        step = env->do_step(torch::ones({1}), 1.f / 60.f);
 
         std::map<std::string, glm::mat4> model_matrix;
 
