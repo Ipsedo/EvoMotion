@@ -66,6 +66,7 @@ target_link_libraries(
         ${TORCH_LIBRARIES}
         argparse
         indicators
+        jsoncpp
 )
 
 function(add_extra_folder source destination)

@@ -34,8 +34,6 @@ JsonMember::JsonMember(const std::shared_ptr<Item> &parent, const Json::Value &m
 
     Json::Value member_info = json_value["member_info"];
 
-    std::string name = json_value["name"].asString();
-    std::string shape_name = member_info["shape"].asString();
     glm::vec3 scale(member_info["scale_x"].asFloat(), member_info["scale_y"].asFloat(),
                     member_info["scale_z"].asFloat());
     float mass = member_info["mass"].asFloat();
@@ -46,12 +44,13 @@ JsonMember::JsonMember(const std::shared_ptr<Item> &parent, const Json::Value &m
         {"cylinder", "./resources/obj/cylinder.obj"}
     };
 
-    auto shape = std::make_shared<ObjShape>(shape_to_path[shape_name]);
+    auto shape = std::make_shared<ObjShape>(shape_to_path[member_info["shape"].asCString()]);
 
     glm::mat4 model_in_parent(1); // TODO model matrix as JSON
     glm::mat4 model_matrix = parent->model_matrix_without_scale() * model_in_parent;
 
-    item = std::make_shared<Item>(parent->get_name() + "_" + name, shape, model_matrix, scale, mass);
+    item = std::make_shared<Item>(parent->get_name() + "_" + json_value["name"].asCString(), shape, model_matrix, scale,
+                                  mass);
 }
 
 std::shared_ptr<Item> JsonMember::get_item() {
