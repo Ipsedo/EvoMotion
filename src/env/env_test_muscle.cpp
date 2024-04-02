@@ -72,9 +72,9 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
     for (const Item &item: json_skeleton.get_items())
         items.push_back(item);
 
-    for (const auto &item: items) {
+    for (auto item: items) {
+        item.get_body()->setActivationState(DISABLE_DEACTIVATION);
         add_item(item);
-
     }
 
     for (auto constraint: muscle->get_constraints())

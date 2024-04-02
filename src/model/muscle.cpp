@@ -101,7 +101,7 @@ Muscle::Muscle(
 
 void Muscle::contract(float force) {
     muscle_slider_constraint->setPoweredLinMotor(true);
-    muscle_slider_constraint->setTargetLinMotorVelocity(force * 3);
+    muscle_slider_constraint->setTargetLinMotorVelocity(force * 5);
 }
 
 void Muscle::release() {
