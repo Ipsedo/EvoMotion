@@ -29,17 +29,17 @@ message_callback(GLenum source,
 }
 
 Renderer::Renderer(
-        const std::string &title,
-        int width, int height,
-        std::shared_ptr<Camera> camera) :
+    const std::string &title,
+    int width, int height,
+    std::shared_ptr<Camera> camera) :
 
-        title(title),
-        width(width), height(height),
-        drawables({}),
-        camera(std::move(camera)),
-        is_open(false),
-        window(nullptr),
-        light_pos(glm::vec3(0.f, 0.f, -1.f)) {
+    title(title),
+    width(width), height(height),
+    drawables({}),
+    camera(std::move(camera)),
+    is_open(false),
+    window(nullptr),
+    light_pos(glm::vec3(0.f, 0.f, -1.f)) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -109,16 +109,16 @@ void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 view_matrix = glm::lookAt(
-            camera->pos(),
-            camera->look(),
-            camera->up()
+        camera->pos(),
+        camera->look(),
+        camera->up()
     );
 
     glm::mat4 proj_matrix = glm::frustum(
-            -1.f, 1.f,
-            -float(height) / float(width), float(height) / float(width),
-            1.f,
-            200.f
+        -1.f, 1.f,
+        -float(height) / float(width), float(height) / float(width),
+        1.f,
+        200.f
     );
 
     for (auto [name, drawable]: drawables) {

@@ -86,14 +86,14 @@ int main(int argc, char **argv) {
     argparse::ArgumentParser muscle_parser("muscle");
 
     muscle_parser.add_argument("-w", "--width")
-            .scan<'i', int>()
-            .default_value(1024)
-            .help("window width");
+        .scan<'i', int>()
+        .default_value(1024)
+        .help("window width");
 
     muscle_parser.add_argument("-h", "--height")
-            .scan<'i', int>()
-            .default_value(1024)
-            .help("window height");
+        .scan<'i', int>()
+        .default_value(1024)
+        .help("window height");
 
     parser.add_subparser(run_parser);
     parser.add_subparser(train_parser);
@@ -135,9 +135,9 @@ int main(int argc, char **argv) {
         );
     else if (parser.is_subcommand_used(muscle_parser))
         test_muscle({
-            muscle_parser.get<int>("width"),
-            muscle_parser.get<int>("height")
-        });
+                        muscle_parser.get<int>("width"),
+                        muscle_parser.get<int>("height")
+                    });
     else {
         std::cerr << "must enter a subcommand" << std::endl << parser.help().str() << std::endl;
         exit(1);

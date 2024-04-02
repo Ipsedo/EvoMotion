@@ -49,15 +49,15 @@ void train(int seed, bool cuda, const train_params &params) {
         int tick_every = ceil(float(params.nb_episodes) / float(pb_bar_length));
 
         indicators::ProgressBar p_bar{
-                indicators::option::BarWidth(pb_bar_length),
-                indicators::option::Start{"["},
-                indicators::option::Fill{"="},
-                indicators::option::Lead{">"},
-                indicators::option::Remainder{" "},
-                indicators::option::End{"]"},
-                indicators::option::ShowPercentage{true},
-                indicators::option::ShowElapsedTime{true},
-                indicators::option::ShowRemainingTime{true}
+            indicators::option::BarWidth(pb_bar_length),
+            indicators::option::Start{"["},
+            indicators::option::Fill{"="},
+            indicators::option::Lead{">"},
+            indicators::option::Remainder{" "},
+            indicators::option::End{"]"},
+            indicators::option::ShowPercentage{true},
+            indicators::option::ShowElapsedTime{true},
+            indicators::option::ShowRemainingTime{true}
         };
 
         for (int e = 0; e < params.nb_episodes; e++) {
@@ -74,9 +74,9 @@ void train(int seed, bool cuda, const train_params &params) {
             critic_loss_meter.add(metrics["critic_loss"]);
 
             std::string p_bar_description =
-                    "Save " + std::to_string(s - 1)
-                    + ", actor = " + std::to_string(actor_loss_meter.loss())
-                    + ", critic = " + std::to_string(critic_loss_meter.loss());
+                "Save " + std::to_string(s - 1)
+                + ", actor = " + std::to_string(actor_loss_meter.loss())
+                + ", critic = " + std::to_string(critic_loss_meter.loss());
 
             p_bar.set_option(indicators::option::PostfixText{p_bar_description});
 

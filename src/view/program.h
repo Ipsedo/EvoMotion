@@ -31,13 +31,13 @@ public:
 
     private:
         Builder(
-                std::string vertex_shader_path,
-                std::string fragment_shader_path,
+            std::string vertex_shader_path,
+            std::string fragment_shader_path,
 
-                const std::vector<std::string> &uniforms,
-                const std::vector<std::string> &attributes,
+            const std::vector<std::string> &uniforms,
+            const std::vector<std::string> &attributes,
 
-                const std::map<std::string, std::vector<float>> &buffers
+            const std::map<std::string, std::vector<float>> &buffers
         );
 
         std::string vertex_shader_path;

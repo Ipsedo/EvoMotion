@@ -15,16 +15,16 @@ void infer(int seed, bool cuda, const run_params &params) {
     std::shared_ptr<Environment> env = env_builder.get();
 
     std::shared_ptr<Camera> camera = std::make_shared<StaticCamera>(
-            glm::vec3(1.f, 1.f, -1.f),
-            glm::normalize(glm::vec3(1.f, 0.f, 1.f)),
-            glm::vec3(0.f, 1.f, 0.f)
+        glm::vec3(1.f, 1.f, -1.f),
+        glm::normalize(glm::vec3(1.f, 0.f, 1.f)),
+        glm::vec3(0.f, 1.f, 0.f)
     );
 
     Renderer renderer(
-            "evo_motion",
-            params.window_width,
-            params.window_height,
-            camera
+        "evo_motion",
+        params.window_width,
+        params.window_height,
+        camera
     );
 
     std::random_device dev;
@@ -34,12 +34,12 @@ void infer(int seed, bool cuda, const run_params &params) {
     for (auto i: env->get_items()) {
 
         std::shared_ptr<OBjSpecular> specular = std::make_shared<OBjSpecular>(
-                i.get_shape()->get_vertices(),
-                i.get_shape()->get_normals(),
-                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
-                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
-                glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
-                300.f
+            i.get_shape()->get_vertices(),
+            i.get_shape()->get_normals(),
+            glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+            glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+            glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+            300.f
         );
 
         renderer.add_drawable(i.get_name(), specular);

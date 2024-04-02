@@ -5,7 +5,7 @@
 #include "slider.h"
 
 SliderController::SliderController(int action_index, btSliderConstraint *slider, float slider_speed) :
-        action_index(action_index), slider(slider), slider_speed(slider_speed) {
+    action_index(action_index), slider(slider), slider_speed(slider_speed) {
 
 }
 

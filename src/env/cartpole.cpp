@@ -7,20 +7,20 @@
 #include "cartpole.h"
 
 CartPole::CartPole(int seed) :
-        Environment({7}, {1}, true),
-        slider_speed(16.f),
-        slider_force(64.f),
-        chariot_push_force(2.f),
-        limit_angle(float(M_PI * 0.5)),
-        reset_frame_nb(8),
-        chariot_mass(1.f),
-        pendulum_mass(1.f),
-        rng(seed),
-        rd_uni(0.f, 1.f),
-        step_idx(0),
-        max_steps(60 * 60),
-        last_ang_vel(0.f),
-        last_vel(0.f) {
+    Environment({7}, {1}, true),
+    slider_speed(16.f),
+    slider_force(64.f),
+    chariot_push_force(2.f),
+    limit_angle(float(M_PI * 0.5)),
+    reset_frame_nb(8),
+    chariot_mass(1.f),
+    pendulum_mass(1.f),
+    rng(seed),
+    rd_uni(0.f, 1.f),
+    step_idx(0),
+    max_steps(60 * 60),
+    last_ang_vel(0.f),
+    last_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;
 
     float pendulum_height = 0.7f, pendulum_width = 0.1f, pendulum_offset = pendulum_height / 4.f;
@@ -33,27 +33,27 @@ CartPole::CartPole(int seed) :
     // Create items
     // (init graphical and physical objects)
     Item base = Item(
-            "base",
-            std::make_shared<ObjShape>("./resources/obj/cube.obj"),
-            glm::vec3(0.f, base_pos, 10.f),
-            glm::vec3(10.f, base_height, 10.f),
-            0.f
+        "base",
+        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        glm::vec3(0.f, base_pos, 10.f),
+        glm::vec3(10.f, base_height, 10.f),
+        0.f
     );
 
     Item chariot = Item(
-            "chariot",
-            std::make_shared<ObjShape>("./resources/obj/cube.obj"),
-            glm::vec3(0.f, chariot_pos, 10.f),
-            glm::vec3(chariot_width, chariot_height, chariot_width),
-            chariot_mass
+        "chariot",
+        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        glm::vec3(0.f, chariot_pos, 10.f),
+        glm::vec3(chariot_width, chariot_height, chariot_width),
+        chariot_mass
     );
 
     Item pendulum = Item(
-            "pendulum",
-            std::make_shared<ObjShape>("./resources/obj/cube.obj"),
-            glm::vec3(0.f, pendulum_pos, 10.f),
-            glm::vec3(pendulum_width, pendulum_height, pendulum_width),
-            pendulum_mass
+        "pendulum",
+        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        glm::vec3(0.f, pendulum_pos, 10.f),
+        glm::vec3(pendulum_width, pendulum_height, pendulum_width),
+        pendulum_mass
     );
 
     // Environment item vector
@@ -72,11 +72,11 @@ CartPole::CartPole(int seed) :
     tr_chariot.setOrigin(btVector3(0.f, -chariot_height, 0.f));
 
     slider = new btSliderConstraint(
-            *base.get_body(),
-            *chariot.get_body(),
-            tr_base,
-            tr_chariot,
-            true
+        *base.get_body(),
+        *chariot.get_body(),
+        tr_base,
+        tr_chariot,
+        true
     );
 
     controllers.push_back(std::make_shared<SliderController>(0, slider, slider_speed));
@@ -129,10 +129,10 @@ step CartPole::compute_step() {
     float ang_vel = pendulum_rg->getAngularVelocity().z();
 
     torch::Tensor state = torch::tensor(
-            {center_distance / 10.f,
-             (pos - base_pos) / 10.f, vel, vel - last_vel,
-             ang / float(2. * M_PI) - 1.f, ang_vel, ang_vel - last_ang_vel},
-            at::TensorOptions().device(curr_device)
+        {center_distance / 10.f,
+         (pos - base_pos) / 10.f, vel, vel - last_vel,
+         ang / float(2. * M_PI) - 1.f, ang_vel, ang_vel - last_ang_vel},
+        at::TensorOptions().device(curr_device)
     );
 
     bool fail = pos > 10.f || pos < -10.f || ang > limit_angle || ang < -limit_angle;

@@ -15,22 +15,22 @@
  */
 
 Program::Builder::Builder(std::string vertex_shader_path, std::string fragment_shader_path) :
-        vertex_shader_path(std::move(vertex_shader_path)),
-        fragment_shader_path(std::move(fragment_shader_path)) {
+    vertex_shader_path(std::move(vertex_shader_path)),
+    fragment_shader_path(std::move(fragment_shader_path)) {
 
 }
 
 Program::Builder::Builder(
-        std::string vertex_shader_path,
-        std::string fragment_shader_path,
-        const std::vector<std::string> &uniforms,
-        const std::vector<std::string> &attributes,
-        const std::map<std::string, std::vector<float>> &buffers) :
-        vertex_shader_path(std::move(vertex_shader_path)),
-        fragment_shader_path(std::move(fragment_shader_path)),
-        uniforms(uniforms),
-        attributes(attributes),
-        buffers(buffers) {
+    std::string vertex_shader_path,
+    std::string fragment_shader_path,
+    const std::vector<std::string> &uniforms,
+    const std::vector<std::string> &attributes,
+    const std::map<std::string, std::vector<float>> &buffers) :
+    vertex_shader_path(std::move(vertex_shader_path)),
+    fragment_shader_path(std::move(fragment_shader_path)),
+    uniforms(uniforms),
+    attributes(attributes),
+    buffers(buffers) {
 
 }
 

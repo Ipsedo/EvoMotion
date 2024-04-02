@@ -11,12 +11,17 @@
 
 class Muscle {
 public:
-    Muscle(const std::string &name, float attach_mass, glm::vec3 attach_scale, Item& item_a, glm::vec3 pos_in_a, Item& item_b, glm::vec3 pos_in_b);
+    Muscle(const std::string &name, float attach_mass, glm::vec3 attach_scale, Item &item_a, glm::vec3 pos_in_a,
+           Item &item_b, glm::vec3 pos_in_b);
+
     void contract(float force);
+
     void release();
 
     std::vector<Item> get_items();
+
     std::vector<btTypedConstraint *> get_constraints();
+
 private:
     std::shared_ptr<Item> attach_a;
     std::shared_ptr<Item> attach_b;

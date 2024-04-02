@@ -4,6 +4,7 @@
 
 #include "./env_test_muscle.h"
 #include "../controller/muscle_controller.h"
+#include "../model/skeleton.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -58,18 +59,28 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
                                       glm::vec3(0.1, 0.2, 0));
 
 
-    base.get_body()->setActivationState(DISABLE_DEACTIVATION);
-    member_base.get_body()->setActivationState(DISABLE_DEACTIVATION);
-    member.get_body()->setActivationState(DISABLE_DEACTIVATION);
+    JsonSkeleton json_skeleton(
+        "./resources/skeleton/test_1.json",
+        "skeleton_test",
+        glm::translate(glm::mat4(1.0), glm::vec3(1.f, -1.f, 5.f))
+    );
+
 
     items = {base, member_base, member};
     for (const auto &item: muscle->get_items())
         items.push_back(item);
+    for (const Item &item: json_skeleton.get_items())
+        items.push_back(item);
 
-    for (const auto &item: items)
+    for (const auto &item: items) {
         add_item(item);
 
+    }
+
     for (auto constraint: muscle->get_constraints())
+        m_world->addConstraint(constraint);
+
+    for (auto constraint: json_skeleton.get_constraints())
         m_world->addConstraint(constraint);
 
     m_world->addConstraint(fixed_constraint);

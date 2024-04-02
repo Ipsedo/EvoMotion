@@ -33,15 +33,15 @@ ObjShape::ObjShape(const std::string &obj_file_path) {
 
         if (split_line[0] == "vn") {
             normals_ref.emplace_back(
-                    std::stof(split_line[1]),
-                    std::stof(split_line[2]),
-                    std::stof(split_line[3])
+                std::stof(split_line[1]),
+                std::stof(split_line[2]),
+                std::stof(split_line[3])
             );
         } else if (split_line[0] == "v") {
             vertices_ref.emplace_back(
-                    std::stof(split_line[1]),
-                    std::stof(split_line[2]),
-                    std::stof(split_line[3])
+                std::stof(split_line[1]),
+                std::stof(split_line[2]),
+                std::stof(split_line[3])
             );
 
         } else if (split_line[0] == "f") {

@@ -1,0 +1,66 @@
+{
+  "name": "test_1",
+  "mass": 1.0,
+  "shape": "cube",
+  "scale_x": 0.1,
+  "scale_y": 0.1,
+  "scale_z": 1.0,
+  "transformation": {
+    "rotation": {
+      "point_x": 0.0,
+      "point_y": 0.0,
+      "point_z": 0.0,
+      "axis_x": 0.0,
+      "axis_y": 1.0,
+      "axis_z": 0.0,
+      "angle_radian": 0.75
+    },
+    "translation": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  },
+  "children": [
+    {
+      "constraint_type": "hinge",
+      "parent_axis_x": 0,
+      "parent_axis_y": 1,
+      "parent_axis_z": 0,
+      "child_axis_x": 0,
+      "child_axis_y": 1,
+      "child_axis_z": 0,
+      "member_attach_x": 0,
+      "member_attach_y": 0,
+      "member_attach_z": -1,
+      "child_attach_x": 0,
+      "child_attach_y": 0,
+      "child_attach_z": 1,
+      "child_member": {
+        "name": "test_2",
+        "mass": 1.0,
+        "shape": "cube",
+        "scale_x": 0.1,
+        "scale_y": 0.1,
+        "scale_z": 1.0,
+        "transformation": {
+          "rotation": {
+            "point_x": 0.0,
+            "point_y": 0.0,
+            "point_z": 1.0,
+            "axis_x": 1.0,
+            "axis_y": 0.0,
+            "axis_z": 0.0,
+            "angle_radian": -0.7
+          },
+          "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": -2.0
+          }
+        },
+        "children": []
+      }
+    }
+  ]
+}

@@ -11,72 +11,96 @@
 
 #include "./item.h"
 
-class AbstractSkeleton {
-public:
-    virtual std::vector<std::shared_ptr<Item>> get_items() = 0;
+class AbstractMember;
 
-    virtual std::vector<btTypedConstraint *> get_constraints() = 0;
+class AbstractConstraint {
+public:
+
+    virtual btTypedConstraint *get_constraint() = 0;
+
+    virtual std::shared_ptr<AbstractMember> get_child() = 0;
 };
 
 class AbstractMember {
 public:
-    explicit AbstractMember(const std::shared_ptr<Item> &parent);
 
-    virtual std::shared_ptr<Item> get_item() = 0;
+    virtual Item get_item() = 0;
 
-    virtual btTypedConstraint *get_constraint() = 0;
-
-    virtual std::vector<std::shared_ptr<AbstractMember>> get_children() = 0;
-
-protected:
-    std::shared_ptr<Item> parent;
+    virtual std::vector<std::shared_ptr<AbstractConstraint>> get_children() = 0;
 };
 
+
+class Skeleton {
+public:
+    explicit Skeleton(const std::shared_ptr<AbstractMember> &root_member);
+
+    std::vector<Item> get_items();
+
+    std::vector<btTypedConstraint *> get_constraints();
+
+private:
+    std::vector<Item> items;
+    std::vector<btTypedConstraint *> constraints;
+};
 
 /*
  * JSON stuff
  */
 
+glm::mat4 json_transformation_to_model_matrix(Json::Value transformation);
+
 class JsonMember : public AbstractMember {
-protected:
-
-    const Json::Value &json_value;
-    std::shared_ptr<Item> item;
-
 public:
-    JsonMember(const std::shared_ptr<Item> &parent, const Json::Value &member);
+    JsonMember(Item parent, const Json::Value &json_member);
 
-    std::shared_ptr<Item> get_item() override;
+    JsonMember(std::string name, glm::mat4 model_matrix, Json::Value json_member);
 
-    std::vector<std::shared_ptr<AbstractMember>> get_children() override;
+    Item get_item() override;
+
+    std::vector<std::shared_ptr<AbstractConstraint>> get_children() override;
+
+protected:
+    Json::Value json_member;
+    std::string name;
+    glm::mat4 model_matrix;
+    std::unordered_map<std::string, std::string> shape_to_path;
+    std::shared_ptr<ObjShape> obj_shape;
+    Item member;
+private:
+    Item build_item();
 };
 
-class JsonHingeMember : public JsonMember {
+class JsonHingeConstraint : public AbstractConstraint {
 public:
-    JsonHingeMember(const std::shared_ptr<Item> &parent, const Json::Value &hinge);
+    JsonHingeConstraint(Item parent, const Json::Value &hinge);
 
     btTypedConstraint *get_constraint() override;
+
+    std::shared_ptr<AbstractMember> get_child() override;
 
 
 private:
     btHingeConstraint *hinge_constraint;
+    std::shared_ptr<JsonMember> child;
 };
 
-class JsonFixedMember : public JsonMember {
+class JsonFixedConstraint : public AbstractConstraint {
 public:
-    JsonFixedMember(const std::shared_ptr<Item> &parent, const Json::Value &fixed);
+    JsonFixedConstraint(const Item &parent, const Json::Value &fixed);
 
     btTypedConstraint *get_constraint() override;
+
+    std::shared_ptr<AbstractMember> get_child() override;
+
+private:
+    btFixedConstraint *fixed_constraint;
+    std::shared_ptr<JsonMember> child;
 };
 
 
-class JsonSkeleton : public AbstractSkeleton {
+class JsonSkeleton : public Skeleton {
 public:
-    explicit JsonSkeleton(const std::string &json_path);
-
-    std::vector<std::shared_ptr<Item>> get_items() override;
-
-    std::vector<btTypedConstraint *> get_constraints() override;
+    explicit JsonSkeleton(const std::string &json_path, const std::string &root_name, glm::mat4 model_matrix);
 };
 
 #endif //EVO_MOTION_SKELETON_H

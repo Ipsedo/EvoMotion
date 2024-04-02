@@ -19,9 +19,9 @@ public:
 class StaticCamera : public Camera {
 public:
     StaticCamera(
-            glm::vec3 pos,
-            glm::vec3 look,
-            glm::vec3 up
+        glm::vec3 pos,
+        glm::vec3 look,
+        glm::vec3 up
     );
 
     glm::vec3 pos() override;
