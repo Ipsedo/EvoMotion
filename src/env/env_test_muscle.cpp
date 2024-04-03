@@ -67,15 +67,15 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
                                       member,
                                       glm::vec3(0.1, 0.2, 0), 20, 1);
 
-
+    auto json_path = "./resources/skeleton/spider.json";
     JsonSkeleton json_skeleton(
-        "./resources/skeleton/test_1.json",
+        json_path,
         "skeleton_test",
         glm::translate(glm::mat4(1.0), glm::vec3(1.f, -1.f, 5.f)));
 
     JsonMuscularSystem json_muscular_system(
         json_skeleton,
-        "./resources/skeleton/test_1.json");
+        json_path);
 
 
     items = {base, member_base, member};
@@ -106,7 +106,7 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
     m_world->addConstraint(hinge);
 
     //controllers.push_back(std::make_shared<MuscleController>(*muscle, 0));
-    controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[0], 0));
+    //controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[0], 0));
 
 }
 

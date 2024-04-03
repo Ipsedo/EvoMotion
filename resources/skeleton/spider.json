@@ -1,31 +1,93 @@
 {
-  "name": "body",
-  "mass": 1.0,
-  "shape": "cube",
-  "scale": {
-    "x": 1.0,
-    "y": 0.1,
-    "z": 1.0
-  },
-  "transformation": {
-    "rotation": {
-      "point": {
+  "skeleton": {
+    "name": "body",
+    "mass": 1.0,
+    "shape": "cube",
+    "scale": {
+      "x": 0.7,
+      "y": 0.2,
+      "z": 0.7
+    },
+    "transformation": {
+      "rotation": {
+        "point": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "axis": {
+          "x": 0.0,
+          "y": 1.0,
+          "z": 0.0
+        },
+        "angle_radian": 0.7
+      },
+      "translation": {
         "x": 0.0,
         "y": 0.0,
         "z": 0.0
-      },
-      "axis": {
-        "x": 0.0,
-        "y": 1.0,
-        "z": 0.0
-      },
-      "angle_radian": 0.0
+      }
     },
-    "translation": {
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0
-    }
+    "children": [
+      {
+        "constraint_type": "hinge",
+        "parent_axis": {
+          "x": 0.0,
+          "y": 1.0,
+          "z": 0.0
+        },
+        "child_axis": {
+          "x": 0.0,
+          "y": 1.0,
+          "z": 0.0
+        },
+        "member_attach": {
+          "x": 0.7,
+          "y": 0.0,
+          "z": 0.7
+        },
+        "child_attach": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.15
+        },
+        "limit_radian": {
+          "min": 0,
+          "max": 3.14159
+        },
+        "child_member": {
+          "name": "leg1_front_right",
+          "mass": 1.0,
+          "shape": "cube",
+          "scale": {
+            "x": 0.15,
+            "y": 0.15,
+            "z": 0.15
+          },
+          "transformation": {
+            "rotation": {
+              "point": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -0.3
+              },
+              "axis": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+              },
+              "angle_radian": 0.4
+            },
+            "translation": {
+              "x": 0.7,
+              "y": 0.0,
+              "z": -0.7
+            }
+          },
+          "children": []
+        }
+      }
+    ]
   },
-  "children": []
+  "muscles": []
 }
