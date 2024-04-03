@@ -6,14 +6,13 @@
 #include <queue>
 #include <fstream>
 #include <iostream>
-#include <utility>
 #include <tuple>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "./skeleton.h"
 
-Skeleton::Skeleton(const std::shared_ptr<AbstractMember> &root_member)
-    : constraints(), items_map() {
+Skeleton::Skeleton(const std::string &root_name, const std::shared_ptr<AbstractMember> &root_member)
+    : root_name(root_name), constraints(), items_map() {
 
     std::queue<std::shared_ptr<AbstractMember>> queue;
     queue.push(root_member);
@@ -46,68 +45,20 @@ Item Skeleton::get_item(std::string name) {
     return items_map.find(name)->second;
 }
 
+std::string Skeleton::get_root_name() {
+    return root_name;
+}
+
 /*
  * JSON stuff
  */
-
-// transformation
-
-glm::mat4 json_transformation_to_model_matrix(Json::Value transformation) {
-
-    Json::Value rotation = transformation["rotation"];
-    Json::Value translation = transformation["translation"];
-
-    glm::vec3 position = json_vec3_to_glm_vec3(transformation["translation"]);
-    glm::vec3 rotation_point = json_vec3_to_glm_vec3(rotation["point"]);
-    glm::vec3 rotation_axis = json_vec3_to_glm_vec3(rotation["axis"]);
-    float angle_radian = rotation["angle_radian"].asFloat();
-
-    glm::mat4 translation_to_origin = glm::translate(glm::mat4(1.0f),
-                                                     -rotation_point);
-    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_radian,
-                                            rotation_axis);
-    glm::mat4 translation_back = glm::translate(glm::mat4(1.0f),
-                                                rotation_point);
-    glm::mat4 translation_to_position = glm::translate(glm::mat4(1.0f),
-                                                       position);
-
-    return translation_to_position * translation_back * rotation_matrix *
-           translation_to_origin;
-}
-
-glm::vec3 json_vec3_to_glm_vec3(Json::Value vec3) {
-    return {
-        vec3["x"].asFloat(),
-        vec3["y"].asFloat(),
-        vec3["z"].asFloat()
-    };
-}
-
-btVector3 json_vec3_to_bt_vector3(Json::Value vec3) {
-    return {
-        vec3["x"].asFloat(),
-        vec3["y"].asFloat(),
-        vec3["z"].asFloat()
-    };
-}
-
-
-Json::Value read_json(const std::string &json_path) {
-    std::ifstream stream(json_path, std::ios::in);
-
-    Json::Value skeleton_json;
-
-    stream >> skeleton_json;
-
-    return skeleton_json;
-}
 
 // skeleton
 
 JsonSkeleton::JsonSkeleton(const std::string &json_path,
                            const std::string &root_name, glm::mat4 model_matrix)
-    : Skeleton(std::make_shared<JsonMember>(root_name, model_matrix,
-                                            read_json(json_path))) {
+    : Skeleton(root_name, std::make_shared<JsonMember>(root_name, model_matrix,
+                                                       read_json(json_path)["skeleton"])) {
 
 }
 

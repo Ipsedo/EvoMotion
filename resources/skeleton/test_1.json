@@ -1,143 +1,57 @@
 {
-  "name": "test_1",
-  "mass": 1.0,
-  "shape": "cube",
-  "scale": {
-    "x": 0.1,
-    "y": 0.1,
-    "z": 1.0
-  },
-  "transformation": {
-    "rotation": {
-      "point": {
+  "skeleton": {
+    "name": "test_1",
+    "mass": 1.0,
+    "shape": "cube",
+    "scale": {
+      "x": 0.1,
+      "y": 0.1,
+      "z": 1.0
+    },
+    "transformation": {
+      "rotation": {
+        "point": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "axis": {
+          "x": 0.0,
+          "y": 1.0,
+          "z": 0.0
+        },
+        "angle_radian": 0.75
+      },
+      "translation": {
         "x": 0.0,
         "y": 0.0,
         "z": 0.0
-      },
-      "axis": {
-        "x": 0.0,
-        "y": 1.0,
-        "z": 0.0
-      },
-      "angle_radian": 0.75
+      }
     },
-    "translation": {
-      "x": 0.0,
-      "y": 0.0,
-      "z": 0.0
-    }
-  },
-  "children": [
-    {
-      "constraint_type": "fixed",
-      "attach_in_parent": {
-        "rotation": {
-          "point": {
-            "x": 0.1,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "axis": {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "angle_radian": -1.57
-        },
-        "translation": {
-          "x": 0.1,
-          "y": 0.0,
-          "z": 1.0
-        }
-      },
-      "attach_in_child": {
-        "rotation": {
-          "point": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 1.0
-          },
-          "axis": {
-            "x": 1.0,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "angle_radian": 0.0
-        },
-        "translation": {
-          "x": -0.5,
-          "y": 0.0,
-          "z": 0.0
-        }
-      },
-      "child_member": {
-        "name": "test_3",
-        "mass": 1.0,
-        "shape": "cube",
-        "scale": {
-          "x": 0.5,
-          "y": 0.1,
-          "z": 0.1
-        },
-        "transformation": {
+    "children": [
+      {
+        "constraint_type": "fixed",
+        "attach_in_parent": {
           "rotation": {
             "point": {
-              "x": -0.5,
+              "x": 0.1,
               "y": 0.0,
               "z": 0.0
             },
             "axis": {
-              "x": 0.0,
-              "y": 1.0,
+              "x": 1.0,
+              "y": 0.0,
               "z": 0.0
             },
-            "angle_radian": 0
+            "angle_radian": -1.57
           },
           "translation": {
-            "x": 0.5,
+            "x": 0.1,
             "y": 0.0,
             "z": 1.0
           }
         },
-        "children": []
-      }
-    },
-    {
-      "constraint_type": "hinge",
-      "parent_axis": {
-        "x": 0.0,
-        "y": 1.0,
-        "z": 0.0
-      },
-      "child_axis": {
-        "x": 0.0,
-        "y": 1.0,
-        "z": 0.0
-      },
-      "member_attach": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -1.0
-      },
-      "limit_radian": {
-        "min": -0.7,
-        "max": 0.7
-      },
-      "child_attach": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 1.0
-      },
-      "child_member": {
-        "name": "test_2",
-        "mass": 1.0,
-        "shape": "cube",
-        "scale": {
-          "x": 0.1,
-          "y": 0.1,
-          "z": 1.0
-        },
-        "transformation": {
+        "attach_in_child": {
           "rotation": {
             "point": {
               "x": 0.0,
@@ -149,16 +63,129 @@
               "y": 0.0,
               "z": 0.0
             },
-            "angle_radian": -0.7
+            "angle_radian": 0.0
           },
           "translation": {
-            "x": 0.0,
+            "x": -0.5,
             "y": 0.0,
-            "z": -2.0
+            "z": 0.0
           }
         },
-        "children": []
+        "child_member": {
+          "name": "test_3",
+          "mass": 1.0,
+          "shape": "cube",
+          "scale": {
+            "x": 0.5,
+            "y": 0.1,
+            "z": 0.1
+          },
+          "transformation": {
+            "rotation": {
+              "point": {
+                "x": -0.5,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "axis": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+              },
+              "angle_radian": 0
+            },
+            "translation": {
+              "x": 0.5,
+              "y": 0.0,
+              "z": 1.0
+            }
+          },
+          "children": []
+        }
+      },
+      {
+        "constraint_type": "hinge",
+        "parent_axis": {
+          "x": 0.0,
+          "y": 1.0,
+          "z": 0.0
+        },
+        "child_axis": {
+          "x": 0.0,
+          "y": 1.0,
+          "z": 0.0
+        },
+        "member_attach": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": -1.0
+        },
+        "limit_radian": {
+          "min": 0,
+          "max": 3.14159
+        },
+        "child_attach": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 1.0
+        },
+        "child_member": {
+          "name": "test_2",
+          "mass": 1.0,
+          "shape": "cube",
+          "scale": {
+            "x": 0.1,
+            "y": 0.1,
+            "z": 1.0
+          },
+          "transformation": {
+            "rotation": {
+              "point": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 1.0
+              },
+              "axis": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+              },
+              "angle_radian": -0.7
+            },
+            "translation": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": -2.0
+            }
+          },
+          "children": []
+        }
       }
+    ]
+  },
+  "muscles": [
+    {
+      "item_a": "test_1",
+      "item_b": "test_1_test_2",
+      "attach_mass": 0.01,
+      "attach_scale": {
+        "x": 0.1,
+        "y": 0.1,
+        "z": 0.1
+      },
+      "pos_in_a": {
+        "x": 0.1,
+        "y": 0.0,
+        "z": 0.5
+      },
+      "pos_in_b": {
+        "x": 0.1,
+        "y": 0.0,
+        "z": -0.5
+      },
+      "force": 15.0,
+      "speed": 1.0
     }
   ]
 }
+

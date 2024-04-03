@@ -8,12 +8,15 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "./item.h"
+#include "./skeleton.h"
 
 class Muscle {
 public:
-    Muscle(const std::string &name, float attach_mass, glm::vec3 attach_scale,
+    Muscle(const std::string &name,
+           float attach_mass, glm::vec3 attach_scale,
            Item &item_a, glm::vec3 pos_in_a,
-           Item &item_b, glm::vec3 pos_in_b);
+           Item &item_b, glm::vec3 pos_in_b,
+           float force, float max_speed);
 
     void contract(float force);
 
@@ -24,12 +27,30 @@ public:
     std::vector<btTypedConstraint *> get_constraints();
 
 private:
-    std::shared_ptr<Item> attach_a;
-    std::shared_ptr<Item> attach_b;
+    float max_speed;
+
+    Item attach_a;
+    Item attach_b;
 
     btSliderConstraint *muscle_slider_constraint;
     btConeTwistConstraint *attach_a_constraint;
     btConeTwistConstraint *attach_b_constraint;
+
+};
+
+class AbstractMuscularSystem {
+public:
+    virtual std::vector<Muscle> get_muscles() = 0;
+};
+
+class JsonMuscularSystem : public AbstractMuscularSystem {
+public:
+    JsonMuscularSystem(Skeleton skeleton, std::string json_path);
+
+    std::vector<Muscle> get_muscles() override;
+
+private:
+    std::vector<Muscle> muscles;
 
 };
 

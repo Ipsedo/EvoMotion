@@ -5,6 +5,7 @@
 #include "./env_test_muscle.h"
 #include "../controller/muscle_controller.h"
 #include "../model/skeleton.h"
+#include "../model/muscle.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -64,14 +65,17 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
     muscle = std::make_shared<Muscle>("test_muscle", 0.01f, glm::vec3(0.1f),
                                       member_base, glm::vec3(0.1, 0.2, 0.0),
                                       member,
-                                      glm::vec3(0.1, 0.2, 0));
+                                      glm::vec3(0.1, 0.2, 0), 20, 1);
 
 
     JsonSkeleton json_skeleton(
         "./resources/skeleton/test_1.json",
         "skeleton_test",
-        glm::translate(glm::mat4(1.0), glm::vec3(1.f, -1.f, 5.f))
-    );
+        glm::translate(glm::mat4(1.0), glm::vec3(1.f, -1.f, 5.f)));
+
+    JsonMuscularSystem json_muscular_system(
+        json_skeleton,
+        "./resources/skeleton/test_1.json");
 
 
     items = {base, member_base, member};
@@ -79,6 +83,13 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
         items.push_back(item);
     for (const Item &item: json_skeleton.get_items())
         items.push_back(item);
+
+    for (auto m: json_muscular_system.get_muscles()) {
+        for (const auto &item: m.get_items())
+            items.push_back(item);
+        for (auto c: m.get_constraints())
+            m_world->addConstraint(c);
+    }
 
     for (auto item: items) {
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
@@ -94,7 +105,8 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
     m_world->addConstraint(fixed_constraint);
     m_world->addConstraint(hinge);
 
-    controllers.push_back(std::make_shared<MuscleController>(*muscle, 0));
+    //controllers.push_back(std::make_shared<MuscleController>(*muscle, 0));
+    controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[0], 0));
 
 }
 

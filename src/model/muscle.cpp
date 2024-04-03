@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "./muscle.h"
+#include "./converter.h"
 
 
 glm::mat4 get_rotation(glm::vec3 a, glm::vec3 b) {
@@ -28,26 +29,24 @@ Muscle::Muscle(
     Item &item_a,
     glm::vec3 pos_in_a,
     Item &item_b,
-    glm::vec3 pos_in_b
-) {
-
-    {
-        glm::mat4 attach_a_mat = item_a.model_matrix_without_scale() *
-                                 glm::translate(glm::mat4(1), pos_in_a);
-        glm::mat4 attach_b_mat = item_b.model_matrix_without_scale() *
-                                 glm::translate(glm::mat4(1), pos_in_b);
-
-        attach_a = std::make_shared<Item>(name + "_attach_a",
-                                          std::make_shared<ObjShape>(
-                                              "./resources/obj/sphere.obj"),
-                                          attach_a_mat, attach_scale,
-                                          attach_mass);
-        attach_b = std::make_shared<Item>(name + "_attach_b",
-                                          std::make_shared<ObjShape>(
-                                              "./resources/obj/sphere.obj"),
-                                          attach_b_mat, attach_scale,
-                                          attach_mass);
-    }
+    glm::vec3 pos_in_b,
+    float force,
+    float max_speed
+) : max_speed(max_speed),
+    attach_a(name + "_attach_a",
+             std::make_shared<ObjShape>(
+                 "./resources/obj/sphere.obj"),
+             item_a.model_matrix_without_scale() *
+             glm::translate(glm::mat4(1), pos_in_a),
+             attach_scale,
+             attach_mass),
+    attach_b(name + "_attach_b",
+             std::make_shared<ObjShape>(
+                 "./resources/obj/sphere.obj"),
+             item_b.model_matrix_without_scale() *
+             glm::translate(glm::mat4(1), pos_in_b),
+             attach_scale,
+             attach_mass) {
 
 
     {
@@ -57,11 +56,11 @@ Muscle::Muscle(
         frame_in_attach_b.setIdentity();
 
         muscle_slider_constraint = new btSliderConstraint(
-            *attach_a->get_body(), *attach_b->get_body(), frame_in_attach_a,
+            *attach_a.get_body(), *attach_b.get_body(), frame_in_attach_a,
             frame_in_attach_b,
             true);
 
-        muscle_slider_constraint->setMaxLinMotorForce(100.f);
+        muscle_slider_constraint->setMaxLinMotorForce(force);
         muscle_slider_constraint->setTargetLinMotorVelocity(0.f);
         muscle_slider_constraint->setLowerAngLimit(0);
         muscle_slider_constraint->setUpperAngLimit(0);
@@ -79,7 +78,7 @@ Muscle::Muscle(
 
         attach_a_constraint = new btConeTwistConstraint(
             *item_a.get_body(),
-            *attach_a->get_body(),
+            *attach_a.get_body(),
             frame_in_item_a,
             frame_in_attach_a
         );
@@ -93,25 +92,25 @@ Muscle::Muscle(
 
         attach_b_constraint = new btConeTwistConstraint(
             *item_b.get_body(),
-            *attach_b->get_body(),
+            *attach_b.get_body(),
             frame_in_item_b,
             frame_in_attach_b
         );
         attach_b_constraint->setLimit(limit_angle_cone, limit_angle_cone, 0.f);
     }
 
-    item_a.get_body()->setIgnoreCollisionCheck(attach_a->get_body(), true);
-    item_b.get_body()->setIgnoreCollisionCheck(attach_a->get_body(), true);
+    item_a.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
+    item_b.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
 
-    item_b.get_body()->setIgnoreCollisionCheck(attach_b->get_body(), true);
-    item_b.get_body()->setIgnoreCollisionCheck(attach_a->get_body(), true);
+    item_b.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
+    item_b.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
 
     item_a.get_body()->setIgnoreCollisionCheck(item_b.get_body(), true);
 }
 
 void Muscle::contract(float force) {
     muscle_slider_constraint->setPoweredLinMotor(true);
-    muscle_slider_constraint->setTargetLinMotorVelocity(force * 5);
+    muscle_slider_constraint->setTargetLinMotorVelocity(force * max_speed);
 }
 
 void Muscle::release() {
@@ -119,9 +118,38 @@ void Muscle::release() {
 }
 
 std::vector<Item> Muscle::get_items() {
-    return {*attach_a, *attach_b};
+    return {attach_a, attach_b};
 }
 
 std::vector<btTypedConstraint *> Muscle::get_constraints() {
     return {muscle_slider_constraint, attach_a_constraint, attach_b_constraint};
+}
+
+/*
+ * JSON
+ */
+
+JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, std::string json_path) : muscles() {
+    auto json_muscles = read_json(json_path)["muscles"];
+
+    for (auto json_muscle: json_muscles) {
+        std::string item_a_name = json_muscle["item_a"].asCString();
+        std::string item_b_name = json_muscle["item_b"].asCString();
+        Item item_a = skeleton.get_item(skeleton.get_root_name() + "_" + item_a_name);
+        Item item_b = skeleton.get_item(skeleton.get_root_name() + "_" + item_b_name);
+
+        muscles.emplace_back(
+            skeleton.get_root_name() + "_" + item_a_name + "_attached_" + item_b_name + "_muscle",
+            json_muscle["attach_mass"].asFloat(),
+            json_vec3_to_glm_vec3(json_muscle["attach_scale"]),
+            item_a, json_vec3_to_glm_vec3(json_muscle["pos_in_b"]),
+            item_b, json_vec3_to_glm_vec3(json_muscle["pos_in_a"]),
+            json_muscle["force"].asFloat(),
+            json_muscle["speed"].asFloat()
+        );
+    }
+}
+
+std::vector<Muscle> JsonMuscularSystem::get_muscles() {
+    return muscles;
 }

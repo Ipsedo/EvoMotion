@@ -6,25 +6,11 @@
 #define EVO_MOTION_SKELETON_H
 
 #include <vector>
-
-#if __has_include(<json/json.h>)
-
-#include <json/json.h>
-#include <json/value.h>
-
-#elif __has_include(<jsoncpp/json/json.h>)
-
-#include <jsoncpp/json/json.h>
-#include <jsoncpp/json/value.h>
-
-#else
-#error "jsoncpp header not found"
-#endif
-
 #include <btBulletDynamicsCommon.h>
 #include <map>
 
 #include "./item.h"
+#include "./converter.h"
 
 class AbstractMember;
 
@@ -47,7 +33,7 @@ public:
 
 class Skeleton {
 public:
-    explicit Skeleton(const std::shared_ptr<AbstractMember> &root_member);
+    explicit Skeleton(const std::string &root_name, const std::shared_ptr<AbstractMember> &root_member);
 
     std::vector<Item> get_items();
 
@@ -55,21 +41,17 @@ public:
 
     std::vector<btTypedConstraint *> get_constraints();
 
-private:
-    std::vector<btTypedConstraint *> constraints;
+    std::string get_root_name();
 
+private:
+    std::string root_name;
+    std::vector<btTypedConstraint *> constraints;
     std::map<std::string, Item> items_map;
 };
 
 /*
  * JSON stuff
  */
-
-glm::mat4 json_transformation_to_model_matrix(Json::Value transformation);
-
-glm::vec3 json_vec3_to_glm_vec3(Json::Value vec3);
-
-btVector3 json_vec3_to_bt_vector3(Json::Value vec3);
 
 class JsonMember : public AbstractMember {
 public:
