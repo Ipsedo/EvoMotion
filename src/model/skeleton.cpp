@@ -78,7 +78,8 @@ btVector3 json_vec3_to_bt_vector3(Json::Value vec3) {
     return {
         vec3["x"].asFloat(),
         vec3["y"].asFloat(),
-        vec3["z"].asFloat()};
+        vec3["z"].asFloat()
+    };
 }
 
 
