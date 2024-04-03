@@ -8,8 +8,10 @@
 #include <vector>
 
 #if __has_include(<json/json.h>)
+
 #include <json/json.h>
 #include <json/value.h>
+
 #elif __has_include(<jsoncpp/json/json.h>)
 
 #include <jsoncpp/json/json.h>
@@ -104,7 +106,7 @@ private:
 
 class JsonFixedConstraint : public AbstractConstraint {
 public:
-    JsonFixedConstraint(const Item &parent, const Json::Value &fixed);
+    JsonFixedConstraint(Item parent, const Json::Value &fixed);
 
     btTypedConstraint *get_constraint() override;
 

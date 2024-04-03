@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <utility>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "./skeleton.h"
 
@@ -74,9 +75,10 @@ glm::vec3 json_vec3_to_glm_vec3(Json::Value vec3) {
 }
 
 btVector3 json_vec3_to_bt_vector3(Json::Value vec3) {
-    return {vec3["x"].asFloat(),
-            vec3["y"].asFloat(),
-            vec3["z"].asFloat()};
+    return {
+        vec3["x"].asFloat(),
+        vec3["y"].asFloat(),
+        vec3["z"].asFloat()};
 }
 
 
@@ -187,10 +189,25 @@ std::shared_ptr<AbstractMember> JsonHingeConstraint::get_child() {
 }
 // fixed constraint
 
-JsonFixedConstraint::JsonFixedConstraint(const Item &parent,
+JsonFixedConstraint::JsonFixedConstraint(Item parent,
                                          const Json::Value &json_constraint) {
     child = std::make_shared<JsonMember>(parent,
-                                         json_constraint["member_info"]);
+                                         json_constraint["child_member"]);
+
+    btTransform parent_tr;
+    parent_tr.setFromOpenGLMatrix(
+        glm::value_ptr(json_transformation_to_model_matrix(json_constraint["attach_in_parent"])));
+    btTransform sub_tr;
+    sub_tr.setFromOpenGLMatrix(glm::value_ptr(json_transformation_to_model_matrix(json_constraint["attach_in_child"])));
+
+    parent.get_body()->setIgnoreCollisionCheck(child->get_item().get_body(), true);
+
+    fixed_constraint = new btFixedConstraint(
+        *parent.get_body(),
+        *child->get_item().get_body(),
+        parent_tr,
+        sub_tr
+    );
 }
 
 btTypedConstraint *JsonFixedConstraint::get_constraint() {
