@@ -7,12 +7,13 @@
 #include <fstream>
 #include <iostream>
 #include <utility>
+#include <tuple>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "./skeleton.h"
 
 Skeleton::Skeleton(const std::shared_ptr<AbstractMember> &root_member)
-    : items(), constraints() {
+    : constraints(), items_map() {
 
     std::queue<std::shared_ptr<AbstractMember>> queue;
     queue.push(root_member);
@@ -21,7 +22,8 @@ Skeleton::Skeleton(const std::shared_ptr<AbstractMember> &root_member)
         auto member = queue.front();
         queue.pop();
 
-        items.push_back(member->get_item());
+        items_map.emplace(member->get_item().get_name(), member->get_item());
+
         for (const auto &child: member->get_children()) {
             constraints.push_back(child->get_constraint());
             queue.push(child->get_child());
@@ -30,11 +32,18 @@ Skeleton::Skeleton(const std::shared_ptr<AbstractMember> &root_member)
 }
 
 std::vector<Item> Skeleton::get_items() {
+    std::vector<Item> items;
+    std::transform(items_map.begin(), items_map.end(), std::back_inserter(items),
+                   [](auto t) { return std::get<1>(t); });
     return items;
 }
 
 std::vector<btTypedConstraint *> Skeleton::get_constraints() {
     return constraints;
+}
+
+Item Skeleton::get_item(std::string name) {
+    return items_map.find(name)->second;
 }
 
 /*
@@ -140,15 +149,14 @@ Item JsonMember::get_item() {
 std::vector<std::shared_ptr<AbstractConstraint>> JsonMember::get_children() {
     std::vector<std::shared_ptr<AbstractConstraint>> children;
 
-    for (const auto &child: json_member["children"]) {
-        std::string constraint_type = child["constraint_type"].asCString();
-        if (constraint_type == "hinge")
-            children.push_back(
-                std::make_shared<JsonHingeConstraint>(member, child));
-        else if (constraint_type == "fixed")
-            children.push_back(
-                std::make_shared<JsonFixedConstraint>(member, child));
-    }
+    std::map<std::string, std::function<std::shared_ptr<AbstractConstraint>(Item, const Json::Value &)>> map{
+        {"hinge", std::make_shared<JsonHingeConstraint, Item, const Json::Value &>},
+        {"fixed", std::make_shared<JsonFixedConstraint, Item, const Json::Value &>}
+    };
+
+    for (const auto &child: json_member["children"])
+        children.push_back(map.find(child["constraint_type"].asCString())->second(member, child));
+
     return children;
 }
 
@@ -176,6 +184,9 @@ JsonHingeConstraint::JsonHingeConstraint(Item parent,
         pos_in_child,
         parent_axis, child_axis
     );
+
+    hinge_constraint->setLimit(json_constraint["limit_radian"]["min"].asFloat(),
+                               json_constraint["limit_radian"]["max"].asFloat());
 
     parent.get_body()->setIgnoreCollisionCheck(child->get_item().get_body(),
                                                true);

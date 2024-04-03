@@ -22,7 +22,7 @@
 #endif
 
 #include <btBulletDynamicsCommon.h>
-#include <unordered_map>
+#include <map>
 
 #include "./item.h"
 
@@ -51,11 +51,14 @@ public:
 
     std::vector<Item> get_items();
 
+    Item get_item(std::string name);
+
     std::vector<btTypedConstraint *> get_constraints();
 
 private:
-    std::vector<Item> items;
     std::vector<btTypedConstraint *> constraints;
+
+    std::map<std::string, Item> items_map;
 };
 
 /*
