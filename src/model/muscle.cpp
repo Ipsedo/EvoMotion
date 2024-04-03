@@ -32,13 +32,21 @@ Muscle::Muscle(
 ) {
 
     {
-        glm::mat4 attach_a_mat = item_a.model_matrix_without_scale() * glm::translate(glm::mat4(1), pos_in_a);
-        glm::mat4 attach_b_mat = item_b.model_matrix_without_scale() * glm::translate(glm::mat4(1), pos_in_b);
+        glm::mat4 attach_a_mat = item_a.model_matrix_without_scale() *
+                                 glm::translate(glm::mat4(1), pos_in_a);
+        glm::mat4 attach_b_mat = item_b.model_matrix_without_scale() *
+                                 glm::translate(glm::mat4(1), pos_in_b);
 
-        attach_a = std::make_shared<Item>(name + "_attach_a", std::make_shared<ObjShape>("./resources/obj/sphere.obj"),
-                                          attach_a_mat, attach_scale, attach_mass);
-        attach_b = std::make_shared<Item>(name + "_attach_b", std::make_shared<ObjShape>("./resources/obj/sphere.obj"),
-                                          attach_b_mat, attach_scale, attach_mass);
+        attach_a = std::make_shared<Item>(name + "_attach_a",
+                                          std::make_shared<ObjShape>(
+                                              "./resources/obj/sphere.obj"),
+                                          attach_a_mat, attach_scale,
+                                          attach_mass);
+        attach_b = std::make_shared<Item>(name + "_attach_b",
+                                          std::make_shared<ObjShape>(
+                                              "./resources/obj/sphere.obj"),
+                                          attach_b_mat, attach_scale,
+                                          attach_mass);
     }
 
 
@@ -62,7 +70,8 @@ Muscle::Muscle(
     {
 
         btTransform frame_in_item_a;
-        frame_in_item_a.setOrigin(btVector3(pos_in_a.x, pos_in_a.y, pos_in_a.z));
+        frame_in_item_a.setOrigin(
+            btVector3(pos_in_a.x, pos_in_a.y, pos_in_a.z));
         btTransform frame_in_attach_a;
         frame_in_attach_a.setIdentity();
 
@@ -77,7 +86,8 @@ Muscle::Muscle(
         attach_a_constraint->setLimit(limit_angle_cone, limit_angle_cone, 0.f);
 
         btTransform frame_in_item_b;
-        frame_in_item_b.setOrigin(btVector3(pos_in_b.x, pos_in_b.y, pos_in_b.z));
+        frame_in_item_b.setOrigin(
+            btVector3(pos_in_b.x, pos_in_b.y, pos_in_b.z));
         btTransform frame_in_attach_b;
         frame_in_attach_b.setIdentity();
 

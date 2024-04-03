@@ -6,16 +6,19 @@
 
 a2c_liquid_networks::a2c_liquid_networks(std::vector<int64_t> state_space,
                                          std::vector<int64_t> action_space,
-                                         int neuron_number, int unfolding_steps) {
+                                         int neuron_number,
+                                         int unfolding_steps) {
     hidden_size = neuron_number;
     steps = unfolding_steps;
 
     weight = register_module(
-        "weight", torch::nn::Linear(torch::nn::LinearOptions(state_space[0], hidden_size).bias(false))
+        "weight", torch::nn::Linear(
+            torch::nn::LinearOptions(state_space[0], hidden_size).bias(false))
     );
 
     recurrent_weight = register_module(
-        "recurrent_weight", torch::nn::Linear(torch::nn::LinearOptions(hidden_size, hidden_size).bias(false))
+        "recurrent_weight", torch::nn::Linear(
+            torch::nn::LinearOptions(hidden_size, hidden_size).bias(false))
     );
 
     bias = register_parameter("bias", torch::randn({1, hidden_size}));
@@ -54,7 +57,8 @@ a2c_response a2c_liquid_networks::forward(const torch::Tensor &state) {
 
     for (int i = 0; i < steps; i++)
         x_t = (x_t + delta_t * compute_step(x_t, batched_state) * a)
-              / (1.f + delta_t * (1.f / tau + compute_step(x_t, batched_state)));
+              /
+              (1.f + delta_t * (1.f / tau + compute_step(x_t, batched_state)));
 
     return {
         mu->forward(x_t).squeeze(0),
@@ -64,7 +68,9 @@ a2c_response a2c_liquid_networks::forward(const torch::Tensor &state) {
 }
 
 void a2c_liquid_networks::reset_x_t() {
-    x_t = torch::mish(torch::randn({1, hidden_size}, torch::TensorOptions().device(weight->weight.device())));
+    x_t = torch::mish(torch::randn({1, hidden_size},
+                                   torch::TensorOptions().device(
+                                       weight->weight.device())));
 }
 
 ActorCriticLiquid::ActorCriticLiquid(int seed,
@@ -73,8 +79,10 @@ ActorCriticLiquid::ActorCriticLiquid(int seed,
                                      int hidden_size, float lr) : ActorCritic(
     seed, state_space, action_space, hidden_size, lr) {
 
-    networks = std::make_shared<a2c_liquid_networks>(state_space, action_space, hidden_size, 6);
-    optimizer = std::make_shared<torch::optim::Adam>(networks->parameters(), lr);
+    networks = std::make_shared<a2c_liquid_networks>(state_space, action_space,
+                                                     hidden_size, 6);
+    optimizer = std::make_shared<torch::optim::Adam>(networks->parameters(),
+                                                     lr);
 }
 
 void ActorCriticLiquid::done(step step) {

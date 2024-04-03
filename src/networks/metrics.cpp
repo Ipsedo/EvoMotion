@@ -7,7 +7,8 @@
 #include "metrics.h"
 
 template<class R, class... I>
-Meter<R, I...>::Meter(std::optional<int> window_size) : window_size(window_size), results() {
+Meter<R, I...>::Meter(std::optional<int> window_size) : window_size(
+    window_size), results() {
 
 }
 

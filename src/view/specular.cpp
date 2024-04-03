@@ -5,11 +5,12 @@
 #include "constants.h"
 #include "specular.h"
 
-OBjSpecular::OBjSpecular(const std::vector<std::tuple<float, float, float>> &vertices,
-                         const std::vector<std::tuple<float, float, float>> &normals,
-                         glm::vec4 ambient_color,
-                         glm::vec4 diffuse_color,
-                         glm::vec4 specular_color, float shininess)
+OBjSpecular::OBjSpecular(
+    const std::vector<std::tuple<float, float, float>> &vertices,
+    const std::vector<std::tuple<float, float, float>> &normals,
+    glm::vec4 ambient_color,
+    glm::vec4 diffuse_color,
+    glm::vec4 specular_color, float shininess)
     : ambient_color(ambient_color),
       diffuse_color(diffuse_color),
       specular_color(specular_color),
@@ -47,7 +48,8 @@ OBjSpecular::OBjSpecular(const std::vector<std::tuple<float, float, float>> &ver
 }
 
 void
-OBjSpecular::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) {
+OBjSpecular::draw(glm::mat4 mvp_matrix, glm::mat4 mv_matrix,
+                  glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) {
     program.use();
 
     program.attrib(

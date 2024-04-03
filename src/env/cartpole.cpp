@@ -23,12 +23,14 @@ CartPole::CartPole(int seed) :
     last_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;
 
-    float pendulum_height = 0.7f, pendulum_width = 0.1f, pendulum_offset = pendulum_height / 4.f;
+    float pendulum_height = 0.7f, pendulum_width = 0.1f, pendulum_offset =
+        pendulum_height / 4.f;
 
     float chariot_height = 0.25f, chariot_width = 0.5f;
 
     chariot_pos = base_pos + base_height + chariot_height;
-    pendulum_pos = chariot_pos + chariot_height + pendulum_height - pendulum_offset;
+    pendulum_pos =
+        chariot_pos + chariot_height + pendulum_height - pendulum_offset;
 
     // Create items
     // (init graphical and physical objects)
@@ -79,7 +81,8 @@ CartPole::CartPole(int seed) :
         true
     );
 
-    controllers.push_back(std::make_shared<SliderController>(0, slider, slider_speed));
+    controllers.push_back(
+        std::make_shared<SliderController>(0, slider, slider_speed));
 
     slider->setEnabled(true);
     slider->setPoweredLinMotor(true);
@@ -92,7 +95,9 @@ CartPole::CartPole(int seed) :
     btVector3 axis(0.f, 0.f, 1.f);
     hinge = new btHingeConstraint(*chariot.get_body(), *pendulum.get_body(),
                                   btVector3(0.f, chariot_height, 0.f),
-                                  btVector3(0.f, -pendulum_height + pendulum_offset, 0.f),
+                                  btVector3(0.f,
+                                            -pendulum_height + pendulum_offset,
+                                            0.f),
                                   axis, axis, true);
 
     base_rg = base.get_body();
@@ -135,10 +140,12 @@ step CartPole::compute_step() {
         at::TensorOptions().device(curr_device)
     );
 
-    bool fail = pos > 10.f || pos < -10.f || ang > limit_angle || ang < -limit_angle;
+    bool fail =
+        pos > 10.f || pos < -10.f || ang > limit_angle || ang < -limit_angle;
     bool win = step_idx > max_steps;
     bool done = fail || win;
-    float reward = (limit_angle - abs(ang)) / limit_angle + (10.f - center_distance) / 10.f;
+    float reward = (limit_angle - abs(ang)) / limit_angle +
+                   (10.f - center_distance) / 10.f;
     reward = fail ? -2.f : (win ? 2.f : reward);
 
     last_vel = vel;
@@ -193,7 +200,8 @@ void CartPole::reset_engine() {
     // Apply random force to chariot for reset_frame_nb steps
     // To prevent over-fitting
 
-    float rand_force = rd_uni(rng) * chariot_push_force * 2.f - chariot_push_force;
+    float rand_force =
+        rd_uni(rng) * chariot_push_force * 2.f - chariot_push_force;
     chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
     //chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 

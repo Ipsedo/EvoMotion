@@ -11,7 +11,8 @@
 
 #include "item.h"
 
-Item::Item(std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix, glm::vec3 scale, float mass)
+Item::Item(std::string name, const std::shared_ptr<Shape> &shape,
+           glm::mat4 model_matrix, glm::vec3 scale, float mass)
     : name(std::move(name)), shape(shape), scale(scale) {
     auto *convex_hull_shape = new btConvexHullShape();
 
@@ -32,20 +33,27 @@ Item::Item(std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 mode
 
     auto *motion_state = new btDefaultMotionState(original_tr);
 
-    btRigidBody::btRigidBodyConstructionInfo body_info(mass, motion_state, collision_shape, local_inertia);
+    btRigidBody::btRigidBodyConstructionInfo body_info(mass, motion_state,
+                                                       collision_shape,
+                                                       local_inertia);
 
     body = new btRigidBody(body_info);
 }
 
-Item::Item(std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::quat rotation,
+Item::Item(std::string name, const std::shared_ptr<Shape> &shape,
+           glm::vec3 position, glm::quat rotation,
            glm::vec3 scale, float mass)
-    : Item(std::move(name), shape, glm::translate(glm::mat4(1.f), position) * glm::mat4_cast(rotation), scale, mass) {
+    : Item(std::move(name), shape,
+           glm::translate(glm::mat4(1.f), position) * glm::mat4_cast(rotation),
+           scale, mass) {
 
 
 }
 
-Item::Item(std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale, float mass)
-    : Item(std::move(name), shape, position, glm::quat_cast(glm::mat4(1.f)), scale, mass) {
+Item::Item(std::string name, const std::shared_ptr<Shape> &shape,
+           glm::vec3 position, glm::vec3 scale, float mass)
+    : Item(std::move(name), shape, position, glm::quat_cast(glm::mat4(1.f)),
+           scale, mass) {
 
 }
 
@@ -77,15 +85,18 @@ glm::mat4 Item::model_matrix_without_scale() {
 }
 
 std::tuple<Item, btHingeConstraint *>
-Item::attach_item_hinge(glm::mat4 model_in_parent, glm::mat4 attach_in_parent, glm::mat4 attach_in_sub,
+Item::attach_item_hinge(glm::mat4 model_in_parent, glm::mat4 attach_in_parent,
+                        glm::mat4 attach_in_sub,
                         glm::vec3 hinge_axis, std::string sub_name,
-                        const std::shared_ptr<Shape> &sub_shape, glm::vec3 sub_scale, float mass) {
+                        const std::shared_ptr<Shape> &sub_shape,
+                        glm::vec3 sub_scale, float mass) {
     glm::mat4 sub_mat = model_matrix_without_scale() * model_in_parent;
 
     Item sub_item(std::move(sub_name), sub_shape, sub_mat, sub_scale, mass);
 
     btVector3 axis(hinge_axis.x, hinge_axis.y, hinge_axis.z);
-    glm::vec3 pos_in_parent = glm::vec3(attach_in_parent * glm::vec4(0, 0, 0, 1));
+    glm::vec3 pos_in_parent = glm::vec3(
+        attach_in_parent * glm::vec4(0, 0, 0, 1));
     glm::vec3 pos_in_sub = glm::vec3(attach_in_sub * glm::vec4(0, 0, 0, 1));
 
     auto hinge = new btHingeConstraint(
@@ -106,9 +117,11 @@ Item::attach_item_hinge(glm::mat4 model_in_parent, glm::mat4 attach_in_parent, g
 }
 
 std::tuple<Item, btFixedConstraint *>
-Item::attach_item_fixed(glm::mat4 model_in_parent, glm::mat4 attach_in_parent, glm::mat4 attach_in_sub,
+Item::attach_item_fixed(glm::mat4 model_in_parent, glm::mat4 attach_in_parent,
+                        glm::mat4 attach_in_sub,
                         std::string sub_name,
-                        const std::shared_ptr<Shape> &sub_shape, glm::vec3 sub_scale, float mass) {
+                        const std::shared_ptr<Shape> &sub_shape,
+                        glm::vec3 sub_scale, float mass) {
     glm::mat4 sub_mat = model_matrix_without_scale() * model_in_parent;
 
     Item sub_item(std::move(sub_name), sub_shape, sub_mat, sub_scale, mass);

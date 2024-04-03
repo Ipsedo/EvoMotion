@@ -23,7 +23,8 @@ message_callback(GLenum source,
                  GLsizei length,
                  const GLchar *message,
                  const void *userParam) {
-    std::cerr << source << " " << type << " " << id << " " << severity << " " << length << " : " << std::endl;
+    std::cerr << source << " " << type << " " << id << " " << severity << " "
+              << length << " : " << std::endl;
     std::cerr << "params : " << userParam << std::endl;
     std::cerr << message << std::endl << std::endl;
 }
@@ -85,7 +86,8 @@ Renderer::Renderer(
     is_open = true;
 }
 
-void Renderer::add_drawable(const std::string &name, const std::shared_ptr<Drawable> &drawable) {
+void Renderer::add_drawable(const std::string &name,
+                            const std::shared_ptr<Drawable> &drawable) {
     drawables.insert({name, drawable});
 }
 

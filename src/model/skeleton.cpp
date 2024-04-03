@@ -4,14 +4,14 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <queue>
-#include <json/json.h>
 #include <fstream>
 #include <iostream>
 #include <utility>
 
 #include "./skeleton.h"
 
-Skeleton::Skeleton(const std::shared_ptr<AbstractMember> &root_member) : items(), constraints() {
+Skeleton::Skeleton(const std::shared_ptr<AbstractMember> &root_member)
+    : items(), constraints() {
 
     std::queue<std::shared_ptr<AbstractMember>> queue;
     queue.push(root_member);
@@ -47,32 +47,36 @@ glm::mat4 json_transformation_to_model_matrix(Json::Value transformation) {
     Json::Value rotation = transformation["rotation"];
     Json::Value translation = transformation["translation"];
 
-    glm::vec3 position(
-        translation["x"].asFloat(),
-        translation["y"].asFloat(),
-        translation["z"].asFloat()
-    );
-
-    glm::vec3 rotation_point(
-        rotation["point_x"].asFloat(),
-        rotation["point_y"].asFloat(),
-        rotation["point_z"].asFloat()
-    );
-
-    glm::vec3 rotation_axis(
-        rotation["axis_x"].asFloat(),
-        rotation["axis_y"].asFloat(),
-        rotation["axis_z"].asFloat()
-    );
-
+    glm::vec3 position = json_vec3_to_glm_vec3(transformation["translation"]);
+    glm::vec3 rotation_point = json_vec3_to_glm_vec3(rotation["point"]);
+    glm::vec3 rotation_axis = json_vec3_to_glm_vec3(rotation["axis"]);
     float angle_radian = rotation["angle_radian"].asFloat();
 
-    glm::mat4 translation_to_origin = glm::translate(glm::mat4(1.0f), -rotation_point);
-    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_radian, rotation_axis);
-    glm::mat4 translation_back = glm::translate(glm::mat4(1.0f), rotation_point);
-    glm::mat4 translation_to_position = glm::translate(glm::mat4(1.0f), position);
+    glm::mat4 translation_to_origin = glm::translate(glm::mat4(1.0f),
+                                                     -rotation_point);
+    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_radian,
+                                            rotation_axis);
+    glm::mat4 translation_back = glm::translate(glm::mat4(1.0f),
+                                                rotation_point);
+    glm::mat4 translation_to_position = glm::translate(glm::mat4(1.0f),
+                                                       position);
 
-    return translation_to_position * translation_back * rotation_matrix * translation_to_origin;
+    return translation_to_position * translation_back * rotation_matrix *
+           translation_to_origin;
+}
+
+glm::vec3 json_vec3_to_glm_vec3(Json::Value vec3) {
+    return {
+        vec3["x"].asFloat(),
+        vec3["y"].asFloat(),
+        vec3["z"].asFloat()
+    };
+}
+
+btVector3 json_vec3_to_bt_vector3(Json::Value vec3) {
+    return {vec3["x"].asFloat(),
+            vec3["y"].asFloat(),
+            vec3["z"].asFloat()};
 }
 
 
@@ -88,7 +92,8 @@ Json::Value read_json(const std::string &json_path) {
 
 // skeleton
 
-JsonSkeleton::JsonSkeleton(const std::string &json_path, const std::string &root_name, glm::mat4 model_matrix)
+JsonSkeleton::JsonSkeleton(const std::string &json_path,
+                           const std::string &root_name, glm::mat4 model_matrix)
     : Skeleton(std::make_shared<JsonMember>(root_name, model_matrix,
                                             read_json(json_path))) {
 
@@ -98,17 +103,18 @@ JsonSkeleton::JsonSkeleton(const std::string &json_path, const std::string &root
 
 Item JsonMember::build_item() {
     return {name + "_" + json_member["name"].asCString(),
-            std::make_shared<ObjShape>(shape_to_path[json_member["shape"].asCString()]),
-            model_matrix * json_transformation_to_model_matrix(json_member["transformation"]),
-            glm::vec3(
-                json_member["scale_x"].asFloat(),
-                json_member["scale_y"].asFloat(),
-                json_member["scale_z"].asFloat()),
+            std::make_shared<ObjShape>(
+                shape_to_path[json_member["shape"].asCString()]),
+            model_matrix *
+            json_transformation_to_model_matrix(json_member["transformation"]),
+            json_vec3_to_glm_vec3(json_member["scale"]),
             json_member["mass"].asFloat()};
 }
 
-JsonMember::JsonMember(std::string name, glm::mat4 model_matrix, Json::Value json_member) :
-    json_member(std::move(json_member)), name(std::move(name)), model_matrix(model_matrix),
+JsonMember::JsonMember(std::string name, glm::mat4 model_matrix,
+                       Json::Value json_member) :
+    json_member(std::move(json_member)), name(std::move(name)),
+    model_matrix(model_matrix),
     shape_to_path({
                       {"sphere",   "./resources/obj/sphere.obj"},
                       {"cube",     "./resources/obj/cube.obj"},
@@ -134,49 +140,42 @@ std::vector<std::shared_ptr<AbstractConstraint>> JsonMember::get_children() {
     for (const auto &child: json_member["children"]) {
         std::string constraint_type = child["constraint_type"].asCString();
         if (constraint_type == "hinge")
-            children.push_back(std::make_shared<JsonHingeConstraint>(member, child));
+            children.push_back(
+                std::make_shared<JsonHingeConstraint>(member, child));
         else if (constraint_type == "fixed")
-            children.push_back(std::make_shared<JsonFixedConstraint>(member, child));
+            children.push_back(
+                std::make_shared<JsonFixedConstraint>(member, child));
     }
     return children;
 }
 
 // hinge
 
-JsonHingeConstraint::JsonHingeConstraint(Item parent, const Json::Value &json_constraint) {
+JsonHingeConstraint::JsonHingeConstraint(Item parent,
+                                         const Json::Value &json_constraint) {
 
-    btVector3 parent_axis(
-        json_constraint["parent_axis_x"].asFloat(),
-        json_constraint["parent_axis_y"].asFloat(),
-        json_constraint["parent_axis_z"].asFloat());
+    btVector3 parent_axis = json_vec3_to_bt_vector3(
+        json_constraint["parent_axis"]);
+    btVector3 child_axis = json_vec3_to_bt_vector3(
+        json_constraint["child_axis"]);
+    btVector3 pos_in_parent = json_vec3_to_bt_vector3(
+        json_constraint["member_attach"]);
+    btVector3 pos_in_child = json_vec3_to_bt_vector3(
+        json_constraint["child_attach"]);
 
-    btVector3 child_axis(
-        json_constraint["child_axis_x"].asFloat(),
-        json_constraint["child_axis_y"].asFloat(),
-        json_constraint["child_axis_z"].asFloat());
-
-    glm::vec3 pos_in_parent(
-        json_constraint["member_attach_x"].asFloat(),
-        json_constraint["member_attach_y"].asFloat(),
-        json_constraint["member_attach_z"].asFloat()
-    );
-    glm::vec3 pos_in_child(
-        json_constraint["child_attach_x"].asFloat(),
-        json_constraint["child_attach_y"].asFloat(),
-        json_constraint["child_attach_z"].asFloat()
-    );
-
-    child = std::make_shared<JsonMember>(parent, json_constraint["child_member"]);
+    child = std::make_shared<JsonMember>(parent,
+                                         json_constraint["child_member"]);
 
     hinge_constraint = new btHingeConstraint(
         *parent.get_body(),
         *child->get_item().get_body(),
-        btVector3(pos_in_parent.x, pos_in_parent.y, pos_in_parent.z),
-        btVector3(pos_in_child.x, pos_in_child.y, pos_in_child.z),
+        pos_in_parent,
+        pos_in_child,
         parent_axis, child_axis
     );
 
-    parent.get_body()->setIgnoreCollisionCheck(child->get_item().get_body(), true);
+    parent.get_body()->setIgnoreCollisionCheck(child->get_item().get_body(),
+                                               true);
 }
 
 btTypedConstraint *JsonHingeConstraint::get_constraint() {
@@ -188,8 +187,10 @@ std::shared_ptr<AbstractMember> JsonHingeConstraint::get_child() {
 }
 // fixed constraint
 
-JsonFixedConstraint::JsonFixedConstraint(const Item &parent, const Json::Value &json_constraint) {
-    child = std::make_shared<JsonMember>(parent, json_constraint["member_info"]);
+JsonFixedConstraint::JsonFixedConstraint(const Item &parent,
+                                         const Json::Value &json_constraint) {
+    child = std::make_shared<JsonMember>(parent,
+                                         json_constraint["member_info"]);
 }
 
 btTypedConstraint *JsonFixedConstraint::get_constraint() {

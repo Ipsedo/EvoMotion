@@ -25,7 +25,8 @@ struct abstract_a2c_networks : torch::nn::Module {
 };
 
 struct a2c_networks : abstract_a2c_networks {
-    a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
+    a2c_networks(std::vector<int64_t> state_space,
+                 std::vector<int64_t> action_space, int hidden_size);
 
     a2c_response forward(const torch::Tensor &state) override;
 

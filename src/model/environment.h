@@ -42,7 +42,8 @@ protected:
     void add_item(Item item);
 
 public:
-    Environment(const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space, bool continuous);
+    Environment(const std::vector<int64_t> &state_space,
+                const std::vector<int64_t> &action_space, bool continuous);
 
     virtual std::vector<Item> get_items() = 0;
 

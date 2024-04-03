@@ -139,7 +139,8 @@ int main(int argc, char **argv) {
                         muscle_parser.get<int>("height")
                     });
     else {
-        std::cerr << "must enter a subcommand" << std::endl << parser.help().str() << std::endl;
+        std::cerr << "must enter a subcommand" << std::endl
+                  << parser.help().str() << std::endl;
         exit(1);
     }
 

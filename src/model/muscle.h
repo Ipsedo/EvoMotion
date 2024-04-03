@@ -11,7 +11,8 @@
 
 class Muscle {
 public:
-    Muscle(const std::string &name, float attach_mass, glm::vec3 attach_scale, Item &item_a, glm::vec3 pos_in_a,
+    Muscle(const std::string &name, float attach_mass, glm::vec3 attach_scale,
+           Item &item_a, glm::vec3 pos_in_a,
            Item &item_b, glm::vec3 pos_in_b);
 
     void contract(float force);

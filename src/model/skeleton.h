@@ -6,8 +6,21 @@
 #define EVO_MOTION_SKELETON_H
 
 #include <vector>
+
+#if __has_include(<json/json.h>)
+#include <json/json.h>
 #include <json/value.h>
+#elif __has_include(<jsoncpp/json/json.h>)
+
+#include <jsoncpp/json/json.h>
+#include <jsoncpp/json/value.h>
+
+#else
+#error "jsoncpp header not found"
+#endif
+
 #include <btBulletDynamicsCommon.h>
+#include <unordered_map>
 
 #include "./item.h"
 
@@ -49,11 +62,16 @@ private:
 
 glm::mat4 json_transformation_to_model_matrix(Json::Value transformation);
 
+glm::vec3 json_vec3_to_glm_vec3(Json::Value vec3);
+
+btVector3 json_vec3_to_bt_vector3(Json::Value vec3);
+
 class JsonMember : public AbstractMember {
 public:
     JsonMember(Item parent, const Json::Value &json_member);
 
-    JsonMember(std::string name, glm::mat4 model_matrix, Json::Value json_member);
+    JsonMember(std::string name, glm::mat4 model_matrix,
+               Json::Value json_member);
 
     Item get_item() override;
 
@@ -100,7 +118,8 @@ private:
 
 class JsonSkeleton : public Skeleton {
 public:
-    explicit JsonSkeleton(const std::string &json_path, const std::string &root_name, glm::mat4 model_matrix);
+    explicit JsonSkeleton(const std::string &json_path,
+                          const std::string &root_name, glm::mat4 model_matrix);
 };
 
 #endif //EVO_MOTION_SKELETON_H

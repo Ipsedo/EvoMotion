@@ -19,13 +19,15 @@ class Program {
 public:
     class Builder {
     public:
-        Builder(std::string vertex_shader_path, std::string fragment_shader_path);
+        Builder(std::string vertex_shader_path,
+                std::string fragment_shader_path);
 
         Program::Builder add_uniform(const std::string &name);
 
         Program::Builder add_attribute(const std::string &name);
 
-        Program::Builder add_buffer(const std::string &name, const std::vector<float> &data);
+        Program::Builder
+        add_buffer(const std::string &name, const std::vector<float> &data);
 
         Program build();
 
@@ -75,7 +77,8 @@ public:
 
     void uniform_float(const std::string &name, float f);
 
-    void attrib(const std::string &name, const std::string &buffer_name, int data_size, int stride, int offset);
+    void attrib(const std::string &name, const std::string &buffer_name,
+                int data_size, int stride, int offset);
 
     void disable_attrib_array();
 

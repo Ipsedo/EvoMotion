@@ -21,13 +21,18 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
     glm::vec3 base_rot_point(0, -1, 0);
     glm::vec3 base_member_pos(0, 2, 0);
 
-    glm::mat4 translation_to_origin = glm::translate(glm::mat4(1.0f), -base_rot_point);
-    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), fixed_angle, glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 translation_back = glm::translate(glm::mat4(1.0f), base_rot_point);
-    glm::mat4 translation_to_position = glm::translate(glm::mat4(1.0f), base_member_pos);
+    glm::mat4 translation_to_origin = glm::translate(glm::mat4(1.0f),
+                                                     -base_rot_point);
+    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), fixed_angle,
+                                            glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 translation_back = glm::translate(glm::mat4(1.0f),
+                                                base_rot_point);
+    glm::mat4 translation_to_position = glm::translate(glm::mat4(1.0f),
+                                                       base_member_pos);
 
     auto [member_base, fixed_constraint] = base.attach_item_fixed(
-        translation_to_position * translation_back * rotation_matrix * translation_to_origin,
+        translation_to_position * translation_back * rotation_matrix *
+        translation_to_origin,
         glm::translate(glm::mat4(1.), glm::vec3(0, 1, 0)) * rotation_matrix,
         glm::translate(glm::mat4(1.), glm::vec3(0, -1, 0)),
         "member_base",
@@ -40,12 +45,14 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
     glm::vec3 member_pos(0, 2, 0);
 
     translation_to_origin = glm::translate(glm::mat4(1.0f), -member_rot_point);
-    rotation_matrix = glm::rotate(glm::mat4(1.0f), hinge_angle, glm::vec3(0.0f, 0.0f, 1.0f));
+    rotation_matrix = glm::rotate(glm::mat4(1.0f), hinge_angle,
+                                  glm::vec3(0.0f, 0.0f, 1.0f));
     translation_back = glm::translate(glm::mat4(1.0f), member_rot_point);
     translation_to_position = glm::translate(glm::mat4(1.0f), member_pos);
 
     auto [member, hinge] = member_base.attach_item_hinge(
-        translation_to_position * translation_back * rotation_matrix * translation_to_origin,
+        translation_to_position * translation_back * rotation_matrix *
+        translation_to_origin,
         glm::translate(glm::mat4(1.), glm::vec3(0, 1, 0)),
         glm::translate(glm::mat4(1.), glm::vec3(0, -1, 0)),
         glm::vec3(0, 0, 1),
@@ -54,7 +61,8 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
         glm::vec3(0.1f, 1.f, 0.1f), 1.f
     );
 
-    muscle = std::make_shared<Muscle>("test_muscle", 0.01f, glm::vec3(0.1f), member_base, glm::vec3(0.1, 0.2, 0.0),
+    muscle = std::make_shared<Muscle>("test_muscle", 0.01f, glm::vec3(0.1f),
+                                      member_base, glm::vec3(0.1, 0.2, 0.0),
                                       member,
                                       glm::vec3(0.1, 0.2, 0));
 

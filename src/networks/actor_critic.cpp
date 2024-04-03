@@ -8,11 +8,13 @@
 
 #include "actor_critic.h"
 
-ActorCritic::ActorCritic(int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+ActorCritic::ActorCritic(int seed, const std::vector<int64_t> &state_space,
+                         const std::vector<int64_t> &action_space,
                          int hidden_size, float lr) :
     curr_device(torch::kCPU),
     gamma(0.99f),
-    networks(std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
+    networks(
+        std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
     rewards_buffer(),
     results_buffer(),
     actions_buffer(),
@@ -51,8 +53,10 @@ void ActorCritic::train() {
     auto mus = torch::stack(mus_tmp);
     auto sigmas = torch::stack(sigmas_tmp);
 
-    auto rewards = torch::tensor(rewards_buffer, at::TensorOptions().device(curr_device));
-    auto t_steps = torch::arange(int(rewards_buffer.size()), at::TensorOptions().device(curr_device));
+    auto rewards = torch::tensor(rewards_buffer,
+                                 at::TensorOptions().device(curr_device));
+    auto t_steps = torch::arange(int(rewards_buffer.size()),
+                                 at::TensorOptions().device(curr_device));
 
     auto returns = rewards * torch::pow(gamma, t_steps);
     returns = returns.flip({0})
@@ -63,13 +67,15 @@ void ActorCritic::train() {
 
     auto advantage = returns - values;
 
-    auto prob = torch::exp(-0.5f * torch::pow((actions.detach() - mus) / sigmas, 2.f))
-                / (sigmas * sqrt(2.f * M_PI));
+    auto prob =
+        torch::exp(-0.5f * torch::pow((actions.detach() - mus) / sigmas, 2.f))
+        / (sigmas * sqrt(2.f * M_PI));
     auto log_prob = torch::log(prob);
 
     auto actor_loss = -log_prob * advantage.detach().unsqueeze(-1);
 
-    auto critic_loss = torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None);
+    auto critic_loss = torch::smooth_l1_loss(values, returns.detach(),
+                                             at::Reduction::None);
 
     auto loss = (actor_loss + critic_loss.unsqueeze(-1)).sum();
 
@@ -143,21 +149,28 @@ void ActorCritic::set_eval(bool eval) {
  * torch Module
  */
 
-a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t> action_space,
+a2c_networks::a2c_networks(std::vector<int64_t> state_space,
+                           std::vector<int64_t> action_space,
                            int hidden_size) {
     head = register_module("head", torch::nn::Sequential(
         torch::nn::Linear(state_space[0], hidden_size),
         torch::nn::Mish(),
-        torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+        torch::nn::LayerNorm(
+            torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(
+                true).eps(1e-5)),
         torch::nn::Linear(hidden_size, hidden_size),
         torch::nn::Mish(),
-        torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5))
+        torch::nn::LayerNorm(
+            torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(
+                true).eps(1e-5))
     ));
 
     mu = register_module("mu", torch::nn::Sequential(
         torch::nn::Linear(hidden_size, hidden_size),
         torch::nn::Mish(),
-        torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+        torch::nn::LayerNorm(
+            torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(
+                true).eps(1e-5)),
         torch::nn::Linear(hidden_size, action_space[0]),
         torch::nn::Tanh()
     ));
@@ -165,7 +178,9 @@ a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t
     sigma = register_module("sigma", torch::nn::Sequential(
         torch::nn::Linear(hidden_size, hidden_size),
         torch::nn::Mish(),
-        torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+        torch::nn::LayerNorm(
+            torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(
+                true).eps(1e-5)),
         torch::nn::Linear(hidden_size, action_space[0]),
         torch::nn::Softplus()
     ));
@@ -173,7 +188,9 @@ a2c_networks::a2c_networks(std::vector<int64_t> state_space, std::vector<int64_t
     critic = register_module("critic", torch::nn::Sequential(
         torch::nn::Linear(hidden_size, hidden_size),
         torch::nn::Mish(),
-        torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+        torch::nn::LayerNorm(
+            torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(
+                true).eps(1e-5)),
         torch::nn::Linear(hidden_size, 1)
     ));
 }

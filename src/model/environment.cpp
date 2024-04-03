@@ -4,10 +4,12 @@
 
 #include "environment.h"
 
-Environment::Environment(const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+Environment::Environment(const std::vector<int64_t> &state_space,
+                         const std::vector<int64_t> &action_space,
                          bool continuous) :
     curr_device(torch::kCPU),
-    state_space(state_space), action_space(action_space), continuous(continuous),
+    state_space(state_space), action_space(action_space),
+    continuous(continuous),
     m_collision_configuration(new btDefaultCollisionConfiguration()),
     m_dispatcher(new btCollisionDispatcher(m_collision_configuration)),
     m_broad_phase(new btDbvtBroadphase()),
