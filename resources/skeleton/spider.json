@@ -1,0 +1,31 @@
+{
+  "name": "body",
+  "mass": 1.0,
+  "shape": "cube",
+  "scale": {
+    "x": 1.0,
+    "y": 0.1,
+    "z": 1.0
+  },
+  "transformation": {
+    "rotation": {
+      "point": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "axis": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+      },
+      "angle_radian": 0.0
+    },
+    "translation": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  },
+  "children": []
+}
