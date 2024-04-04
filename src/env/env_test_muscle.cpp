@@ -48,7 +48,7 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
     for (auto constraint: json_skeleton.get_constraints())
         m_world->addConstraint(constraint);
 
-    controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[0], 0));
+    controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[1], 0));
 
 }
 

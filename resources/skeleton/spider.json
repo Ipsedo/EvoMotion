@@ -20,7 +20,7 @@
           "y": 1.0,
           "z": 0.0
         },
-        "angle_degree": 45.0
+        "angle_degree": 35.0
       },
       "translation": {
         "x": 0.0,
@@ -32,7 +32,7 @@
       {
         "constraint_type": "hinge",
         "limit_degree": {
-          "min": -22.5,
+          "min": 0.0,
           "max": 90.0
         },
         "frame_in_parent": {
