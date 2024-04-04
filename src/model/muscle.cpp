@@ -49,63 +49,48 @@ Muscle::Muscle(
              attach_mass) {
 
 
-    {
-        btTransform frame_in_attach_a;
-        frame_in_attach_a.setIdentity();
-        btTransform frame_in_attach_b;
-        frame_in_attach_b.setIdentity();
+    btTransform frame_in_attach_a;
+    frame_in_attach_a.setIdentity();
+    btTransform frame_in_attach_b;
+    frame_in_attach_b.setIdentity();
 
-        muscle_slider_constraint = new btSliderConstraint(
-            *attach_a.get_body(), *attach_b.get_body(), frame_in_attach_a,
-            frame_in_attach_b,
-            true);
+    muscle_slider_constraint = new btSliderConstraint(
+        *attach_a.get_body(), *attach_b.get_body(), frame_in_attach_a,
+        frame_in_attach_b,
+        true);
 
-        muscle_slider_constraint->setMaxLinMotorForce(force);
-        muscle_slider_constraint->setTargetLinMotorVelocity(0.f);
-        muscle_slider_constraint->setLowerAngLimit(0);
-        muscle_slider_constraint->setUpperAngLimit(0);
-    }
+    muscle_slider_constraint->setMaxLinMotorForce(force);
+    muscle_slider_constraint->setTargetLinMotorVelocity(0.f);
+    muscle_slider_constraint->setLowerAngLimit(0);
+    muscle_slider_constraint->setUpperAngLimit(0);
+    muscle_slider_constraint->setLowerLinLimit(0);
 
-    {
+    float limit_angle_cone = 30.f;
 
-        btTransform frame_in_item_a;
-        frame_in_item_a.setOrigin(
-            btVector3(pos_in_a.x, pos_in_a.y, pos_in_a.z));
-        btTransform frame_in_attach_a;
-        frame_in_attach_a.setIdentity();
+    attach_a_constraint = new btPoint2PointConstraint(
+        *item_a.get_body(),
+        *attach_a.get_body(),
+        glm_to_bullet(pos_in_a),
+        btVector3(0, 0, 0)
+    );
 
-        float limit_angle_cone = 30.f;
+    attach_b_constraint = new btPoint2PointConstraint(
+        *item_b.get_body(),
+        *attach_b.get_body(),
+        glm_to_bullet(pos_in_b),
+        btVector3(0, 0, 0)
+    );
 
-        attach_a_constraint = new btConeTwistConstraint(
-            *item_a.get_body(),
-            *attach_a.get_body(),
-            frame_in_item_a,
-            frame_in_attach_a
-        );
-        attach_a_constraint->setLimit(limit_angle_cone, limit_angle_cone, 0.f);
-
-        btTransform frame_in_item_b;
-        frame_in_item_b.setOrigin(
-            btVector3(pos_in_b.x, pos_in_b.y, pos_in_b.z));
-        btTransform frame_in_attach_b;
-        frame_in_attach_b.setIdentity();
-
-        attach_b_constraint = new btConeTwistConstraint(
-            *item_b.get_body(),
-            *attach_b.get_body(),
-            frame_in_item_b,
-            frame_in_attach_b
-        );
-        attach_b_constraint->setLimit(limit_angle_cone, limit_angle_cone, 0.f);
-    }
 
     item_a.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
-    item_b.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
+    item_a.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
 
-    item_b.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
     item_b.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
+    item_b.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
 
     item_a.get_body()->setIgnoreCollisionCheck(item_b.get_body(), true);
+
+    attach_a.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
 }
 
 void Muscle::contract(float force) {
@@ -129,23 +114,23 @@ std::vector<btTypedConstraint *> Muscle::get_constraints() {
  * JSON
  */
 
-JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, std::string json_path) : muscles() {
+JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &json_path) : muscles() {
     auto json_muscles = read_json(json_path)["muscles"];
 
     for (auto json_muscle: json_muscles) {
-        std::string item_a_name = json_muscle["item_a"].asCString();
-        std::string item_b_name = json_muscle["item_b"].asCString();
+        std::string item_a_name = json_muscle["item_a"].get<std::string>();
+        std::string item_b_name = json_muscle["item_b"].get<std::string>();
         Item item_a = skeleton.get_item(skeleton.get_root_name() + "_" + item_a_name);
         Item item_b = skeleton.get_item(skeleton.get_root_name() + "_" + item_b_name);
 
         muscles.emplace_back(
-            skeleton.get_root_name() + "_" + item_a_name + "_attached_" + item_b_name + "_muscle",
-            json_muscle["attach_mass"].asFloat(),
+            skeleton.get_root_name().append("_").append(json_muscle["name"].get<std::string>()),
+            json_muscle["attach_mass"].get<float>(),
             json_vec3_to_glm_vec3(json_muscle["attach_scale"]),
-            item_a, json_vec3_to_glm_vec3(json_muscle["pos_in_b"]),
-            item_b, json_vec3_to_glm_vec3(json_muscle["pos_in_a"]),
-            json_muscle["force"].asFloat(),
-            json_muscle["speed"].asFloat()
+            item_a, json_vec3_to_glm_vec3(json_muscle["pos_in_a"]),
+            item_b, json_vec3_to_glm_vec3(json_muscle["pos_in_b"]),
+            json_muscle["force"].get<float>(),
+            json_muscle["speed"].get<float>()
         );
     }
 }

@@ -48,6 +48,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(indicators)
 
+# json
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 # evo_motion part
 # Get all source files
 file(GLOB_RECURSE SRC "./src/*.cpp")
@@ -66,7 +70,7 @@ target_link_libraries(
         ${TORCH_LIBRARIES}
         argparse
         indicators
-        jsoncpp
+        nlohmann_json::nlohmann_json
 )
 
 function(add_extra_folder source destination)

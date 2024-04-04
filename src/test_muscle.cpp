@@ -47,7 +47,7 @@ void test_muscle(muscle_params params) {
 
     step step = env->reset();
     while (!renderer.is_close()) {
-        step = env->do_step(-torch::ones({1}), 1.f / 60.f);
+        step = env->do_step(-torch::ones({1}), 1.f / 1000.f);
 
         std::map<std::string, glm::mat4> model_matrix;
 

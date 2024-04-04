@@ -33,11 +33,11 @@ public:
 
 class Skeleton {
 public:
-    explicit Skeleton(const std::string &root_name, const std::shared_ptr<AbstractMember> &root_member);
+    Skeleton(const std::string &root_name, const std::shared_ptr<AbstractMember> &root_member);
 
     std::vector<Item> get_items();
 
-    Item get_item(std::string name);
+    Item get_item(const std::string &name);
 
     std::vector<btTypedConstraint *> get_constraints();
 
@@ -55,29 +55,27 @@ private:
 
 class JsonMember : public AbstractMember {
 public:
-    JsonMember(Item parent, const Json::Value &json_member);
+    JsonMember(Item parent, const nlohmann::json &json_member);
 
-    JsonMember(std::string name, glm::mat4 model_matrix,
-               Json::Value json_member);
+    JsonMember(const std::string &name, glm::mat4 model_matrix,
+               const nlohmann::json &json_member);
 
     Item get_item() override;
 
     std::vector<std::shared_ptr<AbstractConstraint>> get_children() override;
 
 protected:
-    Json::Value json_member;
+    nlohmann::json json_member;
     std::string name;
     glm::mat4 model_matrix;
     std::unordered_map<std::string, std::string> shape_to_path;
     std::shared_ptr<ObjShape> obj_shape;
     Item member;
-private:
-    Item build_item();
 };
 
 class JsonHingeConstraint : public AbstractConstraint {
 public:
-    JsonHingeConstraint(Item parent, const Json::Value &hinge);
+    JsonHingeConstraint(Item parent, const nlohmann::json &hinge);
 
     btTypedConstraint *get_constraint() override;
 
@@ -91,7 +89,7 @@ private:
 
 class JsonFixedConstraint : public AbstractConstraint {
 public:
-    JsonFixedConstraint(Item parent, const Json::Value &fixed);
+    JsonFixedConstraint(Item parent, const nlohmann::json &fixed);
 
     btTypedConstraint *get_constraint() override;
 
@@ -105,7 +103,7 @@ private:
 
 class JsonSkeleton : public Skeleton {
 public:
-    explicit JsonSkeleton(const std::string &json_path,
+    JsonSkeleton(const std::string &json_path,
                           const std::string &root_name, glm::mat4 model_matrix);
 };
 

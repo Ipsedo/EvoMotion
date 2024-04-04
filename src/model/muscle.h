@@ -33,8 +33,8 @@ private:
     Item attach_b;
 
     btSliderConstraint *muscle_slider_constraint;
-    btConeTwistConstraint *attach_a_constraint;
-    btConeTwistConstraint *attach_b_constraint;
+    btPoint2PointConstraint *attach_a_constraint;
+    btPoint2PointConstraint *attach_b_constraint;
 
 };
 
@@ -45,7 +45,7 @@ public:
 
 class JsonMuscularSystem : public AbstractMuscularSystem {
 public:
-    JsonMuscularSystem(Skeleton skeleton, std::string json_path);
+    JsonMuscularSystem(Skeleton skeleton, const std::string &json_path);
 
     std::vector<Muscle> get_muscles() override;
 

@@ -20,7 +20,7 @@
           "y": 1.0,
           "z": 0.0
         },
-        "angle_radian": 0.7
+        "angle_degree": 45.0
       },
       "translation": {
         "x": 0.0,
@@ -31,29 +31,49 @@
     "children": [
       {
         "constraint_type": "hinge",
-        "parent_axis": {
-          "x": 0.0,
-          "y": 1.0,
-          "z": 0.0
+        "limit_degree": {
+          "min": -22.5,
+          "max": 90.0
         },
-        "child_axis": {
-          "x": 0.0,
-          "y": 1.0,
-          "z": 0.0
+        "frame_in_parent": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": 0.7,
+            "y": 0.0,
+            "z": -0.7
+          }
         },
-        "member_attach": {
-          "x": 0.7,
-          "y": 0.0,
-          "z": 0.7
-        },
-        "child_attach": {
-          "x": 0.0,
-          "y": 0.0,
-          "z": 0.15
-        },
-        "limit_radian": {
-          "min": 0,
-          "max": 3.14159
+        "frame_in_child": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
         },
         "child_member": {
           "name": "leg1_front_right",
@@ -69,14 +89,14 @@
               "point": {
                 "x": 0.0,
                 "y": 0.0,
-                "z": -0.3
+                "z": 0.0
               },
               "axis": {
                 "x": 0.0,
                 "y": 1.0,
                 "z": 0.0
               },
-              "angle_radian": 0.4
+              "angle_degree": 45.0
             },
             "translation": {
               "x": 0.7,
@@ -89,5 +109,52 @@
       }
     ]
   },
-  "muscles": []
+  "muscles": [
+    {
+      "name": "muscle_1",
+      "item_a": "body",
+      "item_b": "body_leg1_front_right",
+      "attach_mass": 0.01,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": 0.3,
+        "y": 0.0,
+        "z": -0.7
+      },
+      "pos_in_b": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -0.15
+      },
+      "force": 10.0,
+      "speed": 3.0
+    },
+    {
+      "name": "muscle_2",
+      "item_a": "body",
+      "item_b": "body_leg1_front_right",
+      "attach_mass": 0.01,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": 0.7,
+        "y": 0.0,
+        "z": -0.3
+      },
+      "pos_in_b": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.15
+      },
+      "force": 10.0,
+      "speed": 3.0
+    }
+  ]
 }

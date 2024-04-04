@@ -23,7 +23,6 @@ protected:
 
 private:
     std::vector<Item> items;
-    std::shared_ptr<Muscle> muscle;
 
     std::vector<std::shared_ptr<Controller>> controllers;
 

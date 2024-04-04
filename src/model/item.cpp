@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "item.h"
+#include "./converter.h"
 
 Item::Item(std::string name, const std::shared_ptr<Shape> &shape,
            glm::mat4 model_matrix, glm::vec3 scale, float mass)
@@ -21,7 +22,7 @@ Item::Item(std::string name, const std::shared_ptr<Shape> &shape,
 
     collision_shape = convex_hull_shape;
 
-    collision_shape->setLocalScaling(btVector3(scale.x, scale.y, scale.z));
+    collision_shape->setLocalScaling(glm_to_bullet(scale));
 
     btVector3 local_inertia(0, 0, 0);
     if (mass != 0.f)
