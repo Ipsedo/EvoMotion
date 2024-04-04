@@ -19,7 +19,8 @@ struct a2c_liquid_networks : abstract_a2c_networks {
 
     a2c_response forward(const torch::Tensor &state) override;
 
-    torch::Tensor compute_step(const torch::Tensor &x_t, const torch::Tensor &i_t);
+    torch::Tensor
+    compute_step(const torch::Tensor &x_t, const torch::Tensor &i_t);
 
     int steps;
     int hidden_size;

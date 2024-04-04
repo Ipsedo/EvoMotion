@@ -7,53 +7,55 @@
 #include "cartpole.h"
 
 CartPole::CartPole(int seed) :
-        Environment({6}, {1}, true),
-        slider_speed(8.f),
-        slider_force(32.f),
-        chariot_push_force(2.f),
-        limit_angle(float(M_PI * 0.25)),
-        reset_frame_nb(8),
-        chariot_mass(1.f),
-        pendulum_mass(0.25f),
-        rng(seed),
-        rd_uni(0.f, 1.f),
-        step_idx(0),
-        max_steps(60 * 60),
-        last_ang_vel(0.f),
-        last_vel(0.f) {
+    Environment({7}, {1}, true),
+    slider_speed(16.f),
+    slider_force(64.f),
+    chariot_push_force(2.f),
+    limit_angle(float(M_PI * 0.5)),
+    reset_frame_nb(8),
+    chariot_mass(1.f),
+    pendulum_mass(1.f),
+    rng(seed),
+    rd_uni(0.f, 1.f),
+    step_idx(0),
+    max_steps(60 * 60),
+    last_ang_vel(0.f),
+    last_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;
 
-    float pendulum_height = 0.7f, pendulum_width = 0.1f, pendulum_offset = pendulum_height / 4.f;
+    float pendulum_height = 0.7f, pendulum_width = 0.1f, pendulum_offset =
+        pendulum_height / 4.f;
 
     float chariot_height = 0.25f, chariot_width = 0.5f;
 
     chariot_pos = base_pos + base_height + chariot_height;
-    pendulum_pos = chariot_pos + chariot_height + pendulum_height - pendulum_offset;
+    pendulum_pos =
+        chariot_pos + chariot_height + pendulum_height - pendulum_offset;
 
     // Create items
     // (init graphical and physical objects)
     Item base = Item(
-            "base",
-            std::make_shared<ObjShape>("./resources/obj/cube.obj"),
-            glm::vec3(0.f, base_pos, 10.f),
-            glm::vec3(10.f, base_height, 10.f),
-            0.f
+        "base",
+        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        glm::vec3(0.f, base_pos, 10.f),
+        glm::vec3(10.f, base_height, 10.f),
+        0.f
     );
 
     Item chariot = Item(
-            "chariot",
-            std::make_shared<ObjShape>("./resources/obj/cube.obj"),
-            glm::vec3(0.f, chariot_pos, 10.f),
-            glm::vec3(chariot_width, chariot_height, chariot_width),
-            chariot_mass
+        "chariot",
+        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        glm::vec3(0.f, chariot_pos, 10.f),
+        glm::vec3(chariot_width, chariot_height, chariot_width),
+        chariot_mass
     );
 
     Item pendulum = Item(
-            "pendulum",
-            std::make_shared<ObjShape>("/home/samuel/CLionProjects/EvoMotion/resources/obj/cube.obj"),
-            glm::vec3(0.f, pendulum_pos, 10.f),
-            glm::vec3(pendulum_width, pendulum_height, pendulum_width),
-            pendulum_mass
+        "pendulum",
+        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        glm::vec3(0.f, pendulum_pos, 10.f),
+        glm::vec3(pendulum_width, pendulum_height, pendulum_width),
+        pendulum_mass
     );
 
     // Environment item vector
@@ -72,14 +74,15 @@ CartPole::CartPole(int seed) :
     tr_chariot.setOrigin(btVector3(0.f, -chariot_height, 0.f));
 
     slider = new btSliderConstraint(
-            *base.get_body(),
-            *chariot.get_body(),
-            tr_base,
-            tr_chariot,
-            true
+        *base.get_body(),
+        *chariot.get_body(),
+        tr_base,
+        tr_chariot,
+        true
     );
 
-    controllers.push_back(std::make_shared<SliderController>(0, slider, slider_speed));
+    controllers.push_back(
+        std::make_shared<SliderController>(0, slider, slider_speed));
 
     slider->setEnabled(true);
     slider->setPoweredLinMotor(true);
@@ -92,7 +95,9 @@ CartPole::CartPole(int seed) :
     btVector3 axis(0.f, 0.f, 1.f);
     hinge = new btHingeConstraint(*chariot.get_body(), *pendulum.get_body(),
                                   btVector3(0.f, chariot_height, 0.f),
-                                  btVector3(0.f, -pendulum_height + pendulum_offset, 0.f),
+                                  btVector3(0.f,
+                                            -pendulum_height + pendulum_offset,
+                                            0.f),
                                   axis, axis, true);
 
     base_rg = base.get_body();
@@ -121,21 +126,27 @@ std::vector<std::shared_ptr<Controller>> CartPole::get_controllers() {
 
 step CartPole::compute_step() {
     float pos = chariot_rg->getWorldTransform().getOrigin().x();
+    float base_pos = base_rg->getWorldTransform().getOrigin().x();
+    float center_distance = abs(pos - base_pos);
     float vel = chariot_rg->getLinearVelocity().x();
 
     float ang = pendulum_rg->getWorldTransform().getRotation().getAngle();
     float ang_vel = pendulum_rg->getAngularVelocity().z();
 
     torch::Tensor state = torch::tensor(
-            {pos, vel, vel - last_vel, ang, ang_vel, ang_vel - last_ang_vel},
-            at::TensorOptions().device(curr_device)
+        {center_distance / 10.f,
+         (pos - base_pos) / 10.f, vel, vel - last_vel,
+         ang / float(2. * M_PI) - 1.f, ang_vel, ang_vel - last_ang_vel},
+        at::TensorOptions().device(curr_device)
     );
 
-    bool fail = pos > 8.f || pos < -8.f || ang > limit_angle || ang < -limit_angle;
+    bool fail =
+        pos > 10.f || pos < -10.f || ang > limit_angle || ang < -limit_angle;
     bool win = step_idx > max_steps;
     bool done = fail || win;
-    float reward = 1.f - (abs(ang) / limit_angle) * (abs(pos) / 8.f);
-    reward = fail ? -1.f : (win ? 1.f : reward);
+    float reward = (limit_angle - abs(ang)) / limit_angle +
+                   (10.f - center_distance) / 10.f;
+    reward = fail ? -2.f : (win ? 2.f : reward);
 
     last_vel = vel;
     last_ang_vel = ang_vel;
@@ -189,7 +200,8 @@ void CartPole::reset_engine() {
     // Apply random force to chariot for reset_frame_nb steps
     // To prevent over-fitting
 
-    float rand_force = rd_uni(rng) * chariot_push_force * 2.f - chariot_push_force;
+    float rand_force =
+        rd_uni(rng) * chariot_push_force * 2.f - chariot_push_force;
     chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
     //chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 

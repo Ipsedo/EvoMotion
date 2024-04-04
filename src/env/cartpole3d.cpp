@@ -17,9 +17,13 @@ CartPole3d::CartPole3d(int seed) :
     cart_z_scale(0.5f, 0.125f, 0.5f),
     pole_scale(0.1f, 0.5f, 0.1f),
     base_pos(0.f, -4.f, 10.f),
-    cart_x_pos(base_pos.x(), base_pos.y() + base_scale.y() + cart_x_scale.y(), base_pos.z()),
-    cart_z_pos(base_pos.x(), cart_x_pos.y() + cart_x_scale.y() + cart_z_scale.y(), base_pos.z()),
-    pole_pos(base_pos.x(), cart_z_pos.y() + cart_z_scale.y() + pole_scale.y() - pole_scale.y() / 4.f, base_pos.z()),
+    cart_x_pos(base_pos.x(), base_pos.y() + base_scale.y() + cart_x_scale.y(),
+               base_pos.z()),
+    cart_z_pos(base_pos.x(),
+               cart_x_pos.y() + cart_x_scale.y() + cart_z_scale.y(),
+               base_pos.z()),
+    pole_pos(base_pos.x(), cart_z_pos.y() + cart_z_scale.y() + pole_scale.y() -
+                           pole_scale.y() / 4.f, base_pos.z()),
     base_mass(0.f),
     cart_x_mass(1.f),
     cart_z_mass(1.f),
@@ -98,7 +102,8 @@ CartPole3d::CartPole3d(int seed) :
 
     slider_x->setEnabled(true);
     slider_x->setPoweredLinMotor(true);
-    slider_x->setMaxLinMotorForce(slider_force_per_kg * (cart_x_mass + cart_z_mass + pole_mass));
+    slider_x->setMaxLinMotorForce(
+        slider_force_per_kg * (cart_x_mass + cart_z_mass + pole_mass));
     slider_x->setTargetLinMotorVelocity(0.f);
 
     slider_x->setLowerLinLimit(-100.f);
@@ -111,7 +116,8 @@ CartPole3d::CartPole3d(int seed) :
     slider_x->setSoftnessLimLin(2.f);
     slider_x->setSoftnessLimAng(2.f);
 
-    controllers.push_back(std::make_shared<SliderController>(0, slider_x, slider_speed));
+    controllers.push_back(
+        std::make_shared<SliderController>(0, slider_x, slider_speed));
 
     tr_cart_x.setIdentity();
     tr_cart_x.setOrigin(btVector3(0.f, cart_x_scale.y(), 0.f));
@@ -132,7 +138,8 @@ CartPole3d::CartPole3d(int seed) :
 
     slider_z->setEnabled(true);
     slider_z->setPoweredLinMotor(true);
-    slider_z->setMaxLinMotorForce(slider_force_per_kg * (cart_z_mass + pole_mass));
+    slider_z->setMaxLinMotorForce(
+        slider_force_per_kg * (cart_z_mass + pole_mass));
     slider_z->setTargetLinMotorVelocity(0.f);
 
     slider_z->setLowerLinLimit(-100.f);
@@ -145,7 +152,8 @@ CartPole3d::CartPole3d(int seed) :
     slider_z->setSoftnessLimLin(2.f);
     slider_z->setSoftnessLimAng(2.f);
 
-    controllers.push_back(std::make_shared<SliderController>(1, slider_z, slider_speed));
+    controllers.push_back(
+        std::make_shared<SliderController>(1, slider_z, slider_speed));
 
     p2p_constraint = new btPoint2PointConstraint(
         *cart_z_rg,
@@ -186,7 +194,8 @@ step CartPole3d::compute_step() {
     float vel_x = cart_z_rg->getLinearVelocity().x();
     float vel_z = cart_z_rg->getLinearVelocity().z();
 
-    float center_distance = sqrt(pow(cart_z_pos.x() - pos_x, 2.f) + pow(cart_z_pos.z() - pos_z, 2.f));
+    float center_distance = sqrt(
+        pow(cart_z_pos.x() - pos_x, 2.f) + pow(cart_z_pos.z() - pos_z, 2.f));
     pos_x = pos_x - cart_z_pos.x();
     pos_z = pos_z - cart_z_pos.z();
 
@@ -197,11 +206,14 @@ step CartPole3d::compute_step() {
     btTransform identity;
     identity.setIdentity();
     identity.setOrigin(pole_pos);
-    btVector3 origin = btVector3(0, 1, 0).rotate(identity.getRotation().getAxis(), identity.getRotation().getAngle());
-    btVector3 rotated_ang = btVector3(0, 1, 0).rotate(pole_rg->getWorldTransform().getRotation().getAxis(),
-                                                      pole_rg->getWorldTransform().getRotation().getAngle());
+    btVector3 origin = btVector3(0, 1, 0).rotate(
+        identity.getRotation().getAxis(), identity.getRotation().getAngle());
+    btVector3 rotated_ang = btVector3(0, 1, 0).rotate(
+        pole_rg->getWorldTransform().getRotation().getAxis(),
+        pole_rg->getWorldTransform().getRotation().getAngle());
 
-    float ang = acos(origin.dot(rotated_ang) / (origin.norm() * rotated_ang.norm()));
+    float ang = acos(
+        origin.dot(rotated_ang) / (origin.norm() * rotated_ang.norm()));
     float ang_vel = ang - last_ang;
 
     auto ang_vel_vec = pole_rg->getAngularVelocity();
@@ -211,7 +223,8 @@ step CartPole3d::compute_step() {
 
     btVector3 axis_ori(0.f, 1.f, 0.f);
     float vertical_ang = acos(
-        (axis.x() * axis_ori.x() + axis.y() * axis_ori.y() + axis.z() * axis_ori.z())
+        (axis.x() * axis_ori.x() + axis.y() * axis_ori.y() +
+         axis.z() * axis_ori.z())
         / (axis.norm() + axis_ori.norm())
     );
     float vertical_ang_vel = vertical_ang - last_vert_ang;
@@ -219,7 +232,8 @@ step CartPole3d::compute_step() {
     btVector3 axis_plan(axis.x(), 0.f, axis.z());
     btVector3 axis_plan_ori(1.f, 0.f, 0.f);
     float plan_ang = acos(
-        (axis_plan.x() * axis_plan_ori.x() + axis_plan.y() * axis_plan_ori.y() + axis_plan.z() * axis_plan_ori.z())
+        (axis_plan.x() * axis_plan_ori.x() + axis_plan.y() * axis_plan_ori.y() +
+         axis_plan.z() * axis_plan_ori.z())
         / (axis_plan.norm() + axis_plan_ori.norm())
     );
     float plan_ang_vel = plan_ang - last_plan_ang;
@@ -234,8 +248,10 @@ step CartPole3d::compute_step() {
             ang_vel_vec.x(), ang_vel_vec.y(), ang_vel_vec.z(),
             ang_acc_vec.x(), ang_acc_vec.y(), ang_acc_vec.z(),
             axis.x(), axis.y(), axis.z(),
-            plan_ang / float(M_PI), plan_ang_vel, plan_ang_vel - last_plan_ang_vec,
-            vertical_ang / float(M_PI), vertical_ang_vel, vertical_ang_vel - last_vert_ang_vel
+            plan_ang / float(M_PI), plan_ang_vel,
+            plan_ang_vel - last_plan_ang_vec,
+            vertical_ang / float(M_PI), vertical_ang_vel,
+            vertical_ang_vel - last_vert_ang_vel
         },
         at::TensorOptions().device(curr_device)
     );
@@ -247,7 +263,8 @@ step CartPole3d::compute_step() {
 
 
     float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f)
-                   + pow((base_scale.x() - center_distance) / base_scale.x(), 2.f);
+                   + pow((base_scale.x() - center_distance) / base_scale.x(),
+                         2.f);
     reward = fail ? -2.f : (win ? 2.f : reward);
 
     last_vel_x = vel_x;
