@@ -18,7 +18,7 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
               glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)),
               glm::vec3(10.f, 1.f, 10.f), 0.f);
 
-    auto json_path = "./resources/skeleton/spider.json";
+    auto json_path = "./resources/skeleton/spider_3.json";
     JsonSkeleton json_skeleton(
         json_path,
         "skeleton_test",
