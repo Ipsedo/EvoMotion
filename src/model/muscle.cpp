@@ -61,6 +61,7 @@ Muscle::Muscle(
 
     muscle_slider_constraint->setMaxLinMotorForce(force);
     muscle_slider_constraint->setTargetLinMotorVelocity(0.f);
+
     muscle_slider_constraint->setLowerAngLimit(0);
     muscle_slider_constraint->setUpperAngLimit(0);
     muscle_slider_constraint->setLowerLinLimit(0);
