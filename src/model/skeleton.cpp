@@ -80,6 +80,11 @@ JsonMember::JsonMember(const std::string &name, glm::mat4 parent_model_matrix,
            json_transformation_to_model_matrix(json_member["transformation"]),
            json_vec3_to_glm_vec3(json_member["scale"]),
            json_member["mass"].get<float>()) {
+
+    auto option = json_member["option"];
+
+    if (option.contains("friction"))
+        member.get_body()->setFriction(option["friction"].get<float>());
 }
 
 JsonMember::JsonMember(Item parent, const nlohmann::json &member) :

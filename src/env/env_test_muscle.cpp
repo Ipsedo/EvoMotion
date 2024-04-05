@@ -22,11 +22,11 @@ MuscleEnv::MuscleEnv(int seed) :
     reset_frames(8),
     reset_torque_force(10.f),
     curr_step(0),
-    max_steps(60 * 5) {
+    max_steps(60 * 10) {
 
     Item base("base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
               glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)),
-              glm::vec3(10.f, 1.f, 10.f), 0.f);
+              glm::vec3(1000.f, 1.f, 1000.f), 0.f);
 
     auto json_path = "./resources/skeleton/spider_4.json";
     JsonSkeleton json_skeleton(

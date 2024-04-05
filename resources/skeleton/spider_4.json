@@ -84,6 +84,7 @@
             "y": 0.15,
             "z": 0.15
           },
+          "option": {},
           "transformation": {
             "rotation": {
               "point": {
@@ -160,6 +161,7 @@
                   "y": 0.08,
                   "z": 0.08
                 },
+                "option": {},
                 "transformation": {
                   "rotation": {
                     "point": {
@@ -235,6 +237,9 @@
                         "x": 0.45,
                         "y": 0.08,
                         "z": 0.08
+                      },
+                      "option": {
+                        "friction": 10.0
                       },
                       "transformation": {
                         "rotation": {
@@ -320,6 +325,7 @@
             "y": 0.15,
             "z": 0.15
           },
+          "option": {},
           "transformation": {
             "rotation": {
               "point": {
@@ -396,6 +402,7 @@
                   "y": 0.08,
                   "z": 0.08
                 },
+                "option": {},
                 "transformation": {
                   "rotation": {
                     "point": {
@@ -471,6 +478,9 @@
                         "x": 0.45,
                         "y": 0.08,
                         "z": 0.08
+                      },
+                      "option": {
+                        "friction": 10.0
                       },
                       "transformation": {
                         "rotation": {
@@ -556,6 +566,7 @@
             "y": 0.15,
             "z": 0.15
           },
+          "option": {},
           "transformation": {
             "rotation": {
               "point": {
@@ -632,6 +643,7 @@
                   "y": 0.08,
                   "z": 0.08
                 },
+                "option": {},
                 "transformation": {
                   "rotation": {
                     "point": {
@@ -707,6 +719,9 @@
                         "x": 0.45,
                         "y": 0.08,
                         "z": 0.08
+                      },
+                      "option": {
+                        "friction": 10.0
                       },
                       "transformation": {
                         "rotation": {
