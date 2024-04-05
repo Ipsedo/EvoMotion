@@ -65,6 +65,13 @@ Muscle::Muscle(
     muscle_slider_constraint->setUpperAngLimit(0);
     muscle_slider_constraint->setLowerLinLimit(0);
 
+    auto absolute_pos_a = attach_a.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1);
+    auto absolute_pos_b = attach_b.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1);
+    muscle_slider_constraint->setUpperLinLimit(glm::length(absolute_pos_a - absolute_pos_b));
+
+    muscle_slider_constraint->setSoftnessDirLin(0);
+    muscle_slider_constraint->setSoftnessDirAng(0);
+
     float limit_angle_cone = 30.f;
 
     attach_a_constraint = new btPoint2PointConstraint(
@@ -81,6 +88,15 @@ Muscle::Muscle(
         btVector3(0, 0, 0)
     );
 
+    for (int i = 0; i < 6; i++) {
+        attach_a_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0, i);
+        attach_b_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0, i);
+        muscle_slider_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0, i);
+
+        attach_a_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1, i);
+        attach_b_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1, i);
+        muscle_slider_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1, i);
+    }
 
     item_a.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
     item_a.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
