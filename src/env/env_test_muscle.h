@@ -16,6 +16,12 @@ public:
 
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
 
+    std::vector<int64_t> get_state_space() override;
+
+    std::vector<int64_t> get_action_space() override;
+
+    bool is_continuous() const override;
+
 protected:
     step compute_step() override;
 

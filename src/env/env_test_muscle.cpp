@@ -10,7 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
+MuscleEnv::MuscleEnv() : Environment(),
                          items(),
                          constraints(),
                          controllers() {
@@ -53,7 +53,8 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
         m_world->addConstraint(constraint);
 
     //controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[0], 0));
-
+    for (int i = 0; i < json_muscular_system.get_muscles().size(); i++)
+        controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[i], i));
 }
 
 std::vector<Item> MuscleEnv::get_items() {
@@ -86,4 +87,16 @@ void MuscleEnv::reset_engine() {
         m_world->addRigidBody(item.get_body());
     for (auto c: constraints)
         m_world->addConstraint(c);
+}
+
+std::vector<int64_t> MuscleEnv::get_state_space() {
+    return {1};
+}
+
+std::vector<int64_t> MuscleEnv::get_action_space() {
+    return {1};
+}
+
+bool MuscleEnv::is_continuous() const {
+    return true;
 }
