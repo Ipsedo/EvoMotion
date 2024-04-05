@@ -261,7 +261,85 @@
                           "z": 0.0
                         }
                       },
-                      "children": []
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.45,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "legA4",
+                            "mass": 0.05,
+                            "shape": "sphere",
+                            "scale": {
+                              "x": 0.1,
+                              "y": 0.1,
+                              "z": 0.1
+                            },
+                            "option": {
+                              "friction": 50.0
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.55,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -502,7 +580,85 @@
                           "z": 0.0
                         }
                       },
-                      "children": []
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.45,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "legB4",
+                            "mass": 0.05,
+                            "shape": "sphere",
+                            "scale": {
+                              "x": 0.1,
+                              "y": 0.1,
+                              "z": 0.1
+                            },
+                            "option": {
+                              "friction": 50.0
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.55,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -743,7 +899,85 @@
                           "z": 0.0
                         }
                       },
-                      "children": []
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.45,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "legC4",
+                            "mass": 0.05,
+                            "shape": "sphere",
+                            "scale": {
+                              "x": 0.1,
+                              "y": 0.1,
+                              "z": 0.1
+                            },
+                            "option": {
+                              "friction": 50.0
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.55,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -982,7 +1216,85 @@
                           "z": 0.0
                         }
                       },
-                      "children": []
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.45,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "legD4",
+                            "mass": 0.05,
+                            "shape": "sphere",
+                            "scale": {
+                              "x": 0.1,
+                              "y": 0.1,
+                              "z": 0.1
+                            },
+                            "option": {
+                              "friction": 50.0
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.55,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
