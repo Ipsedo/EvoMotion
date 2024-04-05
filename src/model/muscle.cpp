@@ -65,14 +65,8 @@ Muscle::Muscle(
     muscle_slider_constraint->setUpperAngLimit(0);
     muscle_slider_constraint->setLowerLinLimit(0);
 
-    auto absolute_pos_a = attach_a.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1);
-    auto absolute_pos_b = attach_b.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1);
-    muscle_slider_constraint->setUpperLinLimit(glm::length(absolute_pos_a - absolute_pos_b));
-
     muscle_slider_constraint->setSoftnessDirLin(0);
     muscle_slider_constraint->setSoftnessDirAng(0);
-
-    float limit_angle_cone = 30.f;
 
     attach_a_constraint = new btPoint2PointConstraint(
         *item_a.get_body(),
