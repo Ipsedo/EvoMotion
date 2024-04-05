@@ -46,6 +46,7 @@ void test_muscle(muscle_params params) {
     }
 
     step step = env->reset();
+
     while (!renderer.is_close()) {
         step = env->do_step(-torch::ones({1}), 1.f / 60.f);
 
@@ -57,7 +58,7 @@ void test_muscle(muscle_params params) {
         renderer.draw(model_matrix);
 
         if (step.done) {
-            // step = env->reset();
+            step = env->reset();
             std::cout << "reset" << std::endl;
         }
     }

@@ -977,29 +977,6 @@
   },
   "muscles": [
     {
-      "name": "muscle_A1",
-      "item_a": "body",
-      "item_b": "body_legA1",
-      "attach_mass": 0.01,
-      "attach_scale": {
-        "x": 0.05,
-        "y": 0.05,
-        "z": 0.05
-      },
-      "pos_in_a": {
-        "x": 0.2,
-        "y": 0.0,
-        "z": -0.6
-      },
-      "pos_in_b": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -0.15
-      },
-      "force": 10.0,
-      "speed": 2.0
-    },
-    {
       "name": "muscle_A2",
       "item_a": "body",
       "item_b": "body_legA1",
@@ -1064,29 +1041,6 @@
         "x": 0.0,
         "y": 0.08,
         "z": 0.0
-      },
-      "force": 10.0,
-      "speed": 2.0
-    },
-    {
-      "name": "muscle_B1",
-      "item_a": "body",
-      "item_b": "body_legB1",
-      "attach_mass": 0.01,
-      "attach_scale": {
-        "x": 0.05,
-        "y": 0.05,
-        "z": 0.05
-      },
-      "pos_in_a": {
-        "x": -0.6,
-        "y": 0.0,
-        "z": -0.2
-      },
-      "pos_in_b": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -0.15
       },
       "force": 10.0,
       "speed": 2.0
@@ -1161,29 +1115,6 @@
       "speed": 2.0
     },
     {
-      "name": "muscle_C1",
-      "item_a": "body",
-      "item_b": "body_legC1",
-      "attach_mass": 0.01,
-      "attach_scale": {
-        "x": 0.05,
-        "y": 0.05,
-        "z": 0.05
-      },
-      "pos_in_a": {
-        "x": -0.2,
-        "y": 0.0,
-        "z": 0.6
-      },
-      "pos_in_b": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -0.15
-      },
-      "force": 10.0,
-      "speed": 2.0
-    },
-    {
       "name": "muscle_C2",
       "item_a": "body",
       "item_b": "body_legC1",
@@ -1248,29 +1179,6 @@
         "x": 0.0,
         "y": 0.08,
         "z": 0.0
-      },
-      "force": 10.0,
-      "speed": 2.0
-    },
-    {
-      "name": "muscle_D1",
-      "item_a": "body",
-      "item_b": "body_legD1",
-      "attach_mass": 0.01,
-      "attach_scale": {
-        "x": 0.05,
-        "y": 0.05,
-        "z": 0.05
-      },
-      "pos_in_a": {
-        "x": 0.6,
-        "y": 0.0,
-        "z": -0.2
-      },
-      "pos_in_b": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -0.15
       },
       "force": 10.0,
       "speed": 2.0

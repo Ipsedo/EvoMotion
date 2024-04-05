@@ -23,6 +23,7 @@ protected:
 
 private:
     std::vector<Item> items;
+    std::vector<btTypedConstraint *> constraints;
 
     std::vector<std::shared_ptr<Controller>> controllers;
 

@@ -12,13 +12,14 @@
 
 MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
                          items(),
+                         constraints(),
                          controllers() {
 
     Item base("base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
               glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)),
               glm::vec3(10.f, 1.f, 10.f), 0.f);
 
-    auto json_path = "./resources/skeleton/spider_3.json";
+    auto json_path = "./resources/skeleton/spider_4.json";
     JsonSkeleton json_skeleton(
         json_path,
         "skeleton_test",
@@ -37,7 +38,7 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
         for (const auto &item: m.get_items())
             items.push_back(item);
         for (auto c: m.get_constraints())
-            m_world->addConstraint(c);
+            constraints.push_back(c);
     }
 
     for (auto item: items) {
@@ -45,10 +46,13 @@ MuscleEnv::MuscleEnv() : Environment({1}, {1}, true),
         add_item(item);
     }
 
+    for (auto c: constraints)
+        m_world->addConstraint(c);
+
     for (auto constraint: json_skeleton.get_constraints())
         m_world->addConstraint(constraint);
 
-    controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[15], 0));
+    //controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[0], 0));
 
 }
 
@@ -70,5 +74,16 @@ step MuscleEnv::compute_step() {
 }
 
 void MuscleEnv::reset_engine() {
+    for (auto item: items) {
+        m_world->removeRigidBody(item.get_body());
+        item.reset();
+    }
 
+    for (auto c: constraints)
+        m_world->removeConstraint(c);
+
+    for (auto item: items)
+        m_world->addRigidBody(item.get_body());
+    for (auto c: constraints)
+        m_world->addConstraint(c);
 }
