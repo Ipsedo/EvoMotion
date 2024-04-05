@@ -18,8 +18,10 @@ torch::Tensor ItemState::get_state() {
 
     glm::vec3 up_pos = model_mat * glm::vec4(glm::vec3(0, 1, 0), 1);
     glm::vec3 down_pos = model_mat * glm::vec4(glm::vec3(0, -1, 0), 1);
+
     glm::vec3 right_pos = model_mat * glm::vec4(glm::vec3(1, 0, 0), 1);
     glm::vec3 left_pos = model_mat * glm::vec4(glm::vec3(-1, 0, 0), 1);
+
     glm::vec3 back_pos = model_mat * glm::vec4(glm::vec3(0, 0, -1), 1);
     glm::vec3 front_pos = model_mat * glm::vec4(glm::vec3(0, 0, 1), 1);
 
@@ -29,7 +31,6 @@ torch::Tensor ItemState::get_state() {
 
     btVector3 center_lin_velocity = item.get_body()->getLinearVelocity();
     btVector3 center_ang_velocity = item.get_body()->getAngularVelocity();
-
 
     return torch::tensor({
                              center_pos.x, center_pos.y, center_pos.z,

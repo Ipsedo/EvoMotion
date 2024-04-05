@@ -22,7 +22,7 @@ MuscleEnv::MuscleEnv(int seed) :
     reset_frames(8),
     reset_torque_force(10.f),
     curr_step(0),
-    max_steps(60 * 10) {
+    max_steps(60 * 60) {
 
     Item base("base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
               glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)),
