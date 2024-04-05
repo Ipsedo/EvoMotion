@@ -5,12 +5,15 @@
 #ifndef EVO_MOTION_ENV_TEST_MUSCLE_H
 #define EVO_MOTION_ENV_TEST_MUSCLE_H
 
+#include <random>
 #include "../model/environment.h"
 #include "../model/muscle.h"
 
+#include "../model/state.h"
+
 class MuscleEnv : public Environment {
 public:
-    MuscleEnv();
+    MuscleEnv(int seed);
 
     std::vector<Item> get_items() override;
 
@@ -28,10 +31,22 @@ protected:
     void reset_engine() override;
 
 private:
+    std::mt19937 rng;
+    std::uniform_real_distribution<float> rd_uni;
+
     std::vector<Item> items;
     std::vector<btTypedConstraint *> constraints;
 
     std::vector<std::shared_ptr<Controller>> controllers;
+
+    std::vector<ItemState> states;
+
+    float reset_angle_torque;
+    int reset_frames;
+    float reset_torque_force;
+
+    int curr_step;
+    int max_steps;
 
 };
 

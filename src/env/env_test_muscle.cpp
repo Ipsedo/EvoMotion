@@ -10,10 +10,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-MuscleEnv::MuscleEnv() : Environment(),
-                         items(),
-                         constraints(),
-                         controllers() {
+MuscleEnv::MuscleEnv(int seed) :
+    Environment(),
+    rng(seed),
+    rd_uni(0.f, 1.f),
+    items(),
+    constraints(),
+    controllers(),
+    states(),
+    reset_angle_torque(M_PI / 2.f),
+    reset_frames(8),
+    reset_torque_force(10.f),
+    curr_step(0),
+    max_steps(60 * 5) {
 
     Item base("base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
               glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)),
@@ -29,17 +38,21 @@ MuscleEnv::MuscleEnv() : Environment(),
         json_skeleton,
         json_path);
 
-
-    items = {base};
-    for (const Item &item: json_skeleton.get_items())
+    for (const Item &item: json_skeleton.get_items()) {
         items.push_back(item);
+        states.emplace_back(item);
+    }
 
     for (auto m: json_muscular_system.get_muscles()) {
-        for (const auto &item: m.get_items())
+        for (const auto &item: m.get_items()) {
             items.push_back(item);
+            states.emplace_back(item);
+        }
         for (auto c: m.get_constraints())
             constraints.push_back(c);
     }
+
+    items.push_back(base);
 
     for (auto item: items) {
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
@@ -66,11 +79,17 @@ std::vector<std::shared_ptr<Controller>> MuscleEnv::get_controllers() {
 }
 
 step MuscleEnv::compute_step() {
-    Item member = items[2];
+    std::vector<torch::Tensor> current_states;
 
+    for (auto state: states)
+        current_states.push_back(state.get_state().to(curr_device));
+
+    float reward = items[0].get_body()->getCenterOfMassPosition().z();
+
+    curr_step += 1;
 
     return {
-        torch::zeros({1}), 1, false
+        torch::cat(current_states, 0), reward, curr_step >= max_steps
     };
 }
 
@@ -87,14 +106,36 @@ void MuscleEnv::reset_engine() {
         m_world->addRigidBody(item.get_body());
     for (auto c: constraints)
         m_world->addConstraint(c);
+
+    // prevent overfitting ?
+    Item root = items[0]; // TODO better way to get root item ?
+
+    glm::vec3 axis = glm::rotate(glm::mat4(1), rd_uni(rng) * reset_angle_torque, glm::vec3(1, 0, 0)) *
+                     glm::rotate(glm::mat4(1), float(rd_uni(rng) * M_PI) * 2.f, glm::vec3(0, 1, 0)) *
+                     glm::vec4(glm::vec3(0, 1, 0), 0);
+    /*glm::vec3 point(0);
+
+    auto perpendicular_component = glm::cross(axis, glm::cross(axis, point));
+    auto torque_direction = glm::normalize(glm::cross(point, perpendicular_component));
+    auto torque_vector = reset_torque_force * torque_direction;*/
+
+    root.get_body()->applyTorqueImpulse(glm_to_bullet(axis * reset_torque_force));
+
+    for (int i = 0; i < reset_frames; i++)
+        m_world->stepSimulation(1.f / 60.f);
+
+    curr_step = 0;
 }
 
 std::vector<int64_t> MuscleEnv::get_state_space() {
-    return {1};
+    int nb_features = 0;
+    for (auto s: states)
+        nb_features += s.get_size();
+    return {nb_features};
 }
 
 std::vector<int64_t> MuscleEnv::get_action_space() {
-    return {1};
+    return {(long) controllers.size()};
 }
 
 bool MuscleEnv::is_continuous() const {
