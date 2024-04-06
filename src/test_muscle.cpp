@@ -12,7 +12,7 @@
 
 void test_muscle(muscle_params params) {
 
-    auto env = std::make_shared<MuscleEnv>();
+    auto env = std::make_shared<MuscleEnv>(1234);
 
     std::shared_ptr<Camera> camera = std::make_shared<StaticCamera>(
         glm::vec3(1.f, 1.f, -1.f),
@@ -46,8 +46,9 @@ void test_muscle(muscle_params params) {
     }
 
     step step = env->reset();
+
     while (!renderer.is_close()) {
-        step = env->do_step(-torch::ones({1}), 1.f / 60.f);
+        step = env->do_step(-torch::ones(env->get_action_space()), 1.f / 60.f);
 
         std::map<std::string, glm::mat4> model_matrix;
 
@@ -57,7 +58,7 @@ void test_muscle(muscle_params params) {
         renderer.draw(model_matrix);
 
         if (step.done) {
-            // step = env->reset();
+            step = env->reset();
             std::cout << "reset" << std::endl;
         }
     }

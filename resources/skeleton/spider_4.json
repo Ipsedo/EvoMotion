@@ -1,7 +1,7 @@
 {
   "skeleton": {
     "name": "body",
-    "mass": 1.0,
+    "mass": 0.5,
     "shape": "cube",
     "scale": {
       "x": 0.6,
@@ -20,7 +20,7 @@
           "y": 1.0,
           "z": 0.0
         },
-        "angle_degree": 150.0
+        "angle_degree": 0.0
       },
       "translation": {
         "x": 0.0,
@@ -84,6 +84,7 @@
             "y": 0.15,
             "z": 0.15
           },
+          "option": {},
           "transformation": {
             "rotation": {
               "point": {
@@ -146,7 +147,7 @@
                   "angle_degree": 0.0
                 },
                 "translation": {
-                  "x": 0.5,
+                  "x": 0.3,
                   "y": 0.0,
                   "z": 0.0
                 }
@@ -156,14 +157,15 @@
                 "mass": 0.2,
                 "shape": "cube",
                 "scale": {
-                  "x": 0.5,
+                  "x": 0.3,
                   "y": 0.08,
                   "z": 0.08
                 },
+                "option": {},
                 "transformation": {
                   "rotation": {
                     "point": {
-                      "x": 0.5,
+                      "x": 0.3,
                       "y": 0.0,
                       "z": 0.0
                     },
@@ -175,7 +177,7 @@
                     "angle_degree": 202.5
                   },
                   "translation": {
-                    "x": -0.5,
+                    "x": -0.3,
                     "y": 0.0,
                     "z": 0.0
                   }
@@ -202,7 +204,7 @@
                         "angle_degree": 0.0
                       },
                       "translation": {
-                        "x": -0.4,
+                        "x": -0.2,
                         "y": 0.0,
                         "z": 0.0
                       }
@@ -236,6 +238,8 @@
                         "y": 0.08,
                         "z": 0.08
                       },
+                      "option": {
+                      },
                       "transformation": {
                         "rotation": {
                           "point": {
@@ -251,12 +255,90 @@
                           "angle_degree": 270.0
                         },
                         "translation": {
-                          "x": -0.95,
+                          "x": -0.65,
                           "y": 0.0,
                           "z": 0.0
                         }
                       },
-                      "children": []
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.45,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "legA4",
+                            "mass": 0.05,
+                            "shape": "sphere",
+                            "scale": {
+                              "x": 0.15,
+                              "y": 0.15,
+                              "z": 0.15
+                            },
+                            "option": {
+                              "friction": 500.0
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.6,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -320,6 +402,7 @@
             "y": 0.15,
             "z": 0.15
           },
+          "option": {},
           "transformation": {
             "rotation": {
               "point": {
@@ -382,7 +465,7 @@
                   "angle_degree": 0.0
                 },
                 "translation": {
-                  "x": 0.5,
+                  "x": 0.3,
                   "y": 0.0,
                   "z": 0.0
                 }
@@ -392,14 +475,15 @@
                 "mass": 0.2,
                 "shape": "cube",
                 "scale": {
-                  "x": 0.5,
+                  "x": 0.3,
                   "y": 0.08,
                   "z": 0.08
                 },
+                "option": {},
                 "transformation": {
                   "rotation": {
                     "point": {
-                      "x": 0.5,
+                      "x": 0.3,
                       "y": 0.0,
                       "z": 0.0
                     },
@@ -411,7 +495,7 @@
                     "angle_degree": 202.5
                   },
                   "translation": {
-                    "x": -0.5,
+                    "x": -0.3,
                     "y": 0.0,
                     "z": 0.0
                   }
@@ -438,7 +522,7 @@
                         "angle_degree": 0.0
                       },
                       "translation": {
-                        "x": -0.4,
+                        "x": -0.2,
                         "y": 0.0,
                         "z": 0.0
                       }
@@ -472,6 +556,8 @@
                         "y": 0.08,
                         "z": 0.08
                       },
+                      "option": {
+                      },
                       "transformation": {
                         "rotation": {
                           "point": {
@@ -487,12 +573,90 @@
                           "angle_degree": 270.0
                         },
                         "translation": {
-                          "x": -0.95,
+                          "x": -0.65,
                           "y": 0.0,
                           "z": 0.0
                         }
                       },
-                      "children": []
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.45,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "legB4",
+                            "mass": 0.05,
+                            "shape": "sphere",
+                            "scale": {
+                              "x": 0.15,
+                              "y": 0.15,
+                              "z": 0.15
+                            },
+                            "option": {
+                              "friction": 500.0
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.6,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -556,6 +720,7 @@
             "y": 0.15,
             "z": 0.15
           },
+          "option": {},
           "transformation": {
             "rotation": {
               "point": {
@@ -618,7 +783,7 @@
                   "angle_degree": 0.0
                 },
                 "translation": {
-                  "x": 0.5,
+                  "x": 0.3,
                   "y": 0.0,
                   "z": 0.0
                 }
@@ -628,14 +793,15 @@
                 "mass": 0.2,
                 "shape": "cube",
                 "scale": {
-                  "x": 0.5,
+                  "x": 0.3,
                   "y": 0.08,
                   "z": 0.08
                 },
+                "option": {},
                 "transformation": {
                   "rotation": {
                     "point": {
-                      "x": 0.5,
+                      "x": 0.3,
                       "y": 0.0,
                       "z": 0.0
                     },
@@ -647,7 +813,7 @@
                     "angle_degree": 202.5
                   },
                   "translation": {
-                    "x": -0.5,
+                    "x": -0.3,
                     "y": 0.0,
                     "z": 0.0
                   }
@@ -674,7 +840,7 @@
                         "angle_degree": 0.0
                       },
                       "translation": {
-                        "x": -0.4,
+                        "x": -0.2,
                         "y": 0.0,
                         "z": 0.0
                       }
@@ -708,6 +874,8 @@
                         "y": 0.08,
                         "z": 0.08
                       },
+                      "option": {
+                      },
                       "transformation": {
                         "rotation": {
                           "point": {
@@ -723,12 +891,90 @@
                           "angle_degree": 270.0
                         },
                         "translation": {
-                          "x": -0.95,
+                          "x": -0.65,
                           "y": 0.0,
                           "z": 0.0
                         }
                       },
-                      "children": []
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.45,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "legC4",
+                            "mass": 0.05,
+                            "shape": "sphere",
+                            "scale": {
+                              "x": 0.15,
+                              "y": 0.15,
+                              "z": 0.15
+                            },
+                            "option": {
+                              "friction": 500.0
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.6,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -854,7 +1100,7 @@
                   "angle_degree": 0.0
                 },
                 "translation": {
-                  "x": 0.5,
+                  "x": 0.3,
                   "y": 0.0,
                   "z": 0.0
                 }
@@ -864,14 +1110,14 @@
                 "mass": 0.2,
                 "shape": "cube",
                 "scale": {
-                  "x": 0.5,
+                  "x": 0.3,
                   "y": 0.08,
                   "z": 0.08
                 },
                 "transformation": {
                   "rotation": {
                     "point": {
-                      "x": 0.5,
+                      "x": 0.3,
                       "y": 0.0,
                       "z": 0.0
                     },
@@ -883,7 +1129,7 @@
                     "angle_degree": 202.5
                   },
                   "translation": {
-                    "x": -0.5,
+                    "x": -0.3,
                     "y": 0.0,
                     "z": 0.0
                   }
@@ -910,7 +1156,7 @@
                         "angle_degree": 0.0
                       },
                       "translation": {
-                        "x": -0.4,
+                        "x": -0.2,
                         "y": 0.0,
                         "z": 0.0
                       }
@@ -944,6 +1190,8 @@
                         "y": 0.08,
                         "z": 0.08
                       },
+                      "option": {
+                      },
                       "transformation": {
                         "rotation": {
                           "point": {
@@ -959,12 +1207,90 @@
                           "angle_degree": 270.0
                         },
                         "translation": {
-                          "x": -0.95,
+                          "x": -0.65,
                           "y": 0.0,
                           "z": 0.0
                         }
                       },
-                      "children": []
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.45,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "legD4",
+                            "mass": 0.05,
+                            "shape": "sphere",
+                            "scale": {
+                              "x": 0.15,
+                              "y": 0.15,
+                              "z": 0.15
+                            },
+                            "option": {
+                              "friction": 500.0
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.6,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
                     }
                   }
                 ]
@@ -976,29 +1302,6 @@
     ]
   },
   "muscles": [
-    {
-      "name": "muscle_A1",
-      "item_a": "body",
-      "item_b": "body_legA1",
-      "attach_mass": 0.01,
-      "attach_scale": {
-        "x": 0.05,
-        "y": 0.05,
-        "z": 0.05
-      },
-      "pos_in_a": {
-        "x": 0.2,
-        "y": 0.0,
-        "z": -0.6
-      },
-      "pos_in_b": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -0.15
-      },
-      "force": 10.0,
-      "speed": 2.0
-    },
     {
       "name": "muscle_A2",
       "item_a": "body",
@@ -1019,8 +1322,8 @@
         "y": 0.0,
         "z": 0.15
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_A3",
@@ -1042,8 +1345,8 @@
         "y": -0.08,
         "z": 0.0
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_A4",
@@ -1065,31 +1368,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 10.0,
-      "speed": 2.0
-    },
-    {
-      "name": "muscle_B1",
-      "item_a": "body",
-      "item_b": "body_legB1",
-      "attach_mass": 0.01,
-      "attach_scale": {
-        "x": 0.05,
-        "y": 0.05,
-        "z": 0.05
-      },
-      "pos_in_a": {
-        "x": -0.6,
-        "y": 0.0,
-        "z": -0.2
-      },
-      "pos_in_b": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -0.15
-      },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_B2",
@@ -1111,8 +1391,8 @@
         "y": 0.0,
         "z": 0.15
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_B3",
@@ -1134,8 +1414,8 @@
         "y": -0.08,
         "z": 0.0
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_B4",
@@ -1157,31 +1437,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 10.0,
-      "speed": 2.0
-    },
-    {
-      "name": "muscle_C1",
-      "item_a": "body",
-      "item_b": "body_legC1",
-      "attach_mass": 0.01,
-      "attach_scale": {
-        "x": 0.05,
-        "y": 0.05,
-        "z": 0.05
-      },
-      "pos_in_a": {
-        "x": -0.2,
-        "y": 0.0,
-        "z": 0.6
-      },
-      "pos_in_b": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -0.15
-      },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_C2",
@@ -1203,8 +1460,8 @@
         "y": 0.0,
         "z": 0.15
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_C3",
@@ -1226,8 +1483,8 @@
         "y": -0.08,
         "z": 0.0
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_C4",
@@ -1249,31 +1506,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 10.0,
-      "speed": 2.0
-    },
-    {
-      "name": "muscle_D1",
-      "item_a": "body",
-      "item_b": "body_legD1",
-      "attach_mass": 0.01,
-      "attach_scale": {
-        "x": 0.05,
-        "y": 0.05,
-        "z": 0.05
-      },
-      "pos_in_a": {
-        "x": 0.6,
-        "y": 0.0,
-        "z": -0.2
-      },
-      "pos_in_b": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": -0.15
-      },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_D2",
@@ -1295,8 +1529,8 @@
         "y": 0.0,
         "z": 0.15
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_D3",
@@ -1318,8 +1552,8 @@
         "y": -0.08,
         "z": 0.0
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     },
     {
       "name": "muscle_D4",
@@ -1341,8 +1575,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 10.0,
-      "speed": 2.0
+      "force": 100.0,
+      "speed": 1.5
     }
   ]
 }

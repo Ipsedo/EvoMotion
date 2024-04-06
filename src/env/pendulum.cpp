@@ -5,7 +5,7 @@
 
 #include "./pendulum.h"
 
-Pendulum::Pendulum(int seed) : Environment({3}, {1}, true) {
+Pendulum::Pendulum(int seed) : Environment() {
 
 }
 
@@ -23,4 +23,16 @@ step Pendulum::compute_step() {
 
 void Pendulum::reset_engine() {
 
+}
+
+std::vector<int64_t> Pendulum::get_state_space() {
+    return {3};
+}
+
+std::vector<int64_t> Pendulum::get_action_space() {
+    return {1};
+}
+
+bool Pendulum::is_continuous() const {
+    return true;
 }

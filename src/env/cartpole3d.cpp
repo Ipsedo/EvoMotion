@@ -6,7 +6,7 @@
 #include "../controller/slider.h"
 
 CartPole3d::CartPole3d(int seed) :
-    Environment({28}, {2}, true),
+    Environment(),
     slider_speed(16.f),
     slider_force_per_kg(32.f),
     chariot_push_force(2.f),
@@ -361,4 +361,16 @@ void CartPole3d::reset_engine() {
     slider_x->setPoweredLinMotor(true);
 
     step_idx = 0;
+}
+
+std::vector<int64_t> CartPole3d::get_state_space() {
+    return {28};
+}
+
+std::vector<int64_t> CartPole3d::get_action_space() {
+    return {2};
+}
+
+bool CartPole3d::is_continuous() const {
+    return true;
 }

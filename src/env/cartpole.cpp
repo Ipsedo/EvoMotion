@@ -7,7 +7,7 @@
 #include "cartpole.h"
 
 CartPole::CartPole(int seed) :
-    Environment({7}, {1}, true),
+    Environment(),
     slider_speed(16.f),
     slider_force(64.f),
     chariot_push_force(2.f),
@@ -211,4 +211,16 @@ void CartPole::reset_engine() {
     slider->setPoweredLinMotor(true);
 
     step_idx = 0;
+}
+
+std::vector<int64_t> CartPole::get_state_space() {
+    return {7};
+}
+
+std::vector<int64_t> CartPole::get_action_space() {
+    return {1};
+}
+
+bool CartPole::is_continuous() const {
+    return true;
 }

@@ -19,13 +19,6 @@ struct step {
 };
 
 class Environment {
-private:
-    std::vector<int64_t> state_space;
-    std::vector<int64_t> action_space;
-
-    bool continuous;
-
-
 protected:
     torch::DeviceType curr_device;
 
@@ -42,8 +35,7 @@ protected:
     void add_item(Item item);
 
 public:
-    Environment(const std::vector<int64_t> &state_space,
-                const std::vector<int64_t> &action_space, bool continuous);
+    Environment();
 
     virtual std::vector<Item> get_items() = 0;
 
@@ -53,11 +45,11 @@ public:
 
     step reset();
 
-    std::vector<int64_t> get_state_space();
+    virtual std::vector<int64_t> get_state_space() = 0;
 
-    std::vector<int64_t> get_action_space();
+    virtual std::vector<int64_t> get_action_space() = 0;
 
-    bool is_continuous() const;
+    virtual bool is_continuous() const = 0;
 
     void to(torch::DeviceType device);
 };

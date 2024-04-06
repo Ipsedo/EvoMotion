@@ -14,7 +14,7 @@
 
 Item::Item(std::string name, const std::shared_ptr<Shape> &shape,
            glm::mat4 model_matrix, glm::vec3 scale, float mass)
-    : name(std::move(name)), shape(shape), scale(scale) {
+    : name(std::move(name)), shape(shape), scale(scale), first_model_matrix(model_matrix) {
     auto *convex_hull_shape = new btConvexHullShape();
 
     for (auto [x, y, z]: shape->get_vertices())
@@ -30,7 +30,6 @@ Item::Item(std::string name, const std::shared_ptr<Shape> &shape,
 
     btTransform original_tr;
     original_tr.setFromOpenGLMatrix(glm::value_ptr(model_matrix));
-    curr_model_matrix = model_matrix;
 
     auto *motion_state = new btDefaultMotionState(original_tr);
 
@@ -75,76 +74,20 @@ glm::mat4 Item::model_matrix() {
 }
 
 glm::mat4 Item::model_matrix_without_scale() {
-    btScalar tmp[16];
     btTransform tr;
-
     body->getMotionState()->getWorldTransform(tr);
-
-    tr.getOpenGLMatrix(tmp);
-
-    return glm::make_mat4(tmp);
+    return bullet_to_glm(tr);
 }
 
-std::tuple<Item, btHingeConstraint *>
-Item::attach_item_hinge(glm::mat4 model_in_parent, glm::mat4 attach_in_parent,
-                        glm::mat4 attach_in_sub,
-                        glm::vec3 hinge_axis, std::string sub_name,
-                        const std::shared_ptr<Shape> &sub_shape,
-                        glm::vec3 sub_scale, float mass) {
-    glm::mat4 sub_mat = model_matrix_without_scale() * model_in_parent;
+void Item::reset(glm::mat4 main_model_matrix) {
+    btTransform original_tr = glm_to_bullet(main_model_matrix * first_model_matrix);
 
-    Item sub_item(std::move(sub_name), sub_shape, sub_mat, sub_scale, mass);
+    body->setWorldTransform(original_tr);
+    body->getMotionState()->setWorldTransform(original_tr);
 
-    btVector3 axis(hinge_axis.x, hinge_axis.y, hinge_axis.z);
-    glm::vec3 pos_in_parent = glm::vec3(
-        attach_in_parent * glm::vec4(0, 0, 0, 1));
-    glm::vec3 pos_in_sub = glm::vec3(attach_in_sub * glm::vec4(0, 0, 0, 1));
-
-    auto hinge = new btHingeConstraint(
-        *get_body(),
-        *sub_item.get_body(),
-        btVector3(pos_in_parent.x, pos_in_parent.y, pos_in_parent.z),
-        btVector3(pos_in_sub.x, pos_in_sub.y, pos_in_sub.z),
-        axis, axis
-    );
-
-    get_body()->setIgnoreCollisionCheck(sub_item.get_body(), true);
-    hinge->setLimit(0, M_PI);
-
-    return {
-        sub_item,
-        hinge
-    };
-}
-
-std::tuple<Item, btFixedConstraint *>
-Item::attach_item_fixed(glm::mat4 model_in_parent, glm::mat4 attach_in_parent,
-                        glm::mat4 attach_in_sub,
-                        std::string sub_name,
-                        const std::shared_ptr<Shape> &sub_shape,
-                        glm::vec3 sub_scale, float mass) {
-    glm::mat4 sub_mat = model_matrix_without_scale() * model_in_parent;
-
-    Item sub_item(std::move(sub_name), sub_shape, sub_mat, sub_scale, mass);
-
-    btTransform parent_tr;
-    parent_tr.setFromOpenGLMatrix(glm::value_ptr(attach_in_parent));
-    btTransform sub_tr;
-    sub_tr.setFromOpenGLMatrix(glm::value_ptr(attach_in_sub));
-
-    get_body()->setIgnoreCollisionCheck(sub_item.get_body(), true);
-
-    auto fixed = new btFixedConstraint(
-        *get_body(),
-        *sub_item.get_body(),
-        parent_tr,
-        sub_tr
-    );
-
-    return {
-        sub_item,
-        fixed
-    };
+    body->setLinearVelocity(btVector3(0.f, 0.f, 0.f));
+    body->setAngularVelocity(btVector3(0.f, 0.f, 0.f));
+    body->clearForces();
 }
 
 
