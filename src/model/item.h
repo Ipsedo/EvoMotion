@@ -15,15 +15,17 @@
 
 class Item {
 public:
-    Item(std::string name, const std::shared_ptr<Shape> &shape,
-         glm::mat4 model_matrix, glm::vec3 scale, float mass);
+    Item(
+        std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,
+        glm::vec3 scale, float mass);
 
-    Item(std::string name, const std::shared_ptr<Shape> &shape,
-         glm::vec3 position, glm::vec3 scale, float mass);
+    Item(
+        std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale,
+        float mass);
 
-    Item(std::string name, const std::shared_ptr<Shape> &shape,
-         glm::vec3 position, glm::quat rotation, glm::vec3 scale,
-         float mass);
+    Item(
+        std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position,
+        glm::quat rotation, glm::vec3 scale, float mass);
 
     std::shared_ptr<Shape> get_shape();
 
@@ -50,4 +52,4 @@ private:
     glm::mat4 first_model_matrix;
 };
 
-#endif //EVO_MOTION_ITEM_H
+#endif//EVO_MOTION_ITEM_H

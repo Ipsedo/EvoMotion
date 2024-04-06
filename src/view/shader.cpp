@@ -35,8 +35,7 @@ uint load_shader(GLenum type, const std::string &filename) {
     unsigned int i = 0;
     while (file.good()) {
         shaderSource[i] = (GLchar) file.get();
-        if (!file.eof())
-            i++;
+        if (!file.eof()) i++;
     }
 
     shaderSource[i] = 0;

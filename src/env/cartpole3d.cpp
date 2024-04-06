@@ -5,79 +5,44 @@
 #include "cartpole3d.h"
 #include "../controller/slider.h"
 
-CartPole3d::CartPole3d(int seed) :
-    Environment(),
-    slider_speed(16.f),
-    slider_force_per_kg(32.f),
-    chariot_push_force(2.f),
-    reset_frame_nb(8),
-    limit_angle(float(M_PI) / 2.f),
-    base_scale(10.f, 1.f, 10.f),
-    cart_x_scale(0.5f, 0.125f, 0.5f),
-    cart_z_scale(0.5f, 0.125f, 0.5f),
-    pole_scale(0.1f, 0.5f, 0.1f),
-    base_pos(0.f, -4.f, 10.f),
-    cart_x_pos(base_pos.x(), base_pos.y() + base_scale.y() + cart_x_scale.y(),
-               base_pos.z()),
-    cart_z_pos(base_pos.x(),
-               cart_x_pos.y() + cart_x_scale.y() + cart_z_scale.y(),
-               base_pos.z()),
-    pole_pos(base_pos.x(), cart_z_pos.y() + cart_z_scale.y() + pole_scale.y() -
-                           pole_scale.y() / 4.f, base_pos.z()),
-    base_mass(0.f),
-    cart_x_mass(1.f),
-    cart_z_mass(1.f),
-    pole_mass(1.f),
-    last_vel_x(0.f),
-    last_vel_z(0.f),
-    last_ang_vel_vec(0.f, 0.f, 0.f),
-    last_ang(0.f),
-    last_ang_vel(0.f),
-    last_vert_ang(0.f),
-    last_vert_ang_vel(0.f),
-    last_plan_ang(0.f),
-    last_plan_ang_vec(0.f),
-    max_steps(60 * 60),
-    rng(seed),
-    rd_uni(0.f, 1.f),
-    step_idx(0) {
+CartPole3d::CartPole3d(int seed)
+    : Environment(), slider_speed(16.f), slider_force_per_kg(32.f), chariot_push_force(2.f),
+      reset_frame_nb(8), limit_angle(float(M_PI) / 2.f), base_scale(10.f, 1.f, 10.f),
+      cart_x_scale(0.5f, 0.125f, 0.5f), cart_z_scale(0.5f, 0.125f, 0.5f),
+      pole_scale(0.1f, 0.5f, 0.1f), base_pos(0.f, -4.f, 10.f),
+      cart_x_pos(base_pos.x(), base_pos.y() + base_scale.y() + cart_x_scale.y(), base_pos.z()),
+      cart_z_pos(base_pos.x(), cart_x_pos.y() + cart_x_scale.y() + cart_z_scale.y(), base_pos.z()),
+      pole_pos(
+          base_pos.x(), cart_z_pos.y() + cart_z_scale.y() + pole_scale.y() - pole_scale.y() / 4.f,
+          base_pos.z()),
+      base_mass(0.f), cart_x_mass(1.f), cart_z_mass(1.f), pole_mass(1.f), last_vel_x(0.f),
+      last_vel_z(0.f), last_ang_vel_vec(0.f, 0.f, 0.f), last_ang(0.f), last_ang_vel(0.f),
+      last_vert_ang(0.f), last_vert_ang_vel(0.f), last_plan_ang(0.f), last_plan_ang_vec(0.f),
+      max_steps(60 * 60), rng(seed), rd_uni(0.f, 1.f), step_idx(0) {
 
     Item base(
-        "base",
-        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(base_pos.x(), base_pos.y(), base_pos.z()),
-        glm::vec3(base_scale.x(), base_scale.y(), base_scale.z()),
-        base_mass
-    );
+        glm::vec3(base_scale.x(), base_scale.y(), base_scale.z()), base_mass);
 
     Item cart_x(
-        "cart_x",
-        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        "cart_x", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(cart_x_pos.x(), cart_x_pos.y(), cart_x_pos.z()),
-        glm::vec3(cart_x_scale.x(), cart_x_scale.y(), cart_x_scale.z()),
-        cart_x_mass
-    );
+        glm::vec3(cart_x_scale.x(), cart_x_scale.y(), cart_x_scale.z()), cart_x_mass);
 
     Item cart_z(
-        "cart_z",
-        std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+        "cart_z", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(cart_z_pos.x(), cart_z_pos.y(), cart_z_pos.z()),
-        glm::vec3(cart_z_scale.x(), cart_z_scale.y(), cart_z_scale.z()),
-        cart_z_mass
-    );
+        glm::vec3(cart_z_scale.x(), cart_z_scale.y(), cart_z_scale.z()), cart_z_mass);
 
     Item pole(
-        "pole",
-        std::make_shared<ObjShape>("./resources/obj/cylinder.obj"),
+        "pole", std::make_shared<ObjShape>("./resources/obj/cylinder.obj"),
         glm::vec3(pole_pos.x(), pole_pos.y(), pole_pos.z()),
-        glm::vec3(pole_scale.x(), pole_scale.y(), pole_scale.z()),
-        pole_mass
-    );
+        glm::vec3(pole_scale.x(), pole_scale.y(), pole_scale.z()), pole_mass);
 
     items = {base, cart_x, cart_z, pole};
 
-    for (const auto &item: items)
-        add_item(item);
+    for (const auto &item: items) add_item(item);
 
     base_rg = base.get_body();
     cart_x_rg = cart_x.get_body();
@@ -92,18 +57,12 @@ CartPole3d::CartPole3d(int seed) :
     tr_cart_x.setIdentity();
     tr_cart_x.setOrigin(btVector3(0.f, -cart_x_scale.y(), 0.f));
 
-    slider_x = new btSliderConstraint(
-        *base.get_body(),
-        *cart_x.get_body(),
-        tr_base,
-        tr_cart_x,
-        true
-    );
+    slider_x =
+        new btSliderConstraint(*base.get_body(), *cart_x.get_body(), tr_base, tr_cart_x, true);
 
     slider_x->setEnabled(true);
     slider_x->setPoweredLinMotor(true);
-    slider_x->setMaxLinMotorForce(
-        slider_force_per_kg * (cart_x_mass + cart_z_mass + pole_mass));
+    slider_x->setMaxLinMotorForce(slider_force_per_kg * (cart_x_mass + cart_z_mass + pole_mass));
     slider_x->setTargetLinMotorVelocity(0.f);
 
     slider_x->setLowerLinLimit(-100.f);
@@ -116,8 +75,7 @@ CartPole3d::CartPole3d(int seed) :
     slider_x->setSoftnessLimLin(2.f);
     slider_x->setSoftnessLimAng(2.f);
 
-    controllers.push_back(
-        std::make_shared<SliderController>(0, slider_x, slider_speed));
+    controllers.push_back(std::make_shared<SliderController>(0, slider_x, slider_speed));
 
     tr_cart_x.setIdentity();
     tr_cart_x.setOrigin(btVector3(0.f, cart_x_scale.y(), 0.f));
@@ -128,18 +86,11 @@ CartPole3d::CartPole3d(int seed) :
     tr_cart_z.setOrigin(btVector3(0.f, -cart_z_scale.y(), 0.f));
     tr_cart_z.getBasis().setEulerZYX(0.f, M_PI / 2.f, 0.f);
 
-    slider_z = new btSliderConstraint(
-        *cart_x_rg,
-        *cart_z_rg,
-        tr_cart_x,
-        tr_cart_z,
-        true
-    );
+    slider_z = new btSliderConstraint(*cart_x_rg, *cart_z_rg, tr_cart_x, tr_cart_z, true);
 
     slider_z->setEnabled(true);
     slider_z->setPoweredLinMotor(true);
-    slider_z->setMaxLinMotorForce(
-        slider_force_per_kg * (cart_z_mass + pole_mass));
+    slider_z->setMaxLinMotorForce(slider_force_per_kg * (cart_z_mass + pole_mass));
     slider_z->setTargetLinMotorVelocity(0.f);
 
     slider_z->setLowerLinLimit(-100.f);
@@ -152,15 +103,11 @@ CartPole3d::CartPole3d(int seed) :
     slider_z->setSoftnessLimLin(2.f);
     slider_z->setSoftnessLimAng(2.f);
 
-    controllers.push_back(
-        std::make_shared<SliderController>(1, slider_z, slider_speed));
+    controllers.push_back(std::make_shared<SliderController>(1, slider_z, slider_speed));
 
     p2p_constraint = new btPoint2PointConstraint(
-        *cart_z_rg,
-        *pole_rg,
-        btVector3(0.f, cart_z_scale.y(), 0.f),
-        btVector3(0.f, -pole_scale.y() + pole_scale.y() / 4.f, 0.f)
-    );
+        *cart_z_rg, *pole_rg, btVector3(0.f, cart_z_scale.y(), 0.f),
+        btVector3(0.f, -pole_scale.y() + pole_scale.y() / 4.f, 0.f));
 
     base_rg->setActivationState(DISABLE_DEACTIVATION);
     cart_x_rg->setActivationState(DISABLE_DEACTIVATION);
@@ -179,13 +126,9 @@ CartPole3d::CartPole3d(int seed) :
     m_world->addConstraint(p2p_constraint);
 }
 
-std::vector<Item> CartPole3d::get_items() {
-    return items;
-}
+std::vector<Item> CartPole3d::get_items() { return items; }
 
-std::vector<std::shared_ptr<Controller>> CartPole3d::get_controllers() {
-    return controllers;
-}
+std::vector<std::shared_ptr<Controller>> CartPole3d::get_controllers() { return controllers; }
 
 step CartPole3d::compute_step() {
     float pos_x = cart_z_rg->getWorldTransform().getOrigin().x();
@@ -194,8 +137,8 @@ step CartPole3d::compute_step() {
     float vel_x = cart_z_rg->getLinearVelocity().x();
     float vel_z = cart_z_rg->getLinearVelocity().z();
 
-    float center_distance = sqrt(
-        pow(cart_z_pos.x() - pos_x, 2.f) + pow(cart_z_pos.z() - pos_z, 2.f));
+    float center_distance =
+        sqrt(pow(cart_z_pos.x() - pos_x, 2.f) + pow(cart_z_pos.z() - pos_z, 2.f));
     pos_x = pos_x - cart_z_pos.x();
     pos_z = pos_z - cart_z_pos.z();
 
@@ -212,8 +155,7 @@ step CartPole3d::compute_step() {
         pole_rg->getWorldTransform().getRotation().getAxis(),
         pole_rg->getWorldTransform().getRotation().getAngle());
 
-    float ang = acos(
-        origin.dot(rotated_ang) / (origin.norm() * rotated_ang.norm()));
+    float ang = acos(origin.dot(rotated_ang) / (origin.norm() * rotated_ang.norm()));
     float ang_vel = ang - last_ang;
 
     auto ang_vel_vec = pole_rg->getAngularVelocity();
@@ -223,38 +165,48 @@ step CartPole3d::compute_step() {
 
     btVector3 axis_ori(0.f, 1.f, 0.f);
     float vertical_ang = acos(
-        (axis.x() * axis_ori.x() + axis.y() * axis_ori.y() +
-         axis.z() * axis_ori.z())
-        / (axis.norm() + axis_ori.norm())
-    );
+        (axis.x() * axis_ori.x() + axis.y() * axis_ori.y() + axis.z() * axis_ori.z()) /
+        (axis.norm() + axis_ori.norm()));
     float vertical_ang_vel = vertical_ang - last_vert_ang;
 
     btVector3 axis_plan(axis.x(), 0.f, axis.z());
     btVector3 axis_plan_ori(1.f, 0.f, 0.f);
     float plan_ang = acos(
         (axis_plan.x() * axis_plan_ori.x() + axis_plan.y() * axis_plan_ori.y() +
-         axis_plan.z() * axis_plan_ori.z())
-        / (axis_plan.norm() + axis_plan_ori.norm())
-    );
+         axis_plan.z() * axis_plan_ori.z()) /
+        (axis_plan.norm() + axis_plan_ori.norm()));
     float plan_ang_vel = plan_ang - last_plan_ang;
 
     torch::Tensor state = torch::tensor(
-        {
-            center_distance / base_scale.x(),
-            pos_x / base_scale.x(), vel_x, vel_x - last_vel_x,
-            pos_z / base_scale.z(), vel_z, vel_z - last_vel_z,
-            ang_x / float(M_PI), ang_y / float(M_PI), ang_z / float(M_PI),
-            ang / float(2. * M_PI) - 1.f, ang_vel, ang_vel - last_ang_vel,
-            ang_vel_vec.x(), ang_vel_vec.y(), ang_vel_vec.z(),
-            ang_acc_vec.x(), ang_acc_vec.y(), ang_acc_vec.z(),
-            axis.x(), axis.y(), axis.z(),
-            plan_ang / float(M_PI), plan_ang_vel,
-            plan_ang_vel - last_plan_ang_vec,
-            vertical_ang / float(M_PI), vertical_ang_vel,
-            vertical_ang_vel - last_vert_ang_vel
-        },
-        at::TensorOptions().device(curr_device)
-    );
+        {center_distance / base_scale.x(),
+         pos_x / base_scale.x(),
+         vel_x,
+         vel_x - last_vel_x,
+         pos_z / base_scale.z(),
+         vel_z,
+         vel_z - last_vel_z,
+         ang_x / float(M_PI),
+         ang_y / float(M_PI),
+         ang_z / float(M_PI),
+         ang / float(2. * M_PI) - 1.f,
+         ang_vel,
+         ang_vel - last_ang_vel,
+         ang_vel_vec.x(),
+         ang_vel_vec.y(),
+         ang_vel_vec.z(),
+         ang_acc_vec.x(),
+         ang_acc_vec.y(),
+         ang_acc_vec.z(),
+         axis.x(),
+         axis.y(),
+         axis.z(),
+         plan_ang / float(M_PI),
+         plan_ang_vel,
+         plan_ang_vel - last_plan_ang_vec,
+         vertical_ang / float(M_PI),
+         vertical_ang_vel,
+         vertical_ang_vel - last_vert_ang_vel},
+        at::TensorOptions().device(curr_device));
 
     bool fail = center_distance > base_scale.x() || abs(ang) > limit_angle;
     bool win = step_idx > max_steps;
@@ -262,9 +214,8 @@ step CartPole3d::compute_step() {
     bool done = fail || win;
 
 
-    float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f)
-                   + pow((base_scale.x() - center_distance) / base_scale.x(),
-                         2.f);
+    float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f) +
+                   pow((base_scale.x() - center_distance) / base_scale.x(), 2.f);
     reward = fail ? -2.f : (win ? 2.f : reward);
 
     last_vel_x = vel_x;
@@ -354,8 +305,7 @@ void CartPole3d::reset_engine() {
 
     cart_z_rg->applyCentralImpulse(btVector3(rand_force_x, 0.f, rand_force_z));
 
-    for (int i = 0; i < reset_frame_nb; i++)
-        m_world->stepSimulation(1.f / 60.f);
+    for (int i = 0; i < reset_frame_nb; i++) m_world->stepSimulation(1.f / 60.f);
 
     slider_z->setPoweredLinMotor(true);
     slider_x->setPoweredLinMotor(true);
@@ -363,14 +313,8 @@ void CartPole3d::reset_engine() {
     step_idx = 0;
 }
 
-std::vector<int64_t> CartPole3d::get_state_space() {
-    return {28};
-}
+std::vector<int64_t> CartPole3d::get_state_space() { return {28}; }
 
-std::vector<int64_t> CartPole3d::get_action_space() {
-    return {2};
-}
+std::vector<int64_t> CartPole3d::get_action_space() { return {2}; }
 
-bool CartPole3d::is_continuous() const {
-    return true;
-}
+bool CartPole3d::is_continuous() const { return true; }

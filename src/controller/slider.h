@@ -22,4 +22,4 @@ private:
     float slider_speed;
 };
 
-#endif //EVO_MOTION_SLIDER_H
+#endif//EVO_MOTION_SLIDER_H

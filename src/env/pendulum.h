@@ -25,8 +25,6 @@ protected:
     step compute_step() override;
 
     void reset_engine() override;
-
-
 };
 
-#endif //EVO_MOTION_PENDULUM_H
+#endif//EVO_MOTION_PENDULUM_H

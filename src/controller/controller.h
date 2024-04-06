@@ -12,4 +12,4 @@ public:
     virtual void on_input(torch::Tensor action) = 0;
 };
 
-#endif //EVO_MOTION_CONTROLLER_H
+#endif//EVO_MOTION_CONTROLLER_H

@@ -5,10 +5,10 @@
 #ifndef EVO_MOTION_ENV_TEST_MUSCLE_H
 #define EVO_MOTION_ENV_TEST_MUSCLE_H
 
-#include <random>
 #include "../model/environment.h"
 #include "../model/muscle.h"
 #include "../model/skeleton.h"
+#include <random>
 
 #include "../model/state.h"
 
@@ -51,7 +51,6 @@ private:
     int nb_steps_without_moving;
     float velocity_delta;
     int max_steps_without_moving;
-
 };
 
-#endif //EVO_MOTION_ENV_TEST_MUSCLE_H
+#endif//EVO_MOTION_ENV_TEST_MUSCLE_H

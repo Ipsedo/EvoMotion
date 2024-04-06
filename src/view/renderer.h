@@ -5,24 +5,22 @@
 #ifndef EVO_MOTION_RENDERER_H
 #define EVO_MOTION_RENDERER_H
 
-#include <string>
-#include <memory>
 #include <map>
+#include <memory>
+#include <string>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#include "drawable.h"
 #include "camera.h"
+#include "drawable.h"
 
 class Renderer {
 public:
-    Renderer(const std::string &title, int width, int height,
-             std::shared_ptr<Camera> camera);
+    Renderer(const std::string &title, int width, int height, std::shared_ptr<Camera> camera);
 
-    void add_drawable(const std::string &name,
-                      const std::shared_ptr<Drawable> &drawable);
+    void add_drawable(const std::string &name, const std::shared_ptr<Drawable> &drawable);
 
     bool is_close() const;
 
@@ -46,4 +44,4 @@ private:
     GLFWwindow *window;
 };
 
-#endif //EVO_MOTION_RENDERER_H
+#endif//EVO_MOTION_RENDERER_H

@@ -7,4 +7,4 @@
 
 #define BYTES_PER_FLOAT 4
 
-#endif //EVO_MOTION_CONSTANTS_H
+#endif//EVO_MOTION_CONSTANTS_H

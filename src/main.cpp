@@ -8,26 +8,19 @@
 
 #include <argparse/argparse.hpp>
 
+#include "./run.h"
 #include "./test_muscle.h"
 #include "./train.h"
-#include "./run.h"
 
 int main(int argc, char **argv) {
     argparse::ArgumentParser parser("evo_motion");
 
-    parser.add_argument("environment")
-        .default_value("cartpole")
-        .help("the environment");
+    parser.add_argument("environment").default_value("cartpole").help("the environment");
 
-    parser.add_argument("--seed")
-        .scan<'i', int>()
-        .default_value(1234)
-        .help("seed for RNG");
+    parser.add_argument("--seed").scan<'i', int>().default_value(1234).help("seed for RNG");
 
-    parser.add_argument("--cuda")
-        .default_value(false)
-        .implicit_value(true)
-        .help("enable cuda for neural networks");
+    parser.add_argument("--cuda").default_value(false).implicit_value(true).help(
+        "enable cuda for neural networks");
 
     parser.add_argument("--hidden_size")
         .default_value(32)
@@ -65,9 +58,7 @@ int main(int argc, char **argv) {
 
     argparse::ArgumentParser run_parser("run");
 
-    run_parser.add_argument("input_folder")
-        .required()
-        .help("input folder containing .th file");
+    run_parser.add_argument("input_folder").required().help("input folder containing .th file");
 
     run_parser.add_argument("-w", "--width")
         .scan<'i', int>()
@@ -101,8 +92,7 @@ int main(int argc, char **argv) {
 
     try {
         parser.parse_args(argc, argv);
-    }
-    catch (const std::runtime_error &err) {
+    } catch (const std::runtime_error &err) {
         std::cerr << err.what() << std::endl;
         std::cerr << parser;
         std::exit(1);
@@ -110,37 +100,20 @@ int main(int argc, char **argv) {
 
     if (parser.is_subcommand_used(train_parser))
         train(
-            parser.get<int>("seed"),
-            parser.get<bool>("cuda"),
-            {
-                parser.get<std::string>("environment"),
-                train_parser.get<std::string>("output_path"),
-                train_parser.get<float>("learning_rate"),
-                train_parser.get<int>("nb_saves"),
-                train_parser.get<int>("episodes"),
-                parser.get<int>("hidden_size")
-            }
-        );
+            parser.get<int>("seed"), parser.get<bool>("cuda"),
+            {parser.get<std::string>("environment"), train_parser.get<std::string>("output_path"),
+             train_parser.get<float>("learning_rate"), train_parser.get<int>("nb_saves"),
+             train_parser.get<int>("episodes"), parser.get<int>("hidden_size")});
     else if (parser.is_subcommand_used(run_parser))
         infer(
-            parser.get<int>("seed"),
-            parser.get<bool>("cuda"),
-            {
-                parser.get<std::string>("environment"),
-                run_parser.get<std::string>("input_folder"),
-                run_parser.get<int>("width"),
-                run_parser.get<int>("height"),
-                parser.get<int>("hidden_size")
-            }
-        );
+            parser.get<int>("seed"), parser.get<bool>("cuda"),
+            {parser.get<std::string>("environment"), run_parser.get<std::string>("input_folder"),
+             run_parser.get<int>("width"), run_parser.get<int>("height"),
+             parser.get<int>("hidden_size")});
     else if (parser.is_subcommand_used(muscle_parser))
-        test_muscle({
-                        muscle_parser.get<int>("width"),
-                        muscle_parser.get<int>("height")
-                    });
+        test_muscle({muscle_parser.get<int>("width"), muscle_parser.get<int>("height")});
     else {
-        std::cerr << "must enter a subcommand" << std::endl
-                  << parser.help().str() << std::endl;
+        std::cerr << "must enter a subcommand" << std::endl << parser.help().str() << std::endl;
         exit(1);
     }
 

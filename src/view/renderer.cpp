@@ -2,11 +2,11 @@
 // Created by samuel on 17/12/22.
 //
 
-#include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 #include <utility>
 
 #include "renderer.h"
@@ -15,32 +15,20 @@ void error_callback(int error, const char *description) {
     std::cerr << error << " " << description << std::endl;
 }
 
-void GLAPIENTRY
-message_callback(GLenum source,
-                 GLenum type,
-                 GLuint id,
-                 GLenum severity,
-                 GLsizei length,
-                 const GLchar *message,
-                 const void *userParam) {
-    std::cerr << source << " " << type << " " << id << " " << severity << " "
-              << length << " : " << std::endl;
+void GLAPIENTRY message_callback(
+    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+    const void *userParam) {
+    std::cerr << source << " " << type << " " << id << " " << severity << " " << length << " : "
+              << std::endl;
     std::cerr << "params : " << userParam << std::endl;
     std::cerr << message << std::endl << std::endl;
 }
 
-Renderer::Renderer(
-    const std::string &title,
-    int width, int height,
-    std::shared_ptr<Camera> camera) :
+Renderer::Renderer(const std::string &title, int width, int height, std::shared_ptr<Camera> camera)
+    :
 
-    title(title),
-    width(width), height(height),
-    drawables({}),
-    camera(std::move(camera)),
-    is_open(false),
-    window(nullptr),
-    light_pos(glm::vec3(0.f, 0.f, -1.f)) {
+      title(title), width(width), height(height), drawables({}), camera(std::move(camera)),
+      is_open(false), window(nullptr), light_pos(glm::vec3(0.f, 0.f, -1.f)) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -86,14 +74,11 @@ Renderer::Renderer(
     is_open = true;
 }
 
-void Renderer::add_drawable(const std::string &name,
-                            const std::shared_ptr<Drawable> &drawable) {
+void Renderer::add_drawable(const std::string &name, const std::shared_ptr<Drawable> &drawable) {
     drawables.insert({name, drawable});
 }
 
-bool Renderer::is_close() const {
-    return !is_open;
-}
+bool Renderer::is_close() const { return !is_open; }
 
 void Renderer::close() {
     glfwSetWindowShouldClose(window, true);
@@ -110,18 +95,10 @@ void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 view_matrix = glm::lookAt(
-        camera->pos(),
-        camera->look(),
-        camera->up()
-    );
+    glm::mat4 view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
 
     glm::mat4 proj_matrix = glm::frustum(
-        -1.f, 1.f,
-        -float(height) / float(width), float(height) / float(width),
-        1.f,
-        200.f
-    );
+        -1.f, 1.f, -float(height) / float(width), float(height) / float(width), 1.f, 200.f);
 
     for (auto [name, drawable]: drawables) {
         glm::mat4 m_matrix = model_matrix[name];

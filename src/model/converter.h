@@ -7,8 +7,8 @@
 
 #include <nlohmann/json.hpp>
 
-#include <glm/glm.hpp>
 #include <btBulletDynamicsCommon.h>
+#include <glm/glm.hpp>
 
 
 /*
@@ -43,4 +43,4 @@ glm::mat4 bullet_to_glm(const btTransform &m);
 
 glm::quat bullet_to_glm(btQuaternion m);
 
-#endif //EVO_MOTION_CONVERTER_H
+#endif//EVO_MOTION_CONVERTER_H

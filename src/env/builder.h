@@ -19,8 +19,7 @@ public:
 private:
     int seed;
     std::string env_name;
-    std::map<std::string, std::function<std::shared_ptr<Environment>(
-        int)>> constructors;
+    std::map<std::string, std::function<std::shared_ptr<Environment>(int)>> constructors;
 };
 
-#endif //EVO_MOTION_BUILDER_H
+#endif//EVO_MOTION_BUILDER_H

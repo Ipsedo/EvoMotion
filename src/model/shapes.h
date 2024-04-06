@@ -29,4 +29,4 @@ public:
     std::vector<std::tuple<float, float, float>> get_normals() override;
 };
 
-#endif //EVO_MOTION_SHAPES_H
+#endif//EVO_MOTION_SHAPES_H

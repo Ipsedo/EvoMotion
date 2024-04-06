@@ -5,8 +5,8 @@
 #ifndef EVO_MOTION_MUSCLE_CONTROLLER_H
 #define EVO_MOTION_MUSCLE_CONTROLLER_H
 
-#include "./controller.h"
 #include "../model//muscle.h"
+#include "./controller.h"
 
 class MuscleController : public Controller {
 public:
@@ -17,8 +17,6 @@ public:
 private:
     int action_index;
     Muscle muscle;
-
-
 };
 
-#endif //EVO_MOTION_MUSCLE_CONTROLLER_H
+#endif//EVO_MOTION_MUSCLE_CONTROLLER_H
