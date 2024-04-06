@@ -24,7 +24,7 @@ MuscleEnv::MuscleEnv(int seed) :
     curr_step(0),
     max_steps(60 * 60),
     nb_steps_without_moving(0),
-    max_steps_without_moving(15),
+    max_steps_without_moving(60),
     velocity_delta(0.1) {
 
     Item base("base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
@@ -35,7 +35,7 @@ MuscleEnv::MuscleEnv(int seed) :
     JsonSkeleton json_skeleton(
         json_path,
         "skeleton_test",
-        glm::translate(glm::mat4(1.0), glm::vec3(1.f, 0.f, 2.f)));
+        glm::translate(glm::mat4(1.0), glm::vec3(1.f, -1.2f, 2.f)));
 
     JsonMuscularSystem json_muscular_system(
         json_skeleton,
@@ -97,7 +97,8 @@ step MuscleEnv::compute_step() {
     bool win = curr_step >= max_steps;
     bool fail = nb_steps_without_moving >= max_steps_without_moving;
 
-    float reward = items[0].get_body()->getCenterOfMassPosition().z() * (win ? 2.f : fail ? -1.f : 1.f);
+    float reward = items[0].get_body()->getCenterOfMassPosition().z();
+    reward = win ? 2 * reward : fail ? -1 : reward;
 
     bool done = win | fail;
 
