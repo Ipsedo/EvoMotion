@@ -14,8 +14,12 @@ MuscleEnv::MuscleEnv(int seed) :
     Environment(),
     rng(seed),
     rd_uni(0.f, 1.f),
-    items(),
-    constraints(),
+    base("base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
+         glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)),
+         glm::vec3(1000.f, 1.f, 1000.f), 0.f),
+    skeleton_json_path("./resources/skeleton/spider_long.json"),
+    skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
+    muscular_system(skeleton, skeleton_json_path),
     controllers(),
     states(),
     curr_step(0),
@@ -24,54 +28,38 @@ MuscleEnv::MuscleEnv(int seed) :
     max_steps_without_moving(30),
     velocity_delta(0.5) {
 
-    Item base("base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
-              glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)),
-              glm::vec3(1000.f, 1.f, 1000.f), 0.f);
-
     base.get_body()->setFriction(200.f);
 
-    auto json_path = "./resources/skeleton/spider_long.json";
-    JsonSkeleton json_skeleton(
-        json_path,
-        "skeleton_test",
-        glm::mat4(1.0));
+    add_item(base);
 
-    JsonMuscularSystem json_muscular_system(
-        json_skeleton,
-        json_path);
-
-    for (const Item &item: json_skeleton.get_items()) {
-        items.push_back(item);
+    for (Item item: skeleton.get_items()) {
         states.emplace_back(item);
+        add_item(item);
+        item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
 
-    for (auto m: json_muscular_system.get_muscles()) {
-        for (const auto &item: m.get_items()) {
-            items.push_back(item);
-            states.emplace_back(item);
+    for (auto m: muscular_system.get_muscles()) {
+        for (auto item: m.get_items()) {
+            add_item(item);
+            item.get_body()->setActivationState(DISABLE_DEACTIVATION);
         }
         for (auto c: m.get_constraints())
-            constraints.push_back(c);
+            m_world->addConstraint(c);
     }
 
-    items.push_back(base);
-
-    for (auto item: items) {
-        item.get_body()->setActivationState(DISABLE_DEACTIVATION);
-        add_item(item);
-    }
-
-    for (auto c: constraints)
-        m_world->addConstraint(c);
-
-    for (auto constraint: json_skeleton.get_constraints())
+    for (auto constraint: skeleton.get_constraints())
         m_world->addConstraint(constraint);
 
-    for (int i = 0; i < json_muscular_system.get_muscles().size(); i++)
-        controllers.push_back(std::make_shared<MuscleController>(json_muscular_system.get_muscles()[i], i));
+    for (int i = 0; i < muscular_system.get_muscles().size(); i++)
+        controllers.push_back(std::make_shared<MuscleController>(muscular_system.get_muscles()[i], i));
 }
 
 std::vector<Item> MuscleEnv::get_items() {
+    auto items = skeleton.get_items();
+    for (auto m: muscular_system.get_muscles())
+        for (const auto &i: m.get_items())
+            items.push_back(i);
+    items.push_back(base);
     return items;
 }
 
@@ -87,7 +75,9 @@ step MuscleEnv::compute_step() {
 
     curr_step += 1;
 
-    if (items[0].get_body()->getLinearVelocity().z() <= velocity_delta)
+    Item root = skeleton.get_items()[0];
+
+    if (root.get_body()->getLinearVelocity().z() <= velocity_delta)
         nb_steps_without_moving += 1;
     else
         nb_steps_without_moving = 0;
@@ -95,7 +85,7 @@ step MuscleEnv::compute_step() {
     bool win = curr_step >= max_steps;
     bool fail = nb_steps_without_moving >= max_steps_without_moving;
 
-    float reward = items[0].get_body()->getLinearVelocity().z();
+    float reward = root.get_body()->getLinearVelocity().z();
     reward = win ? 2 * reward : fail ? -1 : reward;
 
     bool done = win | fail;
@@ -109,24 +99,33 @@ void MuscleEnv::reset_engine() {
     glm::vec3 root_pos(1.f, -0.5f, 2.f);
     float angle = 2.f * float(M_PI) * rd_uni(rng);
 
+    // reset
     glm::mat4 model_matrix =
         glm::translate(glm::mat4(1.f), root_pos) * glm::rotate(glm::mat4(1.f), angle, glm::vec3(0, 1, 0));
 
-    for (int i = 0; i < items.size() - 1; i++) {
-        m_world->removeRigidBody(items[i].get_body());
-        items[i].reset(model_matrix);
+    for (auto item: skeleton.get_items()) {
+        m_world->removeRigidBody(item.get_body());
+        item.reset(model_matrix);
     }
 
-    m_world->removeRigidBody(items[items.size() - 1].get_body());
-    items[items.size() - 1].reset();
+    for (auto muscle: muscular_system.get_muscles()) {
+        for (auto item: muscle.get_items()) {
+            m_world->removeRigidBody(item.get_body());
+            item.reset(model_matrix);
+        }
+        for (auto c: muscle.get_constraints())
+            m_world->removeConstraint(c);
+    }
 
-    for (auto c: constraints)
-        m_world->removeConstraint(c);
-
-    for (auto item: items)
+    // re-add
+    for (auto item: skeleton.get_items())
         m_world->addRigidBody(item.get_body());
-    for (auto c: constraints)
-        m_world->addConstraint(c);
+    for (auto m: muscular_system.get_muscles()) {
+        for (auto item: m.get_items())
+            m_world->addRigidBody(item.get_body());
+        for (auto c: m.get_constraints())
+            m_world->addConstraint(c);
+    }
 
     curr_step = 0;
     nb_steps_without_moving = 0;
