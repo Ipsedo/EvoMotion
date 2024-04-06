@@ -18,7 +18,7 @@ public:
            Item &item_b, glm::vec3 pos_in_b,
            float force, float max_speed);
 
-    void contract(float force);
+    void contract(float speed_factor);
 
     void release();
 
