@@ -74,18 +74,13 @@ glm::mat4 Item::model_matrix() {
 }
 
 glm::mat4 Item::model_matrix_without_scale() {
-    btScalar tmp[16];
     btTransform tr;
-
     body->getMotionState()->getWorldTransform(tr);
-
-    tr.getOpenGLMatrix(tmp);
-
-    return glm::make_mat4(tmp);
+    return bullet_to_glm(tr);
 }
 
-void Item::reset() {
-    btTransform original_tr = glm_to_bullet(first_model_matrix);
+void Item::reset(glm::mat4 main_model_matrix) {
+    btTransform original_tr = glm_to_bullet(main_model_matrix * first_model_matrix);
 
     body->setWorldTransform(original_tr);
     body->getMotionState()->setWorldTransform(original_tr);

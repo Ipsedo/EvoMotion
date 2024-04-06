@@ -22,7 +22,10 @@ MuscleEnv::MuscleEnv(int seed) :
     reset_frames(8),
     reset_torque_force(10.f),
     curr_step(0),
-    max_steps(60 * 60) {
+    max_steps(60 * 60),
+    nb_steps_without_moving(0),
+    max_steps_without_moving(15),
+    velocity_delta(0.1) {
 
     Item base("base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
               glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)),
@@ -84,19 +87,29 @@ step MuscleEnv::compute_step() {
     for (auto state: states)
         current_states.push_back(state.get_state().to(curr_device));
 
-    float reward = items[0].get_body()->getCenterOfMassPosition().z();
-
     curr_step += 1;
 
+    if (items[0].get_body()->getLinearVelocity().z() <= velocity_delta)
+        nb_steps_without_moving += 1;
+    else
+        nb_steps_without_moving = 0;
+
+    bool win = curr_step >= max_steps;
+    bool fail = nb_steps_without_moving >= max_steps_without_moving;
+
+    float reward = items[0].get_body()->getCenterOfMassPosition().z() * (win ? 2.f : fail ? -1.f : 1.f);
+
+    bool done = win | fail;
+
     return {
-        torch::cat(current_states, 0), reward, curr_step >= max_steps
+        torch::cat(current_states, 0), reward, done
     };
 }
 
 void MuscleEnv::reset_engine() {
     for (auto item: items) {
         m_world->removeRigidBody(item.get_body());
-        item.reset();
+        item.reset(glm::mat4(1.f));
     }
 
     for (auto c: constraints)
@@ -113,11 +126,6 @@ void MuscleEnv::reset_engine() {
     glm::vec3 axis = glm::rotate(glm::mat4(1), rd_uni(rng) * reset_angle_torque, glm::vec3(1, 0, 0)) *
                      glm::rotate(glm::mat4(1), float(rd_uni(rng) * M_PI) * 2.f, glm::vec3(0, 1, 0)) *
                      glm::vec4(glm::vec3(0, 1, 0), 0);
-    /*glm::vec3 point(0);
-
-    auto perpendicular_component = glm::cross(axis, glm::cross(axis, point));
-    auto torque_direction = glm::normalize(glm::cross(point, perpendicular_component));
-    auto torque_vector = reset_torque_force * torque_direction;*/
 
     root.get_body()->applyTorqueImpulse(glm_to_bullet(axis * reset_torque_force));
 
@@ -125,6 +133,7 @@ void MuscleEnv::reset_engine() {
         m_world->stepSimulation(1.f / 60.f);
 
     curr_step = 0;
+    nb_steps_without_moving = 0;
 }
 
 std::vector<int64_t> MuscleEnv::get_state_space() {

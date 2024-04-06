@@ -35,7 +35,7 @@ public:
 
     btRigidBody *get_body();
 
-    void reset();
+    void reset(glm::mat4 main_model_matrix = glm::mat4(1.f));
 
 private:
     std::string name;
