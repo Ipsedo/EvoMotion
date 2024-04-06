@@ -67,8 +67,7 @@ step MuscleEnv::compute_step() {
     Item root = skeleton.get_items()[0];
 
     if (root.get_body()->getLinearVelocity().z() <= velocity_delta) nb_steps_without_moving += 1;
-    else
-        nb_steps_without_moving = 0;
+    else nb_steps_without_moving = 0;
 
     bool win = curr_step >= max_steps;
     bool fail = nb_steps_without_moving >= max_steps_without_moving;

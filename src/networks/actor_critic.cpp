@@ -130,8 +130,7 @@ void ActorCritic::to(torch::DeviceType device) {
 
 void ActorCritic::set_eval(bool eval) {
     if (eval) networks->eval();
-    else
-        networks->train();
+    else networks->train();
 }
 
 /*
