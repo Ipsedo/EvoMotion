@@ -83,7 +83,7 @@ Muscle::Muscle(
         btVector3(0, 0, 0)
     );
 
-    for (int i = 0; i < 6; i++) {
+    /*for (int i = 0; i < 6; i++) {
         attach_a_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0, i);
         attach_b_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0, i);
         muscle_slider_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0, i);
@@ -91,17 +91,12 @@ Muscle::Muscle(
         attach_a_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1, i);
         attach_b_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1, i);
         muscle_slider_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1, i);
-    }
+    }*/
 
-    item_a.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
-    item_a.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
-
-    item_b.get_body()->setIgnoreCollisionCheck(attach_a.get_body(), true);
-    item_b.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
-
-    item_a.get_body()->setIgnoreCollisionCheck(item_b.get_body(), true);
-
-    attach_a.get_body()->setIgnoreCollisionCheck(attach_b.get_body(), true);
+    attach_a.get_body()->setCollisionFlags(
+        attach_a.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    attach_b.get_body()->setCollisionFlags(
+        attach_b.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 }
 
 void Muscle::contract(float force) {
