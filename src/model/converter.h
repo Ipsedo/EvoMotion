@@ -23,6 +23,10 @@ glm::vec3 json_vec3_to_glm_vec3(nlohmann::json vec3);
 
 btVector3 json_vec3_to_bt_vector3(nlohmann::json vec3);
 
+/*
+ * GLM <-> Bullet conversions
+ */
+
 btVector3 glm_to_bullet(glm::vec3 v);
 
 btVector4 glm_to_bullet(glm::vec4 v);

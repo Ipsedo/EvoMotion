@@ -8,7 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// transformation
+/*
+ * JSON stuff
+ */
 
 glm::mat4 json_transformation_to_model_matrix(nlohmann::json transformation) {
 
