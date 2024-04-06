@@ -41,10 +41,6 @@ private:
 
     std::vector<ItemState> states;
 
-    float reset_angle_torque;
-    int reset_frames;
-    float reset_torque_force;
-
     int curr_step;
     int max_steps;
 

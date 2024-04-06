@@ -20,7 +20,7 @@
           "y": 1.0,
           "z": 0.0
         },
-        "angle_degree": 150.0
+        "angle_degree": 0.0
       },
       "translation": {
         "x": 0.0,
@@ -313,7 +313,7 @@
                               "z": 0.15
                             },
                             "option": {
-                              "friction": 100.0
+                              "friction": 500.0
                             },
                             "transformation": {
                               "rotation": {
@@ -631,7 +631,7 @@
                               "z": 0.15
                             },
                             "option": {
-                              "friction": 100.0
+                              "friction": 500.0
                             },
                             "transformation": {
                               "rotation": {
@@ -949,7 +949,7 @@
                               "z": 0.15
                             },
                             "option": {
-                              "friction": 100.0
+                              "friction": 500.0
                             },
                             "transformation": {
                               "rotation": {
@@ -1265,7 +1265,7 @@
                               "z": 0.15
                             },
                             "option": {
-                              "friction": 100.0
+                              "friction": 500.0
                             },
                             "transformation": {
                               "rotation": {
