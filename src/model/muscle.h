@@ -12,13 +12,11 @@
 
 class Muscle {
 public:
-    Muscle(const std::string &name,
-           float attach_mass, glm::vec3 attach_scale,
-           Item &item_a, glm::vec3 pos_in_a,
-           Item &item_b, glm::vec3 pos_in_b,
-           float force, float max_speed);
+    Muscle(
+        const std::string &name, float attach_mass, glm::vec3 attach_scale, Item &item_a,
+        glm::vec3 pos_in_a, Item &item_b, glm::vec3 pos_in_b, float force, float max_speed);
 
-    void contract(float force);
+    void contract(float speed_factor);
 
     void release();
 
@@ -35,7 +33,6 @@ private:
     btSliderConstraint *muscle_slider_constraint;
     btPoint2PointConstraint *attach_a_constraint;
     btPoint2PointConstraint *attach_b_constraint;
-
 };
 
 class AbstractMuscularSystem {
@@ -51,7 +48,6 @@ public:
 
 private:
     std::vector<Muscle> muscles;
-
 };
 
-#endif //EVO_MOTION_MUSCLE_H
+#endif//EVO_MOTION_MUSCLE_H

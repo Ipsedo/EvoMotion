@@ -54,4 +54,4 @@ public:
     void to(torch::DeviceType device);
 };
 
-#endif //EVO_MOTION_ENVIRONMENT_H
+#endif//EVO_MOTION_ENVIRONMENT_H

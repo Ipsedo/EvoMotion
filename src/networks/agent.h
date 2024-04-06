@@ -28,4 +28,4 @@ public:
     virtual void set_eval(bool eval) = 0;
 };
 
-#endif //EVO_MOTION_AGENT_H
+#endif//EVO_MOTION_AGENT_H

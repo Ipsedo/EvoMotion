@@ -5,18 +5,17 @@
 #ifndef EVO_MOTION_SKELETON_H
 #define EVO_MOTION_SKELETON_H
 
-#include <vector>
 #include <btBulletDynamicsCommon.h>
 #include <map>
+#include <vector>
 
-#include "./item.h"
 #include "./converter.h"
+#include "./item.h"
 
 class AbstractMember;
 
 class AbstractConstraint {
 public:
-
     virtual btTypedConstraint *get_constraint() = 0;
 
     virtual std::shared_ptr<AbstractMember> get_child() = 0;
@@ -24,7 +23,6 @@ public:
 
 class AbstractMember {
 public:
-
     virtual Item get_item() = 0;
 
     virtual std::vector<std::shared_ptr<AbstractConstraint>> get_children() = 0;
@@ -57,8 +55,7 @@ class JsonMember : public AbstractMember {
 public:
     JsonMember(Item parent, const nlohmann::json &json_member);
 
-    JsonMember(const std::string &name, glm::mat4 model_matrix,
-               const nlohmann::json &json_member);
+    JsonMember(const std::string &name, glm::mat4 model_matrix, const nlohmann::json &json_member);
 
     Item get_item() override;
 
@@ -103,8 +100,8 @@ private:
 
 class JsonSkeleton : public Skeleton {
 public:
-    JsonSkeleton(const std::string &json_path,
-                          const std::string &root_name, glm::mat4 model_matrix);
+    JsonSkeleton(
+        const std::string &json_path, const std::string &root_name, glm::mat4 model_matrix);
 };
 
-#endif //EVO_MOTION_SKELETON_H
+#endif//EVO_MOTION_SKELETON_H

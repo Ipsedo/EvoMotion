@@ -37,4 +37,4 @@ protected:
     float process_value(float value) override;
 };
 
-#endif //EVO_MOTION_METRICS_H
+#endif//EVO_MOTION_METRICS_H

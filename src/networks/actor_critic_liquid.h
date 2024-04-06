@@ -9,18 +9,14 @@
 
 struct a2c_liquid_networks : abstract_a2c_networks {
     a2c_liquid_networks(
-        std::vector<int64_t> state_space,
-        std::vector<int64_t> action_space,
-        int hidden_size,
-        int unfolding_steps
-    );
+        std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size,
+        int unfolding_steps);
 
     void reset_x_t();
 
     a2c_response forward(const torch::Tensor &state) override;
 
-    torch::Tensor
-    compute_step(const torch::Tensor &x_t, const torch::Tensor &i_t);
+    torch::Tensor compute_step(const torch::Tensor &x_t, const torch::Tensor &i_t);
 
     int steps;
     int hidden_size;
@@ -42,14 +38,10 @@ struct a2c_liquid_networks : abstract_a2c_networks {
 class ActorCriticLiquid : public ActorCritic {
 public:
     ActorCriticLiquid(
-        int seed,
-        const std::vector<int64_t> &state_space,
-        const std::vector<int64_t> &action_space,
-        int hidden_size,
-        float lr
-    );
+        int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int hidden_size, float lr);
 
     void done(step step) override;
 };
 
-#endif //EVO_MOTION_ACTOR_CRITIC_LIQUID_H
+#endif//EVO_MOTION_ACTOR_CRITIC_LIQUID_H

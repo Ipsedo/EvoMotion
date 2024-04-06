@@ -5,8 +5,8 @@
 #ifndef EVO_MOTION_CARTPOLE_H
 #define EVO_MOTION_CARTPOLE_H
 
-#include <random>
 #include <btBulletDynamicsCommon.h>
+#include <random>
 
 #include "../model/environment.h"
 
@@ -63,7 +63,6 @@ private:
 
     float last_vel;
     float last_ang_vel;
-
 };
 
-#endif //EVO_MOTION_CARTPOLE_H
+#endif//EVO_MOTION_CARTPOLE_H

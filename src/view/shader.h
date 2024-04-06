@@ -11,4 +11,4 @@
 
 uint load_shader(GLenum type, const std::string &filename);
 
-#endif //EVO_MOTION_SHADER_H
+#endif//EVO_MOTION_SHADER_H

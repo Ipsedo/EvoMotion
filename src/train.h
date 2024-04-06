@@ -22,4 +22,4 @@ struct train_params {
 
 void train(int seed, bool cuda, const train_params &params);
 
-#endif //EVO_MOTION_TRAIN_H
+#endif//EVO_MOTION_TRAIN_H

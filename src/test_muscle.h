@@ -12,4 +12,4 @@ struct muscle_params {
 
 void test_muscle(muscle_params params);
 
-#endif //EVO_MOTION_TEST_MUSCLE_H
+#endif//EVO_MOTION_TEST_MUSCLE_H

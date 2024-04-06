@@ -28,6 +28,8 @@ public:
 private:
     Item item;
     glm::vec3 scale;
+    glm::vec3 last_lin_velocity;
+    glm::vec3 last_ang_velocity;
 };
 
-#endif //EVO_MOTION_STATE_H
+#endif//EVO_MOTION_STATE_H

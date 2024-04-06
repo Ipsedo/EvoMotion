@@ -7,8 +7,8 @@
 
 #include <nlohmann/json.hpp>
 
-#include <glm/glm.hpp>
 #include <btBulletDynamicsCommon.h>
+#include <glm/glm.hpp>
 
 
 /*
@@ -22,6 +22,10 @@ glm::mat4 json_transformation_to_model_matrix(nlohmann::json transformation);
 glm::vec3 json_vec3_to_glm_vec3(nlohmann::json vec3);
 
 btVector3 json_vec3_to_bt_vector3(nlohmann::json vec3);
+
+/*
+ * GLM <-> Bullet conversions
+ */
 
 btVector3 glm_to_bullet(glm::vec3 v);
 
@@ -39,4 +43,4 @@ glm::mat4 bullet_to_glm(const btTransform &m);
 
 glm::quat bullet_to_glm(btQuaternion m);
 
-#endif //EVO_MOTION_CONVERTER_H
+#endif//EVO_MOTION_CONVERTER_H

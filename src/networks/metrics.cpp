@@ -7,15 +7,11 @@
 #include "metrics.h"
 
 template<class R, class... I>
-Meter<R, I...>::Meter(std::optional<int> window_size) : window_size(
-    window_size), results() {
-
-}
+Meter<R, I...>::Meter(std::optional<int> window_size) : window_size(window_size), results() {}
 
 template<class R, class... I>
 void Meter<R, I...>::add(I... inputs) {
-    if (window_size.has_value() && results.size() >= window_size)
-        results.erase(results.begin());
+    if (window_size.has_value() && results.size() >= window_size) results.erase(results.begin());
 
     results.push_back(process_value(inputs...));
 }
@@ -25,9 +21,7 @@ void Meter<R, I...>::set_window_size(std::optional<int> new_window_size) {
     window_size = new_window_size;
 }
 
-LossMeter::LossMeter(std::optional<int> window_size) : Meter(window_size) {
-
-}
+LossMeter::LossMeter(std::optional<int> window_size) : Meter(window_size) {}
 
 
 float LossMeter::loss() {
@@ -35,6 +29,4 @@ float LossMeter::loss() {
     return sum / (float) results.size();
 }
 
-float LossMeter::process_value(float value) {
-    return value;
-}
+float LossMeter::process_value(float value) { return value; }

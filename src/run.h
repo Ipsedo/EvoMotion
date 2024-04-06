@@ -20,4 +20,4 @@ struct run_params {
 
 void infer(int seed, bool cuda, const run_params &params);
 
-#endif //EVO_MOTION_RUN_H
+#endif//EVO_MOTION_RUN_H

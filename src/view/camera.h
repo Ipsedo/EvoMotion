@@ -18,11 +18,7 @@ public:
 
 class StaticCamera : public Camera {
 public:
-    StaticCamera(
-        glm::vec3 pos,
-        glm::vec3 look,
-        glm::vec3 up
-    );
+    StaticCamera(glm::vec3 pos, glm::vec3 look, glm::vec3 up);
 
     glm::vec3 pos() override;
 
@@ -36,4 +32,4 @@ private:
     glm::vec3 up_vec;
 };
 
-#endif //EVO_MOTION_CAMERA_H
+#endif//EVO_MOTION_CAMERA_H
