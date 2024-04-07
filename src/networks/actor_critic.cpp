@@ -6,6 +6,7 @@
 
 #include <torch/torch.h>
 
+#include "./functions.h"
 #include "actor_critic.h"
 
 ActorCritic::ActorCritic(
@@ -21,7 +22,7 @@ ActorCritic::ActorCritic(
 
 torch::Tensor ActorCritic::act(step step) {
     auto response = networks->forward(step.state);
-    auto action = at::normal(response.mu, response.sigma);
+    auto action = truncated_normal(response.mu, response.sigma, -1.f, 1.f);
 
     rewards_buffer.push_back(step.reward);
     results_buffer.push_back(response);
