@@ -15,7 +15,7 @@ void test_muscle(muscle_params params) {
     auto env = std::make_shared<MuscleEnv>(1234);
 
     std::shared_ptr<Camera> camera = std::make_shared<StaticCamera>(
-        glm::vec3(1.f, 1.f, -1.f), glm::normalize(glm::vec3(1.f, 0.f, 1.f)),
+        glm::vec3(1.f, 1.f, -3.f), glm::normalize(glm::vec3(1.f, 0.f, 1.f)),
         glm::vec3(0.f, 1.f, 0.f));
 
     Renderer renderer("evo_motion", params.width, params.height, camera);
@@ -38,7 +38,7 @@ void test_muscle(muscle_params params) {
     step step = env->reset();
 
     while (!renderer.is_close()) {
-        step = env->do_step(torch::zeros(env->get_action_space()), 1.f / 60.f);
+        step = env->do_step(torch::ones(env->get_action_space()));
 
         std::map<std::string, glm::mat4> model_matrix;
 

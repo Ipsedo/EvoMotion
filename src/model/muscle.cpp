@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "./converter.h"
+#include "./helper.h"
 #include "./muscle.h"
 
 
@@ -48,34 +49,20 @@ Muscle::Muscle(
 
     muscle_slider_constraint->setLowerAngLimit(0);
     muscle_slider_constraint->setUpperAngLimit(0);
-    muscle_slider_constraint->setLowerLinLimit(0);
 
-    muscle_slider_constraint->setSoftnessDirLin(0);
-    muscle_slider_constraint->setSoftnessDirAng(0);
+    muscle_slider_constraint->setLowerLinLimit(0);
+    // TODO calculate max length or get it from json
+    float max_extension_muscle =
+        2.f * glm::length(
+                  bullet_to_glm(attach_a.get_body()->getCenterOfMassPosition()) -
+                  bullet_to_glm(attach_b.get_body()->getCenterOfMassPosition()));
+    muscle_slider_constraint->setUpperLinLimit(max_extension_muscle);
 
     attach_a_constraint = new btPoint2PointConstraint(
         *item_a.get_body(), *attach_a.get_body(), glm_to_bullet(pos_in_a), btVector3(0, 0, 0));
 
     attach_b_constraint = new btPoint2PointConstraint(
         *item_b.get_body(), *attach_b.get_body(), glm_to_bullet(pos_in_b), btVector3(0, 0, 0));
-
-    /*int solver_iteration_factor = 32;
-    attach_a_constraint->setOverrideNumSolverIterations(attach_a_constraint->getOverrideNumSolverIterations() * solver_iteration_factor);
-    attach_b_constraint->setOverrideNumSolverIterations(attach_b_constraint->getOverrideNumSolverIterations() * solver_iteration_factor);
-    muscle_slider_constraint->setOverrideNumSolverIterations(muscle_slider_constraint->getOverrideNumSolverIterations() * solver_iteration_factor);
-
-    for (int i = 0; i < 6; i++) {
-        attach_a_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 1e-6f, i);
-        attach_b_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 1e-6f, i);
-        muscle_slider_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 1e-6f, i);
-
-        attach_a_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1.f - 1e-6f, i);
-        attach_b_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1.f - 1e-6f, i);
-        muscle_slider_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1.f - 1e-6f, i);
-    }*/
-
-    attach_a_constraint->m_setting.m_tau = 1e-6f;
-    attach_a_constraint->m_setting.m_damping = 1.f;
 
     attach_a.get_body()->setCollisionFlags(
         attach_a.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);

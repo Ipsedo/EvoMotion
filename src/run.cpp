@@ -49,7 +49,7 @@ void infer(int seed, bool cuda, const run_params &params) {
 
     step step = env->reset();
     while (!renderer.is_close()) {
-        step = env->do_step(a2c.act(step), 1.f / 60.f);
+        step = env->do_step(a2c.act(step));
 
         std::map<std::string, glm::mat4> model_matrix;
 

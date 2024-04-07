@@ -77,6 +77,9 @@ JsonMember::JsonMember(
 
     if (option.contains("friction"))
         member.get_body()->setFriction(option["friction"].get<float>());
+    if (option.contains("ignore_collision") && option["ignore_collision"].get<bool>())
+        member.get_body()->setCollisionFlags(
+            member.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 }
 
 JsonMember::JsonMember(Item parent, const nlohmann::json &member)
