@@ -20,7 +20,7 @@ MuscleEnv::MuscleEnv(int seed)
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), controllers(), states(), curr_step(0),
       max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(30),
-      velocity_delta(0.25) {
+      velocity_delta(0.1) {
 
     base.get_body()->setFriction(200.f);
 
