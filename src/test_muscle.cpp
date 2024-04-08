@@ -38,7 +38,7 @@ void test_muscle(muscle_params params) {
     step step = env->reset();
 
     while (!renderer.is_close()) {
-        step = env->do_step(torch::ones(env->get_action_space()));
+        step = env->do_step(torch::zeros(env->get_action_space()));
 
         std::map<std::string, glm::mat4> model_matrix;
 

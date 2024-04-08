@@ -16,11 +16,11 @@ MuscleEnv::MuscleEnv(int seed)
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
           0.f),
-      skeleton_json_path("./resources/skeleton/spider_long_2.json"),
+      skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), controllers(), states(), curr_step(0),
-      max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(30),
-      velocity_delta(0.1) {
+      max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(60),
+      velocity_delta(0.2) {
 
     base.get_body()->setFriction(200.f);
 
@@ -73,8 +73,7 @@ step MuscleEnv::compute_step() {
     bool fail = nb_steps_without_moving >= max_steps_without_moving;
 
     float reward =
-        std::max(root.get_body()->getLinearVelocity().z(), 0.f) +
-        std::max(root.get_body()->getCenterOfMassPosition().z(), 0.f);
+        root.get_body()->getLinearVelocity().z() + root.get_body()->getCenterOfMassPosition().z();
 
     reward = win ? 2 * reward : fail ? -1 : reward;
 
@@ -84,7 +83,7 @@ step MuscleEnv::compute_step() {
 }
 
 void MuscleEnv::reset_engine() {
-    glm::vec3 root_pos(1.f, -0.3f, 2.f);
+    glm::vec3 root_pos(1.f, -0.2f, 2.f);
     float angle = float(M_PI) * rd_uni(rng) / 2.f - float(M_PI) / 4.f;
 
     // reset

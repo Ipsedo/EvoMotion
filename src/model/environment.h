@@ -5,8 +5,6 @@
 #ifndef EVO_MOTION_ENVIRONMENT_H
 #define EVO_MOTION_ENVIRONMENT_H
 
-#include <BulletDynamics/Featherstone/btMultiBodyConstraintSolver.h>
-#include <BulletDynamics/Featherstone/btMultiBodyDynamicsWorld.h>
 #include <vector>
 
 #include "../controller/controller.h"
@@ -25,8 +23,8 @@ protected:
     btDefaultCollisionConfiguration *m_collision_configuration;
     btCollisionDispatcher *m_dispatcher;
     btBroadphaseInterface *m_broad_phase;
-    btMultiBodyConstraintSolver *m_constraint_solver;
-    btMultiBodyDynamicsWorld *m_world;
+    btSequentialImpulseConstraintSolver *m_constraint_solver;
+    btDynamicsWorld *m_world;
 
     virtual step compute_step() = 0;
 

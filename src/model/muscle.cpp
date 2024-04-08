@@ -51,11 +51,10 @@ Muscle::Muscle(
     muscle_slider_constraint->setUpperAngLimit(0);
 
     muscle_slider_constraint->setLowerLinLimit(0);
-    // TODO calculate max length or get it from json
     float max_extension_muscle =
-        2.f * glm::length(
-                  bullet_to_glm(attach_a.get_body()->getCenterOfMassPosition()) -
-                  bullet_to_glm(attach_b.get_body()->getCenterOfMassPosition()));
+        2.f * glm::length(glm::vec3(
+                  attach_a.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1) -
+                  attach_b.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)));
     muscle_slider_constraint->setUpperLinLimit(max_extension_muscle);
 
     attach_a_constraint = new btPoint2PointConstraint(
@@ -68,6 +67,13 @@ Muscle::Muscle(
         attach_a.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     attach_b.get_body()->setCollisionFlags(
         attach_b.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+
+    attach_a_constraint->setOverrideNumSolverIterations(
+        attach_a_constraint->getOverrideNumSolverIterations() * 16);
+    attach_b_constraint->setOverrideNumSolverIterations(
+        attach_b_constraint->getOverrideNumSolverIterations() * 16);
+    muscle_slider_constraint->setOverrideNumSolverIterations(
+        muscle_slider_constraint->getOverrideNumSolverIterations() * 16);
 }
 
 void Muscle::contract(float speed_factor) {
