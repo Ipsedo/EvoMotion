@@ -44,6 +44,7 @@ Muscle::Muscle(
     muscle_slider_constraint = new btSliderConstraint(
         *attach_a.get_body(), *attach_b.get_body(), frame_in_attach_a, frame_in_attach_b, true);
 
+    muscle_slider_constraint->setPoweredLinMotor(true);
     muscle_slider_constraint->setMaxLinMotorForce(force);
     muscle_slider_constraint->setTargetLinMotorVelocity(0.f);
 
