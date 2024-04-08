@@ -68,22 +68,6 @@ Muscle::Muscle(
         attach_a.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     attach_b.get_body()->setCollisionFlags(
         attach_b.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-
-    attach_a_constraint->setParam(BT_CONSTRAINT_CFM, 0);
-    attach_b_constraint->setParam(BT_CONSTRAINT_CFM, 0);
-    muscle_slider_constraint->setParam(BT_CONSTRAINT_CFM, 0);
-
-    attach_a_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0);
-    attach_b_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0);
-    muscle_slider_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0);
-
-    attach_a_constraint->setParam(BT_CONSTRAINT_ERP, 1);
-    attach_b_constraint->setParam(BT_CONSTRAINT_ERP, 1);
-    muscle_slider_constraint->setParam(BT_CONSTRAINT_ERP, 1);
-
-    attach_a_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1);
-    attach_b_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1);
-    muscle_slider_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 1);
 }
 
 void Muscle::contract(float speed_factor) {

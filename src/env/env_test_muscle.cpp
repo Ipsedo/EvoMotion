@@ -83,7 +83,7 @@ step MuscleEnv::compute_step() {
 
 void MuscleEnv::reset_engine() {
     glm::vec3 root_pos(1.f, -0.3f, 2.f);
-    float angle = 2.f * float(M_PI) * rd_uni(rng);
+    float angle = float(M_PI) * rd_uni(rng) / 2.f - float(M_PI) / 4.f;
 
     // reset
     glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos) *

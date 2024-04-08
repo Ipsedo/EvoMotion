@@ -466,7 +466,7 @@
                                     "z": 0.115
                                   },
                                   "option": {
-                                    "friction": 500.0
+                                    "friction": 100.0
                                   },
                                   "transformation": {
                                     "rotation": {
@@ -940,7 +940,7 @@
                                     "z": 0.115
                                   },
                                   "option": {
-                                    "friction": 500.0
+                                    "friction": 100.0
                                   },
                                   "transformation": {
                                     "rotation": {
@@ -1414,7 +1414,7 @@
                                     "z": 0.115
                                   },
                                   "option": {
-                                    "friction": 500.0
+                                    "friction": 100.0
                                   },
                                   "transformation": {
                                     "rotation": {
@@ -1887,7 +1887,7 @@
                                     "z": 0.115
                                   },
                                   "option": {
-                                    "friction": 500.0
+                                    "friction": 100.0
                                   },
                                   "transformation": {
                                     "rotation": {
@@ -1947,8 +1947,8 @@
         "y": 0.0,
         "z": 0.15
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_A2",
@@ -1970,8 +1970,8 @@
         "y": -0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_A3",
@@ -1993,8 +1993,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_A4",
@@ -2016,8 +2016,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_B1",
@@ -2039,8 +2039,8 @@
         "y": 0.0,
         "z": 0.15
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_B2",
@@ -2062,8 +2062,8 @@
         "y": -0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_B3",
@@ -2085,8 +2085,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_B4",
@@ -2108,8 +2108,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_C1",
@@ -2131,8 +2131,8 @@
         "y": 0.0,
         "z": 0.15
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_C2",
@@ -2154,8 +2154,8 @@
         "y": -0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_C3",
@@ -2177,8 +2177,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_C4",
@@ -2200,8 +2200,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_D1",
@@ -2223,8 +2223,8 @@
         "y": 0.0,
         "z": 0.15
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_D2",
@@ -2246,8 +2246,8 @@
         "y": -0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_D3",
@@ -2269,8 +2269,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     },
     {
       "name": "muscle_D4",
@@ -2292,8 +2292,8 @@
         "y": 0.08,
         "z": 0.0
       },
-      "force": 300.0,
-      "speed": 16.0
+      "force": 80.0,
+      "speed": 4.0
     }
   ]
 }
