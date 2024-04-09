@@ -2,7 +2,9 @@
 // Created by samuel on 20/12/22.
 //
 
+#include <chrono>
 #include <random>
+#include <thread>
 
 #include "./env/builder.h"
 #include "./networks/actor_critic_liquid.h"
@@ -49,13 +51,20 @@ void infer(int seed, bool cuda, const run_params &params) {
 
     step step = env->reset();
     while (!renderer.is_close()) {
-        step = env->do_step(a2c.act(step), 1.f / 60.f);
+        auto before = std::chrono::system_clock::now();
+
+        step = env->do_step(a2c.act(step));
 
         std::map<std::string, glm::mat4> model_matrix;
 
         for (auto i: env->get_items()) model_matrix.insert({i.get_name(), i.model_matrix()});
 
         renderer.draw(model_matrix);
+
+        std::chrono::duration<double, std::milli> delta = std::chrono::system_clock::now() - before;
+
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(long(std::max(0., 1000. / 60. - delta.count()))));
 
         if (step.done) {
             step = env->reset();

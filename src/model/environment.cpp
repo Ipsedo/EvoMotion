@@ -3,6 +3,9 @@
 //
 
 #include "environment.h"
+#include "./constants.h"
+#include <BulletDynamics/Featherstone/btMultiBodyMLCPConstraintSolver.h>
+#include <BulletDynamics/MLCPSolvers/btDantzigSolver.h>
 
 Environment::Environment()
     : curr_device(torch::kCPU), m_collision_configuration(new btDefaultCollisionConfiguration()),
@@ -17,10 +20,10 @@ Environment::Environment()
 
 void Environment::add_item(Item item) { m_world->addRigidBody(item.get_body()); }
 
-step Environment::do_step(const torch::Tensor &action, float delta) {
+step Environment::do_step(const torch::Tensor &action) {
     for (const auto &c: get_controllers()) c->on_input(action);
 
-    m_world->stepSimulation(delta);
+    m_world->stepSimulation(DELTA_T_MODEL);
 
     return compute_step();
 }

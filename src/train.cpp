@@ -58,7 +58,7 @@ void train(int seed, bool cuda, const train_params &params) {
 
         for (int e = 0; e < params.nb_episodes; e++) {
 
-            while (!step.done) step = env->do_step(a2c.act(step), 1.f / 60.f);
+            while (!step.done) step = env->do_step(a2c.act(step));
 
             a2c.done(step);
             step = env->reset();
