@@ -33,7 +33,7 @@ An internet connexion is also required in order to download dependencies inside 
 This project requires multiple libraries.
 * physic engine stuff : Bullet
 * graphic stuff : OpenGL, GLM, GLEW, GLFW
-* reinforcement learning : LibTorch (put libtorch folder in `/opt/`, see cmake file)
+* reinforcement learning : LibTorch (put libtorch folder in `/opt/`, see cmake file) CXX 11 ABI (not pre-cxx 11 ABI)
 * utils stuff : [argparse](https://github.com/p-ranav/argparse), [indicators](https://github.com/p-ranav/indicators)
 
 ## References
