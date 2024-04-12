@@ -3,14 +3,17 @@
 //
 
 #include <chrono>
+#include <glm/glm.hpp>
 #include <random>
 #include <thread>
 
-#include "./env/builder.h"
-#include "./networks/actor_critic_liquid.h"
 #include "./run.h"
-#include "./view/renderer.h"
-#include "./view/specular.h"
+
+#include <evo_motion_model/env_builder.h>
+#include <evo_motion_networks/actor_critic_liquid.h>
+#include <evo_motion_view/camera.h>
+#include <evo_motion_view/renderer.h>
+#include <evo_motion_view/specular.h>
 
 void infer(int seed, bool cuda, const run_params &params) {
     EnvBuilder env_builder(seed, params.env_name);
@@ -53,7 +56,7 @@ void infer(int seed, bool cuda, const run_params &params) {
     while (!renderer.is_close()) {
         auto before = std::chrono::system_clock::now();
 
-        step = env->do_step(a2c.act(step));
+        step = env->do_step(a2c.act(step.state, step.reward));
 
         std::map<std::string, glm::mat4> model_matrix;
 

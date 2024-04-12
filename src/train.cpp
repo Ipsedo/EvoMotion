@@ -4,12 +4,12 @@
 
 #include <filesystem>
 
+#include <evo_motion_model/env_builder.h>
 #include <indicators/progress_bar.hpp>
 
-#include "./env/builder.h"
-#include "./networks/actor_critic_liquid.h"
-#include "./networks/metrics.h"
 #include "./train.h"
+#include <evo_motion_networks/actor_critic_liquid.h>
+#include <evo_motion_networks/metrics.h>
 
 void train(int seed, bool cuda, const train_params &params) {
 
@@ -58,9 +58,9 @@ void train(int seed, bool cuda, const train_params &params) {
 
         for (int e = 0; e < params.nb_episodes; e++) {
 
-            while (!step.done) step = env->do_step(a2c.act(step));
+            while (!step.done) step = env->do_step(a2c.act(step.state, step.reward));
 
-            a2c.done(step);
+            a2c.done(step.reward);
             step = env->reset();
 
             auto metrics = a2c.get_metrics();
