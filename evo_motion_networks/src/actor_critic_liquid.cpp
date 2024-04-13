@@ -14,7 +14,7 @@ a2c_liquid_networks::a2c_liquid_networks(
         "weight",
         torch::nn::Sequential(
             torch::nn::Linear(torch::nn::LinearOptions(state_space[0], hidden_size * 2)),
-            torch::nn::Mish(),
+            torch::nn::Mish(), torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
             torch::nn::Linear(torch::nn::LinearOptions(hidden_size * 2, hidden_size).bias(false))));
 
     recurrent_weight = register_module(
@@ -29,16 +29,19 @@ a2c_liquid_networks::a2c_liquid_networks(
     mu = register_module(
         "mu", torch::nn::Sequential(
                   torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+                  torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
                   torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
                      torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+                     torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
                      torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Softplus()));
 
     critic = register_module(
         "critic", torch::nn::Sequential(
                       torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+                      torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
                       torch::nn::Linear(hidden_size * 2, 1)));
 
     x_t = register_buffer("x_t", torch::mish(torch::randn({1, hidden_size})));

@@ -4,12 +4,13 @@
 
 #include <filesystem>
 
-#include <evo_motion_model/env_builder.h>
 #include <indicators/progress_bar.hpp>
 
-#include "./train.h"
+#include <evo_motion_model/env_builder.h>
 #include <evo_motion_networks/actor_critic_liquid.h>
 #include <evo_motion_networks/metrics.h>
+
+#include "./train.h"
 
 void train(int seed, bool cuda, const train_params &params) {
 
@@ -36,17 +37,17 @@ void train(int seed, bool cuda, const train_params &params) {
 
     step step = env->reset();
 
-    LossMeter actor_loss_meter(32);
-    LossMeter critic_loss_meter(32);
-
+    LossMeter actor_loss_meter("actor_loss", 32);
+    LossMeter critic_loss_meter("critic_loss", 32);
 
     for (int s = 0; s < params.nb_saves; s++) {
 
-        int pb_bar_length = 100;
-        int tick_every = ceil(float(params.nb_episodes) / float(pb_bar_length));
+        int p_bar_wanted_steps = 100;
+        int tick_every = ceil(float(params.nb_episodes) / float(p_bar_wanted_steps));
+        int p_bar_length = params.nb_episodes / tick_every;
 
         indicators::ProgressBar p_bar{
-            indicators::option::BarWidth(pb_bar_length),
+            indicators::option::BarWidth(p_bar_length),
             indicators::option::Start{"["},
             indicators::option::Fill{"="},
             indicators::option::Lead{">"},
@@ -75,8 +76,16 @@ void train(int seed, bool cuda, const train_params &params) {
 
             p_bar.set_option(indicators::option::PostfixText{p_bar_description});
 
-            if (e % tick_every == 0) p_bar.tick();
+            if (e % tick_every == 0) {
+                p_bar.tick();
+
+                //std::filesystem::path loss_save_path(params.output_path);
+                //actor_loss_meter.to_csv(loss_save_path);
+                //critic_loss_meter.to_csv(loss_save_path);
+            }
         }
+
+        std::cout << std::endl;
 
         // save agent
         auto save_folder_path =

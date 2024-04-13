@@ -3,10 +3,11 @@
 //
 
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
-#include "./shader.h"
+#include <shader.h>
 
 unsigned long get_file_length(std::ifstream &file) {
     if (!file.good()) return 0;
@@ -23,8 +24,8 @@ uint load_shader(GLenum type, const std::string &filename) {
     GLchar *shaderSource;
     unsigned long len;
 
-    std::ifstream file;
-    file.open(filename.c_str(), std::ios::in);
+    std::filesystem::path shader_source_path(SHADERS_SOURCE_PATH);
+    std::ifstream file(shader_source_path / filename, std::ios::in);
 
     len = get_file_length(file);
 

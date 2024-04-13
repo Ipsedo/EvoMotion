@@ -63,4 +63,3 @@ function(add_extra_folder source destination)
 endfunction()
 
 add_extra_folder("${CMAKE_CURRENT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources")
-add_extra_folder("${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders")
