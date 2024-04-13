@@ -41,8 +41,7 @@ void Meter<R, I...>::to_csv(const std::filesystem::path &output_directory) {
     }
 
     std::ofstream csv_file(csv_path.string());
-    csv_file << std::string(curr_step) + std::string(csv_sep) + loss_to_string(loss())
-             << std::endl;
+    csv_file << std::string(curr_step) + std::string(csv_sep) + loss_to_string(loss()) << std::endl;
     csv_file.close();
 }
 

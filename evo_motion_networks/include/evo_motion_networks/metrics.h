@@ -31,7 +31,7 @@ public:
 
     virtual void set_window_size(std::optional<int> new_window_size);
 
-    void to_csv(const std::filesystem::path& output_directory);
+    void to_csv(const std::filesystem::path &output_directory);
 
     virtual R loss();
 };

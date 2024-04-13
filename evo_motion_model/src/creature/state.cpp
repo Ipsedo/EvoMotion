@@ -26,8 +26,8 @@ torch::Tensor ItemState::get_state() {
     last_ang_velocity = bullet_to_glm(center_ang_velocity);
 
     return torch::tensor(
-        {center_pos.x(), center_pos.y(), center_pos.z(), front_vector.x, front_vector.y, front_vector.z,
-         center_lin_velocity.x(), center_lin_velocity.y(), center_lin_velocity.z(),
+        {center_pos.x(), center_pos.y(), center_pos.z(), front_vector.x, front_vector.y,
+         front_vector.z, center_lin_velocity.x(), center_lin_velocity.y(), center_lin_velocity.z(),
          center_ang_velocity.x(), center_ang_velocity.y(), center_ang_velocity.z(), lin_acc.x,
          lin_acc.y, lin_acc.z, ang_acc.x, ang_acc.y, ang_acc.z});
 }
