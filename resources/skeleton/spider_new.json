@@ -312,7 +312,7 @@
                               "z": 0.115
                             },
                             "option": {
-                              "friction": 500.0
+                              "friction": 1000.0
                             },
                             "transformation": {
                               "rotation": {
@@ -629,7 +629,7 @@
                               "z": 0.115
                             },
                             "option": {
-                              "friction": 500.0
+                              "friction": 1000.0
                             },
                             "transformation": {
                               "rotation": {
@@ -946,7 +946,7 @@
                               "z": 0.115
                             },
                             "option": {
-                              "friction": 500.0
+                              "friction": 1000.0
                             },
                             "transformation": {
                               "rotation": {
@@ -1262,7 +1262,7 @@
                               "z": 0.115
                             },
                             "option": {
-                              "friction": 500.0
+                              "friction": 1000.0
                             },
                             "transformation": {
                               "rotation": {
