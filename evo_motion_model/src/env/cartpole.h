@@ -5,10 +5,10 @@
 #ifndef EVO_MOTION_CARTPOLE_H
 #define EVO_MOTION_CARTPOLE_H
 
-#include <btBulletDynamicsCommon.h>
 #include <random>
 
-#include "evo_motion_model/environment.h"
+#include <btBulletDynamicsCommon.h>
+#include <evo_motion_model/environment.h>
 
 class CartPole : public Environment {
 public:

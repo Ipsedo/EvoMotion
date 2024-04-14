@@ -1,10 +1,14 @@
 # EvoMotion
+
 __author__ : Samuel Berrien
 
 ## Description
-The final goal of this project is to implement any kind of optimisation algorithm in order to teach creature to walk, run etc.
 
-We will first try to reproduce the results of the article [Flexible Muscle-Based Locomotion for Bipedal Creatures](https://www.goatstream.com/research/papers/SA2013/SA2013.pdf).
+The final goal of this project is to implement any kind of optimisation algorithm in order to teach creature to walk,
+run etc.
+
+We will first try to reproduce the results of the
+article [Flexible Muscle-Based Locomotion for Bipedal Creatures](https://www.goatstream.com/research/papers/SA2013/SA2013.pdf).
 
 ## Build and run
 
@@ -30,7 +34,9 @@ An internet connexion is also required in order to download dependencies inside 
    ```
 
 ## Requirements
+
 This project requires multiple libraries.
+
 * physic engine stuff : Bullet
 * graphic stuff : OpenGL, GLM, GLEW, GLFW
 * reinforcement learning : LibTorch CXX 11 ABI, not pre-cxx 11 ABI. Put `libtorch` folder in `/opt/`, (see cmake files)

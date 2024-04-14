@@ -64,3 +64,16 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 TabWidth: 4
 UseTab: Never
+
+# order / regroup include
+IncludeBlocks: Regroup
+IncludeCategories:
+  # Standard headers in <>
+  - Regex: '<[-\w\/-_]+>'
+    Priority: 1
+  # External headers in <> with extension or /
+  - Regex: '<[-\w\/-_]+[\.\/][-\w\/-_]+>'
+    Priority: 2
+  # Local headers in ""
+  - Regex: '"[-\w\/-_\.]*"'
+    Priority: 3

@@ -3,14 +3,15 @@
 //
 
 
-#include <btBulletDynamicsCommon.h>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <utility>
 
-#include "./converter.h"
+#include <btBulletDynamicsCommon.h>
 #include <evo_motion_model/item.h>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "./converter.h"
 
 Item::Item(
     std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix, glm::vec3 scale,

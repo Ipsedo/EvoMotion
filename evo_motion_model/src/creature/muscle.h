@@ -6,9 +6,9 @@
 #define EVO_MOTION_MUSCLE_H
 
 #include <btBulletDynamicsCommon.h>
+#include <evo_motion_model/item.h>
 
 #include "./skeleton.h"
-#include "evo_motion_model/item.h"
 
 class Muscle {
 public:

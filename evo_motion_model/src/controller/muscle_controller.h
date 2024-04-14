@@ -5,8 +5,9 @@
 #ifndef EVO_MOTION_MUSCLE_CONTROLLER_H
 #define EVO_MOTION_MUSCLE_CONTROLLER_H
 
+#include <evo_motion_model/controller.h>
+
 #include "../creature/muscle.h"
-#include "evo_motion_model/controller.h"
 
 class MuscleController : public Controller {
 public:

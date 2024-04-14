@@ -2,15 +2,14 @@
 // Created by samuel on 20/12/22.
 //
 
-#include <filesystem>
+#include "./train.h"
 
-#include <indicators/progress_bar.hpp>
+#include <filesystem>
 
 #include <evo_motion_model/env_builder.h>
 #include <evo_motion_networks/actor_critic_liquid.h>
 #include <evo_motion_networks/metrics.h>
-
-#include "./train.h"
+#include <indicators/progress_bar.hpp>
 
 void train(int seed, bool cuda, const train_params &params) {
 

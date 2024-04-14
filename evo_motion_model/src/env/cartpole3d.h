@@ -7,7 +7,7 @@
 
 #include <random>
 
-#include "evo_motion_model/environment.h"
+#include <evo_motion_model/environment.h>
 
 class CartPole3d : public Environment {
 public:

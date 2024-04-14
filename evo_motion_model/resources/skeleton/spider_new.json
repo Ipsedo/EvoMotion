@@ -1437,7 +1437,6 @@
       "force": 200.0,
       "speed": 2.0
     },
-
     {
       "name": "muscle_C1",
       "item_a": "body",
@@ -1507,7 +1506,6 @@
       "force": 200.0,
       "speed": 2.0
     },
-
     {
       "name": "muscle_D1",
       "item_a": "body",

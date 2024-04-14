@@ -2,19 +2,18 @@
 // Created by samuel on 28/01/24.
 //
 
+#include "./test_muscle.h"
+
 #include <iostream>
 #include <memory>
 #include <random>
-
-#include <glm/glm.hpp>
-#include <torch/torch.h>
-
-#include "./test_muscle.h"
 
 #include <evo_motion_model/env_builder.h>
 #include <evo_motion_view/camera.h>
 #include <evo_motion_view/renderer.h>
 #include <evo_motion_view/specular.h>
+#include <glm/glm.hpp>
+#include <torch/torch.h>
 
 void test_muscle(muscle_params params) {
 

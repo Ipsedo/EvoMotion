@@ -1,12 +1,11 @@
 //
 // Created by samuel on 17/12/22.
 //
-#include <evo_motion_view/renderer.h>
-
-#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
-
 #include <utility>
+
+#include <evo_motion_view/renderer.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 
 void GLAPIENTRY message_callback(

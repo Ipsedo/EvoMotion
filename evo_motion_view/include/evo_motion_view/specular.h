@@ -5,8 +5,9 @@
 #ifndef EVO_MOTION_SPECULAR_H
 #define EVO_MOTION_SPECULAR_H
 
-#include <glm/glm.hpp>
 #include <vector>
+
+#include <glm/glm.hpp>
 
 #include "./constants.h"
 #include "./drawable.h"

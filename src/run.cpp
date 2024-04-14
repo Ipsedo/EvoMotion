@@ -2,8 +2,9 @@
 // Created by samuel on 20/12/22.
 //
 
+#include "./run.h"
+
 #include <chrono>
-#include <glm/glm.hpp>
 #include <random>
 #include <thread>
 
@@ -12,8 +13,7 @@
 #include <evo_motion_view/camera.h>
 #include <evo_motion_view/renderer.h>
 #include <evo_motion_view/specular.h>
-
-#include "./run.h"
+#include <glm/glm.hpp>
 
 void infer(int seed, bool cuda, const run_params &params) {
     EnvBuilder env_builder(seed, params.env_name);
