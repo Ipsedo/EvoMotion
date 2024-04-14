@@ -9,15 +9,14 @@
 
 #include <glm/glm.hpp>
 
-#include "./constants.h"
 #include "./drawable.h"
 #include "./program.h"
 
 class OBjSpecular : public Drawable {
 private:
-    static const int POSITION_SIZE = 3;
-    static const int NORMAL_SIZE = 3;
-    static const int STRIDE = (POSITION_SIZE + NORMAL_SIZE) * BYTES_PER_FLOAT;
+    const int position_size;
+    const int normal_size;
+    const int stride;
 
     Program program;
 

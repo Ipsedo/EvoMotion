@@ -22,8 +22,8 @@ torch::Tensor truncated_normal(
 
     auto alpha = (min_value - mu) / sigma;
     auto beta = (max_value - mu) / sigma;
-    auto phi_a = (1 + torch::erf(alpha / std::sqrt(2.f))) / 2.f;
-    auto phi_b = (1 + torch::erf(beta / std::sqrt(2.f))) / 2.;
+    auto phi_a = truncated_normal_cdf(alpha);
+    auto phi_b = truncated_normal_cdf(beta);
 
     return mu + sigma * torch::erfinv(2 * u * (phi_b - phi_a) + phi_a * 2.f - 1.f) * std::sqrt(2.f);
 }

@@ -7,4 +7,7 @@
 
 #define BYTES_PER_FLOAT 4
 
+// defined by CMake configure_file
+#cmakedefine SHADERS_SOURCE_PATH "@SHADERS_SOURCE_PATH@"
+
 #endif//EVO_MOTION_CONSTANTS_H
