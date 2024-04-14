@@ -2,9 +2,10 @@
 // Created by samuel on 15/12/22.
 //
 
+#include <utility>
+
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <utility>
 
 #include <evo_motion_view/constants.h>
 #include <evo_motion_view/program.h>

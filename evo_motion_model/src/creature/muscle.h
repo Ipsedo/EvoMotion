@@ -7,8 +7,9 @@
 
 #include <btBulletDynamicsCommon.h>
 
+#include <evo_motion_model/item.h>
+
 #include "./skeleton.h"
-#include "evo_motion_model/item.h"
 
 class Muscle {
 public:

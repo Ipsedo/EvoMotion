@@ -5,11 +5,12 @@
 #ifndef EVO_MOTION_ENV_TEST_MUSCLE_H
 #define EVO_MOTION_ENV_TEST_MUSCLE_H
 
-#include "../creature/muscle.h"
-#include "../creature/skeleton.h"
-#include "evo_motion_model/environment.h"
 #include <random>
 
+#include <evo_motion_model/environment.h>
+
+#include "../creature/muscle.h"
+#include "../creature/skeleton.h"
 #include "../creature/state.h"
 
 class MuscleEnv : public Environment {

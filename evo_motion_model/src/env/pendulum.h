@@ -5,7 +5,7 @@
 #ifndef EVO_MOTION_PENDULUM_H
 #define EVO_MOTION_PENDULUM_H
 
-#include "evo_motion_model/environment.h"
+#include <evo_motion_model/environment.h>
 
 class Pendulum : public Environment {
 public:

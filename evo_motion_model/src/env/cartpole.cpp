@@ -3,8 +3,10 @@
 //
 
 #include "cartpole.h"
+
+#include <evo_motion_model/item.h>
+
 #include "../controller/slider.h"
-#include "evo_motion_model/item.h"
 
 CartPole::CartPole(int seed)
     : Environment(), slider_speed(16.f), slider_force(64.f), chariot_push_force(2.f),

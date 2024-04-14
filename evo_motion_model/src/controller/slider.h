@@ -8,7 +8,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <torch/torch.h>
 
-#include "evo_motion_model/controller.h"
+#include <evo_motion_model/controller.h>
 
 class SliderController : public Controller {
 public:

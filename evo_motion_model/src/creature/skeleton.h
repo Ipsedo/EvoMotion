@@ -5,12 +5,14 @@
 #ifndef EVO_MOTION_SKELETON_H
 #define EVO_MOTION_SKELETON_H
 
-#include <btBulletDynamicsCommon.h>
 #include <map>
 #include <vector>
 
+#include <btBulletDynamicsCommon.h>
+
+#include <evo_motion_model/item.h>
+
 #include "../converter.h"
-#include "evo_motion_model/item.h"
 
 class AbstractMember;
 

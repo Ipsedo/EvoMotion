@@ -2,9 +2,11 @@
 // Created by samuel on 18/12/22.
 //
 
-#include "./constants.h"
-#include <evo_motion_model/environment.h>
 #include <torch/torch.h>
+
+#include <evo_motion_model/environment.h>
+
+#include "./constants.h"
 
 Environment::Environment()
     : curr_device(torch::kCPU), m_collision_configuration(new btDefaultCollisionConfiguration()),

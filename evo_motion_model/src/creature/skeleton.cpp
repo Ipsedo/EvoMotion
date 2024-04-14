@@ -2,15 +2,16 @@
 // Created by samuel on 01/04/24.
 //
 
+#include "./skeleton.h"
+
 #include <fstream>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <queue>
 #include <tuple>
 #include <utility>
 
-#include "./skeleton.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Skeleton::Skeleton(const std::string &root_name, const std::shared_ptr<AbstractMember> &root_member)
     : root_name(root_name), constraints(), items_map() {

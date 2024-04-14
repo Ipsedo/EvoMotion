@@ -2,9 +2,9 @@
 // Created by samuel on 07/04/24.
 //
 
-#include <cmath>
-
 #include "./functions.h"
+
+#include <cmath>
 
 
 torch::Tensor truncated_normal_pdf(const torch::Tensor &xi) {

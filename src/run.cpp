@@ -2,18 +2,19 @@
 // Created by samuel on 20/12/22.
 //
 
+#include "./run.h"
+
 #include <chrono>
-#include <glm/glm.hpp>
 #include <random>
 #include <thread>
+
+#include <glm/glm.hpp>
 
 #include <evo_motion_model/env_builder.h>
 #include <evo_motion_networks/actor_critic_liquid.h>
 #include <evo_motion_view/camera.h>
 #include <evo_motion_view/renderer.h>
 #include <evo_motion_view/specular.h>
-
-#include "./run.h"
 
 void infer(int seed, bool cuda, const run_params &params) {
     EnvBuilder env_builder(seed, params.env_name);

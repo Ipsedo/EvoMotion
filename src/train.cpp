@@ -2,6 +2,8 @@
 // Created by samuel on 20/12/22.
 //
 
+#include "./train.h"
+
 #include <filesystem>
 
 #include <indicators/progress_bar.hpp>
@@ -9,8 +11,6 @@
 #include <evo_motion_model/env_builder.h>
 #include <evo_motion_networks/actor_critic_liquid.h>
 #include <evo_motion_networks/metrics.h>
-
-#include "./train.h"
 
 void train(int seed, bool cuda, const train_params &params) {
 
@@ -45,7 +45,7 @@ void train(int seed, bool cuda, const train_params &params) {
         indicators::ProgressBar p_bar{
             indicators::option::MinProgress{0},
             indicators::option::MaxProgress{params.nb_episodes},
-            indicators::option::BarWidth(100),
+            indicators::option::BarWidth{100},
             indicators::option::Start{"["},
             indicators::option::Fill{"="},
             indicators::option::Lead{">"},

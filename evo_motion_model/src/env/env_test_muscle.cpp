@@ -3,9 +3,10 @@
 //
 
 #include "./env_test_muscle.h"
-#include "../controller/muscle_controller.h"
 
 #include <chrono>
+
+#include "../controller/muscle_controller.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 

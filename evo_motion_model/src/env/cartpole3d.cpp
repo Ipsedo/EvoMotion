@@ -3,6 +3,7 @@
 //
 
 #include "cartpole3d.h"
+
 #include "../controller/slider.h"
 
 CartPole3d::CartPole3d(int seed)

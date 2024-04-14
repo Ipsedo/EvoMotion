@@ -5,9 +5,10 @@
 #ifndef EVO_MOTION_ENVIRONMENT_H
 #define EVO_MOTION_ENVIRONMENT_H
 
+#include <vector>
+
 #include <btBulletDynamicsCommon.h>
 #include <torch/torch.h>
-#include <vector>
 
 #include "./controller.h"
 #include "./item.h"

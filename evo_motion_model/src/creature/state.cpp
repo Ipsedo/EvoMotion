@@ -3,6 +3,7 @@
 //
 
 #include "./state.h"
+
 #include "../converter.h"
 
 ItemState::ItemState(const Item &item)

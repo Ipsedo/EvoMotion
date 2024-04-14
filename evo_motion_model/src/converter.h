@@ -5,10 +5,9 @@
 #ifndef EVO_MOTION_CONVERTER_H
 #define EVO_MOTION_CONVERTER_H
 
-#include "nlohmann/json.hpp"
-
 #include <btBulletDynamicsCommon.h>
 #include <glm/glm.hpp>
+#include <nlohmann/json.hpp>
 
 
 /*

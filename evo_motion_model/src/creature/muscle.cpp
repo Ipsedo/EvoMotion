@@ -2,14 +2,16 @@
 // Created by samuel on 30/12/23.
 //
 
+#include <memory>
+
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <memory>
 
 #define GLM_ENABLE_EXPERIMENTAL
 
-#include <glm/gtx/euler_angles.hpp>
 #include <iostream>
+
+#include <glm/gtx/euler_angles.hpp>
 
 #include "../converter.h"
 #include "./muscle.h"
