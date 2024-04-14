@@ -5,9 +5,6 @@
 #ifndef EVO_MOTION_SHADER_H
 #define EVO_MOTION_SHADER_H
 
-// defined by CMake configure_file
-#cmakedefine SHADERS_SOURCE_PATH "@SHADERS_SOURCE_PATH@"
-
 #include <string>
 
 #include <GL/glew.h>

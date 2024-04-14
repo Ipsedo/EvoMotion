@@ -4,7 +4,7 @@ project(evo_motion_view)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SHADERS_SOURCE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/shader.h.in" "${CMAKE_CURRENT_BINARY_DIR}/shader.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/constants.h.in" "${CMAKE_CURRENT_BINARY_DIR}/constants.h" @ONLY)
 
 set(EVO_MOTION_VIEW_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE INTERNAL "")
 include_directories(${EVO_MOTION_VIEW_INCLUDE_DIRS})

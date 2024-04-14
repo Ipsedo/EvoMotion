@@ -2,14 +2,16 @@
 // Created by samuel on 17/12/22.
 //
 
-#include <evo_motion_view/constants.h>
 #include <evo_motion_view/specular.h>
+
+#include "./constants.h"
 
 OBjSpecular::OBjSpecular(
     const std::vector<std::tuple<float, float, float>> &vertices,
     const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color,
     glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess)
-    : ambient_color(ambient_color), diffuse_color(diffuse_color), specular_color(specular_color),
+    : position_size(3), normal_size(3), stride((position_size + normal_size) * BYTES_PER_FLOAT),
+      ambient_color(ambient_color), diffuse_color(diffuse_color), specular_color(specular_color),
       nb_vertices(int(vertices.size())), shininess(shininess) {
 
     std::vector<float> vbo_data;
@@ -45,11 +47,11 @@ void OBjSpecular::draw(
     glm::vec3 camera_pos) {
     program.use();
 
-    program.attrib("a_position", "vertices_normals_buffer", POSITION_SIZE, STRIDE, 0);
+    program.attrib("a_position", "vertices_normals_buffer", position_size, stride, 0);
 
     program.attrib(
-        "a_normal", "vertices_normals_buffer", NORMAL_SIZE, STRIDE,
-        POSITION_SIZE * BYTES_PER_FLOAT);
+        "a_normal", "vertices_normals_buffer", normal_size, stride,
+        position_size * BYTES_PER_FLOAT);
 
     program.uniform_mat4("u_mvp_matrix", mvp_matrix);
     program.uniform_mat4("u_mv_matrix", mv_matrix);

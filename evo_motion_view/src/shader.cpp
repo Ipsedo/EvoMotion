@@ -9,6 +9,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "./constants.h"
+
 unsigned long get_file_length(std::ifstream &file) {
     if (!file.good()) return 0;
 
