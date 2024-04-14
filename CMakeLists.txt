@@ -9,11 +9,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_view")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_networks")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_model")
 
-# Torch
-list(APPEND CMAKE_PREFIX_PATH "/opt/libtorch/share/cmake")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
-find_package(Torch REQUIRED)
-
 # FetchContent -> get libraries from git
 include(FetchContent)
 
@@ -47,7 +42,6 @@ target_link_libraries(
         evo_motion
         argparse
         indicators
-        ${TORCH_LIBRARIES}
         evo_motion_view
         evo_motion_model
         evo_motion_networks

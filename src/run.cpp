@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 
 #include <evo_motion_model/env_builder.h>
-#include <evo_motion_networks/actor_critic_liquid.h>
+#include <evo_motion_networks/agent_builder.h>
 #include <evo_motion_view/camera.h>
 #include <evo_motion_view/renderer.h>
 #include <evo_motion_view/specular.h>
@@ -41,23 +41,25 @@ void infer(int seed, bool cuda, const run_params &params) {
         renderer.add_drawable(i.get_name(), specular);
     }
 
-    ActorCriticLiquid a2c(
-        0, env->get_state_space(), env->get_action_space(), params.hidden_size, 1e-4f);
+    AgentBuilder agent_builder(
+        params.agent_name, 0, env->get_state_space(), env->get_action_space(), params.hidden_size, 1e-4f);
 
-    a2c.load(params.input_folder);
+    std::shared_ptr<Agent> agent = agent_builder.get();
+
+    agent->load(params.input_folder);
 
     if (cuda) {
-        a2c.to(torch::kCUDA);
+        agent->to(torch::kCUDA);
         env->to(torch::kCUDA);
     }
 
-    a2c.set_eval(true);
+    agent->set_eval(true);
 
     step step = env->reset();
     while (!renderer.is_close()) {
         auto before = std::chrono::system_clock::now();
 
-        step = env->do_step(a2c.act(step.state, step.reward));
+        step = env->do_step(agent->act(step.state, step.reward));
 
         std::map<std::string, glm::mat4> model_matrix;
 

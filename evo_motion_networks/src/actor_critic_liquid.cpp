@@ -2,7 +2,7 @@
 // Created by samuel on 29/03/24.
 //
 
-#include <evo_motion_networks/actor_critic_liquid.h>
+#include "./actor_critic_liquid.h"
 
 a2c_liquid_networks::a2c_liquid_networks(
     std::vector<int64_t> state_space, std::vector<int64_t> action_space, int neuron_number,
