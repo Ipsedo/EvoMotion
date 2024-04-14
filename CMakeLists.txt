@@ -52,14 +52,3 @@ target_link_libraries(
         evo_motion_model
         evo_motion_networks
 )
-
-function(add_extra_folder source destination)
-    add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
-            DEPENDS ${destination}
-            COMMENT "symbolic link resources folder from ${source} => ${destination}"
-    )
-endfunction()
-
-add_extra_folder("${CMAKE_CURRENT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources")

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(evo_motion_view)
 set(CMAKE_CXX_STANDARD 17)
 
-set(SHADERS_SOURCE_PATH "${CMAKE_BINARY_DIR}")
+set(SHADERS_SOURCE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/shader.h.in" "${CMAKE_CURRENT_BINARY_DIR}/shader.h" @ONLY)
 
 set(EVO_MOTION_VIEW_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE INTERNAL "")
@@ -46,14 +46,7 @@ target_link_libraries(
 
 set(EVO_MOTION_VIEW_LIBRARIES evo_motion_view PARENT_SCOPE)
 
-function(add_extra_folder source destination)
-    add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${source} ${destination}
-            DEPENDS ${destination}
-            COMMENT "symbolic link resources folder from ${source} => ${destination}"
-    )
-endfunction()
-
-add_extra_folder("${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_BINARY_DIR}/shaders")
+add_custom_target(copy-shaders-files ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders"
+        DEPENDS evo_motion_view)
 

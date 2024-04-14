@@ -4,14 +4,23 @@
 
 #include "./env_test_muscle.h"
 #include "../controller/muscle_controller.h"
-#include "../creature/muscle.h"
-#include "../creature/skeleton.h"
+
+#include <chrono>
+
+#define GLM_ENABLE_EXPERIMENTAL
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
+
+int64_t get_time_millis() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+               std::chrono::system_clock::now().time_since_epoch())
+        .count();
+}
 
 MuscleEnv::MuscleEnv(int seed)
-    : Environment(), rng(seed), rd_uni(0.f, 1.f),
+    : Environment(), rng(get_time_millis()), rd_uni(0.f, 1.f),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
@@ -19,7 +28,7 @@ MuscleEnv::MuscleEnv(int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), controllers(), states(), curr_step(0),
-      max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(60),
+      max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(60 * 2),
       velocity_delta(0.2) {
 
     base.get_body()->setFriction(100.f);
@@ -81,12 +90,18 @@ step MuscleEnv::compute_step() {
 }
 
 void MuscleEnv::reset_engine() {
-    glm::vec3 root_pos(1.f, -0.12f, 2.f);
-    float angle = float(M_PI) * rd_uni(rng) / 2.f - float(M_PI) / 4.f;
+    rng = std::mt19937(get_time_millis());
 
-    // reset
+    // reset model transform
+    glm::vec3 root_pos(1.f, 0.f, 2.f);
+
+    float angle_limit = float(M_PI) / 6.f;
+
+    float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
+    float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
+    float angle_pitch = rd_uni(rng) * angle_limit - angle_limit / 2.f;
     glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos) *
-                             glm::rotate(glm::mat4(1.f), angle, glm::vec3(0, 1, 0));
+                             glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
 
     for (auto item: skeleton.get_items()) {
         m_world->removeRigidBody(item.get_body());

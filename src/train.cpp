@@ -42,12 +42,10 @@ void train(int seed, bool cuda, const train_params &params) {
 
     for (int s = 0; s < params.nb_saves; s++) {
 
-        int p_bar_wanted_steps = 100;
-        int tick_every = ceil(float(params.nb_episodes) / float(p_bar_wanted_steps));
-        int p_bar_length = params.nb_episodes / tick_every;
-
         indicators::ProgressBar p_bar{
-            indicators::option::BarWidth(p_bar_length),
+            indicators::option::MinProgress{0},
+            indicators::option::MaxProgress{params.nb_episodes},
+            indicators::option::BarWidth(100),
             indicators::option::Start{"["},
             indicators::option::Fill{"="},
             indicators::option::Lead{">"},
@@ -76,16 +74,8 @@ void train(int seed, bool cuda, const train_params &params) {
 
             p_bar.set_option(indicators::option::PostfixText{p_bar_description});
 
-            if (e % tick_every == 0) {
-                p_bar.tick();
-
-                //std::filesystem::path loss_save_path(params.output_path);
-                //actor_loss_meter.to_csv(loss_save_path);
-                //critic_loss_meter.to_csv(loss_save_path);
-            }
+            p_bar.tick();
         }
-
-        std::cout << std::endl;
 
         // save agent
         auto save_folder_path =

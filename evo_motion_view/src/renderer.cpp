@@ -92,7 +92,7 @@ void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
     glm::mat4 proj_matrix = glm::frustum(
         -1.f, 1.f, -float(height) / float(width), float(height) / float(width), 1.f, 200.f);
 
-    for (auto [name, drawable]: drawables) {
+    for (const auto &[name, drawable]: drawables) {
         glm::mat4 m_matrix = model_matrix[name];
 
         auto mv_matrix = view_matrix * m_matrix;
