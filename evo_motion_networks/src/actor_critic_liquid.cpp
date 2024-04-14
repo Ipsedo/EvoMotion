@@ -14,6 +14,7 @@ a2c_liquid_networks::a2c_liquid_networks(
         "weight",
         torch::nn::Sequential(
             torch::nn::Linear(torch::nn::LinearOptions(state_space[0], hidden_size * 2)),
+            torch::nn::Mish(),
             torch::nn::Linear(torch::nn::LinearOptions(hidden_size * 2, hidden_size).bias(false))));
 
     recurrent_weight = register_module(
