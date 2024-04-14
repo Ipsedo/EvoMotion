@@ -66,14 +66,18 @@ TabWidth: 4
 UseTab: Never
 
 # order / regroup include
+SortIncludes: CaseInsensitive
 IncludeBlocks: Regroup
 IncludeCategories:
-  # Standard headers in <>
-  - Regex: '<[-\w\/-_]+>'
-    Priority: 1
+  # Local headers in ""
+  - Regex: '"[-\w\/-_\.]*"'
+    Priority: 4
+  # Headers in <> from specific external libraries.
+  - Regex: '<evo_motion_.+'
+    Priority: 3
   # External headers in <> with extension or /
   - Regex: '<[-\w\/-_]+[\.\/][-\w\/-_]+>'
     Priority: 2
-  # Local headers in ""
-  - Regex: '"[-\w\/-_\.]*"'
-    Priority: 3
+  # Standard headers in <>
+  - Regex: '<[-\w\/-_]+>'
+    Priority: 1

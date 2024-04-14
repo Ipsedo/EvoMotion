@@ -8,6 +8,7 @@
 #include <random>
 
 #include <btBulletDynamicsCommon.h>
+
 #include <evo_motion_model/environment.h>
 
 class CartPole : public Environment {

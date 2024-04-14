@@ -2,8 +2,9 @@
 // Created by samuel on 18/12/22.
 //
 
-#include <evo_motion_model/environment.h>
 #include <torch/torch.h>
+
+#include <evo_motion_model/environment.h>
 
 #include "./constants.h"
 

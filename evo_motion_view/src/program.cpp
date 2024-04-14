@@ -5,9 +5,10 @@
 #include <utility>
 
 #include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <evo_motion_view/constants.h>
 #include <evo_motion_view/program.h>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "./shader.h"
 

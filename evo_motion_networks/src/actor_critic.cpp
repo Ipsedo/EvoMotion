@@ -4,8 +4,9 @@
 
 #include <filesystem>
 
-#include <evo_motion_networks/actor_critic.h>
 #include <torch/torch.h>
+
+#include <evo_motion_networks/actor_critic.h>
 
 #include "./functions.h"
 

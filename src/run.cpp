@@ -8,12 +8,13 @@
 #include <random>
 #include <thread>
 
+#include <glm/glm.hpp>
+
 #include <evo_motion_model/env_builder.h>
 #include <evo_motion_networks/actor_critic_liquid.h>
 #include <evo_motion_view/camera.h>
 #include <evo_motion_view/renderer.h>
 #include <evo_motion_view/specular.h>
-#include <glm/glm.hpp>
 
 void infer(int seed, bool cuda, const run_params &params) {
     EnvBuilder env_builder(seed, params.env_name);

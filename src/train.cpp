@@ -6,10 +6,11 @@
 
 #include <filesystem>
 
+#include <indicators/progress_bar.hpp>
+
 #include <evo_motion_model/env_builder.h>
 #include <evo_motion_networks/actor_critic_liquid.h>
 #include <evo_motion_networks/metrics.h>
-#include <indicators/progress_bar.hpp>
 
 void train(int seed, bool cuda, const train_params &params) {
 

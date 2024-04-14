@@ -6,8 +6,9 @@
 #ifndef EVO_MOTION_STATE_H
 #define EVO_MOTION_STATE_H
 
-#include <evo_motion_model/item.h>
 #include <torch/torch.h>
+
+#include <evo_motion_model/item.h>
 
 class State {
 public:

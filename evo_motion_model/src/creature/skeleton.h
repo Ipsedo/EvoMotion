@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <btBulletDynamicsCommon.h>
+
 #include <evo_motion_model/item.h>
 
 #include "../converter.h"

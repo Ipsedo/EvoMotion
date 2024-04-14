@@ -7,9 +7,10 @@
 #include <utility>
 
 #include <btBulletDynamicsCommon.h>
-#include <evo_motion_model/item.h>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <evo_motion_model/item.h>
 
 #include "./converter.h"
 

@@ -4,8 +4,9 @@
 #include <iostream>
 #include <utility>
 
-#include <evo_motion_view/renderer.h>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <evo_motion_view/renderer.h>
 
 
 void GLAPIENTRY message_callback(
