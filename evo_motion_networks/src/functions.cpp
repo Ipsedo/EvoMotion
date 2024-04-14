@@ -6,7 +6,6 @@
 
 #include <cmath>
 
-
 torch::Tensor truncated_normal_pdf(const torch::Tensor &xi) {
     return torch::exp(-xi / 2.f) / sqrt(2.f * M_PI);
 }
@@ -14,7 +13,6 @@ torch::Tensor truncated_normal_pdf(const torch::Tensor &xi) {
 torch::Tensor truncated_normal_cdf(const torch::Tensor &x) {
     return (1.f + torch::erf(x / std::sqrt(2.f))) / 2.f;
 }
-
 
 torch::Tensor truncated_normal(
     const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value) {

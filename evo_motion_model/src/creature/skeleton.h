@@ -30,7 +30,6 @@ public:
     virtual std::vector<std::shared_ptr<AbstractConstraint>> get_children() = 0;
 };
 
-
 class Skeleton {
 public:
     Skeleton(const std::string &root_name, const std::shared_ptr<AbstractMember> &root_member);
@@ -80,7 +79,6 @@ public:
 
     std::shared_ptr<AbstractMember> get_child() override;
 
-
 private:
     btHingeConstraint *hinge_constraint;
     std::shared_ptr<JsonMember> child;
@@ -98,7 +96,6 @@ private:
     btFixedConstraint *fixed_constraint;
     std::shared_ptr<JsonMember> child;
 };
-
 
 class JsonSkeleton : public Skeleton {
 public:
