@@ -9,6 +9,7 @@
 
 struct run_params {
     std::string env_name;
+    std::string agent_name;
 
     std::string input_folder;
 
@@ -20,4 +21,4 @@ struct run_params {
 
 void infer(int seed, bool cuda, const run_params &params);
 
-#endif //EVO_MOTION_RUN_H
+#endif//EVO_MOTION_RUN_H

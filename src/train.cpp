@@ -2,14 +2,15 @@
 // Created by samuel on 20/12/22.
 //
 
+#include "./train.h"
+
 #include <filesystem>
 
 #include <indicators/progress_bar.hpp>
 
-#include "./networks/metrics.h"
-#include "./env/builder.h"
-#include "./networks/actor_critic.h"
-#include "./train.h"
+#include <evo_motion_model/env_builder.h>
+#include <evo_motion_networks/agent_builder.h>
+#include <evo_motion_networks/metrics.h>
 
 void train(int seed, bool cuda, const train_params &params) {
 
@@ -23,70 +24,65 @@ void train(int seed, bool cuda, const train_params &params) {
     EnvBuilder env_builder(seed, params.env_name);
     std::shared_ptr<Environment> env = env_builder.get();
 
-    ActorCritic a2c(seed,
-                    env->get_state_space(),
-                    env->get_action_space(),
-                    params.hidden_size,
-                    params.learning_rate
-    );
+    AgentBuilder agent_builder(
+        params.agent_name, seed, env->get_state_space(), env->get_action_space(), params.hidden_size,
+        params.learning_rate);
+
+    std::shared_ptr<Agent> agent = agent_builder.get();
 
     if (cuda) {
-        a2c.to(torch::kCUDA);
+        agent->to(torch::kCUDA);
         env->to(torch::kCUDA);
     }
 
-    a2c.set_eval(false);
+    agent->set_eval(false);
 
     step step = env->reset();
 
-    LossMeter actor_loss_meter(32);
-    LossMeter critic_loss_meter(32);
-
+    LossMeter actor_loss_meter("actor_loss", 32);
+    LossMeter critic_loss_meter("critic_loss", 32);
 
     for (int s = 0; s < params.nb_saves; s++) {
 
-        int pb_bar_length = 100;
-        int tick_every = ceil(float(params.nb_episodes) / float(pb_bar_length));
-
         indicators::ProgressBar p_bar{
-                indicators::option::BarWidth(pb_bar_length),
-                indicators::option::Start{"["},
-                indicators::option::Fill{"="},
-                indicators::option::Lead{">"},
-                indicators::option::Remainder{" "},
-                indicators::option::End{"]"},
-                indicators::option::ShowPercentage{true},
-                indicators::option::ShowElapsedTime{true},
-                indicators::option::ShowRemainingTime{true}
-        };
+            indicators::option::MinProgress{0},
+            indicators::option::MaxProgress{params.nb_episodes},
+            indicators::option::BarWidth{100},
+            indicators::option::Start{"["},
+            indicators::option::Fill{"="},
+            indicators::option::Lead{">"},
+            indicators::option::Remainder{" "},
+            indicators::option::End{"]"},
+            indicators::option::ShowPercentage{true},
+            indicators::option::ShowElapsedTime{true},
+            indicators::option::ShowRemainingTime{true}};
 
         for (int e = 0; e < params.nb_episodes; e++) {
 
-            while (!step.done)
-                step = env->do_step(a2c.act(step), 1.f / 60.f);
+            while (!step.done) step = env->do_step(agent->act(step.state, step.reward));
 
-            a2c.done(step);
+            agent->done(step.reward);
             step = env->reset();
 
-            auto metrics = a2c.get_metrics();
+            auto metrics = agent->get_metrics();
 
             actor_loss_meter.add(metrics["actor_loss"]);
             critic_loss_meter.add(metrics["critic_loss"]);
 
             std::string p_bar_description =
-                    "Save " + std::to_string(s - 1)
-                    + ", actor = " + std::to_string(actor_loss_meter.loss())
-                    + ", critic = " + std::to_string(critic_loss_meter.loss());
+                "Save " + std::to_string(s - 1) +
+                ", actor = " + std::to_string(actor_loss_meter.loss()) +
+                ", critic = " + std::to_string(critic_loss_meter.loss());
 
             p_bar.set_option(indicators::option::PostfixText{p_bar_description});
 
-            if (e % tick_every == 0)
-                p_bar.tick();
+            p_bar.tick();
         }
 
         // save agent
-        auto save_folder_path = std::filesystem::path(params.output_path) / ("save_" + std::to_string(s));
+        auto save_folder_path =
+            std::filesystem::path(params.output_path) / ("save_" + std::to_string(s));
         std::filesystem::create_directory(save_folder_path);
-        a2c.save(save_folder_path);
+        agent->save(save_folder_path);
     }
 }
