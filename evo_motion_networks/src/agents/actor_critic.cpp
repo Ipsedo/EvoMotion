@@ -8,7 +8,7 @@
 
 #include <torch/torch.h>
 
-#include "./functions.h"
+#include "../functions.h"
 
 ActorCritic::ActorCritic(
     int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
@@ -39,7 +39,7 @@ void ActorCritic::train() {
     std::vector<torch::Tensor> sigmas_tmp;
     std::vector<torch::Tensor> values_tmp;
 
-    for (auto [mu, sigma, value]: results_buffer) {
+    for (const auto &[mu, sigma, value]: results_buffer) {
         mus_tmp.push_back(mu);
         sigmas_tmp.push_back(sigma);
         values_tmp.push_back(value);
