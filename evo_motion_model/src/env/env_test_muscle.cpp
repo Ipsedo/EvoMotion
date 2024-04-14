@@ -24,7 +24,7 @@ MuscleEnv::MuscleEnv(int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), controllers(), states(), curr_step(0),
-      max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(60 * 2),
+      max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(60),
       velocity_delta(0.2) {
 
     base.get_body()->setFriction(100.f);
@@ -77,8 +77,7 @@ step MuscleEnv::compute_step() {
     bool win = curr_step >= max_steps;
     bool fail = nb_steps_without_moving >= max_steps_without_moving;
 
-    float reward = root.get_body()->getLinearVelocity().z() - velocity_delta +
-                   float(curr_step) / float(max_steps);
+    float reward = root.get_body()->getLinearVelocity().z() - velocity_delta;
 
     bool done = win | fail;
 
