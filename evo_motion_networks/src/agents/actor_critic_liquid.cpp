@@ -55,8 +55,8 @@ a2c_response a2c_liquid_networks::forward(const torch::Tensor &state) {
     float delta_t = 1.f / float(steps);
 
     for (int i = 0; i < steps; i++)
-        x_t = (x_t + delta_t * compute_step(x_t, batched_state) * a) /
-              (1.f + delta_t * (1.f / tau + compute_step(x_t, batched_state)));
+        x_t = (x_t + delta_t * compute_step(x_t, batched_state) * a)
+              / (1.f + delta_t * (1.f / tau + compute_step(x_t, batched_state)));
 
     return {
         mu->forward(x_t).squeeze(0), sigma->forward(x_t).squeeze(0),

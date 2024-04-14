@@ -2,7 +2,6 @@
 // Created by samuel on 15/12/22.
 //
 
-
 #include "./shader.h"
 
 #include <filesystem>

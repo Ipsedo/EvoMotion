@@ -16,13 +16,11 @@
 #include "../converter.h"
 #include "./muscle.h"
 
-
 glm::mat4 get_rotation(glm::vec3 a, glm::vec3 b) {
     return glm::rotate(
         glm::mat4(1.0f), acos(glm::dot(b, a) / (glm::length(b) * glm::length(a))),
         glm::cross(b, a));
 }
-
 
 Muscle::Muscle(
     const std::string &name, float attach_mass, glm::vec3 attach_scale, Item &item_a,
@@ -54,9 +52,10 @@ Muscle::Muscle(
 
     muscle_slider_constraint->setLowerLinLimit(0);
     float max_extension_muscle =
-        2.f * glm::length(glm::vec3(
-                  attach_a.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1) -
-                  attach_b.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)));
+        2.f
+        * glm::length(glm::vec3(
+            attach_a.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)
+            - attach_b.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)));
     muscle_slider_constraint->setUpperLinLimit(max_extension_muscle);
 
     attach_a_constraint = new btPoint2PointConstraint(

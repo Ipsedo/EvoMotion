@@ -27,7 +27,6 @@ private:
 
     int nb_vertices;
 
-
 public:
     OBjSpecular(
         const std::vector<std::tuple<float, float, float>> &vertices,

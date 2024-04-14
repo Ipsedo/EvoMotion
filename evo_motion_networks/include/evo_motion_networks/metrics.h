@@ -36,7 +36,6 @@ public:
     virtual R loss();
 };
 
-
 class LossMeter : public Meter<float, float> {
 public:
     explicit LossMeter(const std::string &name, std::optional<int> window_size);

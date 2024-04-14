@@ -166,16 +166,16 @@ step CartPole3d::compute_step() {
 
     btVector3 axis_ori(0.f, 1.f, 0.f);
     float vertical_ang = acos(
-        (axis.x() * axis_ori.x() + axis.y() * axis_ori.y() + axis.z() * axis_ori.z()) /
-        (axis.norm() + axis_ori.norm()));
+        (axis.x() * axis_ori.x() + axis.y() * axis_ori.y() + axis.z() * axis_ori.z())
+        / (axis.norm() + axis_ori.norm()));
     float vertical_ang_vel = vertical_ang - last_vert_ang;
 
     btVector3 axis_plan(axis.x(), 0.f, axis.z());
     btVector3 axis_plan_ori(1.f, 0.f, 0.f);
     float plan_ang = acos(
-        (axis_plan.x() * axis_plan_ori.x() + axis_plan.y() * axis_plan_ori.y() +
-         axis_plan.z() * axis_plan_ori.z()) /
-        (axis_plan.norm() + axis_plan_ori.norm()));
+        (axis_plan.x() * axis_plan_ori.x() + axis_plan.y() * axis_plan_ori.y()
+         + axis_plan.z() * axis_plan_ori.z())
+        / (axis_plan.norm() + axis_plan_ori.norm()));
     float plan_ang_vel = plan_ang - last_plan_ang;
 
     torch::Tensor state = torch::tensor(
@@ -214,9 +214,8 @@ step CartPole3d::compute_step() {
 
     bool done = fail || win;
 
-
-    float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f) +
-                   pow((base_scale.x() - center_distance) / base_scale.x(), 2.f);
+    float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f)
+                   + pow((base_scale.x() - center_distance) / base_scale.x(), 2.f);
     reward = fail ? -2.f : (win ? 2.f : reward);
 
     last_vel_x = vel_x;

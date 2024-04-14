@@ -10,7 +10,6 @@
 #include "cartpole.h"
 #include "cartpole3d.h"
 
-
 std::shared_ptr<Environment> EnvBuilder::get() { return constructors[env_name](seed); }
 
 EnvBuilder::EnvBuilder(int seed, std::string env_name)

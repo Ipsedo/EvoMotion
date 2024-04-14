@@ -25,8 +25,8 @@ void train(int seed, bool cuda, const train_params &params) {
     std::shared_ptr<Environment> env = env_builder.get();
 
     AgentBuilder agent_builder(
-        params.agent_name, seed, env->get_state_space(), env->get_action_space(), params.hidden_size,
-        params.learning_rate);
+        params.agent_name, seed, env->get_state_space(), env->get_action_space(),
+        params.hidden_size, params.learning_rate);
 
     std::shared_ptr<Agent> agent = agent_builder.get();
 
@@ -70,9 +70,9 @@ void train(int seed, bool cuda, const train_params &params) {
             critic_loss_meter.add(metrics["critic_loss"]);
 
             std::string p_bar_description =
-                "Save " + std::to_string(s - 1) +
-                ", actor = " + std::to_string(actor_loss_meter.loss()) +
-                ", critic = " + std::to_string(critic_loss_meter.loss());
+                "Save " + std::to_string(s - 1)
+                + ", actor = " + std::to_string(actor_loss_meter.loss())
+                + ", critic = " + std::to_string(critic_loss_meter.loss());
 
             p_bar.set_option(indicators::option::PostfixText{p_bar_description});
 

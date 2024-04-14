@@ -8,7 +8,6 @@
 
 #include <evo_motion_view/renderer.h>
 
-
 void GLAPIENTRY message_callback(
     GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
     const void *userParam) {

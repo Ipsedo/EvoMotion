@@ -108,7 +108,6 @@ std::vector<std::shared_ptr<AbstractConstraint>> JsonMember::get_children() {
 
 JsonHingeConstraint::JsonHingeConstraint(Item parent, const nlohmann::json &json_constraint) {
 
-
     child = std::make_shared<JsonMember>(parent, json_constraint["child_member"]);
 
     btTransform frame_in_parent =

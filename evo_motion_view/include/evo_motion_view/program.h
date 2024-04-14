@@ -14,7 +14,6 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-
 class Program {
 public:
     class Builder {

@@ -14,7 +14,6 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-
 MuscleEnv::MuscleEnv(int seed)
     : Environment(), rng(seed), rd_uni(0.f, 1.f),
       base(
@@ -93,8 +92,8 @@ void MuscleEnv::reset_engine() {
     float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
     float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
     float angle_pitch = rd_uni(rng) * angle_limit - angle_limit / 2.f;
-    glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos) *
-                             glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
+    glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
+                             * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
 
     for (auto item: skeleton.get_items()) {
         m_world->removeRigidBody(item.get_body());

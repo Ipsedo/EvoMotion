@@ -10,7 +10,6 @@ DebugAgent::DebugAgent(
     int hidden_size, float lr)
     : action_space(int(action_space[0])), curr_device(torch::kCPU) {}
 
-
 void DebugAgent::done(float reward) {}
 void DebugAgent::save(const std::string &output_folder_path) {}
 void DebugAgent::load(const std::string &input_folder_path) {}
