@@ -45,7 +45,7 @@ void train(int seed, bool cuda, const train_params &params) {
         indicators::ProgressBar p_bar{
             indicators::option::MinProgress{0},
             indicators::option::MaxProgress{params.nb_episodes},
-            indicators::option::BarWidth(100),
+            indicators::option::BarWidth{100},
             indicators::option::Start{"["},
             indicators::option::Fill{"="},
             indicators::option::Lead{">"},
