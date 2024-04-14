@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
     argparse::ArgumentParser parser("evo_motion");
 
     parser.add_argument("environment").default_value("cartpole").help("the environment");
+    parser.add_argument("agent").default_value("actor_critic_liquide").help("the agent");
 
     parser.add_argument("--seed").scan<'i', int>().default_value(1234).help("seed for RNG");
 
@@ -100,15 +101,16 @@ int main(int argc, char **argv) {
     if (parser.is_subcommand_used(train_parser))
         train(
             parser.get<int>("seed"), parser.get<bool>("cuda"),
-            {parser.get<std::string>("environment"), train_parser.get<std::string>("output_path"),
-             train_parser.get<float>("learning_rate"), train_parser.get<int>("nb_saves"),
-             train_parser.get<int>("episodes"), parser.get<int>("hidden_size")});
+            {parser.get<std::string>("environment"), parser.get<std::string>("agent"),
+             train_parser.get<std::string>("output_path"), train_parser.get<float>("learning_rate"),
+             train_parser.get<int>("nb_saves"), train_parser.get<int>("episodes"),
+             parser.get<int>("hidden_size")});
     else if (parser.is_subcommand_used(run_parser))
         infer(
             parser.get<int>("seed"), parser.get<bool>("cuda"),
-            {parser.get<std::string>("environment"), run_parser.get<std::string>("input_folder"),
-             run_parser.get<int>("width"), run_parser.get<int>("height"),
-             parser.get<int>("hidden_size")});
+            {parser.get<std::string>("environment"), parser.get<std::string>("agent"),
+             run_parser.get<std::string>("input_folder"), run_parser.get<int>("width"),
+             run_parser.get<int>("height"), parser.get<int>("hidden_size")});
     else if (parser.is_subcommand_used(muscle_parser))
         test_muscle({muscle_parser.get<int>("width"), muscle_parser.get<int>("height")});
     else {

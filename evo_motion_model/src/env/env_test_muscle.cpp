@@ -14,14 +14,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-int64_t get_time_millis() {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(
-               std::chrono::system_clock::now().time_since_epoch())
-        .count();
-}
 
 MuscleEnv::MuscleEnv(int seed)
-    : Environment(), rng(get_time_millis()), rd_uni(0.f, 1.f),
+    : Environment(), rng(seed), rd_uni(0.f, 1.f),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
@@ -91,8 +86,6 @@ step MuscleEnv::compute_step() {
 }
 
 void MuscleEnv::reset_engine() {
-    rng = std::mt19937(get_time_millis());
-
     // reset model transform
     glm::vec3 root_pos(1.f, 0.f, 2.f);
 

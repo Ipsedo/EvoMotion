@@ -2,11 +2,12 @@
 // Created by samuel on 19/12/22.
 //
 
+#include "./actor_critic.h"
+         "
+
 #include <filesystem>
 
 #include <torch/torch.h>
-
-#include <evo_motion_networks/actor_critic.h>
 
 #include "./functions.h"
 

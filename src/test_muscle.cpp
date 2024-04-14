@@ -9,9 +9,9 @@
 #include <random>
 
 #include <glm/glm.hpp>
-#include <torch/torch.h>
 
 #include <evo_motion_model/env_builder.h>
+#include <evo_motion_networks/agent_builder.h>
 #include <evo_motion_view/camera.h>
 #include <evo_motion_view/renderer.h>
 #include <evo_motion_view/specular.h>
@@ -25,6 +25,9 @@ void test_muscle(muscle_params params) {
         glm::vec3(0.f, 1.f, 0.f));
 
     Renderer renderer("evo_motion", params.width, params.height, camera);
+
+    std::shared_ptr<Agent> random_agent =
+        AgentBuilder("random", 1234, {1}, env->get_action_space(), 0, 0.f).get();
 
     std::random_device dev;
     std::mt19937 rng(dev());
@@ -44,7 +47,7 @@ void test_muscle(muscle_params params) {
     step step = env->reset();
 
     while (!renderer.is_close()) {
-        step = env->do_step(torch::zeros(env->get_action_space()));
+        step = env->do_step(random_agent->act(torch::tensor({0}), 0.f));
 
         std::map<std::string, glm::mat4> model_matrix;
 

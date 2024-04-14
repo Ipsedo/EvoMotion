@@ -9,6 +9,7 @@
 
 struct run_params {
     std::string env_name;
+    std::string agent_name;
 
     std::string input_folder;
 

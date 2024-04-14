@@ -9,7 +9,7 @@
 #include <indicators/progress_bar.hpp>
 
 #include <evo_motion_model/env_builder.h>
-#include <evo_motion_networks/actor_critic_liquid.h>
+#include <evo_motion_networks/agent_builder.h>
 #include <evo_motion_networks/metrics.h>
 
 void train(int seed, bool cuda, const train_params &params) {
@@ -24,16 +24,18 @@ void train(int seed, bool cuda, const train_params &params) {
     EnvBuilder env_builder(seed, params.env_name);
     std::shared_ptr<Environment> env = env_builder.get();
 
-    ActorCriticLiquid a2c(
-        seed, env->get_state_space(), env->get_action_space(), params.hidden_size,
+    AgentBuilder agent_builder(
+        params.agent_name, seed, env->get_state_space(), env->get_action_space(), params.hidden_size,
         params.learning_rate);
 
+    std::shared_ptr<Agent> agent = agent_builder.get();
+
     if (cuda) {
-        a2c.to(torch::kCUDA);
+        agent->to(torch::kCUDA);
         env->to(torch::kCUDA);
     }
 
-    a2c.set_eval(false);
+    agent->set_eval(false);
 
     step step = env->reset();
 
@@ -57,12 +59,12 @@ void train(int seed, bool cuda, const train_params &params) {
 
         for (int e = 0; e < params.nb_episodes; e++) {
 
-            while (!step.done) step = env->do_step(a2c.act(step.state, step.reward));
+            while (!step.done) step = env->do_step(agent->act(step.state, step.reward));
 
-            a2c.done(step.reward);
+            agent->done(step.reward);
             step = env->reset();
 
-            auto metrics = a2c.get_metrics();
+            auto metrics = agent->get_metrics();
 
             actor_loss_meter.add(metrics["actor_loss"]);
             critic_loss_meter.add(metrics["critic_loss"]);
@@ -81,6 +83,6 @@ void train(int seed, bool cuda, const train_params &params) {
         auto save_folder_path =
             std::filesystem::path(params.output_path) / ("save_" + std::to_string(s));
         std::filesystem::create_directory(save_folder_path);
-        a2c.save(save_folder_path);
+        agent->save(save_folder_path);
     }
 }
