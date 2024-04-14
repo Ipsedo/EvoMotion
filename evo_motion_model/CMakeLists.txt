@@ -4,6 +4,9 @@ project(evo_motion_model)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(RESOURCES_PATH "${CMAKE_CURRENT_BINARY_DIR}")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/constants.h.in" "${CMAKE_CURRENT_BINARY_DIR}/constants.h" @ONLY)
+
 set(EVO_MOTION_MODEL_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE INTERNAL "")
 include_directories("${EVO_MOTION_MODEL_INCLUDE_DIRS}")
 
@@ -35,6 +38,7 @@ add_library(evo_motion_model SHARED "${SRC}")
 target_include_directories(evo_motion_model PUBLIC "${TORCH_INCLUDE_DIRS}")
 target_include_directories(evo_motion_model PUBLIC "${BULLET_INCLUDE_DIR}")
 target_include_directories(evo_motion_model PUBLIC "${GLM_INCLUDE_DIRS}")
+target_include_directories(evo_motion_model PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Link libraries
 target_link_libraries(
@@ -46,3 +50,7 @@ target_link_libraries(
 )
 
 set(EVO_MOTION_MODEL_LIBRARIES evo_motion_model PARENT_SCOPE)
+
+add_custom_target(copy-resources-files ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources"
+        DEPENDS evo_motion_model)

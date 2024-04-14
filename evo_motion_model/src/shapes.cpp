@@ -2,11 +2,14 @@
 // Created by samuel on 15/12/22.
 //
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 #include <evo_motion_model/shapes.h>
+
+#include "./constants.h"
 
 std::vector<std::string> split(const std::string &s, char delim) {
     std::stringstream ss(s);
@@ -23,7 +26,8 @@ ObjShape::ObjShape(const std::string &obj_file_path) {
     std::vector<int> vertices_order;
     std::vector<int> normals_order;
 
-    std::ifstream obj_file(obj_file_path);
+    std::filesystem::path resources_path(RESOURCES_PATH);
+    std::ifstream obj_file(resources_path / obj_file_path);
     std::string line;
 
     while (std::getline(obj_file, line)) {
