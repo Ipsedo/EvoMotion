@@ -12,7 +12,7 @@ ItemState::ItemState(const Item &item)
 int ItemState::get_size() { return 3 + 3 + 3 * 2 + 3 * 2; }
 
 torch::Tensor ItemState::get_state() {
-    btVector3 center_pos = item.get_body()->getCenterOfMassPosition();
+    btVector3 center_pos = item.get_body()->getCenterOfMassPosition() / 1000;
 
     glm::mat4 model_mat = item.model_matrix_without_scale();
     glm::vec3 front_vector = model_mat * glm::vec4(0, 0, 1, 0);
@@ -20,11 +20,14 @@ torch::Tensor ItemState::get_state() {
     btVector3 center_lin_velocity = item.get_body()->getLinearVelocity();
     btVector3 center_ang_velocity = item.get_body()->getAngularVelocity();
 
-    glm::vec3 lin_acc = bullet_to_glm(center_lin_velocity) - last_lin_velocity;
-    glm::vec3 ang_acc = bullet_to_glm(center_ang_velocity) - last_ang_velocity;
+    auto lin_vel = bullet_to_glm(center_lin_velocity);
+    auto ang_vel = bullet_to_glm(center_ang_velocity);
 
-    last_lin_velocity = bullet_to_glm(center_lin_velocity);
-    last_ang_velocity = bullet_to_glm(center_ang_velocity);
+    glm::vec3 lin_acc = lin_vel - last_lin_velocity;
+    glm::vec3 ang_acc = ang_vel - last_ang_velocity;
+
+    last_lin_velocity = lin_vel;
+    last_ang_velocity = ang_vel;
 
     return torch::tensor(
         {center_pos.x(), center_pos.y(), center_pos.z(), front_vector.x, front_vector.y,

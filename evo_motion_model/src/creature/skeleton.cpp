@@ -122,8 +122,10 @@ JsonHingeConstraint::JsonHingeConstraint(Item parent, const nlohmann::json &json
         M_PI * json_constraint["limit_degree"]["min"].get<float>() / 180.f,
         M_PI * json_constraint["limit_degree"]["max"].get<float>() / 180.f);
 
-    hinge_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
-    hinge_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);
+    /*hinge_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
+    hinge_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);*/
+    hinge_constraint->setOverrideNumSolverIterations(
+        hinge_constraint->getOverrideNumSolverIterations() * 4);
 
     parent.get_body()->setIgnoreCollisionCheck(child->get_item().get_body(), true);
 }
@@ -149,9 +151,9 @@ JsonFixedConstraint::JsonFixedConstraint(Item parent, const nlohmann::json &json
         new btFixedConstraint(*parent.get_body(), *child->get_item().get_body(), parent_tr, sub_tr);
 
     fixed_constraint->setOverrideNumSolverIterations(
-        fixed_constraint->getOverrideNumSolverIterations() * 16);
-    fixed_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
-    fixed_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);
+        fixed_constraint->getOverrideNumSolverIterations() * 4);
+    /*fixed_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
+    fixed_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);*/
 }
 
 btTypedConstraint *JsonFixedConstraint::get_constraint() { return fixed_constraint; }

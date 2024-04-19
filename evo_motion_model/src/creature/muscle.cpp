@@ -43,9 +43,7 @@ Muscle::Muscle(
     muscle_slider_constraint = new btSliderConstraint(
         *attach_a.get_body(), *attach_b.get_body(), frame_in_attach_a, frame_in_attach_b, true);
 
-    muscle_slider_constraint->setPoweredLinMotor(true);
     muscle_slider_constraint->setMaxLinMotorForce(force);
-    muscle_slider_constraint->setTargetLinMotorVelocity(0.f);
 
     muscle_slider_constraint->setLowerAngLimit(0);
     muscle_slider_constraint->setUpperAngLimit(0);
@@ -70,17 +68,17 @@ Muscle::Muscle(
         attach_b.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
     attach_a_constraint->setOverrideNumSolverIterations(
-        attach_a_constraint->getOverrideNumSolverIterations() * 16);
+        attach_a_constraint->getOverrideNumSolverIterations() * 4);
     attach_b_constraint->setOverrideNumSolverIterations(
-        attach_b_constraint->getOverrideNumSolverIterations() * 16);
+        attach_b_constraint->getOverrideNumSolverIterations() * 4);
     muscle_slider_constraint->setOverrideNumSolverIterations(
-        muscle_slider_constraint->getOverrideNumSolverIterations() * 16);
+        muscle_slider_constraint->getOverrideNumSolverIterations() * 4);
 
-    attach_a_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
+    /*attach_a_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
     attach_a_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);
 
     attach_b_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
-    attach_b_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);
+    attach_b_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);*/
 }
 
 void Muscle::contract(float speed_factor) {

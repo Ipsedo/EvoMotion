@@ -43,6 +43,9 @@ protected:
     std::shared_ptr<abstract_a2c_networks> networks;
     std::shared_ptr<torch::optim::Adam> optimizer;
 
+    float actor_loss_factor;
+    float critic_loss_factor;
+
 private:
     torch::DeviceType curr_device;
 

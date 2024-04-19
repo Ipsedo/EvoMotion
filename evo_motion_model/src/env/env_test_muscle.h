@@ -46,6 +46,7 @@ private:
 
     std::vector<ItemState> states;
 
+    int reset_frames;
     int curr_step;
     int max_steps;
 

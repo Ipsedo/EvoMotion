@@ -17,7 +17,8 @@ ActorCritic::ActorCritic(
       networks(std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
       rewards_buffer(), results_buffer(), actions_buffer(),
       optimizer(std::make_shared<torch::optim::Adam>(networks->parameters(), lr)),
-      episode_actor_loss(0.f), episode_critic_loss(0.f) {
+      episode_actor_loss(0.f), episode_critic_loss(0.f), actor_loss_factor(1.f),
+      critic_loss_factor(1.f) {
     at::manual_seed(seed);
 }
 
@@ -58,7 +59,7 @@ void ActorCritic::train() {
     returns = returns.flip({0}).cumsum(0).flip({0}) / torch::pow(gamma, t_steps);
     returns = (returns - returns.mean()) / (returns.std() + 1e-8f);
 
-    auto advantage = returns - values;
+    auto advantage = torch::smooth_l1_loss(returns, values, at::Reduction::None);
 
     auto prob = torch::exp(-0.5f * torch::pow((actions.detach() - mus) / sigmas, 2.f))
                 / (sigmas * sqrt(2.f * M_PI));
@@ -68,7 +69,8 @@ void ActorCritic::train() {
 
     auto critic_loss = torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None);
 
-    auto loss = (actor_loss + critic_loss.unsqueeze(-1)).sum();
+    auto loss =
+        (actor_loss_factor * actor_loss + critic_loss_factor * critic_loss.unsqueeze(-1)).sum();
 
     optimizer->zero_grad();
     loss.backward();
@@ -81,7 +83,7 @@ void ActorCritic::train() {
 void ActorCritic::done(float reward) {
     rewards_buffer.push_back(reward);
 
-    train();
+    if (networks->is_training()) train();
 
     results_buffer.clear();
     rewards_buffer.clear();

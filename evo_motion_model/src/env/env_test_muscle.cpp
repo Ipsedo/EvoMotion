@@ -22,8 +22,8 @@ MuscleEnv::MuscleEnv(int seed)
           0.f),
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
-      muscular_system(skeleton, skeleton_json_path), controllers(), states(), curr_step(0),
-      max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(60),
+      muscular_system(skeleton, skeleton_json_path), controllers(), states(), reset_frames(30),
+      curr_step(0), max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(60),
       velocity_delta(0.2) {
 
     base.get_body()->setFriction(100.f);
@@ -85,9 +85,9 @@ step MuscleEnv::compute_step() {
 
 void MuscleEnv::reset_engine() {
     // reset model transform
-    glm::vec3 root_pos(1.f, 0.f, 2.f);
+    glm::vec3 root_pos(1.f, 0.5f, 2.f);
 
-    float angle_limit = float(M_PI) / 6.f;
+    float angle_limit = float(M_PI) / 4.f;
 
     float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
     float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
@@ -117,6 +117,8 @@ void MuscleEnv::reset_engine() {
 
     curr_step = 0;
     nb_steps_without_moving = 0;
+
+    for (int i = 0; i < reset_frames; i++) m_world->stepSimulation(1.f / 60.f);
 }
 
 std::vector<int64_t> MuscleEnv::get_state_space() {

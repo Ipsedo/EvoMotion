@@ -74,6 +74,7 @@ void infer(int seed, bool cuda, const run_params &params) {
             std::chrono::milliseconds(long(std::max(0., 1000. / 60. - delta.count()))));
 
         if (step.done) {
+            agent->done(step.reward);
             step = env->reset();
             std::cout << "reset" << std::endl;
         }
