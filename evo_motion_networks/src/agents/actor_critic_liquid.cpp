@@ -82,7 +82,7 @@ ActorCriticLiquid::ActorCriticLiquid(
     networks = std::make_shared<a2c_liquid_networks>(state_space, action_space, hidden_size, 6);
     optimizer = std::make_shared<torch::optim::Adam>(networks->parameters(), lr);
 
-    actor_loss_factor = 1e-8f;
+    actor_loss_factor = 1.f;
     critic_loss_factor = 1.f;
 }
 

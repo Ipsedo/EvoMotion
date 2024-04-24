@@ -30,8 +30,14 @@ MuscleEnv::MuscleEnv(int seed)
 
     add_item(base);
 
-    for (Item item: skeleton.get_items()) {
-        states.emplace_back(item);
+    auto skeleton_items = skeleton.get_items();
+
+    for (int i = 0; i < skeleton_items.size(); i++) {
+        auto item = skeleton_items[i];
+
+        if (i == 0) states.push_back(std::make_shared<ItemState>(item));
+        else states.push_back(std::make_shared<SkeletonItemState>(skeleton_items[0], item));
+
         add_item(item);
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
@@ -64,7 +70,7 @@ std::vector<std::shared_ptr<Controller>> MuscleEnv::get_controllers() { return c
 step MuscleEnv::compute_step() {
     std::vector<torch::Tensor> current_states;
 
-    for (auto state: states) current_states.push_back(state.get_state().to(curr_device));
+    for (auto state: states) current_states.push_back(state->get_state().to(curr_device));
 
     curr_step += 1;
 
@@ -76,7 +82,7 @@ step MuscleEnv::compute_step() {
     bool win = curr_step >= max_steps;
     bool fail = nb_steps_without_moving >= max_steps_without_moving;
 
-    float reward = root.get_body()->getLinearVelocity().z() - velocity_delta;
+    float reward = root.get_body()->getLinearVelocity().z() - velocity_delta + root.get_body()->getCenterOfMassPosition().z() / 100.f;
 
     bool done = win | fail;
 
@@ -123,7 +129,7 @@ void MuscleEnv::reset_engine() {
 
 std::vector<int64_t> MuscleEnv::get_state_space() {
     int nb_features = 0;
-    for (auto s: states) nb_features += s.get_size();
+    for (auto s: states) nb_features += s->get_size();
     return {nb_features};
 }
 

@@ -24,7 +24,7 @@ ActorCritic::ActorCritic(
 
 torch::Tensor ActorCritic::act(torch::Tensor state, float reward) {
     auto response = networks->forward(state);
-    auto action = truncated_normal(response.mu, response.sigma, -1.f, 1.f);
+    auto action = truncated_normal_sample(response.mu, response.sigma, -1.f, 1.f);
 
     rewards_buffer.push_back(reward);
     results_buffer.push_back(response);
@@ -61,8 +61,7 @@ void ActorCritic::train() {
 
     auto advantage = torch::smooth_l1_loss(returns, values, at::Reduction::None);
 
-    auto prob = torch::exp(-0.5f * torch::pow((actions.detach() - mus) / sigmas, 2.f))
-                / (sigmas * sqrt(2.f * M_PI));
+    auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     auto log_prob = torch::log(prob);
 
     auto actor_loss = -log_prob * advantage.detach().unsqueeze(-1);

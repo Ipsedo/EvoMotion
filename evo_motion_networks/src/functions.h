@@ -7,10 +7,12 @@
 
 #include <torch/torch.h>
 
-torch::Tensor truncated_normal_pdf(const torch::Tensor &xi);
-torch::Tensor truncated_normal_cdf(const torch::Tensor &x);
+torch::Tensor normal_pdf(const torch::Tensor &xi, const torch::Tensor &mu, const torch::Tensor &sigma);
+torch::Tensor normal_cdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma);
 
-torch::Tensor truncated_normal(
+torch::Tensor truncated_normal_sample(
     const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value);
+
+torch::Tensor truncated_normal_pdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value);
 
 #endif//EVO_MOTION_FUNCTIONS_H

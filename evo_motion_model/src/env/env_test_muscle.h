@@ -44,7 +44,7 @@ private:
 
     std::vector<std::shared_ptr<Controller>> controllers;
 
-    std::vector<ItemState> states;
+    std::vector<std::shared_ptr<State>> states;
 
     int reset_frames;
     int curr_step;
