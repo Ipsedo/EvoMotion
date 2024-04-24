@@ -41,23 +41,50 @@ torch::Tensor ItemState::get_state() {
     last_ang_velocity = ang_vel;
 
     return torch::tensor(
-        {center_pos.x(), center_pos.y(), center_pos.z(),
-            x_1.x, x_1.y, x_1.z, x_2.x, x_2.y, x_2.z,
-            y_1.x, y_1.y, y_1.z, y_2.x, y_2.y, y_2.z,
-            z_1.x, z_1.y, z_1.z, z_2.x, z_2.y, z_2.y,
-            front_vector.x, front_vector.y,
-         front_vector.z, center_lin_velocity.x(), center_lin_velocity.y(), center_lin_velocity.z(),
-         center_ang_velocity.x(), center_ang_velocity.y(), center_ang_velocity.z(), lin_acc.x,
-         lin_acc.y, lin_acc.z, ang_acc.x, ang_acc.y, ang_acc.z});
+    {center_pos.x(),
+     center_pos.y(),
+     center_pos.z(),
+     x_1.x,
+     x_1.y,
+     x_1.z,
+     x_2.x,
+     x_2.y,
+     x_2.z,
+     y_1.x,
+     y_1.y,
+     y_1.z,
+     y_2.x,
+     y_2.y,
+     y_2.z,
+     z_1.x,
+     z_1.y,
+     z_1.z,
+     z_2.x,
+     z_2.y,
+     z_2.y,
+     front_vector.x,
+     front_vector.y,
+     front_vector.z,
+     center_lin_velocity.x(),
+     center_lin_velocity.y(),
+     center_lin_velocity.z(),
+     center_ang_velocity.x(),
+     center_ang_velocity.y(),
+     center_ang_velocity.z(),
+     lin_acc.x,
+     lin_acc.y,
+     lin_acc.z,
+     ang_acc.x,
+     ang_acc.y,
+     ang_acc.z});
 }
 
 // Skeleton Item state
 
-SkeletonItemState::SkeletonItemState(const Item &root, const Item &item) : root(root), item(item), last_lin_velocity(0.f), last_ang_velocity(0.f) {}
+SkeletonItemState::SkeletonItemState(const Item &root, const Item &item)
+    : root(root), item(item), last_lin_velocity(0.f), last_ang_velocity(0.f) {}
 
-int SkeletonItemState::get_size() {
-    return 3 + 3 + 3 * 2 + 3 * 2 + 6 * 3;
-}
+int SkeletonItemState::get_size() { return 3 + 3 + 3 * 2 + 3 * 2 + 6 * 3; }
 
 torch::Tensor SkeletonItemState::get_state() {
     glm::vec3 root_pos = bullet_to_glm(item.get_body()->getCenterOfMassPosition());
@@ -90,13 +117,40 @@ torch::Tensor SkeletonItemState::get_state() {
     last_ang_velocity = ang_vel;
 
     return torch::tensor(
-        {center_pos.x, center_pos.y, center_pos.z,
-            x_1.x, x_1.y, x_1.z, x_2.x, x_2.y, x_2.z,
-            y_1.x, y_1.y, y_1.z, y_2.x, y_2.y, y_2.z,
-            z_1.x, z_1.y, z_1.z, z_2.x, z_2.y, z_2.y,
-            front_vector.x, front_vector.y,
-         front_vector.z, center_lin_velocity.x(), center_lin_velocity.y(), center_lin_velocity.z(),
-         center_ang_velocity.x(), center_ang_velocity.y(), center_ang_velocity.z(), lin_acc.x,
-         lin_acc.y, lin_acc.z, ang_acc.x, ang_acc.y, ang_acc.z});
+    {center_pos.x,
+     center_pos.y,
+     center_pos.z,
+     x_1.x,
+     x_1.y,
+     x_1.z,
+     x_2.x,
+     x_2.y,
+     x_2.z,
+     y_1.x,
+     y_1.y,
+     y_1.z,
+     y_2.x,
+     y_2.y,
+     y_2.z,
+     z_1.x,
+     z_1.y,
+     z_1.z,
+     z_2.x,
+     z_2.y,
+     z_2.y,
+     front_vector.x,
+     front_vector.y,
+     front_vector.z,
+     center_lin_velocity.x(),
+     center_lin_velocity.y(),
+     center_lin_velocity.z(),
+     center_ang_velocity.x(),
+     center_ang_velocity.y(),
+     center_ang_velocity.z(),
+     lin_acc.x,
+     lin_acc.y,
+     lin_acc.z,
+     ang_acc.x,
+     ang_acc.y,
+     ang_acc.z});
 }
-

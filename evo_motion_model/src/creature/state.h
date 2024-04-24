@@ -35,7 +35,9 @@ private:
 class SkeletonItemState : public State {
 public:
     SkeletonItemState(const Item &root, const Item &item);
+
     int get_size() override;
+
     torch::Tensor get_state() override;
 
 private:
