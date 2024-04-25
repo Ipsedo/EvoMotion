@@ -27,23 +27,6 @@ public:
 
 private:
     Item item;
-    glm::vec3 scale;
-    glm::vec3 last_lin_velocity;
-    glm::vec3 last_ang_velocity;
-};
-
-class SkeletonItemState : public State {
-public:
-    SkeletonItemState(const Item &root, const Item &item);
-
-    int get_size() override;
-
-    torch::Tensor get_state() override;
-
-private:
-    Item root;
-    Item item;
-    glm::vec3 scale;
     glm::vec3 last_lin_velocity;
     glm::vec3 last_ang_velocity;
 };

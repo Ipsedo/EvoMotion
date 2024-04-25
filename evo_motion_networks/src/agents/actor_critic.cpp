@@ -18,7 +18,9 @@ ActorCritic::ActorCritic(
       rewards_buffer(), results_buffer(), actions_buffer(),
       optimizer(std::make_shared<torch::optim::Adam>(networks->parameters(), lr)),
       episode_actor_loss(0.f), episode_critic_loss(0.f), actor_loss_factor(1.f),
-      critic_loss_factor(1.f) { at::manual_seed(seed); }
+      critic_loss_factor(1.f) {
+    at::manual_seed(seed);
+}
 
 torch::Tensor ActorCritic::act(torch::Tensor state, float reward) {
     auto response = networks->forward(state);

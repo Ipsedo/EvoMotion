@@ -17,7 +17,7 @@ normal_cdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor 
 }
 
 torch::Tensor phi(const torch::Tensor &z) {
-    return torch::exp(-0.5f * torch::pow(z, 2.f)) / std::sqrt(2 * M_PI);
+    return torch::exp(-0.5f * torch::pow(z, 2.f)) / std::sqrt(2.f * M_PI);
 }
 
 torch::Tensor theta(const torch::Tensor &x) { return 0.5f * (1.f + torch::erf(x / std::sqrt(2))); }
@@ -41,6 +41,6 @@ torch::Tensor truncated_normal_sample(
     return theta_inv(
                theta(alpha)
                + at::rand(mu.sizes(), at::TensorOptions(mu.device()))
-               * (theta(beta) - theta(alpha)))
+                     * (theta(beta) - theta(alpha)))
            + mu;
 }

@@ -4,8 +4,6 @@
 
 #include "./env_test_muscle.h"
 
-#include <chrono>
-
 #include "../controller/muscle_controller.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -23,20 +21,14 @@ MuscleEnv::MuscleEnv(int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), controllers(), states(), reset_frames(30),
-      curr_step(0), max_steps(60 * 60), nb_steps_without_moving(0), max_steps_without_moving(60),
-      velocity_delta(0.2) {
+      curr_step(0), max_steps(60 * 60), nb_steps_without_moving(0), velocity_delta(0.2),
+      max_steps_without_moving(60) {
     base.get_body()->setFriction(100.f);
 
     add_item(base);
 
-    auto skeleton_items = skeleton.get_items();
-
-    for (int i = 0; i < skeleton_items.size(); i++) {
-        auto item = skeleton_items[i];
-
-        if (i == 0) states.push_back(std::make_shared<ItemState>(item));
-        else states.push_back(std::make_shared<SkeletonItemState>(skeleton_items[0], item));
-
+    for (auto item: skeleton.get_items()) {
+        states.push_back(std::make_shared<ItemState>(item));
         add_item(item);
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
@@ -64,12 +56,12 @@ std::vector<Item> MuscleEnv::get_items() {
     return items;
 }
 
-std::vector<std::shared_ptr<Controller> > MuscleEnv::get_controllers() { return controllers; }
+std::vector<std::shared_ptr<Controller>> MuscleEnv::get_controllers() { return controllers; }
 
 step MuscleEnv::compute_step() {
     std::vector<torch::Tensor> current_states;
 
-    for (auto state: states) current_states.push_back(state->get_state().to(curr_device));
+    for (const auto &state: states) current_states.push_back(state->get_state().to(curr_device));
 
     curr_step += 1;
 
@@ -81,8 +73,7 @@ step MuscleEnv::compute_step() {
     bool win = curr_step >= max_steps;
     bool fail = nb_steps_without_moving >= max_steps_without_moving;
 
-    float reward = root.get_body()->getLinearVelocity().z() - velocity_delta
-                   + root.get_body()->getCenterOfMassPosition().z() / 100.f;
+    float reward = root.get_body()->getLinearVelocity().z();
 
     bool done = win | fail;
 
@@ -129,7 +120,7 @@ void MuscleEnv::reset_engine() {
 
 std::vector<int64_t> MuscleEnv::get_state_space() {
     int nb_features = 0;
-    for (auto s: states) nb_features += s->get_size();
+    for (const auto &s: states) nb_features += s->get_size();
     return {nb_features};
 }
 

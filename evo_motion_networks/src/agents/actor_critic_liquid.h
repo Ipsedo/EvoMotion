@@ -22,7 +22,7 @@ struct a2c_liquid_networks : abstract_a2c_networks {
     int steps;
     int hidden_size;
 
-    torch::nn::Linear weight{nullptr};
+    torch::nn::Sequential weight{nullptr};
     torch::nn::Linear recurrent_weight{nullptr};
     torch::Tensor bias;
     torch::Tensor a;
