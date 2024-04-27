@@ -14,24 +14,19 @@ int ItemState::get_size() { return 3 + 3 + 3 * 2 + 3 * 2; }
 torch::Tensor ItemState::get_state() {
     btVector3 center_pos = item.get_body()->getCenterOfMassPosition();
 
-    glm::mat4 model_mat = item.model_matrix_without_scale();
-    glm::vec3 front_vector = model_mat * glm::vec4(0, 0, 1, 0);
+    btScalar yaw, pitch, roll;
+    item.get_body()->getWorldTransform().getRotation().getEulerZYX(yaw, pitch, roll);
 
     btVector3 center_lin_velocity = item.get_body()->getLinearVelocity();
     btVector3 center_ang_velocity = item.get_body()->getAngularVelocity();
 
-    auto lin_vel = bullet_to_glm(center_lin_velocity);
-    auto ang_vel = bullet_to_glm(center_ang_velocity);
-
-    glm::vec3 lin_acc = lin_vel - last_lin_velocity;
-    glm::vec3 ang_acc = ang_vel - last_ang_velocity;
-
-    last_lin_velocity = lin_vel;
-    last_ang_velocity = ang_vel;
+    btVector3 force = item.get_body()->getTotalForce();
+    btVector3 torque = item.get_body()->getTotalTorque();
 
     return torch::tensor(
-        {center_pos.x(), center_pos.y(), center_pos.z(), front_vector.x, front_vector.y,
-         front_vector.z, center_lin_velocity.x(), center_lin_velocity.y(), center_lin_velocity.z(),
-         center_ang_velocity.x(), center_ang_velocity.y(), center_ang_velocity.z(), lin_acc.x,
-         lin_acc.y, lin_acc.z, ang_acc.x, ang_acc.y, ang_acc.z});
+    {center_pos.x(), center_pos.y(), center_pos.z(),
+     yaw, pitch, roll,
+     center_lin_velocity.x(), center_lin_velocity.y(), center_lin_velocity.z(),
+     center_ang_velocity.x(), center_ang_velocity.y(), center_ang_velocity.z(),
+     force.x(), force.y(), force.z(), torque.x(), torque.y(), torque.z()});
 }

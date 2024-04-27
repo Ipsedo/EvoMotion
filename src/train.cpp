@@ -43,7 +43,6 @@ void train(int seed, bool cuda, const train_params &params) {
     LossMeter critic_loss_meter("critic_loss", 32);
 
     for (int s = 0; s < params.nb_saves; s++) {
-
         indicators::ProgressBar p_bar{
             indicators::option::MinProgress{0},
             indicators::option::MaxProgress{params.nb_episodes},
@@ -58,7 +57,6 @@ void train(int seed, bool cuda, const train_params &params) {
             indicators::option::ShowRemainingTime{true}};
 
         for (int e = 0; e < params.nb_episodes; e++) {
-
             while (!step.done) step = env->do_step(agent->act(step.state, step.reward));
 
             agent->done(step.reward);

@@ -14,7 +14,7 @@ a2c_liquid_networks::a2c_liquid_networks(
         "weight",
         torch::nn::Sequential(
             torch::nn::Linear(torch::nn::LinearOptions(state_space[0], hidden_size * 2)),
-            torch::nn::Mish(),
+            torch::nn::Mish(), torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
             torch::nn::Linear(torch::nn::LinearOptions(hidden_size * 2, hidden_size).bias(false))));
 
     recurrent_weight = register_module(
@@ -26,19 +26,23 @@ a2c_liquid_networks::a2c_liquid_networks(
     a = register_parameter("a", torch::ones({1, hidden_size}));
     tau = register_parameter("tau", torch::ones({1, hidden_size}));
 
-    head = register_module(
-        "head",
-        torch::nn::Sequential(torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish()));
-
     mu = register_module(
         "mu", torch::nn::Sequential(
-                  torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Tanh()));
+            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
+            torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-                     torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Softplus()));
+            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
+            torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Softplus()));
 
-    critic = register_module("critic", torch::nn::Linear(hidden_size * 2, 1));
+    critic = register_module(
+        "critic", torch::nn::Sequential(
+            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
+            torch::nn::Linear(hidden_size * 2, 1)));
 
     x_t = torch::mish(torch::randn({1, hidden_size}));
 }
@@ -57,16 +61,15 @@ a2c_response a2c_liquid_networks::forward(const torch::Tensor &state) {
         x_t = (x_t + delta_t * compute_step(x_t, batched_state) * a)
               / (1.f + delta_t * (1.f / tau + compute_step(x_t, batched_state)));
 
-    auto head_output = head->forward(x_t);
-
     return {
-        mu->forward(head_output).squeeze(0), sigma->forward(head_output).squeeze(0),
-        critic->forward(head_output).squeeze(0)};
+        mu->forward(x_t).squeeze(0), sigma->forward(x_t).squeeze(0),
+        critic->forward(x_t).squeeze(0)};
 }
 
 void a2c_liquid_networks::reset_x_t() {
-    x_t = torch::mish(torch::randn(
-        {1, hidden_size}, torch::TensorOptions().device(recurrent_weight->weight.device())));
+    x_t = torch::mish(
+        torch::randn(
+            {1, hidden_size}, torch::TensorOptions().device(recurrent_weight->weight.device())));
 }
 
 void a2c_liquid_networks::to(torch::Device device, bool non_blocking) {

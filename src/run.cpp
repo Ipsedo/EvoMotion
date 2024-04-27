@@ -31,7 +31,6 @@ void infer(int seed, bool cuda, const run_params &params) {
     std::uniform_real_distribution<float> dist(0.f, 1.f);
 
     for (auto i: env->get_items()) {
-
         std::shared_ptr<OBjSpecular> specular = std::make_shared<OBjSpecular>(
             i.get_shape()->get_vertices(), i.get_shape()->get_normals(),
             glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),

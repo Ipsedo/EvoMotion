@@ -17,6 +17,7 @@ struct a2c_liquid_networks : abstract_a2c_networks {
     a2c_response forward(const torch::Tensor &state) override;
 
     torch::Tensor compute_step(const torch::Tensor &x_t, const torch::Tensor &i_t);
+
     void to(torch::Device device, bool non_blocking) override;
 
     int steps;
@@ -28,11 +29,10 @@ struct a2c_liquid_networks : abstract_a2c_networks {
     torch::Tensor a;
     torch::Tensor tau;
 
-    torch::nn::Sequential head{nullptr};
     torch::nn::Sequential mu{nullptr};
     torch::nn::Sequential sigma{nullptr};
 
-    torch::nn::Linear critic{nullptr};
+    torch::nn::Sequential critic{nullptr};
 
     torch::Tensor x_t;
 };

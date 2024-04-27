@@ -17,4 +17,4 @@ EnvBuilder::EnvBuilder(int seed, std::string env_name)
       constructors(
           {{"cartpole", std::make_shared<CartPole, int>},
            {"cartpole3d", std::make_shared<CartPole3d, int>},
-           {"test_muscle", std::make_shared<MuscleEnv, int>}}) {}
+           {"muscles", std::make_shared<MuscleEnv, int>}}) {}
