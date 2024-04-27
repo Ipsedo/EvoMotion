@@ -15,6 +15,6 @@ std::shared_ptr<Environment> EnvBuilder::get() { return constructors[env_name](s
 EnvBuilder::EnvBuilder(int seed, std::string env_name)
     : seed(seed), env_name(std::move(env_name)),
       constructors(
-          {{"cartpole", std::make_shared<CartPole, int>},
-           {"cartpole3d", std::make_shared<CartPole3d, int>},
-           {"muscles", std::make_shared<MuscleEnv, int>}}) {}
+      {{"cartpole", std::make_shared<CartPole, int>},
+       {"cartpole3d", std::make_shared<CartPole3d, int>},
+       {"muscles", std::make_shared<MuscleEnv, int>}}) {}
