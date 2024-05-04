@@ -17,9 +17,7 @@ find_package(Torch REQUIRED)
 file(GLOB_RECURSE SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 # Create EvoMotion executable
-add_library(evo_motion_networks SHARED "${SRC}"
-        src/init.h
-        src/init.cpp)
+add_library(evo_motion_networks SHARED "${SRC}")
 
 target_include_directories(evo_motion_networks PUBLIC "${TORCH_INCLUDE_DIRS}")
 
