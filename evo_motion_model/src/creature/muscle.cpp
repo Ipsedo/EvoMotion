@@ -73,12 +73,6 @@ Muscle::Muscle(
         attach_b_constraint->getOverrideNumSolverIterations() * 4);
     muscle_slider_constraint->setOverrideNumSolverIterations(
         muscle_slider_constraint->getOverrideNumSolverIterations() * 4);
-
-    /*attach_a_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
-    attach_a_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);
-
-    attach_b_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
-    attach_b_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);*/
 }
 
 void Muscle::contract(float speed_factor) {

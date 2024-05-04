@@ -4,6 +4,8 @@
 
 #include "./actor_critic_liquid.h"
 
+#include "../init.h"
+
 a2c_liquid_networks::a2c_liquid_networks(
     std::vector<int64_t> state_space, std::vector<int64_t> action_space, int neuron_number,
     int unfolding_steps) {
@@ -13,10 +15,13 @@ a2c_liquid_networks::a2c_liquid_networks(
     weight = register_module(
         "weight",
         torch::nn::Sequential(
-            torch::nn::Linear(torch::nn::LinearOptions(state_space[0], hidden_size * 2)),
+            torch::nn::Linear(torch::nn::LinearOptions(state_space[0], hidden_size * 8)),
             torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
-            torch::nn::Linear(torch::nn::LinearOptions({hidden_size * 2, hidden_size * 2})),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 8})),
+            torch::nn::Linear(torch::nn::LinearOptions(hidden_size * 8, hidden_size * 4)),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 4})),
+            torch::nn::Linear(torch::nn::LinearOptions({hidden_size * 4, hidden_size * 2})),
             torch::nn::Mish(),
             torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
             torch::nn::Linear(torch::nn::LinearOptions(hidden_size * 2, hidden_size).bias(false))));
@@ -49,6 +54,8 @@ a2c_liquid_networks::a2c_liquid_networks(
             torch::nn::Linear(hidden_size * 2, 1)));
 
     x_t = torch::mish(torch::randn({1, hidden_size}));
+
+    this->apply(init_weights);
 }
 
 torch::Tensor

@@ -77,7 +77,7 @@ step MuscleEnv::compute_step() {
     bool win = curr_step >= max_steps;
     bool fail = remaining_steps <= 0;
 
-    float target_velocity = pos_delta; // 10cm in a second
+    float target_velocity = pos_delta;
 
     float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
 
