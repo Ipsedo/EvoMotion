@@ -11,7 +11,6 @@ void init_weights(torch::nn::Module &module) {
         torch::nn::init::xavier_normal_(lin->weight, 1e-3f);
 
         if (lin->options.bias()) torch::nn::init::normal_(lin->bias);
-
     } else if (typeid(module) == typeid(torch::nn::LayerNorm)) {
         auto ln = *dynamic_cast<torch::nn::LayerNorm *>(&module);
 

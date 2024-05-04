@@ -27,7 +27,7 @@ class AbstractMember {
 public:
     virtual Item get_item() = 0;
 
-    virtual std::vector<std::shared_ptr<AbstractConstraint>> get_children() = 0;
+    virtual std::vector<std::shared_ptr<AbstractConstraint> > get_children() = 0;
 };
 
 class Skeleton {
@@ -60,7 +60,7 @@ public:
 
     Item get_item() override;
 
-    std::vector<std::shared_ptr<AbstractConstraint>> get_children() override;
+    std::vector<std::shared_ptr<AbstractConstraint> > get_children() override;
 
 protected:
     nlohmann::json json_member;
