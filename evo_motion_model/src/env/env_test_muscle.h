@@ -50,9 +50,13 @@ private:
     int curr_step;
     int max_steps;
 
-    int nb_steps_without_moving;
-    float velocity_delta;
+    //float velocity_delta;
+    float pos_delta;
+    float last_pos;
     int max_steps_without_moving;
+    int remaining_steps;
+    int frames_to_add;
+
 };
 
 #endif//EVO_MOTION_ENV_TEST_MUSCLE_H

@@ -21,9 +21,9 @@ MuscleEnv::MuscleEnv(int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), controllers(), states(), reset_frames(30),
-      curr_step(0), max_steps(60 * 60), nb_steps_without_moving(0), velocity_delta(0.2),
-      max_steps_without_moving(60) {
-    base.get_body()->setFriction(100.f);
+      curr_step(0), max_steps(60 * 60), pos_delta(0.01f), last_pos(0.f),
+      max_steps_without_moving(60), remaining_steps(max_steps_without_moving), frames_to_add(10) {
+    base.get_body()->setFriction(500.f);
 
     add_item(base);
 
@@ -67,16 +67,19 @@ step MuscleEnv::compute_step() {
 
     Item root = skeleton.get_items()[0];
 
-    if (root.get_body()->getLinearVelocity().z() <= velocity_delta) nb_steps_without_moving += 1;
-    else nb_steps_without_moving = 0;
+    float curr_pos = root.get_body()->getCenterOfMassPosition().z();
+    if ((curr_pos - last_pos) < pos_delta) remaining_steps -= 1;
+    else {
+        remaining_steps += frames_to_add;
+        last_pos = curr_pos;
+    }
 
     bool win = curr_step >= max_steps;
-    bool fail = nb_steps_without_moving >= max_steps_without_moving;
+    bool fail = remaining_steps <= 0;
 
-    float reward = root.get_body()->getLinearVelocity().z();
+    float target_velocity = pos_delta; // 10cm in a second
 
-    if (fail) reward = -1.f;
-    else if (win) reward = 2.f * reward;
+    float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
 
     bool done = win | fail;
 
@@ -116,9 +119,11 @@ void MuscleEnv::reset_engine() {
     }
 
     curr_step = 0;
-    nb_steps_without_moving = 0;
+    remaining_steps = max_steps_without_moving;
 
     for (int i = 0; i < reset_frames; i++) m_world->stepSimulation(1.f / 60.f);
+
+    last_pos = skeleton.get_items()[0].get_body()->getCenterOfMassPosition().z();
 }
 
 std::vector<int64_t> MuscleEnv::get_state_space() {
