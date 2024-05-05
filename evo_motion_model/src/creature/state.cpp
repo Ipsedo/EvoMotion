@@ -7,9 +7,9 @@
 #include "../converter.h"
 
 ItemState::ItemState(const Item &item)
-    : item(item), last_lin_velocity(0.f), last_ang_velocity(0.f) {}
+    : item(item), last_lin_velocity(0.f, 0.f, 0.f), last_ang_velocity(0.f, 0.f, 0.f) {}
 
-int ItemState::get_size() { return 3 + 3 + 3 * 2 + 3 * 2; }
+int ItemState::get_size() { return 3 + 3 + 3 * 4 + 3 * 2; }
 
 torch::Tensor ItemState::get_state() {
     btVector3 center_pos = item.get_body()->getCenterOfMassPosition();
@@ -20,6 +20,12 @@ torch::Tensor ItemState::get_state() {
     btVector3 center_lin_velocity = item.get_body()->getLinearVelocity();
     btVector3 center_ang_velocity = item.get_body()->getAngularVelocity();
 
+    btVector3 center_lin_acc = center_lin_velocity - last_lin_velocity;
+    btVector3 center_ang_acc = center_ang_velocity - last_ang_velocity;
+
+    last_lin_velocity = center_lin_velocity;
+    last_ang_velocity = center_ang_velocity;
+
     btVector3 force = item.get_body()->getTotalForce();
     btVector3 torque = item.get_body()->getTotalTorque();
 
@@ -28,5 +34,7 @@ torch::Tensor ItemState::get_state() {
      yaw, pitch, roll,
      center_lin_velocity.x(), center_lin_velocity.y(), center_lin_velocity.z(),
      center_ang_velocity.x(), center_ang_velocity.y(), center_ang_velocity.z(),
+     center_lin_acc.x(), center_lin_acc.y(), center_lin_acc.z(),
+     center_ang_acc.x(), center_ang_acc.y(), center_ang_acc.z(),
      force.x(), force.y(), force.z(), torque.x(), torque.y(), torque.z()});
 }
