@@ -22,10 +22,7 @@ MuscleEnv::MuscleEnv(const int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path),
-
-
-      initial_remaining_seconds(1.f),max_episode_seconds(60.f),reset_frames(30),
-      curr_step(0),
+      initial_remaining_seconds(1.f), max_episode_seconds(60.f), reset_frames(30), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       max_steps_without_moving(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)),
       remaining_steps(max_steps_without_moving),
