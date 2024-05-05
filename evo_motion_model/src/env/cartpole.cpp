@@ -10,7 +10,7 @@
 
 CartPole::CartPole(int seed)
     : Environment(), slider_speed(16.f), slider_force(64.f), chariot_push_force(2.f),
-      limit_angle(float(M_PI * 0.5)), reset_frame_nb(8), chariot_mass(1.f), pendulum_mass(1.f),
+      limit_angle(static_cast<float>(M_PI * 0.5)), reset_frame_nb(8), chariot_mass(1.f), pendulum_mass(1.f),
       rng(seed), rd_uni(0.f, 1.f), step_idx(0), max_steps(60 * 60), last_ang_vel(0.f),
       last_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;
@@ -91,22 +91,22 @@ std::vector<Item> CartPole::get_items() { return items; }
 std::vector<std::shared_ptr<Controller>> CartPole::get_controllers() { return controllers; }
 
 step CartPole::compute_step() {
-    float pos = chariot_rg->getWorldTransform().getOrigin().x();
-    float base_pos = base_rg->getWorldTransform().getOrigin().x();
+    const float pos = chariot_rg->getWorldTransform().getOrigin().x();
+    const float base_pos = base_rg->getWorldTransform().getOrigin().x();
     float center_distance = abs(pos - base_pos);
     float vel = chariot_rg->getLinearVelocity().x();
 
-    float ang = pendulum_rg->getWorldTransform().getRotation().getAngle();
+    const float ang = pendulum_rg->getWorldTransform().getRotation().getAngle();
     float ang_vel = pendulum_rg->getAngularVelocity().z();
 
-    torch::Tensor state = torch::tensor(
+    const torch::Tensor state = torch::tensor(
         {center_distance / 10.f, (pos - base_pos) / 10.f, vel, vel - last_vel,
-         ang / float(2. * M_PI) - 1.f, ang_vel, ang_vel - last_ang_vel},
+         ang / static_cast<float>(2. * M_PI) - 1.f, ang_vel, ang_vel - last_ang_vel},
         at::TensorOptions().device(curr_device));
 
     bool fail = pos > 10.f || pos < -10.f || ang > limit_angle || ang < -limit_angle;
     bool win = step_idx > max_steps;
-    bool done = fail || win;
+    const bool done = fail || win;
     float reward = (limit_angle - abs(ang)) / limit_angle + (10.f - center_distance) / 10.f;
     reward = fail ? -2.f : (win ? 2.f : reward);
 
@@ -162,7 +162,7 @@ void CartPole::reset_engine() {
     // Apply random force to chariot for reset_frame_nb steps
     // To prevent over-fitting
 
-    float rand_force = rd_uni(rng) * chariot_push_force * 2.f - chariot_push_force;
+    const float rand_force = rd_uni(rng) * chariot_push_force * 2.f - chariot_push_force;
     chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
     //chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 

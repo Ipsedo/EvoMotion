@@ -8,7 +8,7 @@
 #include <torch/torch.h>
 
 torch::Tensor
-normal_pdf(const torch::Tensor &xi, const torch::Tensor &mu, const torch::Tensor &sigma);
+normal_pdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma);
 
 torch::Tensor
 normal_cdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma);

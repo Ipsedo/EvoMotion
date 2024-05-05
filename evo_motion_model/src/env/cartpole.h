@@ -11,7 +11,7 @@
 
 #include <evo_motion_model/environment.h>
 
-class CartPole : public Environment {
+class CartPole final : public Environment {
 public:
     explicit CartPole(int seed);
 

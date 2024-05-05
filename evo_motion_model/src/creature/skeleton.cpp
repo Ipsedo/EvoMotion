@@ -24,7 +24,7 @@ AbstractMember::~AbstractMember() = default;
  */
 
 Skeleton::Skeleton(std::string root_name, const std::shared_ptr<AbstractMember> &root_member)
-    : root_name(std::move(root_name)), constraints(), items_map() {
+    : root_name(std::move(root_name)) {
 
     std::queue<std::shared_ptr<AbstractMember> > queue;
     queue.push(root_member);

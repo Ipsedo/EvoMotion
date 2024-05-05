@@ -13,14 +13,14 @@
 #include <glm/gtx/euler_angles.hpp>
 
 MuscleEnv::MuscleEnv(const int seed)
-    : Environment(), rng(seed), rd_uni(0.f, 1.f),
+    : rng(seed), rd_uni(0.f, 1.f),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
           0.f),
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
-      muscular_system(skeleton, skeleton_json_path), controllers(), states(), reset_frames(30),
+      muscular_system(skeleton, skeleton_json_path), reset_frames(30),
       curr_step(0), max_steps(60 * 60), max_steps_without_moving(60),
       remaining_steps(max_steps_without_moving),
       frames_to_add(10), target_velocity(0.01f),
@@ -70,7 +70,7 @@ step MuscleEnv::compute_step() {
     const Item root = skeleton.get_items()[0];
 
     if (const float curr_pos = root.get_body()->getCenterOfMassPosition().z();
-        (curr_pos - last_pos) < pos_delta)
+        curr_pos - last_pos < pos_delta)
         remaining_steps -= 1;
     else {
         remaining_steps += frames_to_add;

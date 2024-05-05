@@ -27,17 +27,17 @@ torch::Tensor theta_inv(const torch::Tensor &theta) {
 }
 
 torch::Tensor truncated_normal_pdf(
-    const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
-    float max_value) {
-    auto alpha = (min_value - mu) / sigma;
-    auto beta = (max_value - mu) / sigma;
-    return (phi((x - mu) / sigma)) / (theta(beta) - theta(alpha)) / sigma;
+    const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, const float min_value,
+    const float max_value) {
+    const auto alpha = (min_value - mu) / sigma;
+    const auto beta = (max_value - mu) / sigma;
+    return phi((x - mu) / sigma) / (theta(beta) - theta(alpha)) / sigma;
 }
 
 torch::Tensor truncated_normal_sample(
-    const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value) {
-    auto alpha = (min_value - mu) / sigma;
-    auto beta = (max_value - mu) / sigma;
+    const torch::Tensor &mu, const torch::Tensor &sigma, const float min_value, const float max_value) {
+    const auto alpha = (min_value - mu) / sigma;
+    const auto beta = (max_value - mu) / sigma;
     return theta_inv(
                theta(alpha)
                + at::rand(mu.sizes(), at::TensorOptions(mu.device()))

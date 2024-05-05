@@ -56,7 +56,7 @@ private:
  * JSON stuff
  */
 
-class JsonMember : public AbstractMember {
+class JsonMember final : public AbstractMember {
 public:
     JsonMember(const Item &parent, const nlohmann::json &json_member);
 
@@ -77,7 +77,7 @@ protected:
     Item member;
 };
 
-class JsonHingeConstraint : public AbstractConstraint {
+class JsonHingeConstraint final : public AbstractConstraint {
 public:
     JsonHingeConstraint(const Item &parent, const nlohmann::json &hinge);
 
@@ -92,7 +92,7 @@ private:
     std::shared_ptr<JsonMember> child;
 };
 
-class JsonFixedConstraint : public AbstractConstraint {
+class JsonFixedConstraint final : public AbstractConstraint {
 public:
     JsonFixedConstraint(const Item &parent, const nlohmann::json &fixed);
 

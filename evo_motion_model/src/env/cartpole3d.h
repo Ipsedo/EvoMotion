@@ -9,7 +9,7 @@
 
 #include <evo_motion_model/environment.h>
 
-class CartPole3d : public Environment {
+class CartPole3d final : public Environment {
 public:
     explicit CartPole3d(int seed);
 

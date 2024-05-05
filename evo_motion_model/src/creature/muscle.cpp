@@ -97,8 +97,7 @@ AbstractMuscularSystem::~AbstractMuscularSystem() = default;
  * JSON
  */
 
-JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &json_path)
-    : muscles() {
+JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &json_path) {
     auto json_muscles = read_json(json_path)["muscles"];
 
     for (auto json_muscle: json_muscles) {

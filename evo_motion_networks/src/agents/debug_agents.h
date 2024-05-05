@@ -31,7 +31,7 @@ protected:
     torch::DeviceType curr_device;
 };
 
-class RandomAgent : public DebugAgent {
+class RandomAgent final : public DebugAgent {
 public:
     RandomAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
@@ -40,7 +40,7 @@ public:
     torch::Tensor act(torch::Tensor state, float reward) override;
 };
 
-class ConstantAgent : public DebugAgent {
+class ConstantAgent final : public DebugAgent {
 public:
     ConstantAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,

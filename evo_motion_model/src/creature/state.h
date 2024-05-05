@@ -19,7 +19,7 @@ public:
     virtual ~State();
 };
 
-class ItemState : public State, public btCollisionWorld::ContactResultCallback {
+class ItemState final : public State, public btCollisionWorld::ContactResultCallback {
 public:
     ItemState(Item item, const Item &floor, btDynamicsWorld *world);
 

@@ -11,7 +11,6 @@
 
 template<class R, class... I>
 class Meter {
-private:
     const char csv_sep;
     std::string name;
     std::optional<int> window_size;
@@ -25,7 +24,7 @@ protected:
     virtual std::string loss_to_string(R loss_value) = 0;
 
 public:
-    explicit Meter(const std::string &name, std::optional<int> window_size);
+    explicit Meter(std::string name, std::optional<int> window_size);
 
     virtual void add(I... inputs);
 
@@ -34,11 +33,15 @@ public:
     void to_csv(const std::filesystem::path &output_directory);
 
     virtual R loss();
+
+    virtual ~Meter();
 };
 
-class LossMeter : public Meter<float, float> {
+class LossMeter final : public Meter<float, float> {
 public:
     explicit LossMeter(const std::string &name, std::optional<int> window_size);
+
+    ~LossMeter() override;
 
 protected:
     float process_value(float value) override;

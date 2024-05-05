@@ -18,8 +18,7 @@ public:
     virtual ~Shape();
 };
 
-class ObjShape : public Shape {
-private:
+class ObjShape final : public Shape {
     std::vector<std::tuple<float, float, float>> vertices;
     std::vector<std::tuple<float, float, float>> normals;
 

@@ -13,7 +13,7 @@
 #include "../creature/skeleton.h"
 #include "../creature/state.h"
 
-class MuscleEnv : public Environment {
+class MuscleEnv final : public Environment {
 public:
     explicit MuscleEnv(int seed);
 

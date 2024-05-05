@@ -9,7 +9,7 @@
 
 #include "../creature/muscle.h"
 
-class MuscleController : public Controller {
+class MuscleController final : public Controller {
 public:
     MuscleController(const Muscle& muscle, int action_index);
 

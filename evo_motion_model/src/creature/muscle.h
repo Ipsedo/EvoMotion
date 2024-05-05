@@ -45,7 +45,7 @@ public:
     virtual ~AbstractMuscularSystem();
 };
 
-class JsonMuscularSystem : public AbstractMuscularSystem {
+class JsonMuscularSystem final : public AbstractMuscularSystem {
 public:
     JsonMuscularSystem(Skeleton skeleton, const std::string &json_path);
 

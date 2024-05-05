@@ -15,7 +15,7 @@
 class AgentBuilder {
 public:
     AgentBuilder(
-        const std::string &name, int seed, const std::vector<int64_t> &state_space,
+        std::string name, int seed, const std::vector<int64_t> &state_space,
         const std::vector<int64_t> &action_space, int hidden_size, float lr);
     std::shared_ptr<Agent> get();
 
