@@ -26,15 +26,14 @@ a2c_liquid_networks::a2c_liquid_networks(
     tau = register_parameter("tau", torch::ones({1, hidden_size}));
 
     mu = register_module(
-        "mu", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
+        "mu",
+        torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
-    critic = register_module(
-        "critic", torch::nn::Linear(hidden_size, 1));
+    critic = register_module("critic", torch::nn::Linear(hidden_size, 1));
 
     x_t = torch::mish(torch::randn({1, hidden_size}));
 

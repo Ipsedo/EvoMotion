@@ -43,8 +43,8 @@ Item::Item(
     std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::quat rotation,
     glm::vec3 scale, float mass)
     : Item(
-          std::move(name), shape,
-          glm::translate(glm::mat4(1.f), position) * glm::mat4_cast(rotation), scale, mass) {}
+        std::move(name), shape,
+        glm::translate(glm::mat4(1.f), position) * glm::mat4_cast(rotation), scale, mass) {}
 
 Item::Item(
     std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale,
