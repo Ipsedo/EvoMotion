@@ -23,7 +23,7 @@ public:
 
     std::vector<int64_t> get_action_space() override;
 
-    bool is_continuous() const override;
+    [[nodiscard]] bool is_continuous() const override;
 
 protected:
     step compute_step() override;

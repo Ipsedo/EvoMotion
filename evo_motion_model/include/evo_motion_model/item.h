@@ -27,17 +27,17 @@ public:
         std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position,
         glm::quat rotation, glm::vec3 scale, float mass);
 
-    std::shared_ptr<Shape> get_shape();
+    [[nodiscard]] std::shared_ptr<Shape> get_shape() const;
 
-    std::string get_name();
+    [[nodiscard]] std::string get_name() const;
 
-    glm::mat4 model_matrix();
+    [[nodiscard]] glm::mat4 model_matrix() const;
 
-    glm::mat4 model_matrix_without_scale();
+    [[nodiscard]] glm::mat4 model_matrix_without_scale() const;
 
-    btRigidBody *get_body();
+    [[nodiscard]] btRigidBody *get_body() const;
 
-    void reset(glm::mat4 main_model_matrix = glm::mat4(1.f));
+    void reset(const glm::mat4 &main_model_matrix) const;
 
 private:
     std::string name;

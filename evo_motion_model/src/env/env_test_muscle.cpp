@@ -12,7 +12,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-MuscleEnv::MuscleEnv(int seed)
+MuscleEnv::MuscleEnv(const int seed)
     : Environment(), rng(seed), rd_uni(0.f, 1.f),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
@@ -21,27 +21,29 @@ MuscleEnv::MuscleEnv(int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), controllers(), states(), reset_frames(30),
-      curr_step(0), max_steps(60 * 60), pos_delta(0.01f), last_pos(0.f),
-      max_steps_without_moving(60), remaining_steps(max_steps_without_moving), frames_to_add(10) {
+      curr_step(0), max_steps(60 * 60), max_steps_without_moving(60),
+      remaining_steps(max_steps_without_moving),
+      frames_to_add(10), target_velocity(0.01f),
+      pos_delta(target_velocity / (60.f / static_cast<float>(frames_to_add))), last_pos(0.f) {
     base.get_body()->setFriction(500.f);
 
     add_item(base);
 
-    for (auto item: skeleton.get_items()) {
-        states.push_back(std::make_shared<ItemState>(item));
+    for (const auto &item: skeleton.get_items()) {
+        states.push_back(std::make_shared<ItemState>(item, base, m_world));
         add_item(item);
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
 
     for (auto m: muscular_system.get_muscles()) {
-        for (auto item: m.get_items()) {
+        for (const auto &item: m.get_items()) {
             add_item(item);
             item.get_body()->setActivationState(DISABLE_DEACTIVATION);
         }
-        for (auto c: m.get_constraints()) m_world->addConstraint(c);
+        for (const auto c: m.get_constraints()) m_world->addConstraint(c);
     }
 
-    for (auto constraint: skeleton.get_constraints()) m_world->addConstraint(constraint);
+    for (const auto constraint: skeleton.get_constraints()) m_world->addConstraint(constraint);
 
     for (int i = 0; i < muscular_system.get_muscles().size(); i++)
         controllers.push_back(
@@ -65,23 +67,20 @@ step MuscleEnv::compute_step() {
 
     curr_step += 1;
 
-    Item root = skeleton.get_items()[0];
+    const Item root = skeleton.get_items()[0];
 
-    float curr_pos = root.get_body()->getCenterOfMassPosition().z();
-    if ((curr_pos - last_pos) < pos_delta) remaining_steps -= 1;
+    if (const float curr_pos = root.get_body()->getCenterOfMassPosition().z(); (curr_pos - last_pos) < pos_delta) remaining_steps -= 1;
     else {
         remaining_steps += frames_to_add;
         last_pos = curr_pos;
     }
 
-    bool win = curr_step >= max_steps;
-    bool fail = remaining_steps <= 0;
+    const bool win = curr_step >= max_steps;
+    const bool fail = remaining_steps <= 0;
 
-    float target_velocity = pos_delta;
+    const float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
 
-    float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
-
-    bool done = win | fail;
+    const bool done = win | fail;
 
     return {torch::cat(current_states, 0), reward, done};
 }
@@ -90,7 +89,7 @@ void MuscleEnv::reset_engine() {
     // reset model transform
     glm::vec3 root_pos(1.f, 0.5f, 2.f);
 
-    float angle_limit = float(M_PI) / 4.f;
+    float angle_limit = static_cast<float>(M_PI) / 4.f;
 
     float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
     float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
@@ -98,13 +97,13 @@ void MuscleEnv::reset_engine() {
     glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
                              * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
 
-    for (auto item: skeleton.get_items()) {
+    for (const auto& item: skeleton.get_items()) {
         m_world->removeRigidBody(item.get_body());
         item.reset(model_matrix);
     }
 
     for (auto muscle: muscular_system.get_muscles()) {
-        for (auto item: muscle.get_items()) {
+        for (const auto& item: muscle.get_items()) {
             m_world->removeRigidBody(item.get_body());
             item.reset(model_matrix);
         }
@@ -112,9 +111,9 @@ void MuscleEnv::reset_engine() {
     }
 
     // re-add
-    for (auto item: skeleton.get_items()) m_world->addRigidBody(item.get_body());
+    for (const auto& item: skeleton.get_items()) m_world->addRigidBody(item.get_body());
     for (auto m: muscular_system.get_muscles()) {
-        for (auto item: m.get_items()) m_world->addRigidBody(item.get_body());
+        for (const auto& item: m.get_items()) m_world->addRigidBody(item.get_body());
         for (auto c: m.get_constraints()) m_world->addConstraint(c);
     }
 
@@ -132,6 +131,6 @@ std::vector<int64_t> MuscleEnv::get_state_space() {
     return {nb_features};
 }
 
-std::vector<int64_t> MuscleEnv::get_action_space() { return {(long) controllers.size()}; }
+std::vector<int64_t> MuscleEnv::get_action_space() { return {static_cast<long>(controllers.size())}; }
 
 bool MuscleEnv::is_continuous() const { return true; }

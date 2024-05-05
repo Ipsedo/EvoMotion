@@ -21,6 +21,8 @@ public:
     virtual btTypedConstraint *get_constraint() = 0;
 
     virtual std::shared_ptr<AbstractMember> get_child() = 0;
+
+    virtual ~AbstractConstraint();
 };
 
 class AbstractMember {
@@ -28,11 +30,13 @@ public:
     virtual Item get_item() = 0;
 
     virtual std::vector<std::shared_ptr<AbstractConstraint> > get_children() = 0;
+
+    virtual ~AbstractMember();
 };
 
 class Skeleton {
 public:
-    Skeleton(const std::string &root_name, const std::shared_ptr<AbstractMember> &root_member);
+    Skeleton(std::string root_name, const std::shared_ptr<AbstractMember> &root_member);
 
     std::vector<Item> get_items();
 
@@ -54,9 +58,9 @@ private:
 
 class JsonMember : public AbstractMember {
 public:
-    JsonMember(Item parent, const nlohmann::json &json_member);
+    JsonMember(const Item& parent, const nlohmann::json &json_member);
 
-    JsonMember(const std::string &name, glm::mat4 model_matrix, const nlohmann::json &json_member);
+    JsonMember(const std::string &name, const glm::mat4 &parent_model_matrix, nlohmann::json json_member_input);
 
     Item get_item() override;
 
@@ -73,11 +77,13 @@ protected:
 
 class JsonHingeConstraint : public AbstractConstraint {
 public:
-    JsonHingeConstraint(Item parent, const nlohmann::json &hinge);
+    JsonHingeConstraint(const Item& parent, const nlohmann::json &hinge);
 
     btTypedConstraint *get_constraint() override;
 
     std::shared_ptr<AbstractMember> get_child() override;
+
+    ~JsonHingeConstraint() override;
 
 private:
     btHingeConstraint *hinge_constraint;
@@ -86,11 +92,13 @@ private:
 
 class JsonFixedConstraint : public AbstractConstraint {
 public:
-    JsonFixedConstraint(Item parent, const nlohmann::json &fixed);
+    JsonFixedConstraint(const Item& parent, const nlohmann::json &fixed);
 
     btTypedConstraint *get_constraint() override;
 
     std::shared_ptr<AbstractMember> get_child() override;
+
+    ~JsonFixedConstraint() override;
 
 private:
     btFixedConstraint *fixed_constraint;

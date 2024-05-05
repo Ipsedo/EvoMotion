@@ -11,9 +11,11 @@
 
 class MuscleController : public Controller {
 public:
-    MuscleController(Muscle muscle, int action_index);
+    MuscleController(const Muscle& muscle, int action_index);
 
     void on_input(torch::Tensor action) override;
+
+    ~MuscleController() override;
 
 private:
     int action_index;

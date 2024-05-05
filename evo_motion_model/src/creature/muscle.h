@@ -17,13 +17,15 @@ public:
         const std::string &name, float attach_mass, glm::vec3 attach_scale, Item &item_a,
         glm::vec3 pos_in_a, Item &item_b, glm::vec3 pos_in_b, float force, float max_speed);
 
-    void contract(float speed_factor);
+    void contract(float speed_factor) const;
 
-    void release();
+    void release() const;
 
     std::vector<Item> get_items();
 
     std::vector<btTypedConstraint *> get_constraints();
+
+    ~Muscle();
 
 private:
     float max_speed;
@@ -39,6 +41,8 @@ private:
 class AbstractMuscularSystem {
 public:
     virtual std::vector<Muscle> get_muscles() = 0;
+
+    virtual ~AbstractMuscularSystem();
 };
 
 class JsonMuscularSystem : public AbstractMuscularSystem {

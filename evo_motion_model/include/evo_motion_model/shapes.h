@@ -14,6 +14,8 @@ public:
     virtual std::vector<std::tuple<float, float, float>> get_vertices() = 0;
 
     virtual std::vector<std::tuple<float, float, float>> get_normals() = 0;
+
+    virtual ~Shape();
 };
 
 class ObjShape : public Shape {
@@ -27,6 +29,8 @@ public:
     std::vector<std::tuple<float, float, float>> get_vertices() override;
 
     std::vector<std::tuple<float, float, float>> get_normals() override;
+
+    ~ObjShape() override;
 };
 
 #endif//EVO_MOTION_SHAPES_H

@@ -7,16 +7,12 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define GLM_ENABLE_EXPERIMENTAL
-
 #include <iostream>
-
-#include <glm/gtx/euler_angles.hpp>
 
 #include "../converter.h"
 #include "./muscle.h"
 
-glm::mat4 get_rotation(glm::vec3 a, glm::vec3 b) {
+glm::mat4 get_rotation(const glm::vec3 a, const glm::vec3 b) {
     return glm::rotate(
         glm::mat4(1.0f), acos(glm::dot(b, a) / (glm::length(b) * glm::length(a))),
         glm::cross(b, a));
@@ -76,18 +72,26 @@ Muscle::Muscle(
         muscle_slider_constraint->getOverrideNumSolverIterations() * 4);
 }
 
-void Muscle::contract(float speed_factor) {
+void Muscle::contract(const float speed_factor) const {
     muscle_slider_constraint->setPoweredLinMotor(true);
     muscle_slider_constraint->setTargetLinMotorVelocity(speed_factor * max_speed);
 }
 
-void Muscle::release() { muscle_slider_constraint->setPoweredLinMotor(false); }
+void Muscle::release() const { muscle_slider_constraint->setPoweredLinMotor(false); }
 
 std::vector<Item> Muscle::get_items() { return {attach_a, attach_b}; }
 
 std::vector<btTypedConstraint *> Muscle::get_constraints() {
     return {muscle_slider_constraint, attach_a_constraint, attach_b_constraint};
 }
+
+Muscle::~Muscle() = default;
+
+/*
+ * Abstract muscular system
+ */
+
+AbstractMuscularSystem::~AbstractMuscularSystem() = default;
 
 /*
  * JSON
@@ -98,8 +102,8 @@ JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &jso
     auto json_muscles = read_json(json_path)["muscles"];
 
     for (auto json_muscle: json_muscles) {
-        std::string item_a_name = json_muscle["item_a"].get<std::string>();
-        std::string item_b_name = json_muscle["item_b"].get<std::string>();
+        auto item_a_name = json_muscle["item_a"].get<std::string>();
+        auto item_b_name = json_muscle["item_b"].get<std::string>();
         Item item_a = skeleton.get_item(skeleton.get_root_name() + "_" + item_a_name);
         Item item_b = skeleton.get_item(skeleton.get_root_name() + "_" + item_b_name);
 
@@ -114,3 +118,4 @@ JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &jso
 }
 
 std::vector<Muscle> JsonMuscularSystem::get_muscles() { return muscles; }
+

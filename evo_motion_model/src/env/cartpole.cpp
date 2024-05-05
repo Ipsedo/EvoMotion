@@ -24,16 +24,16 @@ CartPole::CartPole(int seed)
 
     // Create items
     // (init graphical and physical objects)
-    Item base = Item(
+    Item base(
         "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, base_pos, 10.f), glm::vec3(10.f, base_height, 10.f), 0.f);
 
-    Item chariot = Item(
+    Item chariot(
         "chariot", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, chariot_pos, 10.f), glm::vec3(chariot_width, chariot_height, chariot_width),
         chariot_mass);
 
-    Item pendulum = Item(
+    Item pendulum(
         "pendulum", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, pendulum_pos, 10.f),
         glm::vec3(pendulum_width, pendulum_height, pendulum_width), pendulum_mass);

@@ -4,11 +4,13 @@
 
 #include "./muscle_controller.h"
 
-#include <utility>
 
-MuscleController::MuscleController(Muscle muscle, int action_index)
-    : action_index(action_index), muscle(std::move(muscle)) {}
 
-void MuscleController::on_input(torch::Tensor action) {
+MuscleController::MuscleController(const Muscle& muscle, const int action_index)
+    : action_index(action_index), muscle(muscle) {}
+
+void MuscleController::on_input(const torch::Tensor action) {
     muscle.contract(action[action_index].item().toFloat());
 }
+
+MuscleController::~MuscleController() = default;

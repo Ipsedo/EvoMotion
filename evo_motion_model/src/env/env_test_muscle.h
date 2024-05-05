@@ -25,7 +25,7 @@ public:
 
     std::vector<int64_t> get_action_space() override;
 
-    bool is_continuous() const override;
+    [[nodiscard]] bool is_continuous() const override;
 
 protected:
     step compute_step() override;
@@ -51,11 +51,12 @@ private:
     int max_steps;
 
     //float velocity_delta;
-    float pos_delta;
-    float last_pos;
     int max_steps_without_moving;
     int remaining_steps;
     int frames_to_add;
+    float target_velocity;
+    float pos_delta;
+    float last_pos;
 
 };
 

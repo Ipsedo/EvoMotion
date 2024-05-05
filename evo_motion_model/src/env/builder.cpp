@@ -12,7 +12,7 @@
 
 std::shared_ptr<Environment> EnvBuilder::get() { return constructors[env_name](seed); }
 
-EnvBuilder::EnvBuilder(int seed, std::string env_name)
+EnvBuilder::EnvBuilder(const int seed, std::string env_name)
     : seed(seed), env_name(std::move(env_name)),
       constructors(
       {{"cartpole", std::make_shared<CartPole, int>},

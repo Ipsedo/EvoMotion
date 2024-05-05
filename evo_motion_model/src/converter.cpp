@@ -21,15 +21,15 @@ glm::mat4 json_transformation_to_model_matrix(nlohmann::json transformation) {
     nlohmann::json rotation = transformation["rotation"];
     nlohmann::json translation = transformation["translation"];
 
-    glm::vec3 position = json_vec3_to_glm_vec3(transformation["translation"]);
-    glm::vec3 rotation_point = json_vec3_to_glm_vec3(rotation["point"]);
-    glm::vec3 rotation_axis = json_vec3_to_glm_vec3(rotation["axis"]);
-    float angle_radian = M_PI * rotation["angle_degree"].get<float>() / 180.f;
+    const glm::vec3 position = json_vec3_to_glm_vec3(transformation["translation"]);
+    const glm::vec3 rotation_point = json_vec3_to_glm_vec3(rotation["point"]);
+    const glm::vec3 rotation_axis = json_vec3_to_glm_vec3(rotation["axis"]);
+    const float angle_radian = M_PI * rotation["angle_degree"].get<float>() / 180.f;
 
-    glm::mat4 translation_to_origin = glm::translate(glm::mat4(1.0f), -rotation_point);
-    glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_radian, rotation_axis);
-    glm::mat4 translation_back = glm::translate(glm::mat4(1.0f), rotation_point);
-    glm::mat4 translation_to_position = glm::translate(glm::mat4(1.0f), position);
+    const glm::mat4 translation_to_origin = glm::translate(glm::mat4(1.0f), -rotation_point);
+    const glm::mat4 rotation_matrix = glm::rotate(glm::mat4(1.0f), angle_radian, rotation_axis);
+    const glm::mat4 translation_back = glm::translate(glm::mat4(1.0f), rotation_point);
+    const glm::mat4 translation_to_position = glm::translate(glm::mat4(1.0f), position);
 
     return translation_to_position * translation_back * rotation_matrix * translation_to_origin;
 }
@@ -67,9 +67,9 @@ btTransform glm_to_bullet(glm::mat4 m) {
 
 btQuaternion glm_to_bullet(glm::quat q) { return {q.x, q.y, q.z, q.w}; }
 
-glm::vec3 bullet_to_glm(btVector3 v) { return {v.x(), v.y(), v.z()}; }
+glm::vec3 bullet_to_glm(const btVector3 v) { return {v.x(), v.y(), v.z()}; }
 
-glm::vec4 bullet_to_glm(btVector4 v) { return {v.x(), v.y(), v.z(), v.w()}; }
+glm::vec4 bullet_to_glm(const btVector4 v) { return {v.x(), v.y(), v.z(), v.w()}; }
 
 glm::mat4 bullet_to_glm(const btTransform &m) {
     float tmp[16];
@@ -77,4 +77,4 @@ glm::mat4 bullet_to_glm(const btTransform &m) {
     return glm::make_mat4(tmp);
 }
 
-glm::quat bullet_to_glm(btQuaternion q) { return {q.w(), q.x(), q.y(), q.z()}; }
+glm::quat bullet_to_glm(const btQuaternion q) { return {q.w(), q.x(), q.y(), q.z()}; }

@@ -39,6 +39,6 @@ glm::vec4 bullet_to_glm(btVector4 v);
 
 glm::mat4 bullet_to_glm(const btTransform &m);
 
-glm::quat bullet_to_glm(btQuaternion m);
+glm::quat bullet_to_glm(btQuaternion q);
 
 #endif//EVO_MOTION_CONVERTER_H

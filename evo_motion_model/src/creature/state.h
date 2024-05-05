@@ -15,20 +15,29 @@ public:
     virtual int get_size() = 0;
 
     virtual torch::Tensor get_state() = 0;
+
+    virtual ~State();
 };
 
-class ItemState : public State {
+class ItemState : public State, public btCollisionWorld::ContactResultCallback {
 public:
-    explicit ItemState(const Item &item);
+    ItemState(Item item, const Item &floor, btDynamicsWorld *world);
 
     int get_size() override;
 
     torch::Tensor get_state() override;
 
+    btScalar addSingleResult(
+        btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0Wrap, int partId0, int index0,
+        const btCollisionObjectWrapper *colObj1Wrap, int partId1, int index1) override;
+
+    ~ItemState() override;
+
 private:
-    Item item;
+    Item state_item;
     btVector3 last_lin_velocity;
     btVector3 last_ang_velocity;
+    bool floor_touched;
 };
 
 #endif//EVO_MOTION_STATE_H

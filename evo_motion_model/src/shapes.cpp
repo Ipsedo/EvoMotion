@@ -4,14 +4,15 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 #include <evo_motion_model/shapes.h>
 
 #include "./constants.h"
 
-std::vector<std::string> split(const std::string &s, char delim) {
+Shape::~Shape() = default;
+
+std::vector<std::string> split(const std::string &s, const char delim) {
     std::stringstream ss(s);
     std::string item;
     std::vector<std::string> elems;
@@ -31,9 +32,7 @@ ObjShape::ObjShape(const std::string &obj_file_path) {
     std::string line;
 
     while (std::getline(obj_file, line)) {
-        std::vector<std::string> split_line = split(line, ' ');
-
-        if (split_line[0] == "vn") {
+        if (std::vector<std::string> split_line = split(line, ' '); split_line[0] == "vn") {
             normals_ref.emplace_back(
                 std::stof(split_line[1]), std::stof(split_line[2]), std::stof(split_line[3]));
         } else if (split_line[0] == "v") {
@@ -60,3 +59,5 @@ ObjShape::ObjShape(const std::string &obj_file_path) {
 std::vector<std::tuple<float, float, float>> ObjShape::get_vertices() { return vertices; }
 
 std::vector<std::tuple<float, float, float>> ObjShape::get_normals() { return normals; }
+
+ObjShape::~ObjShape() = default;
