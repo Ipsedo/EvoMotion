@@ -2,7 +2,7 @@
 // Created by samuel on 28/01/24.
 //
 
-#include "./env_test_muscle.h"
+#include "./creature_env.h"
 
 #include "../controller/muscle_controller.h"
 #include "./constants.h"
