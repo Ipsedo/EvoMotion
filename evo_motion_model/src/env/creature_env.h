@@ -13,7 +13,7 @@
 #include "../creature/skeleton.h"
 #include "../creature/state.h"
 
-class MuscleEnv : public Environment {
+class MuscleEnv final : public Environment {
 public:
     explicit MuscleEnv(int seed);
 
@@ -25,7 +25,7 @@ public:
 
     std::vector<int64_t> get_action_space() override;
 
-    bool is_continuous() const override;
+    [[nodiscard]] bool is_continuous() const override;
 
 protected:
     step compute_step() override;
@@ -44,14 +44,23 @@ private:
 
     std::vector<std::shared_ptr<Controller>> controllers;
 
-    std::vector<ItemState> states;
+    std::vector<std::shared_ptr<State>> states;
 
+
+    float initial_remaining_seconds;
+    float max_episode_seconds;
+
+    int reset_frames;
     int curr_step;
     int max_steps;
 
-    int nb_steps_without_moving;
-    float velocity_delta;
     int max_steps_without_moving;
+    int remaining_steps;
+    int frames_to_add;
+    float target_velocity;
+    float pos_delta;
+    float last_pos;
+
 };
 
 #endif//EVO_MOTION_ENV_TEST_MUSCLE_H

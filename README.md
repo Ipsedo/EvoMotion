@@ -32,7 +32,7 @@ An internet connexion is also required in order to download dependencies inside 
    Run training on creature muscles
    ```bash
    $ cd /path/to/EvoMotion/build
-   $ evo_motion test_muscle actor_critic_liquid --seed 1234 --cuda --hidden_size 32 train ./out/muscles_a2c_liquid --episodes 1024 --nb_saves 1024 --learning_rate 1e-3
+   $ evo_motion muscles actor_critic_liquid --seed 1234 --cuda --hidden_size 32 train ./out/muscles_a2c_liquid --episodes 1024 --nb_saves 1024 --learning_rate 1e-3
    ```
 4. After the first save (here after 1024 episodes), you can now evaluate your trained agent.
 
@@ -43,7 +43,7 @@ An internet connexion is also required in order to download dependencies inside 
 
    Evaluate agent on creature muscles (here the first model save) with GLFW window of 1920 * 1024 pixels
    ```bash
-   $ evo_motion test_muscle actor_critic_liquid --seed 1234 --hidden_size 32 --cuda run ./out/muscles_a2c_liquid/save_0 -w 1920 -h 1024
+   $ evo_motion muscles actor_critic_liquid --seed 1234 --hidden_size 32 --cuda run ./out/muscles_a2c_liquid/save_0 -w 1920 -h 1024
    ```
 
 ## Requirements

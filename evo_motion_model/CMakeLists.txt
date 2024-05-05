@@ -51,6 +51,13 @@ target_link_libraries(
 
 set(EVO_MOTION_MODEL_LIBRARIES evo_motion_model PARENT_SCOPE)
 
-add_custom_target(copy-resources-files ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources"
-        DEPENDS evo_motion_model)
+function(add_extra_folder source destination)
+    add_custom_command(
+            TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${source} ${destination}
+            DEPENDS ${destination}
+            COMMENT "symbolic link resources folder from ${source} => ${destination}"
+    )
+endfunction()
+
+add_extra_folder("${CMAKE_CURRENT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources")

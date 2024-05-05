@@ -4,12 +4,13 @@
 
 #include <fstream>
 #include <numeric>
+#include <utility>
 
 #include <evo_motion_networks/metrics.h>
 
 template<class R, class... I>
-Meter<R, I...>::Meter(const std::string &name, std::optional<int> window_size)
-    : csv_sep(','), name(name), window_size(window_size), results(), curr_step(0L) {}
+Meter<R, I...>::Meter(std::string name, const std::optional<int> window_size)
+    : csv_sep(','), name(std::move(name)), window_size(window_size), results(), curr_step(0L) {}
 
 template<class R, class... I>
 void Meter<R, I...>::add(I... inputs) {
@@ -26,7 +27,7 @@ R Meter<R, I...>::loss() {
 }
 
 template<class R, class... I>
-void Meter<R, I...>::set_window_size(std::optional<int> new_window_size) {
+void Meter<R, I...>::set_window_size(const std::optional<int> new_window_size) {
     window_size = new_window_size;
 }
 
@@ -36,22 +37,27 @@ void Meter<R, I...>::to_csv(const std::filesystem::path &output_directory) {
 
     if (!std::filesystem::exists(csv_path)) {
         std::ofstream csv_file(csv_path.string());
-        csv_file << "step" << std::string(csv_sep) << "loss" << std::endl;
+        csv_file << "step" << csv_sep << "loss" << std::endl;
         csv_file.close();
     }
 
     std::ofstream csv_file(csv_path.string());
-    csv_file << std::string(curr_step) + std::string(csv_sep) + loss_to_string(loss()) << std::endl;
+    csv_file << curr_step << csv_sep << loss_to_string(loss()) << std::endl;
     csv_file.close();
 }
+
+template<class R, class ... I>
+Meter<R, I...>::~Meter() = default;
 
 /*
  * Single value loss
  */
 
-LossMeter::LossMeter(const std::string &name, std::optional<int> window_size)
+LossMeter::LossMeter(const std::string &name, const std::optional<int> window_size)
     : Meter(name, window_size) {}
 
-float LossMeter::process_value(float value) { return value; }
+float LossMeter::process_value(const float value) { return value; }
 
-std::string LossMeter::loss_to_string(float loss_value) { return std::to_string(loss_value); }
+std::string LossMeter::loss_to_string(const float loss_value) { return std::to_string(loss_value); }
+
+LossMeter::~LossMeter() = default;

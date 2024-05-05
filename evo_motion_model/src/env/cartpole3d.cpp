@@ -8,7 +8,7 @@
 
 CartPole3d::CartPole3d(int seed)
     : Environment(), slider_speed(16.f), slider_force_per_kg(32.f), chariot_push_force(2.f),
-      reset_frame_nb(8), limit_angle(float(M_PI) / 2.f), base_scale(10.f, 1.f, 10.f),
+      reset_frame_nb(8), limit_angle(static_cast<float>(M_PI) / 2.f), base_scale(10.f, 1.f, 10.f),
       cart_x_scale(0.5f, 0.125f, 0.5f), cart_z_scale(0.5f, 0.125f, 0.5f),
       pole_scale(0.1f, 0.5f, 0.1f), base_pos(0.f, -4.f, 10.f),
       cart_x_pos(base_pos.x(), base_pos.y() + base_scale.y() + cart_x_scale.y(), base_pos.z()),
@@ -129,7 +129,7 @@ CartPole3d::CartPole3d(int seed)
 
 std::vector<Item> CartPole3d::get_items() { return items; }
 
-std::vector<std::shared_ptr<Controller>> CartPole3d::get_controllers() { return controllers; }
+std::vector<std::shared_ptr<Controller> > CartPole3d::get_controllers() { return controllers; }
 
 step CartPole3d::compute_step() {
     float pos_x = cart_z_rg->getWorldTransform().getOrigin().x();
@@ -138,47 +138,47 @@ step CartPole3d::compute_step() {
     float vel_x = cart_z_rg->getLinearVelocity().x();
     float vel_z = cart_z_rg->getLinearVelocity().z();
 
-    float center_distance =
+    const float center_distance =
         sqrt(pow(cart_z_pos.x() - pos_x, 2.f) + pow(cart_z_pos.z() - pos_z, 2.f));
     pos_x = pos_x - cart_z_pos.x();
     pos_z = pos_z - cart_z_pos.z();
 
-    auto ang_quaternion = pole_rg->getWorldTransform().getRotation();
+    const auto ang_quaternion = pole_rg->getWorldTransform().getRotation();
     float ang_x = 0.f, ang_y = 0.f, ang_z = 0.f;
     ang_quaternion.getEulerZYX(ang_x, ang_y, ang_z);
 
     btTransform identity;
     identity.setIdentity();
     identity.setOrigin(pole_pos);
-    btVector3 origin = btVector3(0, 1, 0).rotate(
+    const btVector3 origin = btVector3(0, 1, 0).rotate(
         identity.getRotation().getAxis(), identity.getRotation().getAngle());
-    btVector3 rotated_ang = btVector3(0, 1, 0).rotate(
+    const btVector3 rotated_ang = btVector3(0, 1, 0).rotate(
         pole_rg->getWorldTransform().getRotation().getAxis(),
         pole_rg->getWorldTransform().getRotation().getAngle());
 
-    float ang = acos(origin.dot(rotated_ang) / (origin.norm() * rotated_ang.norm()));
+    const float ang = acos(origin.dot(rotated_ang) / (origin.norm() * rotated_ang.norm()));
     float ang_vel = ang - last_ang;
 
-    auto ang_vel_vec = pole_rg->getAngularVelocity();
-    auto ang_acc_vec = ang_vel_vec - last_ang_vel_vec;
+    const auto ang_vel_vec = pole_rg->getAngularVelocity();
+    const auto ang_acc_vec = ang_vel_vec - last_ang_vel_vec;
 
-    auto axis = pole_rg->getWorldTransform().getRotation().getAxis();
+    const auto axis = pole_rg->getWorldTransform().getRotation().getAxis();
 
-    btVector3 axis_ori(0.f, 1.f, 0.f);
-    float vertical_ang = acos(
+    const btVector3 axis_ori(0.f, 1.f, 0.f);
+    const float vertical_ang = acos(
         (axis.x() * axis_ori.x() + axis.y() * axis_ori.y() + axis.z() * axis_ori.z())
         / (axis.norm() + axis_ori.norm()));
     float vertical_ang_vel = vertical_ang - last_vert_ang;
 
-    btVector3 axis_plan(axis.x(), 0.f, axis.z());
-    btVector3 axis_plan_ori(1.f, 0.f, 0.f);
-    float plan_ang = acos(
+    const btVector3 axis_plan(axis.x(), 0.f, axis.z());
+    const btVector3 axis_plan_ori(1.f, 0.f, 0.f);
+    const float plan_ang = acos(
         (axis_plan.x() * axis_plan_ori.x() + axis_plan.y() * axis_plan_ori.y()
          + axis_plan.z() * axis_plan_ori.z())
         / (axis_plan.norm() + axis_plan_ori.norm()));
     float plan_ang_vel = plan_ang - last_plan_ang;
 
-    torch::Tensor state = torch::tensor(
+    const torch::Tensor state = torch::tensor(
         {center_distance / base_scale.x(),
          pos_x / base_scale.x(),
          vel_x,
@@ -186,10 +186,10 @@ step CartPole3d::compute_step() {
          pos_z / base_scale.z(),
          vel_z,
          vel_z - last_vel_z,
-         ang_x / float(M_PI),
-         ang_y / float(M_PI),
-         ang_z / float(M_PI),
-         ang / float(2. * M_PI) - 1.f,
+         ang_x / static_cast<float>(M_PI),
+         ang_y / static_cast<float>(M_PI),
+         ang_z / static_cast<float>(M_PI),
+         ang / static_cast<float>(2. * M_PI) - 1.f,
          ang_vel,
          ang_vel - last_ang_vel,
          ang_vel_vec.x(),
@@ -201,10 +201,10 @@ step CartPole3d::compute_step() {
          axis.x(),
          axis.y(),
          axis.z(),
-         plan_ang / float(M_PI),
+         plan_ang / static_cast<float>(M_PI),
          plan_ang_vel,
          plan_ang_vel - last_plan_ang_vec,
-         vertical_ang / float(M_PI),
+         vertical_ang / static_cast<float>(M_PI),
          vertical_ang_vel,
          vertical_ang_vel - last_vert_ang_vel},
         at::TensorOptions().device(curr_device));
@@ -212,7 +212,7 @@ step CartPole3d::compute_step() {
     bool fail = center_distance > base_scale.x() || abs(ang) > limit_angle;
     bool win = step_idx > max_steps;
 
-    bool done = fail || win;
+    const bool done = fail || win;
 
     float reward = pow((limit_angle - abs(ang)) / limit_angle, 2.f)
                    + pow((base_scale.x() - center_distance) / base_scale.x(), 2.f);
@@ -297,11 +297,11 @@ void CartPole3d::reset_engine() {
 
     // Apply random force to chariot for reset_frame_nb steps
     // To prevent over-fitting
-    float angle = rd_uni(rng) * float(M_PI) * 2.f;
-    float rand_force = rd_uni(rng) * chariot_push_force;
+    const float angle = rd_uni(rng) * static_cast<float>(M_PI) * 2.f;
+    const float rand_force = rd_uni(rng) * chariot_push_force;
 
-    float rand_force_x = cos(angle) * rand_force;
-    float rand_force_z = sin(angle) * rand_force;
+    const float rand_force_x = cos(angle) * rand_force;
+    const float rand_force_z = sin(angle) * rand_force;
 
     cart_z_rg->applyCentralImpulse(btVector3(rand_force_x, 0.f, rand_force_z));
 

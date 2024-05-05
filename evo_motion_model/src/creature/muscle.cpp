@@ -7,16 +7,12 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define GLM_ENABLE_EXPERIMENTAL
-
 #include <iostream>
-
-#include <glm/gtx/euler_angles.hpp>
 
 #include "../converter.h"
 #include "./muscle.h"
 
-glm::mat4 get_rotation(glm::vec3 a, glm::vec3 b) {
+glm::mat4 get_rotation(const glm::vec3 a, const glm::vec3 b) {
     return glm::rotate(
         glm::mat4(1.0f), acos(glm::dot(b, a) / (glm::length(b) * glm::length(a))),
         glm::cross(b, a));
@@ -43,9 +39,7 @@ Muscle::Muscle(
     muscle_slider_constraint = new btSliderConstraint(
         *attach_a.get_body(), *attach_b.get_body(), frame_in_attach_a, frame_in_attach_b, true);
 
-    muscle_slider_constraint->setPoweredLinMotor(true);
     muscle_slider_constraint->setMaxLinMotorForce(force);
-    muscle_slider_constraint->setTargetLinMotorVelocity(0.f);
 
     muscle_slider_constraint->setLowerAngLimit(0);
     muscle_slider_constraint->setUpperAngLimit(0);
@@ -53,9 +47,10 @@ Muscle::Muscle(
     muscle_slider_constraint->setLowerLinLimit(0);
     float max_extension_muscle =
         2.f
-        * glm::length(glm::vec3(
-            attach_a.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)
-            - attach_b.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)));
+        * glm::length(
+            glm::vec3(
+                attach_a.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)
+                - attach_b.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)));
     muscle_slider_constraint->setUpperLinLimit(max_extension_muscle);
 
     attach_a_constraint = new btPoint2PointConstraint(
@@ -70,25 +65,19 @@ Muscle::Muscle(
         attach_b.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
     attach_a_constraint->setOverrideNumSolverIterations(
-        attach_a_constraint->getOverrideNumSolverIterations() * 16);
+        attach_a_constraint->getOverrideNumSolverIterations() * 4);
     attach_b_constraint->setOverrideNumSolverIterations(
-        attach_b_constraint->getOverrideNumSolverIterations() * 16);
+        attach_b_constraint->getOverrideNumSolverIterations() * 4);
     muscle_slider_constraint->setOverrideNumSolverIterations(
-        muscle_slider_constraint->getOverrideNumSolverIterations() * 16);
-
-    attach_a_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
-    attach_a_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);
-
-    attach_b_constraint->setParam(BT_CONSTRAINT_ERP, 0.9);
-    attach_b_constraint->setParam(BT_CONSTRAINT_CFM, 0.1);
+        muscle_slider_constraint->getOverrideNumSolverIterations() * 4);
 }
 
-void Muscle::contract(float speed_factor) {
+void Muscle::contract(const float speed_factor) const {
     muscle_slider_constraint->setPoweredLinMotor(true);
     muscle_slider_constraint->setTargetLinMotorVelocity(speed_factor * max_speed);
 }
 
-void Muscle::release() { muscle_slider_constraint->setPoweredLinMotor(false); }
+void Muscle::release() const { muscle_slider_constraint->setPoweredLinMotor(false); }
 
 std::vector<Item> Muscle::get_items() { return {attach_a, attach_b}; }
 
@@ -96,17 +85,24 @@ std::vector<btTypedConstraint *> Muscle::get_constraints() {
     return {muscle_slider_constraint, attach_a_constraint, attach_b_constraint};
 }
 
+Muscle::~Muscle() = default;
+
+/*
+ * Abstract muscular system
+ */
+
+AbstractMuscularSystem::~AbstractMuscularSystem() = default;
+
 /*
  * JSON
  */
 
-JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &json_path)
-    : muscles() {
+JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &json_path) {
     auto json_muscles = read_json(json_path)["muscles"];
 
     for (auto json_muscle: json_muscles) {
-        std::string item_a_name = json_muscle["item_a"].get<std::string>();
-        std::string item_b_name = json_muscle["item_b"].get<std::string>();
+        auto item_a_name = json_muscle["item_a"].get<std::string>();
+        auto item_b_name = json_muscle["item_b"].get<std::string>();
         Item item_a = skeleton.get_item(skeleton.get_root_name() + "_" + item_a_name);
         Item item_b = skeleton.get_item(skeleton.get_root_name() + "_" + item_b_name);
 
@@ -121,3 +117,4 @@ JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &jso
 }
 
 std::vector<Muscle> JsonMuscularSystem::get_muscles() { return muscles; }
+

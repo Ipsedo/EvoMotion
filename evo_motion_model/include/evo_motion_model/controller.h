@@ -10,6 +10,8 @@
 class Controller {
 public:
     virtual void on_input(torch::Tensor action) = 0;
+
+    virtual ~Controller();
 };
 
 #endif//EVO_MOTION_CONTROLLER_H

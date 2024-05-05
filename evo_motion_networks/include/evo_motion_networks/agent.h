@@ -24,6 +24,8 @@ public:
     virtual void to(torch::DeviceType device) = 0;
 
     virtual void set_eval(bool eval) = 0;
+
+    virtual ~Agent();
 };
 
 #endif//EVO_MOTION_AGENT_H

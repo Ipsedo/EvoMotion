@@ -19,7 +19,7 @@ Environment::Environment()
     m_world->setGravity(btVector3(0, -9.8f, 0));
 }
 
-void Environment::add_item(Item item) { m_world->addRigidBody(item.get_body()); }
+void Environment::add_item(const Item &item) const { m_world->addRigidBody(item.get_body()); }
 
 step Environment::do_step(const torch::Tensor &action) {
     for (const auto &c: get_controllers()) c->on_input(action);
@@ -34,4 +34,27 @@ step Environment::reset() {
     return compute_step();
 }
 
-void Environment::to(torch::DeviceType device) { curr_device = device; }
+void Environment::to(const torch::DeviceType device) { curr_device = device; }
+
+Environment::~Environment() {
+    for (int i = m_world->getNumCollisionObjects() - 1; i >= 0; i--) {
+        btCollisionObject *obj = m_world->getCollisionObjectArray()[i];
+        m_world->removeCollisionObject(obj);
+        const auto body = dynamic_cast<btRigidBody *>(obj);
+
+        while (body->getNumConstraintRefs()) {
+            btTypedConstraint *constraint = body->getConstraintRef(0);
+            m_world->removeConstraint(constraint);
+            delete constraint;
+        }
+
+        m_world->removeRigidBody(body);
+        delete body;
+    }
+
+    delete m_world;
+    delete m_broad_phase;
+    delete m_dispatcher;
+    delete m_collision_configuration;
+    delete m_constraint_solver;
+}

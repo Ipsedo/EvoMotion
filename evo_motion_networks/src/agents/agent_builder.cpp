@@ -4,14 +4,16 @@
 
 #include <evo_motion_networks/agent_builder.h>
 
+#include <utility>
+
 #include "./actor_critic.h"
 #include "./actor_critic_liquid.h"
 #include "./debug_agents.h"
 
 AgentBuilder::AgentBuilder(
-    const std::string &name, int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, float lr)
-    : name(name), seed(seed), state_space(state_space), action_space(action_space),
+    std::string name, const int seed, const std::vector<int64_t> &state_space,
+    const std::vector<int64_t> &action_space, const int hidden_size, const float lr)
+    : name(std::move(name)), seed(seed), state_space(state_space), action_space(action_space),
       hidden_size(hidden_size), lr(lr),
       agent_constructors(
           {{"actor_critic",

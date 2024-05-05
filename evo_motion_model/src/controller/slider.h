@@ -10,7 +10,7 @@
 
 #include <evo_motion_model/controller.h>
 
-class SliderController : public Controller {
+class SliderController final : public Controller {
 public:
     explicit SliderController(int action_index, btSliderConstraint *slider, float slider_speed);
 

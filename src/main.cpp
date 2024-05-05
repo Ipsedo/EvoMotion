@@ -8,14 +8,13 @@
 #include <argparse/argparse.hpp>
 
 #include "./run.h"
-#include "./test_muscle.h"
 #include "./train.h"
 
 int main(int argc, char **argv) {
     argparse::ArgumentParser parser("evo_motion");
 
     parser.add_argument("environment").default_value("cartpole").help("the environment");
-    parser.add_argument("agent").default_value("actor_critic_liquide").help("the agent");
+    parser.add_argument("agent").default_value("actor_critic_liquid").help("the agent");
 
     parser.add_argument("--seed").scan<'i', int>().default_value(1234).help("seed for RNG");
 
@@ -70,29 +69,10 @@ int main(int argc, char **argv) {
         .default_value(1024)
         .help("window height");
 
-    /*
-     * Test muscle parser
-     */
-
-    argparse::ArgumentParser muscle_parser("muscle");
-
-    muscle_parser.add_argument("-w", "--width")
-        .scan<'i', int>()
-        .default_value(1024)
-        .help("window width");
-
-    muscle_parser.add_argument("-h", "--height")
-        .scan<'i', int>()
-        .default_value(1024)
-        .help("window height");
-
     parser.add_subparser(run_parser);
     parser.add_subparser(train_parser);
-    parser.add_subparser(muscle_parser);
 
-    try {
-        parser.parse_args(argc, argv);
-    } catch (const std::runtime_error &err) {
+    try { parser.parse_args(argc, argv); } catch (const std::runtime_error &err) {
         std::cerr << err.what() << std::endl;
         std::cerr << parser;
         std::exit(1);
@@ -111,8 +91,6 @@ int main(int argc, char **argv) {
             {parser.get<std::string>("environment"), parser.get<std::string>("agent"),
              run_parser.get<std::string>("input_folder"), run_parser.get<int>("width"),
              run_parser.get<int>("height"), parser.get<int>("hidden_size")});
-    else if (parser.is_subcommand_used(muscle_parser))
-        test_muscle({muscle_parser.get<int>("width"), muscle_parser.get<int>("height")});
     else {
         std::cerr << "must enter a subcommand" << std::endl << parser.help().str() << std::endl;
         exit(1);

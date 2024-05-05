@@ -33,7 +33,7 @@ protected:
 
     virtual void reset_engine() = 0;
 
-    void add_item(Item item);
+    void add_item(const Item &item) const;
 
 public:
     Environment();
@@ -50,9 +50,11 @@ public:
 
     virtual std::vector<int64_t> get_action_space() = 0;
 
-    virtual bool is_continuous() const = 0;
+    [[nodiscard]] virtual bool is_continuous() const = 0;
 
     void to(torch::DeviceType device);
+
+    virtual ~Environment();
 };
 
 #endif//EVO_MOTION_ENVIRONMENT_H
