@@ -46,11 +46,14 @@ private:
 
     std::vector<std::shared_ptr<State>> states;
 
+
+    float initial_remaining_seconds;
+    float max_episode_seconds;
+
     int reset_frames;
     int curr_step;
     int max_steps;
 
-    //float velocity_delta;
     int max_steps_without_moving;
     int remaining_steps;
     int frames_to_add;

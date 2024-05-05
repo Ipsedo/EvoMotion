@@ -5,6 +5,7 @@
 #include "./env_test_muscle.h"
 
 #include "../controller/muscle_controller.h"
+#include "./constants.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -21,10 +22,11 @@ MuscleEnv::MuscleEnv(const int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), reset_frames(30),
-      curr_step(0), max_steps(60 * 60), max_steps_without_moving(60),
+      curr_step(0), max_episode_seconds(60.f), max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)), initial_remaining_seconds(1.f),
+      max_steps_without_moving(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)),
       remaining_steps(max_steps_without_moving),
-      frames_to_add(10), target_velocity(0.01f),
-      pos_delta(target_velocity / (60.f / static_cast<float>(frames_to_add))), last_pos(0.f) {
+      frames_to_add(2), target_velocity(0.05f),
+      pos_delta(target_velocity * DELTA_T_MODEL * static_cast<float>(frames_to_add)), last_pos(0.f) {
     base.get_body()->setFriction(500.f);
 
     add_item(base);
@@ -123,7 +125,7 @@ void MuscleEnv::reset_engine() {
     curr_step = 0;
     remaining_steps = max_steps_without_moving;
 
-    for (int i = 0; i < reset_frames; i++) m_world->stepSimulation(1.f / 60.f);
+    for (int i = 0; i < reset_frames; i++) m_world->stepSimulation(DELTA_T_MODEL);
 
     last_pos = skeleton.get_items()[0].get_body()->getCenterOfMassPosition().z();
 }
