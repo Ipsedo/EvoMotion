@@ -69,7 +69,9 @@ step MuscleEnv::compute_step() {
 
     const Item root = skeleton.get_items()[0];
 
-    if (const float curr_pos = root.get_body()->getCenterOfMassPosition().z(); (curr_pos - last_pos) < pos_delta) remaining_steps -= 1;
+    if (const float curr_pos = root.get_body()->getCenterOfMassPosition().z();
+        (curr_pos - last_pos) < pos_delta)
+        remaining_steps -= 1;
     else {
         remaining_steps += frames_to_add;
         last_pos = curr_pos;
@@ -78,7 +80,8 @@ step MuscleEnv::compute_step() {
     const bool win = curr_step >= max_steps;
     const bool fail = remaining_steps <= 0;
 
-    const float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
+    const float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) /
+                         target_velocity;
 
     const bool done = win | fail;
 
@@ -111,9 +114,9 @@ void MuscleEnv::reset_engine() {
     }
 
     // re-add
-    for (const auto& item: skeleton.get_items()) m_world->addRigidBody(item.get_body());
+    for (const auto &item: skeleton.get_items()) m_world->addRigidBody(item.get_body());
     for (auto m: muscular_system.get_muscles()) {
-        for (const auto& item: m.get_items()) m_world->addRigidBody(item.get_body());
+        for (const auto &item: m.get_items()) m_world->addRigidBody(item.get_body());
         for (auto c: m.get_constraints()) m_world->addConstraint(c);
     }
 

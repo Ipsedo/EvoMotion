@@ -92,7 +92,7 @@ JsonMember::JsonMember(
             member.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 }
 
-JsonMember::JsonMember(const Item& parent, const nlohmann::json &json_member)
+JsonMember::JsonMember(const Item &parent, const nlohmann::json &json_member)
     : JsonMember(parent.get_name(), parent.model_matrix_without_scale(), json_member) {}
 
 Item JsonMember::get_item() { return member; }
@@ -104,7 +104,7 @@ std::vector<std::shared_ptr<AbstractConstraint> > JsonMember::get_children() {
             std::string,
             std::function<std::shared_ptr<AbstractConstraint>(Item, const nlohmann::json &)> >
         const map{{"hinge", std::make_shared<JsonHingeConstraint, Item, const nlohmann::json &>},
-            {"fixed", std::make_shared<JsonFixedConstraint, Item, const nlohmann::json &>}};
+                  {"fixed", std::make_shared<JsonFixedConstraint, Item, const nlohmann::json &>}};
 
     for (const auto &child: json_member["children"])
         children.push_back(
@@ -115,7 +115,7 @@ std::vector<std::shared_ptr<AbstractConstraint> > JsonMember::get_children() {
 
 // hinge
 
-JsonHingeConstraint::JsonHingeConstraint(const Item& parent, const nlohmann::json &hinge) {
+JsonHingeConstraint::JsonHingeConstraint(const Item &parent, const nlohmann::json &hinge) {
 
     child = std::make_shared<JsonMember>(parent, hinge["child_member"]);
 
@@ -145,7 +145,7 @@ JsonHingeConstraint::~JsonHingeConstraint() = default;
 
 // fixed constraint
 
-JsonFixedConstraint::JsonFixedConstraint(const Item& parent, const nlohmann::json &fixed) {
+JsonFixedConstraint::JsonFixedConstraint(const Item &parent, const nlohmann::json &fixed) {
     child = std::make_shared<JsonMember>(parent, fixed["child_member"]);
 
     btTransform parent_tr;

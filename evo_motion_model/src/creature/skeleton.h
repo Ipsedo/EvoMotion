@@ -58,9 +58,11 @@ private:
 
 class JsonMember : public AbstractMember {
 public:
-    JsonMember(const Item& parent, const nlohmann::json &json_member);
+    JsonMember(const Item &parent, const nlohmann::json &json_member);
 
-    JsonMember(const std::string &name, const glm::mat4 &parent_model_matrix, nlohmann::json json_member_input);
+    JsonMember(
+        const std::string &name, const glm::mat4 &parent_model_matrix,
+        nlohmann::json json_member_input);
 
     Item get_item() override;
 
@@ -77,7 +79,7 @@ protected:
 
 class JsonHingeConstraint : public AbstractConstraint {
 public:
-    JsonHingeConstraint(const Item& parent, const nlohmann::json &hinge);
+    JsonHingeConstraint(const Item &parent, const nlohmann::json &hinge);
 
     btTypedConstraint *get_constraint() override;
 
@@ -92,7 +94,7 @@ private:
 
 class JsonFixedConstraint : public AbstractConstraint {
 public:
-    JsonFixedConstraint(const Item& parent, const nlohmann::json &fixed);
+    JsonFixedConstraint(const Item &parent, const nlohmann::json &fixed);
 
     btTypedConstraint *get_constraint() override;
 
