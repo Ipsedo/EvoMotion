@@ -141,7 +141,7 @@ void ActorCritic::set_eval(const bool eval) {
 
 int ActorCritic::count_parameters() {
     int count = 0;
-    for (const auto& p : networks->parameters()) {
+    for (const auto &p: networks->parameters()) {
         auto sizes = p.sizes();
         count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
     }
@@ -151,9 +151,7 @@ int ActorCritic::count_parameters() {
 float ActorCritic::grad_norm_mean() {
     float grad_sum = 0.f;
     const auto parameters = networks->parameters();
-    for (const auto& p: parameters) {
-        grad_sum += p.grad().norm().item().toFloat();
-    }
+    for (const auto &p: parameters) { grad_sum += p.grad().norm().item().toFloat(); }
 
     return grad_sum / static_cast<float>(parameters.size());
 }

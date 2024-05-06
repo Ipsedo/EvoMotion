@@ -29,7 +29,8 @@ MuscleEnv::MuscleEnv(const int seed)
       max_steps_without_moving(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)),
       remaining_steps(max_steps_without_moving),
       frames_to_add(32),
-      pos_delta(minimal_velocity * DELTA_T_MODEL * static_cast<float>(frames_to_add)), last_pos(0.f) {
+      pos_delta(minimal_velocity * DELTA_T_MODEL * static_cast<float>(frames_to_add)),
+      last_pos(0.f) {
     base.get_body()->setFriction(500.f);
 
     add_item(base);
