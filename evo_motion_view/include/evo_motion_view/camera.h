@@ -14,9 +14,11 @@ public:
     virtual glm::vec3 look() = 0;
 
     virtual glm::vec3 up() = 0;
+
+    virtual ~Camera();
 };
 
-class StaticCamera : public Camera {
+class StaticCamera final : public Camera {
 public:
     StaticCamera(glm::vec3 pos, glm::vec3 look, glm::vec3 up);
 

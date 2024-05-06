@@ -22,7 +22,7 @@ public:
 
     void add_drawable(const std::string &name, const std::shared_ptr<Drawable> &drawable);
 
-    bool is_close() const;
+    [[nodiscard]] bool is_close() const;
 
     void close();
 

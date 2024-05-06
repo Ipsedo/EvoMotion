@@ -10,7 +10,7 @@
 
 template<class R, class... I>
 Meter<R, I...>::Meter(std::string name, const std::optional<int> window_size)
-    : csv_sep(','), name(std::move(name)), window_size(window_size), results(), curr_step(0L) {}
+    : csv_sep(','), name(std::move(name)), window_size(window_size), curr_step(0L), results() {}
 
 template<class R, class... I>
 void Meter<R, I...>::add(I... inputs) {

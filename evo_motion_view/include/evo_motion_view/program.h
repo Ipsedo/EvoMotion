@@ -6,9 +6,7 @@
 #define EVO_MOTION_PROGRAM_H
 
 #include <map>
-#include <memory>
 #include <string>
-#include <typeindex>
 #include <vector>
 
 #include <GL/glew.h>
@@ -31,10 +29,8 @@ public:
     private:
         Builder(
             std::string vertex_shader_path, std::string fragment_shader_path,
-
             const std::vector<std::string> &uniforms, const std::vector<std::string> &attributes,
-
-            const std::map<std::string, std::vector<float>> &buffers);
+            const std::map<std::string, std::vector<float> > &buffers);
 
         std::string vertex_shader_path;
         std::string fragment_shader_path;
@@ -42,7 +38,7 @@ public:
         std::vector<std::string> uniforms;
         std::vector<std::string> attributes;
 
-        std::map<std::string, std::vector<float>> buffers;
+        std::map<std::string, std::vector<float> > buffers;
     };
 
 private:
@@ -58,7 +54,13 @@ private:
     template<typename F, class... T>
     void _uniform(F uniform_fun, const std::string &name, T... args);
 
-protected:
+    Program(
+        const std::string &vertex_shader_path,
+        const std::string &fragment_shader_path,
+        const std::vector<std::string> &uniforms,
+        const std::vector<std::string> &attributes,
+        const std::map<std::string, std::vector<float> > &buffers);
+
 public:
     void use() const;
 

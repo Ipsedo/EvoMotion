@@ -6,7 +6,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 
 #include "./constants.h"
 
@@ -14,7 +13,7 @@ unsigned long get_file_length(std::ifstream &file) {
     if (!file.good()) return 0;
 
     file.seekg(0, std::ios::end);
-    unsigned long len = (unsigned long) file.tellg();
+    const unsigned long len = file.tellg();
     file.seekg(std::ios::beg);
 
     return len;
@@ -36,7 +35,7 @@ uint load_shader(GLenum type, const std::string &filename) {
 
     unsigned int i = 0;
     while (file.good()) {
-        shaderSource[i] = (GLchar) file.get();
+        shaderSource[i] = static_cast<GLchar>(file.get());
         if (!file.eof()) i++;
     }
 
@@ -44,7 +43,7 @@ uint load_shader(GLenum type, const std::string &filename) {
 
     file.close();
 
-    glShaderSource(shader, 1, (const char **) &shaderSource, nullptr);
+    glShaderSource(shader, 1, const_cast<const char **>(&shaderSource), nullptr);
     glCompileShader(shader);
 
     delete[] shaderSource;
