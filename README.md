@@ -7,6 +7,38 @@ __author__ : Samuel Berrien
 The final goal of this project is to implement any kind of optimisation algorithm in order to teach creature to walk,
 run etc.
 
+## Requirements
+
+This project requires multiple libraries.
+
+* physic engine stuff : Bullet
+* graphic stuff : OpenGL, GLM, GLEW, GLFW
+* reinforcement learning : LibTorch CXX 11 ABI (not pre-cxx 11 ABI) according to your CUDA version. Put `libtorch`
+  folder in `/opt/`, (see cmake files)
+* utils
+  stuff : [p-ranav argparse](https://github.com/p-ranav/argparse), [p-ranav indicators](https://github.com/p-ranav/indicators), [nlohmann json](https://github.com/nlohmann/json)
+
+### ArchLinux
+
+Install dependencies with `pacman` :
+
+```bash
+$ # as root
+$ pacman -Syu cmake bullet glm glew glfw
+```
+
+Download `libtorch` from torch official website and then copy the extracted folder in `/opt/` (here version 2.3.0 with
+CUDA 12.1) :
+
+```bash
+$ # as root
+$ unzip /path/to/libtorch-cxx11-abi-shared-with-deps-2.3.0+cu121.zip -d /opt/
+```
+
+### Other OS
+
+Any attempt to build this project on other OS will be appreciated to complete this section.
+
 ## Build and run
 
 To build this project you need a decent C++ compiler with cmake and make.
@@ -45,17 +77,6 @@ An internet connexion is also required in order to download dependencies inside 
    ```bash
    $ evo_motion muscles actor_critic_liquid --seed 1234 --hidden_size 32 --cuda run ./out/muscles_a2c_liquid/save_0 -w 1920 -h 1024
    ```
-
-## Requirements
-
-This project requires multiple libraries.
-
-* physic engine stuff : Bullet
-* graphic stuff : OpenGL, GLM, GLEW, GLFW
-* reinforcement learning : LibTorch CXX 11 ABI (not pre-cxx 11 ABI) according to your CUDA version. Put `libtorch`
-  folder in `/opt/`, (see cmake files)
-* utils
-  stuff : [p-ranav argparse](https://github.com/p-ranav/argparse), [p-ranav indicators](https://github.com/p-ranav/indicators), [nlohmann json](https://github.com/nlohmann/json)
 
 ## References
 
