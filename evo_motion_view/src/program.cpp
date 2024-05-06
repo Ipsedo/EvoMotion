@@ -2,12 +2,12 @@
 // Created by samuel on 15/12/22.
 //
 
+#include "./program.h"
+
 #include <utility>
 
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
-
-#include <evo_motion_view/program.h>
 
 #include "./constants.h"
 #include "./shader.h"
@@ -45,13 +45,7 @@ Program::Builder::add_buffer(const std::string &name, const std::vector<float> &
 }
 
 Program Program::Builder::build() {
-    return {
-        vertex_shader_path,
-        fragment_shader_path,
-        uniforms,
-        attributes,
-        buffers
-    };
+    return {vertex_shader_path, fragment_shader_path, uniforms, attributes, buffers};
 }
 
 /*
@@ -59,11 +53,9 @@ Program Program::Builder::build() {
  */
 
 Program::Program(
-        const std::string& vertex_shader_path,
-        const std::string& fragment_shader_path,
-        const std::vector<std::string>& uniforms,
-        const std::vector<std::string>& attributes,
-        const std::map<std::string, std::vector<float> >& buffers) {
+    const std::string &vertex_shader_path, const std::string &fragment_shader_path,
+    const std::vector<std::string> &uniforms, const std::vector<std::string> &attributes,
+    const std::map<std::string, std::vector<float>> &buffers) {
     program_id = glCreateProgram();
 
     vertex_shader_id = load_shader(GL_VERTEX_SHADER, vertex_shader_path);
@@ -80,25 +72,25 @@ Program::Program(
         glGenBuffers(1, &buffer_ids[name]);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffer_ids[name]);
-        glBufferData(GL_ARRAY_BUFFER, static_cast<int>(data.size()) * BYTES_PER_FLOAT, &data[0], GL_STATIC_DRAW);
+        glBufferData(
+            GL_ARRAY_BUFFER, static_cast<int>(data.size()) * BYTES_PER_FLOAT, &data[0],
+            GL_STATIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     for (const auto &name: uniforms)
-        uniform_handles.insert(
-            {name, glGetUniformLocation(program_id, name.c_str())});
+        uniform_handles.insert({name, glGetUniformLocation(program_id, name.c_str())});
 
     for (const auto &name: attributes)
-        attribute_handles.insert(
-            {name, glGetAttribLocation(program_id, name.c_str())});
+        attribute_handles.insert({name, glGetAttribLocation(program_id, name.c_str())});
 }
 
 void Program::kill() {
     glDeleteShader(vertex_shader_id);
     glDeleteShader(fragment_shader_id);
 
-    for (const auto& [name, buffer_id]: buffer_ids) glDeleteBuffers(1, &buffer_id);
+    for (const auto &[name, buffer_id]: buffer_ids) glDeleteBuffers(1, &buffer_id);
 
     glDeleteProgram(program_id);
 }
@@ -122,7 +114,9 @@ void Program::uniform_vec3(const std::string &name, glm::vec3 vec3) {
     _uniform(glUniform3fv, name, 1, glm::value_ptr(vec3));
 }
 
-void Program::uniform_float(const std::string &name, const float f) { _uniform(glUniform1f, name, f); }
+void Program::uniform_float(const std::string &name, const float f) {
+    _uniform(glUniform1f, name, f);
+}
 
 void Program::attrib(
     const std::string &name, const std::string &buffer_name, const int data_size, const int stride,
@@ -131,13 +125,14 @@ void Program::attrib(
 
     glEnableVertexAttribArray(attribute_handles[name]);
     glVertexAttribPointer(
-        attribute_handles[name], data_size, GL_FLOAT, GL_FALSE, stride, reinterpret_cast<GLvoid *>(offset));
+        attribute_handles[name], data_size, GL_FLOAT, GL_FALSE, stride,
+        reinterpret_cast<GLvoid *>(offset));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void Program::disable_attrib_array() {
-    for (const auto& [name, attrib_id]: attribute_handles) glDisableVertexAttribArray(attrib_id);
+    for (const auto &[name, attrib_id]: attribute_handles) glDisableVertexAttribArray(attrib_id);
 }
 
 void Program::draw_arrays(const GLenum type, const int from, const int nb_vertices) {

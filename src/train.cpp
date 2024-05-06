@@ -39,8 +39,8 @@ void train(int seed, bool cuda, const train_params &params) {
 
     step step = env->reset();
 
-    std::cout << "state_space = " << env->get_state_space() << ", action_space = " << env->
-        get_action_space() << std::endl;
+    std::cout << "state_space = " << env->get_state_space()
+              << ", action_space = " << env->get_action_space() << std::endl;
     std::cout << "parameters_count = " << agent->count_parameters() << std::endl;
 
     LossMeter actor_loss_meter("actor_loss", 32);

@@ -14,13 +14,13 @@
 
 ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space,
-    int hidden_size, float lr)
+    const std::vector<int64_t> &action_space, int hidden_size, float lr)
     : networks(std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
       optimizer(std::make_shared<torch::optim::Adam>(networks->parameters(), lr)),
-      actor_loss_factor(1.f), critic_loss_factor(1.f),
-      curr_device(torch::kCPU), gamma(0.99f),
-      episode_actor_loss(0.f), episode_critic_loss(0.f) { at::manual_seed(seed); }
+      actor_loss_factor(1.f), critic_loss_factor(1.f), curr_device(torch::kCPU), gamma(0.99f),
+      episode_actor_loss(0.f), episode_critic_loss(0.f) {
+    at::manual_seed(seed);
+}
 
 torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     const auto response = networks->forward(state);
@@ -52,9 +52,8 @@ void ActorCritic::train() {
     const auto sigmas = torch::stack(sigmas_tmp);
 
     const auto rewards = torch::tensor(rewards_buffer, at::TensorOptions().device(curr_device));
-    const auto t_steps =
-        torch::arange(
-            static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
+    const auto t_steps = torch::arange(
+        static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
 
     auto returns = rewards * torch::pow(gamma, t_steps);
     returns = returns.flip({0}).cumsum(0).flip({0}) / torch::pow(gamma, t_steps);

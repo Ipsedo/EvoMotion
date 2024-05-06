@@ -13,8 +13,8 @@
 #include <evo_motion_model/env_builder.h>
 #include <evo_motion_networks/agent_builder.h>
 #include <evo_motion_view/camera.h>
+#include <evo_motion_view/drawable.h>
 #include <evo_motion_view/renderer.h>
-#include <evo_motion_view/specular.h>
 
 void infer(int seed, bool cuda, const run_params &params) {
     EnvBuilder env_builder(seed, params.env_name);
@@ -28,10 +28,10 @@ void infer(int seed, bool cuda, const run_params &params) {
 
     std::random_device dev;
     std::mt19937 rng(dev());
-    std::uniform_real_distribution<float> dist(0.f, 1.f);
+    std::uniform_real_distribution dist(0.f, 1.f);
 
-    for (auto i: env->get_items()) {
-        std::shared_ptr<OBjSpecular> specular = std::make_shared<OBjSpecular>(
+    for (const auto &i: env->get_items()) {
+        auto specular = Drawable::Builder::build_specular_obj(
             i.get_shape()->get_vertices(), i.get_shape()->get_normals(),
             glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
             glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
@@ -63,14 +63,14 @@ void infer(int seed, bool cuda, const run_params &params) {
 
         std::map<std::string, glm::mat4> model_matrix;
 
-        for (auto i: env->get_items()) model_matrix.insert({i.get_name(), i.model_matrix()});
+        for (const auto &i: env->get_items()) model_matrix.insert({i.get_name(), i.model_matrix()});
 
         renderer.draw(model_matrix);
 
         std::chrono::duration<double, std::milli> delta = std::chrono::system_clock::now() - before;
 
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(long(std::max(0., 1000. / 60. - delta.count()))));
+        std::this_thread::sleep_for(std::chrono::milliseconds(
+            static_cast<long>(std::max(0., 1000. / 60. - delta.count()))));
 
         if (step.done) {
             agent->done(step.reward);
