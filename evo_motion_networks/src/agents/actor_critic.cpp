@@ -4,7 +4,9 @@
 
 #include "./actor_critic.h"
 
+#include <algorithm>
 #include <filesystem>
+#include <numeric>
 
 #include <torch/torch.h>
 
@@ -137,9 +139,30 @@ void ActorCritic::set_eval(const bool eval) {
     else networks->train();
 }
 
+int ActorCritic::count_parameters() {
+    int count = 0;
+    for (const auto& p : networks->parameters()) {
+        auto sizes = p.sizes();
+        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
+    }
+    return count;
+}
+
+float ActorCritic::grad_norm_mean() {
+    float grad_sum = 0.f;
+    const auto parameters = networks->parameters();
+    for (const auto& p: parameters) {
+        grad_sum += p.grad().norm().item().toFloat();
+    }
+
+    return grad_sum / static_cast<float>(parameters.size());
+}
+
 /*
  * torch Module
  */
+
+// a2c network
 
 a2c_networks::a2c_networks(
     std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {

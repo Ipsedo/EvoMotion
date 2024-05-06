@@ -39,7 +39,9 @@ void train(int seed, bool cuda, const train_params &params) {
 
     step step = env->reset();
 
-    std::cout << "state_space = " << env->get_state_space() << ", action_space = " << env->get_action_space() << std::endl;
+    std::cout << "state_space = " << env->get_state_space() << ", action_space = " << env->
+        get_action_space() << std::endl;
+    std::cout << "parameters_count = " << agent->count_parameters() << std::endl;
 
     LossMeter actor_loss_meter("actor_loss", 32);
     LossMeter critic_loss_meter("critic_loss", 32);
@@ -72,7 +74,8 @@ void train(int seed, bool cuda, const train_params &params) {
             std::string p_bar_description =
                 "Save " + std::to_string(s - 1)
                 + ", actor = " + std::to_string(actor_loss_meter.loss())
-                + ", critic = " + std::to_string(critic_loss_meter.loss());
+                + ", critic = " + std::to_string(critic_loss_meter.loss())
+                + ", grad_norm = " + std::to_string(agent->grad_norm_mean());
 
             p_bar.set_option(indicators::option::PostfixText{p_bar_description});
 

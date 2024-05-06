@@ -16,6 +16,8 @@ void DebugAgent::load(const std::string &input_folder_path) {}
 std::map<std::string, float> DebugAgent::get_metrics() { return {}; }
 void DebugAgent::to(const torch::DeviceType device) { curr_device = device; }
 void DebugAgent::set_eval(bool eval) {}
+int DebugAgent::count_parameters() { return 0; }
+float DebugAgent::grad_norm_mean() { return 0.f; }
 
 // Random Agent
 RandomAgent::RandomAgent(

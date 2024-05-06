@@ -7,14 +7,29 @@
 #include "../init.h"
 
 a2c_liquid_networks::a2c_liquid_networks(
-    const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, const int hidden_size,
+    const std::vector<int64_t> &state_space, std::vector<int64_t> action_space,
+    const int hidden_size,
     const int unfolding_steps) {
     neuron_number = hidden_size;
     steps = unfolding_steps;
 
     weight = register_module(
         "weight",
-        torch::nn::Linear(torch::nn::LinearOptions(state_space[0], neuron_number).bias(false)));
+        torch::nn::Sequential(
+            torch::nn::Linear(
+                torch::nn::LinearOptions(state_space[0], state_space[0] * 2)),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({state_space[0] * 2}).elementwise_affine(true)),
+
+            torch::nn::Linear(
+                torch::nn::LinearOptions(state_space[0] * 2, state_space[0] * 2)),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({state_space[0] * 2}).elementwise_affine(true)),
+
+            torch::nn::Linear(
+                torch::nn::LinearOptions(state_space[0] * 2, neuron_number).bias(false))));
 
     recurrent_weight = register_module(
         "recurrent_weight",
@@ -27,13 +42,32 @@ a2c_liquid_networks::a2c_liquid_networks(
 
     mu = register_module(
         "mu",
-        torch::nn::Sequential(torch::nn::Linear(neuron_number, action_space[0]), torch::nn::Tanh()));
+        torch::nn::Sequential(
+            torch::nn::Linear(
+                torch::nn::LinearOptions(neuron_number, neuron_number * 2)),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({neuron_number * 2}).elementwise_affine(true)),
+            torch::nn::Linear(neuron_number * 2, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-            torch::nn::Linear(neuron_number, action_space[0]), torch::nn::Softplus()));
+            torch::nn::Linear(
+                torch::nn::LinearOptions(neuron_number, neuron_number * 2)),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({neuron_number * 2}).elementwise_affine(true)),
+            torch::nn::Linear(neuron_number * 2, action_space[0]), torch::nn::Softplus()));
 
-    critic = register_module("critic", torch::nn::Linear(neuron_number, 1));
+    critic = register_module(
+        "critic",
+        torch::nn::Sequential(
+            torch::nn::Linear(
+                torch::nn::LinearOptions(neuron_number, neuron_number * 2)),
+            torch::nn::Mish(),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({neuron_number * 2}).elementwise_affine(true)),
+            torch::nn::Linear(neuron_number * 2, 1)));
 
     x_t = torch::mish(torch::randn({1, neuron_number}));
 
@@ -71,7 +105,8 @@ void a2c_liquid_networks::to(torch::Device device, const bool non_blocking) {
 }
 
 ActorCriticLiquid::ActorCriticLiquid(
-    const int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+    const int seed, const std::vector<int64_t> &state_space,
+    const std::vector<int64_t> &action_space,
     int hidden_size, float lr)
     : ActorCritic(seed, state_space, action_space, hidden_size, lr) {
     networks = std::make_shared<a2c_liquid_networks>(state_space, action_space, hidden_size, 6);

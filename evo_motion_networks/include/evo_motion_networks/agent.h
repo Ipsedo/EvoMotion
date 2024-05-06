@@ -25,6 +25,9 @@ public:
 
     virtual void set_eval(bool eval) = 0;
 
+    virtual int count_parameters() = 0;
+    virtual float grad_norm_mean() = 0;
+
     virtual ~Agent();
 };
 

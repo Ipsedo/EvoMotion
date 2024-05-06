@@ -50,6 +50,9 @@ private:
     float initial_remaining_seconds;
     float max_episode_seconds;
 
+    float target_velocity;
+    float minimal_velocity;
+
     int reset_frames;
     int curr_step;
     int max_steps;
@@ -57,7 +60,6 @@ private:
     int max_steps_without_moving;
     int remaining_steps;
     int frames_to_add;
-    float target_velocity;
     float pos_delta;
     float last_pos;
 
