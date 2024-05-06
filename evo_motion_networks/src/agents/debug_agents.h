@@ -25,6 +25,10 @@ public:
 
     void set_eval(bool eval) override;
 
+    int count_parameters() override;
+
+    float grad_norm_mean() override;
+
 protected:
     int action_space;
 
@@ -38,6 +42,8 @@ public:
         int hidden_size, float lr);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
+
+
 };
 
 class ConstantAgent final : public DebugAgent {

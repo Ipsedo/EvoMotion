@@ -78,6 +78,10 @@ public:
     void to(torch::DeviceType device) override;
 
     void set_eval(bool eval) override;
+
+    int count_parameters() override;
+
+    float grad_norm_mean() override;
 };
 
 #endif//EVO_MOTION_ACTOR_CRITIC_H

@@ -4,7 +4,9 @@
 
 #include "./actor_critic.h"
 
+#include <algorithm>
 #include <filesystem>
+#include <numeric>
 
 #include <torch/torch.h>
 
@@ -12,13 +14,11 @@
 
 ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space,
-    int hidden_size, float lr)
-    : curr_device(torch::kCPU), gamma(0.99f),
-      networks(std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
+    const std::vector<int64_t> &action_space, int hidden_size, float lr)
+    : networks(std::make_shared<a2c_networks>(state_space, action_space, hidden_size)),
       optimizer(std::make_shared<torch::optim::Adam>(networks->parameters(), lr)),
-      episode_actor_loss(0.f), episode_critic_loss(0.f), actor_loss_factor(1.f),
-      critic_loss_factor(1.f) {
+      actor_loss_factor(1.f), critic_loss_factor(1.f), curr_device(torch::kCPU), gamma(0.99f),
+      episode_actor_loss(0.f), episode_critic_loss(0.f) {
     at::manual_seed(seed);
 }
 
@@ -52,9 +52,8 @@ void ActorCritic::train() {
     const auto sigmas = torch::stack(sigmas_tmp);
 
     const auto rewards = torch::tensor(rewards_buffer, at::TensorOptions().device(curr_device));
-    const auto t_steps =
-        torch::arange(
-            static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
+    const auto t_steps = torch::arange(
+        static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
 
     auto returns = rewards * torch::pow(gamma, t_steps);
     returns = returns.flip({0}).cumsum(0).flip({0}) / torch::pow(gamma, t_steps);
@@ -137,9 +136,28 @@ void ActorCritic::set_eval(const bool eval) {
     else networks->train();
 }
 
+int ActorCritic::count_parameters() {
+    int count = 0;
+    for (const auto &p: networks->parameters()) {
+        auto sizes = p.sizes();
+        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
+    }
+    return count;
+}
+
+float ActorCritic::grad_norm_mean() {
+    float grad_sum = 0.f;
+    const auto parameters = networks->parameters();
+    for (const auto &p: parameters) { grad_sum += p.grad().norm().item().toFloat(); }
+
+    return grad_sum / static_cast<float>(parameters.size());
+}
+
 /*
  * torch Module
  */
+
+// a2c network
 
 a2c_networks::a2c_networks(
     std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {

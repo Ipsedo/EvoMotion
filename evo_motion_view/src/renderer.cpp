@@ -4,22 +4,26 @@
 #include <iostream>
 #include <utility>
 
+#include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <evo_motion_view/renderer.h>
 
 void GLAPIENTRY message_callback(
-    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+    const GLenum source, const GLenum type, const GLuint id, const GLenum severity,
+    const GLsizei length, const GLchar *message,
     const void *userParam) {
     std::cerr << source << " " << type << " " << id << " " << severity << " " << length << " : "
-              << std::endl;
+        << std::endl;
     std::cerr << "params : " << userParam << std::endl;
     std::cerr << message << std::endl << std::endl;
 }
 
-Renderer::Renderer(const std::string &title, int width, int height, std::shared_ptr<Camera> camera)
-    : title(title), width(width), height(height), drawables({}), camera(std::move(camera)),
-      is_open(false), window(nullptr), light_pos(glm::vec3(0.f, 0.f, -1.f)) {
+Renderer::Renderer(
+    const std::string &title, const int width, const int height, std::shared_ptr<Camera> camera)
+    : title(title), width(width), height(height), is_open(false),
+      light_pos(glm::vec3(0.f, 0.f, -1.f)), camera(std::move(camera)), drawables({}),
+      window(nullptr) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -86,16 +90,17 @@ void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
+    const glm::mat4 view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
 
-    glm::mat4 proj_matrix = glm::frustum(
-        -1.f, 1.f, -float(height) / float(width), float(height) / float(width), 1.f, 200.f);
+    const glm::mat4 proj_matrix = glm::frustum(
+        -1.f, 1.f, -static_cast<float>(height) / static_cast<float>(width),
+        static_cast<float>(height) / static_cast<float>(width), 1.f, 200.f);
 
     for (const auto &[name, drawable]: drawables) {
         glm::mat4 m_matrix = model_matrix[name];
 
         auto mv_matrix = view_matrix * m_matrix;
-        auto mvp_matrix = proj_matrix * mv_matrix;
+        const auto mvp_matrix = proj_matrix * mv_matrix;
 
         drawable->draw(mvp_matrix, mv_matrix, light_pos, camera->pos());
     }

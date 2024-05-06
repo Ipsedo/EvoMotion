@@ -19,7 +19,7 @@ public:
 
     std::vector<Item> get_items() override;
 
-    std::vector<std::shared_ptr<Controller>> get_controllers() override;
+    std::vector<std::shared_ptr<Controller> > get_controllers() override;
 
     std::vector<int64_t> get_state_space() override;
 
@@ -42,13 +42,16 @@ private:
     JsonSkeleton skeleton;
     JsonMuscularSystem muscular_system;
 
-    std::vector<std::shared_ptr<Controller>> controllers;
+    std::vector<std::shared_ptr<Controller> > controllers;
 
-    std::vector<std::shared_ptr<State>> states;
+    std::vector<std::shared_ptr<State> > states;
 
 
     float initial_remaining_seconds;
     float max_episode_seconds;
+
+    float target_velocity;
+    float minimal_velocity;
 
     int reset_frames;
     int curr_step;
@@ -57,7 +60,6 @@ private:
     int max_steps_without_moving;
     int remaining_steps;
     int frames_to_add;
-    float target_velocity;
     float pos_delta;
     float last_pos;
 
