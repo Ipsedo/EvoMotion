@@ -10,7 +10,7 @@
 #include "./run.h"
 #include "./train.h"
 
-int main(int argc, char **argv) {
+int main(const int argc, char **argv) {
     argparse::ArgumentParser parser("evo_motion");
 
     parser.add_argument("environment").default_value("cartpole").help("the environment");
@@ -72,7 +72,9 @@ int main(int argc, char **argv) {
     parser.add_subparser(run_parser);
     parser.add_subparser(train_parser);
 
-    try { parser.parse_args(argc, argv); } catch (const std::runtime_error &err) {
+    try {
+        parser.parse_args(argc, argv);
+    } catch (const std::runtime_error &err) {
         std::cerr << err.what() << std::endl;
         std::cerr << parser;
         std::exit(1);
