@@ -46,7 +46,7 @@ void Meter<R, I...>::to_csv(const std::filesystem::path &output_directory) {
     csv_file.close();
 }
 
-template<class R, class ... I>
+template<class R, class... I>
 Meter<R, I...>::~Meter() = default;
 
 /*

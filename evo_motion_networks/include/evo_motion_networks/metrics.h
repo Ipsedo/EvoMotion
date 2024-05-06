@@ -45,6 +45,7 @@ public:
 
 protected:
     float process_value(float value) override;
+
     std::string loss_to_string(float loss_value) override;
 };
 

@@ -64,7 +64,7 @@ std::vector<Item> MuscleEnv::get_items() {
     return items;
 }
 
-std::vector<std::shared_ptr<Controller>> MuscleEnv::get_controllers() { return controllers; }
+std::vector<std::shared_ptr<Controller> > MuscleEnv::get_controllers() { return controllers; }
 
 step MuscleEnv::compute_step() {
     std::vector<torch::Tensor> current_states;
@@ -106,13 +106,13 @@ void MuscleEnv::reset_engine() {
     glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
                              * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
 
-    for (const auto& item: skeleton.get_items()) {
+    for (const auto &item: skeleton.get_items()) {
         m_world->removeRigidBody(item.get_body());
         item.reset(model_matrix);
     }
 
     for (auto muscle: muscular_system.get_muscles()) {
-        for (const auto& item: muscle.get_items()) {
+        for (const auto &item: muscle.get_items()) {
             m_world->removeRigidBody(item.get_body());
             item.reset(model_matrix);
         }
@@ -140,6 +140,8 @@ std::vector<int64_t> MuscleEnv::get_state_space() {
     return {nb_features};
 }
 
-std::vector<int64_t> MuscleEnv::get_action_space() { return {static_cast<long>(controllers.size())}; }
+std::vector<int64_t> MuscleEnv::get_action_space() {
+    return {static_cast<long>(controllers.size())};
+}
 
 bool MuscleEnv::is_continuous() const { return true; }

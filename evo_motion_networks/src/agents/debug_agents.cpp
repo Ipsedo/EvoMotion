@@ -36,6 +36,7 @@ ConstantAgent::ConstantAgent(
     const std::vector<int64_t> &action_space,
     const int hidden_size, const float lr)
     : DebugAgent(seed, state_space, action_space, hidden_size, lr) {}
+
 torch::Tensor ConstantAgent::act(torch::Tensor state, float reward) {
     return torch::ones({action_space}, torch::TensorOptions(curr_device));
 }

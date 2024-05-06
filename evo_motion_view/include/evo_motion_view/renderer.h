@@ -39,7 +39,7 @@ private:
     glm::vec3 light_pos;
     std::shared_ptr<Camera> camera;
 
-    std::map<std::string, std::shared_ptr<Drawable>> drawables;
+    std::map<std::string, std::shared_ptr<Drawable> > drawables;
 
     GLFWwindow *window;
 };
