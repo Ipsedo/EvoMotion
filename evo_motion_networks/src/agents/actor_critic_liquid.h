@@ -7,19 +7,15 @@
 
 #include "./actor_critic.h"
 
-struct a2c_liquid_networks final : abstract_a2c_networks {
-    a2c_liquid_networks(
-        const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
-        int unfolding_steps);
-
+class LiquidCell final : public torch::nn::Module {
+public:
+    LiquidCell(const std::vector<int64_t> &state_space, int neuron_number, int unfolding_steps);
     void reset_x_t();
-
-    a2c_response forward(const torch::Tensor &state) override;
-
     torch::Tensor compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t);
-
+    torch::Tensor forward(const torch::Tensor &state);
     void to(torch::Device device, bool non_blocking) override;
 
+private:
     int steps;
     int neuron_number;
 
@@ -29,13 +25,44 @@ struct a2c_liquid_networks final : abstract_a2c_networks {
     torch::Tensor a;
     torch::Tensor tau;
 
-    torch::nn::Sequential mu{nullptr};
-    torch::nn::Sequential sigma{nullptr};
-
-    torch::nn::Sequential critic{nullptr};
-
     torch::Tensor x_t;
 };
+
+class ActorLiquidNetwork final : public AbstractActor {
+public:
+    ActorLiquidNetwork(
+        const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
+        int unfolding_steps);
+
+    actor_response forward(const torch::Tensor &state) override;
+
+    void reset_liquid() const;
+
+private:
+    std::shared_ptr<LiquidCell> liquid_network;
+
+    torch::nn::Sequential actor_mu{nullptr};
+    torch::nn::Sequential actor_sigma{nullptr};
+
+};
+
+class CriticLiquidNetwork final : public AbstractCritic {
+public:
+    CriticLiquidNetwork(
+        const std::vector<int64_t> &state_space, int hidden_size,
+        int unfolding_steps);
+
+    critic_response forward(const torch::Tensor &state) override;
+
+    void reset_liquid() const;
+
+private:
+    std::shared_ptr<LiquidCell> liquid_network;
+
+    torch::nn::Linear critic{nullptr};
+};
+
+// Agent
 
 class ActorCriticLiquid final : public ActorCritic {
 public:

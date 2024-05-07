@@ -49,6 +49,7 @@ private:
 
     float initial_remaining_seconds;
     float max_episode_seconds;
+    float seconds_to_add;
 
     float target_velocity;
     float minimal_velocity;

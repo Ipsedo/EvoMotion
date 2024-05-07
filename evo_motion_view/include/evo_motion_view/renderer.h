@@ -44,4 +44,6 @@ private:
     GLFWwindow *window;
 };
 
+class ImGuiRenderer : public Renderer {};
+
 #endif//EVO_MOTION_RENDERER_H
