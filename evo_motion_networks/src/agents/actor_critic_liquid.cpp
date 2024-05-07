@@ -20,9 +20,15 @@ LiquidCell::LiquidCell(
         torch::nn::Sequential(
             torch::nn::Linear(torch::nn::LinearOptions(state_space[0], state_space[0] * 2)),
             torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({state_space[0] * 2})
+                                     .elementwise_affine(true)
+                                     .eps(1e-5f)),
 
             torch::nn::Linear(torch::nn::LinearOptions(state_space[0] * 2, state_space[0] * 2)),
             torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({state_space[0] * 2})
+                                     .elementwise_affine(true)
+                                     .eps(1e-5f)),
 
             torch::nn::Linear(
                 torch::nn::LinearOptions(state_space[0] * 2, neuron_number).bias(false))));
