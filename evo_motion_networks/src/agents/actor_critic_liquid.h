@@ -19,7 +19,7 @@ private:
     int steps;
     int neuron_number;
 
-    torch::nn::Sequential weight{nullptr};
+    torch::nn::Linear weight{nullptr};
     torch::nn::Linear recurrent_weight{nullptr};
     torch::Tensor bias;
     torch::Tensor a;
