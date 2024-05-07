@@ -32,7 +32,7 @@ AgentBuilder::AgentBuilder(
           }) {
     if (agent_constructors.find(this->name) == agent_constructors.end()) {
         std::vector<std::string> agent_keys;
-        for (const auto& [k, v] : agent_constructors) agent_keys.push_back(k);
+        for (const auto &[k, v]: agent_constructors) agent_keys.push_back(k);
 
         std::cerr << "Unrecognized agent \"" << this->name << "\"" << std::endl;
         std::cerr << "Supported agents are : " << agent_keys << std::endl;
