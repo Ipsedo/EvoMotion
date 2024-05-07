@@ -88,7 +88,6 @@ ActorLiquidNetwork::ActorLiquidNetwork(
     this->apply(init_weights);
 }
 
-
 actor_response ActorLiquidNetwork::forward(const torch::Tensor &state) {
     const auto x_t = liquid_network->forward(state.unsqueeze(0));
 
