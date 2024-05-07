@@ -7,8 +7,7 @@
 #include "../controller/slider.h"
 
 CartPole3d::CartPole3d(int seed)
-    : slider_speed(16.f), slider_force_per_kg(32.f), chariot_push_force(2.f),
-      reset_frame_nb(8), limit_angle(static_cast<float>(M_PI) / 2.f), base_scale(10.f, 1.f, 10.f),
+    : slider_speed(16.f), slider_force_per_kg(32.f), chariot_push_force(2.f), reset_frame_nb(8), limit_angle(static_cast<float>(M_PI) / 2.f), base_scale(10.f, 1.f, 10.f),
       cart_x_scale(0.5f, 0.125f, 0.5f), cart_z_scale(0.5f, 0.125f, 0.5f),
       pole_scale(0.1f, 0.5f, 0.1f), base_pos(0.f, -4.f, 10.f),
       cart_x_pos(base_pos.x(), base_pos.y() + base_scale.y() + cart_x_scale.y(), base_pos.z()),
