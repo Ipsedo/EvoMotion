@@ -65,7 +65,7 @@ torch::Tensor LiquidCell::forward(const torch::Tensor &state) {
     return x_t;
 }
 
-void LiquidCell::to(torch::Device device, bool non_blocking) {
+void LiquidCell::to(torch::Device device, const bool non_blocking) {
     Module::to(device, non_blocking);
     x_t = x_t.to(device, non_blocking);
 }

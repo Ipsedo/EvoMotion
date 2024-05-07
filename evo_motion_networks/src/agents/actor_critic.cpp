@@ -91,10 +91,10 @@ ActorCritic::ActorCritic(
 }
 
 torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
-    const auto act_resp = actor->forward(state);
-    const auto cri_resp = critic->forward(state);
+    const auto [mu, sigma] = actor->forward(state);
+    const auto [value] = critic->forward(state);
 
-    const a2c_response response = {act_resp.mu, act_resp.sigma, cri_resp.value};
+    const a2c_response response = {mu, sigma, value};
 
     auto action = truncated_normal_sample(response.mu, response.sigma, -1.f, 1.f);
 

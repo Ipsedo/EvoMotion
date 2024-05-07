@@ -7,13 +7,13 @@
 
 class FrameBuffer {
 public:
-    FrameBuffer(const int width, const int height);
+    FrameBuffer(int width, int height);
 
     void bind() const;
     static void unbind();
 
-    void rescale(const int width, const int height) const;
-    unsigned long get_texture() const;
+    void rescale(int width, int height) const;
+    [[nodiscard]] unsigned long get_texture() const;
 
     ~FrameBuffer();
 

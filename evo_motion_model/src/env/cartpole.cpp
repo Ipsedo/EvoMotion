@@ -9,7 +9,7 @@
 #include "../controller/slider.h"
 
 CartPole::CartPole(int seed)
-    : Environment(), slider_speed(16.f), slider_force(64.f), chariot_push_force(2.f),
+    : slider_speed(16.f), slider_force(64.f), chariot_push_force(2.f),
       limit_angle(static_cast<float>(M_PI * 0.5)), reset_frame_nb(8), chariot_mass(1.f), pendulum_mass(1.f),
       rng(seed), rd_uni(0.f, 1.f), step_idx(0), max_steps(60 * 60), last_ang_vel(0.f),
       last_vel(0.f) {
@@ -108,7 +108,7 @@ step CartPole::compute_step() {
     bool win = step_idx > max_steps;
     const bool done = fail || win;
     float reward = (limit_angle - abs(ang)) / limit_angle + (10.f - center_distance) / 10.f;
-    reward = fail ? -2.f : (win ? 2.f : reward);
+    reward = fail ? -2.f : win ? 2.f : reward;
 
     last_vel = vel;
     last_ang_vel = ang_vel;
