@@ -17,7 +17,15 @@ LiquidCell::LiquidCell(
 
     weight = register_module(
         "weight",
-        torch::nn::Linear(torch::nn::LinearOptions(state_space[0], neuron_number).bias(false)));
+        torch::nn::Sequential(
+            torch::nn::Linear(torch::nn::LinearOptions(state_space[0], state_space[0] * 2)),
+            torch::nn::Mish(),
+
+            torch::nn::Linear(torch::nn::LinearOptions(state_space[0] * 2, state_space[0] * 2)),
+            torch::nn::Mish(),
+
+            torch::nn::Linear(
+                torch::nn::LinearOptions(state_space[0] * 2, neuron_number).bias(false))));
 
     recurrent_weight = register_module(
         "recurrent_weight",
@@ -79,6 +87,7 @@ ActorLiquidNetwork::ActorLiquidNetwork(
 
     this->apply(init_weights);
 }
+
 
 actor_response ActorLiquidNetwork::forward(const torch::Tensor &state) {
     const auto x_t = liquid_network->forward(state.unsqueeze(0));
