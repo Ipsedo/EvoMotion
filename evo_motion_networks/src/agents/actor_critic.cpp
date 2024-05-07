@@ -134,9 +134,11 @@ void ActorCritic::train() {
     const auto advantage = torch::smooth_l1_loss(returns, values, at::Reduction::None);
 
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
-    const auto actor_loss = -torch::log(prob) * advantage.detach().unsqueeze(-1) * actor_loss_factor;
+    const auto actor_loss =
+        -torch::log(prob) * advantage.detach().unsqueeze(-1) * actor_loss_factor;
 
-    const auto critic_loss = torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None) * critic_loss_factor;
+    const auto critic_loss =
+        torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None) * critic_loss_factor;
 
     actor_optimizer->zero_grad();
     actor_loss.sum().backward();
@@ -229,8 +231,12 @@ void ActorCritic::to(const torch::DeviceType device) {
 }
 
 void ActorCritic::set_eval(const bool eval) {
-    if (eval) {actor->eval(); critic->eval(); }
-    else { actor->train(); critic->train(); }
+    if (eval) {
+        actor->eval();
+        critic->eval();
+    } else {
+        actor->train();
+        critic->train(); }
 }
 
 int ActorCritic::count_parameters() {
@@ -255,5 +261,6 @@ float ActorCritic::grad_norm_mean() {
     for (const auto &p: actor_params) { grad_sum += p.grad().norm().item().toFloat(); }
     for (const auto &p: critic_params) { grad_sum += p.grad().norm().item().toFloat(); }
 
-    return grad_sum / (static_cast<float>(actor_params.size()) + static_cast<float>(critic_params.size()));
+    return grad_sum
+           / (static_cast<float>(actor_params.size()) + static_cast<float>(critic_params.size()));
 }
