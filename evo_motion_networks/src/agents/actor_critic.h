@@ -14,7 +14,6 @@
 
 #include <evo_motion_networks/agent.h>
 
-
 // responses
 
 struct actor_response {
@@ -31,7 +30,6 @@ struct a2c_response {
     torch::Tensor sigma;
     torch::Tensor value;
 };
-
 
 // abstract modules
 
@@ -61,8 +59,7 @@ private:
 
 class CriticModule final : public AbstractCritic {
 public:
-    CriticModule(
-        std::vector<int64_t> state_space, int hidden_size);
+    CriticModule(std::vector<int64_t> state_space, int hidden_size);
 
     critic_response forward(const torch::Tensor &state) override;
 
@@ -76,7 +73,6 @@ class ActorCritic : public Agent {
 protected:
     std::shared_ptr<AbstractActor> actor;
     std::shared_ptr<torch::optim::Adam> actor_optimizer;
-
 
     std::shared_ptr<AbstractCritic> critic;
     std::shared_ptr<torch::optim::Adam> critic_optimizer;

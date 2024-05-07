@@ -236,7 +236,8 @@ void ActorCritic::set_eval(const bool eval) {
         critic->eval();
     } else {
         actor->train();
-        critic->train(); }
+        critic->train();
+    }
 }
 
 int ActorCritic::count_parameters() {

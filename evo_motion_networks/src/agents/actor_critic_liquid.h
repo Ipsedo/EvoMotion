@@ -43,14 +43,12 @@ private:
 
     torch::nn::Sequential actor_mu{nullptr};
     torch::nn::Sequential actor_sigma{nullptr};
-
 };
 
 class CriticLiquidNetwork final : public AbstractCritic {
 public:
     CriticLiquidNetwork(
-        const std::vector<int64_t> &state_space, int hidden_size,
-        int unfolding_steps);
+        const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);
 
     critic_response forward(const torch::Tensor &state) override;
 

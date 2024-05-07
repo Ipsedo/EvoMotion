@@ -75,13 +75,11 @@ ActorLiquidNetwork::ActorLiquidNetwork(
     const int hidden_size, const int unfolding_steps) {
 
     liquid_network = register_module(
-        "liquid_network",
-        std::make_shared<LiquidCell>(state_space, hidden_size, unfolding_steps)
-    );
+        "liquid_network", std::make_shared<LiquidCell>(state_space, hidden_size, unfolding_steps));
 
     actor_mu = register_module(
-        "mu", torch::nn::Sequential(
-                  torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
+        "mu",
+        torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
 
     actor_sigma = register_module(
         "sigma", torch::nn::Sequential(
@@ -104,12 +102,9 @@ void ActorLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(); }
 CriticLiquidNetwork::CriticLiquidNetwork(
     const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps) {
     liquid_network = register_module(
-        "liquid_network",
-        std::make_shared<LiquidCell>(state_space, hidden_size, unfolding_steps)
-    );
+        "liquid_network", std::make_shared<LiquidCell>(state_space, hidden_size, unfolding_steps));
 
-    critic = register_module(
-        "mu", torch::nn::Linear(hidden_size, 1));
+    critic = register_module("mu", torch::nn::Linear(hidden_size, 1));
 
     this->apply(init_weights);
 }
