@@ -22,6 +22,11 @@ find_package(OpenGL REQUIRED)
 # GLFW-3
 find_package(glfw3 REQUIRED)
 
+# ImGUI
+set(IMGUI_BUILD_GLFW_BINDING "ON")
+set(IMGUI_BUILD_OPENGL3_BINDING "ON")
+find_package(imgui REQUIRED)
+
 # evo_motion part
 # Get all source files
 file(GLOB_RECURSE SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
@@ -33,6 +38,7 @@ target_include_directories(evo_motion_view PUBLIC ${GLM_INCLUDE_DIRS})
 target_include_directories(evo_motion_view PUBLIC ${GLEW_INCLUDE_DIRS})
 target_include_directories(evo_motion_view PUBLIC ${OPENGL_INCLUDE_DIRS})
 target_include_directories(evo_motion_view PUBLIC ${GLFW_INCLUDE_DIRS})
+target_include_directories(evo_motion_view PUBLIC ${IMGUI_INCLUDE_DIRS})
 target_include_directories(evo_motion_view PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Link libraries
@@ -42,6 +48,7 @@ target_link_libraries(
         OpenGL
         GLEW
         glfw
+        imgui
 )
 
 set(EVO_MOTION_VIEW_LIBRARIES evo_motion_view PARENT_SCOPE)

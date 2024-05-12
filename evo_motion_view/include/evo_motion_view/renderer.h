@@ -26,7 +26,14 @@ public:
 
     void close();
 
-    void draw(std::map<std::string, glm::mat4> model_matrix);
+    void draw(const std::map<std::string, glm::mat4> &model_matrix);
+
+    virtual ~Renderer();
+
+protected:
+    virtual void on_new_frame();
+    virtual void on_end_frame();
+    virtual void render_drawables(std::map<std::string, glm::mat4> model_matrix);
 
 private:
     std::string title;
@@ -44,6 +51,15 @@ private:
     GLFWwindow *window;
 };
 
-class ImGuiRenderer : public Renderer {};
+class ImGuiRenderer : public Renderer {
+public:
+    ImGuiRenderer(
+        const std::string &title, int width, int height, const std::shared_ptr<Camera> &camera);
+
+protected:
+    void on_new_frame() override;
+    void on_end_frame() override;
+    void render_drawables(std::map<std::string, glm::mat4> model_matrix) override;
+};
 
 #endif//EVO_MOTION_RENDERER_H

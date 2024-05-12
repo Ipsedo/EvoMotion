@@ -35,9 +35,9 @@ public:
 
 private:
     Item state_item;
-    btVector3 last_lin_velocity;
-    btVector3 last_ang_velocity;
     bool floor_touched;
+protected:
+    torch::Tensor get_point_state(glm::vec3 point) const;
 };
 
 #endif//EVO_MOTION_STATE_H
