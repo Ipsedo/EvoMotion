@@ -52,7 +52,8 @@ void LiquidCellModule::reset_x_t() {
             {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
 }
 
-torch::Tensor LiquidCellModule::compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t) {
+torch::Tensor
+LiquidCellModule::compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t) {
     return torch::mish(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
 }
 torch::Tensor LiquidCellModule::forward(const torch::Tensor &state) {
@@ -79,7 +80,8 @@ ActorCriticLiquidModule::ActorCriticLiquidModule(
     const int hidden_size, const int unfolding_steps) {
 
     liquid_network = register_module(
-        "liquid_network", std::make_shared<LiquidCellModule>(state_space, hidden_size, unfolding_steps));
+        "liquid_network",
+        std::make_shared<LiquidCellModule>(state_space, hidden_size, unfolding_steps));
 
     mu = register_module(
         "mu", torch::nn::Sequential(
@@ -95,9 +97,9 @@ ActorCriticLiquidModule::ActorCriticLiquidModule(
 
     critic = register_module(
         "critic", torch::nn::Sequential(
-                  torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-                  torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
-                  torch::nn::Linear(hidden_size * 2, 1)));
+                      torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+                      torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
+                      torch::nn::Linear(hidden_size * 2, 1)));
 
     this->apply(init_weights);
 }
@@ -105,7 +107,9 @@ ActorCriticLiquidModule::ActorCriticLiquidModule(
 a2c_response ActorCriticLiquidModule::forward(const torch::Tensor &state) {
     const auto x_t = liquid_network->forward(state.unsqueeze(0));
 
-    return {mu->forward(x_t).squeeze(0), sigma->forward(x_t).squeeze(0), critic->forward(x_t).squeeze(0)};
+    return {
+        mu->forward(x_t).squeeze(0), sigma->forward(x_t).squeeze(0),
+        critic->forward(x_t).squeeze(0)};
 }
 
 void ActorCriticLiquidModule::reset_liquid() const { liquid_network->reset_x_t(); }
@@ -119,7 +123,8 @@ ActorCriticLiquid::ActorCriticLiquid(
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
     : ActorCritic(seed, state_space, action_space, hidden_size, lr) {
 
-    actor_critic = std::make_shared<ActorCriticLiquidModule>(state_space, action_space, hidden_size, 6);
+    actor_critic =
+        std::make_shared<ActorCriticLiquidModule>(state_space, action_space, hidden_size, 6);
     optimizer = std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr);
 
     actor_loss_factor = 1.f;

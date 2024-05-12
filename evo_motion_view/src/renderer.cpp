@@ -132,7 +132,9 @@ void Renderer::on_end_frame() {}
  * ImGUI Rendere
  */
 ImGuiRenderer::ImGuiRenderer(
-    const std::string &title, const int width, const int height, const std::shared_ptr<Camera> &camera) : Renderer(title, width, height, camera) {}
+    const std::string &title, const int width, const int height,
+    const std::shared_ptr<Camera> &camera)
+    : Renderer(title, width, height, camera) {}
 
 void ImGuiRenderer::on_new_frame() {
     //ImGui_ImplOpenGL3_NewFrame();
