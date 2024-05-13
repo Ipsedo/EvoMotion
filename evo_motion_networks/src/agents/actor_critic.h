@@ -61,15 +61,13 @@ private:
 
 class CriticModule final : public AbstractCritic {
 public:
-    CriticModule(
-        std::vector<int64_t> state_space, int hidden_size);
+    CriticModule(std::vector<int64_t> state_space, int hidden_size);
 
     critic_response forward(const torch::Tensor &state) override;
 
 private:
     torch::nn::Sequential critic{nullptr};
 };
-
 
 // Agent
 

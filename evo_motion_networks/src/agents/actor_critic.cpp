@@ -55,20 +55,18 @@ ActorModule::ActorModule(
 actor_response ActorModule::forward(const torch::Tensor &state) {
     auto head_out = head->forward(state.unsqueeze(0));
 
-    return {
-        mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0)};
+    return {mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0)};
 }
 
 // critic
 
-CriticModule::CriticModule(
-    std::vector<int64_t> state_space, int hidden_size) {
+CriticModule::CriticModule(std::vector<int64_t> state_space, int hidden_size) {
     critic = register_module(
         "critic",
         torch::nn::Sequential(
-        torch::nn::Linear(state_space[0], hidden_size), torch::nn::Mish(),
-        torch::nn::LayerNorm(
-            torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+            torch::nn::Linear(state_space[0], hidden_size), torch::nn::Mish(),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
             torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
             torch::nn::LayerNorm(
@@ -89,9 +87,9 @@ ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
 : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
-  actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
-  critic(std::make_shared<CriticModule>(state_space, hidden_size)),
-  critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
+      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
+      critic(std::make_shared<CriticModule>(state_space, hidden_size)),
+      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
       actor_loss_factor(1.f), critic_loss_factor(1.f), curr_device(torch::kCPU), gamma(0.99f),
       episode_actor_loss(0.f), episode_critic_loss(0.f) {
     at::manual_seed(seed);

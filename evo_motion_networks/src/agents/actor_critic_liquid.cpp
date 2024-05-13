@@ -82,7 +82,8 @@ ActorLiquidNetwork::ActorLiquidNetwork(
     const int hidden_size, const int unfolding_steps) {
 
     liquid_network = register_module(
-        "liquid_network", std::make_shared<LiquidCellModule>(state_space, hidden_size, unfolding_steps));
+        "liquid_network",
+        std::make_shared<LiquidCellModule>(state_space, hidden_size, unfolding_steps));
 
     mu = register_module(
         "mu", torch::nn::Sequential(
@@ -112,7 +113,8 @@ void ActorLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(); }
 CriticLiquidNetwork::CriticLiquidNetwork(
     const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps) {
     liquid_network = register_module(
-        "liquid_network", std::make_shared<LiquidCellModule>(state_space, hidden_size, unfolding_steps));
+        "liquid_network",
+        std::make_shared<LiquidCellModule>(state_space, hidden_size, unfolding_steps));
 
     critic = register_module(
         "critic", torch::nn::Sequential(
