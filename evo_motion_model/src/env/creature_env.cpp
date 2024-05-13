@@ -78,15 +78,14 @@ step MuscleEnv::compute_step() {
         curr_pos - last_pos < pos_delta)
         remaining_steps -= 1;
     else {
-        remaining_steps += frames_to_add;
+        remaining_steps += frames_to_add * 2;
         last_pos = curr_pos;
     }
 
     const bool win = curr_step >= max_steps;
     const bool fail = remaining_steps <= 0;
 
-    const float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) /
-                         target_velocity;
+    const float reward = root.get_body()->getLinearVelocity().z();
 
     const bool done = win | fail;
 

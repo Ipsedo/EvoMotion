@@ -29,13 +29,13 @@ private:
     torch::Tensor x_t;
 };
 
-class ActorCriticLiquidModule final : public AbstractActorCriticModule {
+class ActorLiquidNetwork final : public AbstractActor {
 public:
-    ActorCriticLiquidModule(
+    ActorLiquidNetwork(
         const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
         int unfolding_steps);
 
-    a2c_response forward(const torch::Tensor &state) override;
+    actor_response forward(const torch::Tensor &state) override;
 
     void reset_liquid() const;
 
@@ -44,6 +44,19 @@ private:
 
     torch::nn::Sequential mu{nullptr};
     torch::nn::Sequential sigma{nullptr};
+};
+
+class CriticLiquidNetwork final : public AbstractCritic {
+public:
+    CriticLiquidNetwork(
+        const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);
+
+    critic_response forward(const torch::Tensor &state) override;
+
+    void reset_liquid() const;
+
+private:
+    std::shared_ptr<LiquidCellModule> liquid_network;
 
     torch::nn::Sequential critic{nullptr};
 };
