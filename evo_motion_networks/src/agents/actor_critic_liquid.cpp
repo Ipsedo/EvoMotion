@@ -41,11 +41,8 @@ LiquidCellModule::LiquidCellModule(
     reset_x_t();
 }
 
-void LiquidCellModule::reset_x_t() {
-    x_t = torch::mish(
-        1e-3f
-        * torch::randn(
-            {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
+void LiquidCellModule::reset_x_t() {/
+    x_t = torch::zeros({1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device()));
 }
 
 torch::Tensor
