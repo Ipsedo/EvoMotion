@@ -19,6 +19,22 @@ struct run_params {
     int hidden_size;
 };
 
+struct train_params {
+    std::string env_name;
+    std::string agent_name;
+
+    std::string output_path;
+
+    float learning_rate;
+
+    int nb_saves;
+    int nb_episodes;
+
+    int hidden_size;
+};
+
 void infer(int seed, bool cuda, const run_params &params);
+
+void train(int seed, bool cuda, const train_params &params);
 
 #endif//EVO_MOTION_RUN_H
