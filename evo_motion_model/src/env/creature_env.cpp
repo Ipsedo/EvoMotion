@@ -30,7 +30,7 @@ MuscleEnv::MuscleEnv(const int seed)
       frames_to_add(static_cast<int>(seconds_to_add / DELTA_T_MODEL)),
       pos_delta(minimal_velocity * DELTA_T_MODEL * static_cast<float>(frames_to_add)),
       last_pos(0.f) {
-    base.get_body()->setFriction(0.5f);
+    base.get_body()->setFriction(0.1f);
 
     add_item(base);
 
@@ -85,7 +85,8 @@ step MuscleEnv::compute_step() {
     const bool win = curr_step >= max_steps;
     const bool fail = remaining_steps <= 0;
 
-    const float reward = root.get_body()->getLinearVelocity().z();
+    const float reward =
+        root.get_body()->getLinearVelocity().z() * root.get_body()->getCenterOfMassPosition().z();
 
     const bool done = win | fail;
 

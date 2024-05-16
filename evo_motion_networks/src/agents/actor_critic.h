@@ -82,10 +82,10 @@ protected:
     float actor_loss_factor;
     float critic_loss_factor;
 
+    float gamma;
+
 private:
     torch::DeviceType curr_device;
-
-    float gamma;
 
     std::vector<a2c_response> results_buffer;
     std::vector<float> rewards_buffer;

@@ -23,8 +23,8 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 # ImGUI
-set(IMGUI_BUILD_GLFW_BINDING "ON")
-set(IMGUI_BUILD_OPENGL3_BINDING "ON")
+set(IMGUI_BUILD_GLFW_BINDING ON)
+set(IMGUI_BUILD_OPENGL3_BINDING ON)
 find_package(imgui REQUIRED)
 
 # evo_motion part

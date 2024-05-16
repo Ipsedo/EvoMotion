@@ -134,6 +134,11 @@ JsonHingeConstraint::JsonHingeConstraint(const Item &parent, const nlohmann::jso
     hinge_constraint->setOverrideNumSolverIterations(
         hinge_constraint->getOverrideNumSolverIterations() * 4);
 
+    hinge_constraint->setParam(BT_CONSTRAINT_ERP, 0.7);
+    hinge_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.8);
+    hinge_constraint->setParam(BT_CONSTRAINT_CFM, 0.2);
+    hinge_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.1);
+
     parent.get_body()->setIgnoreCollisionCheck(child->get_item().get_body(), true);
 }
 
@@ -162,6 +167,11 @@ JsonFixedConstraint::JsonFixedConstraint(const Item &parent, const nlohmann::jso
 
     fixed_constraint->setOverrideNumSolverIterations(
         fixed_constraint->getOverrideNumSolverIterations() * 4);
+
+    fixed_constraint->setParam(BT_CONSTRAINT_ERP, 0.7);
+    fixed_constraint->setParam(BT_CONSTRAINT_STOP_ERP, 0.8);
+    fixed_constraint->setParam(BT_CONSTRAINT_CFM, 0.2);
+    fixed_constraint->setParam(BT_CONSTRAINT_STOP_CFM, 0.1);
 }
 
 btTypedConstraint *JsonFixedConstraint::get_constraint() { return fixed_constraint; }

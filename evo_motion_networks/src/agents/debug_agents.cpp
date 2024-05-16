@@ -38,5 +38,5 @@ ConstantAgent::ConstantAgent(
     : DebugAgent(seed, state_space, action_space, hidden_size, lr) {}
 
 torch::Tensor ConstantAgent::act(torch::Tensor state, float reward) {
-    return torch::ones({action_space}, torch::TensorOptions(curr_device));
+    return torch::zeros({action_space}, torch::TensorOptions(curr_device));
 }

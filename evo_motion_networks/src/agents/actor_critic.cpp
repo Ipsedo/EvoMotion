@@ -48,8 +48,6 @@ ActorModule::ActorModule(
                 torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
             torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
-
-
 }
 
 actor_response ActorModule::forward(const torch::Tensor &state) {
@@ -86,11 +84,11 @@ critic_response CriticModule::forward(const torch::Tensor &state) {
 ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
-: actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
+    : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
-      actor_loss_factor(1.f), critic_loss_factor(1.f), curr_device(torch::kCPU), gamma(0.99f),
+      actor_loss_factor(1.f), critic_loss_factor(1.f), gamma(0.99f), curr_device(torch::kCPU),
       episode_actor_loss(0.f), episode_critic_loss(0.f) {
     at::manual_seed(seed);
 }
@@ -136,28 +134,27 @@ void ActorCritic::train() {
     returns = returns.flip({0}).cumsum(0).flip({0}) / torch::pow(gamma, t_steps);
     returns = (returns - returns.mean()) / (returns.std() + 1e-8f);
 
-    const auto advantage = torch::smooth_l1_loss(returns, values, at::Reduction::None);
-
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     const auto actor_loss =
-        -torch::log(prob) * advantage.detach().unsqueeze(-1) * actor_loss_factor;
+        torch::sum(
+            -torch::log(prob)
+            * torch::smooth_l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1))
+        * actor_loss_factor;
 
     const auto critic_loss =
-        torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None) * critic_loss_factor;
-
-    const auto loss =
-        torch::sum(actor_loss_factor * actor_loss + critic_loss_factor * critic_loss.unsqueeze(-1));
+        torch::sum(torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None))
+        * critic_loss_factor;
 
     actor_optimizer->zero_grad();
-    actor_loss.sum().backward();
+    actor_loss.backward();
     actor_optimizer->step();
 
     critic_optimizer->zero_grad();
-    critic_loss.sum().backward();
+    critic_loss.backward();
     critic_optimizer->step();
 
-    episode_actor_loss = actor_loss.sum().item().toFloat();
-    episode_critic_loss = critic_loss.sum().item().toFloat();
+    episode_actor_loss = actor_loss.item().toFloat();
+    episode_critic_loss = critic_loss.item().toFloat();
 }
 
 void ActorCritic::done(const float reward) {
@@ -197,7 +194,6 @@ void ActorCritic::save(const std::string &output_folder_path) {
 
     critic_archive.save_to(critic_file);
     critic_optimizer_archive.save_to(critic_optimizer_file);
-
 }
 
 void ActorCritic::load(const std::string &input_folder_path) {

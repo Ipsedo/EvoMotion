@@ -15,7 +15,7 @@ ItemState::ItemState(Item item, const Item &floor, btDynamicsWorld *world)
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
-int ItemState::get_size() { return 3 + 3 + 3 * 4 + 3 + 1 + 6 * (3 + 3); }
+int ItemState::get_size() { return 3 + 3 + 3 * 4 + 3 + 1 /*+ 6 * (3 + 3)*/; }
 
 torch::Tensor ItemState::get_point_state(const glm::vec3 point) const {
     const auto model_mat = state_item.model_matrix();
@@ -35,7 +35,7 @@ torch::Tensor ItemState::get_state() {
     btScalar yaw, pitch, roll;
     state_item.get_body()->getWorldTransform().getRotation().getEulerZYX(yaw, pitch, roll);
 
-    const btVector3 up_axis = state_item.get_body()->getWorldTransform() * btVector4(0, 1, 0, 0);
+    const glm::vec3 up_axis = state_item.model_matrix_without_scale() * glm::vec4(0, 1, 0, 0);
 
     const btVector3 center_lin_velocity = state_item.get_body()->getLinearVelocity();
     const btVector3 center_ang_velocity = state_item.get_body()->getAngularVelocity();
@@ -43,18 +43,18 @@ torch::Tensor ItemState::get_state() {
     const btVector3 force = state_item.get_body()->getTotalForce();
     const btVector3 torque = state_item.get_body()->getTotalTorque();
 
-    float touched = floor_touched ? 1.f : 0.f;
+    float touched = floor_touched ? 1.f : -1.f;
     floor_touched = false;
 
     auto main_state = torch::tensor(
     {center_pos.x(), center_pos.y(), center_pos.z(),
      yaw / static_cast<float>(M_PI), pitch / static_cast<float>(M_PI), roll / static_cast<float>(M_PI),
      center_lin_velocity.x(), center_lin_velocity.y(), center_lin_velocity.z(),
-     center_ang_velocity.x(), center_ang_velocity.y(), center_ang_velocity.z(),
+     center_ang_velocity.x() / static_cast<float>(M_PI), center_ang_velocity.y() / static_cast<float>(M_PI), center_ang_velocity.z() / static_cast<float>(M_PI),
      force.x(), force.y(), force.z(), torque.x(), torque.y(), torque.z(),
-        up_axis.x(), up_axis.y(), up_axis.z(), touched});
+        up_axis.x, up_axis.y, up_axis.z, touched});
 
-    return torch::cat({
+    /*return torch::cat({
         main_state,
         get_point_state(glm::vec3(1, 0, 0)),
         get_point_state(glm::vec3(-1, 0, 0)),
@@ -62,7 +62,8 @@ torch::Tensor ItemState::get_state() {
         get_point_state(glm::vec3(0, -1, 0)),
         get_point_state(glm::vec3(0, 0, 1)),
         get_point_state(glm::vec3(0, 0, -1))
-    }, 0);
+    }, 0);*/
+    return main_state;
 }
 
 btScalar ItemState::addSingleResult(
