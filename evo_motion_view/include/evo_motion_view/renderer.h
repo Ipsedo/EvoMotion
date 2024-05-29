@@ -28,6 +28,13 @@ public:
 
     void draw(std::map<std::string, glm::mat4> model_matrix);
 
+protected:
+    virtual bool on_new_frame();
+    virtual void on_end_frame();
+    virtual void render_drawables(std::map<std::string, glm::mat4> model_matrix);
+
+    virtual void window_size_callback(int new_width, int new_height);
+
 private:
     std::string title;
 
@@ -42,8 +49,15 @@ private:
     std::map<std::string, std::shared_ptr<Drawable>> drawables;
 
     GLFWwindow *window;
+
+    static void window_size_callback_static(GLFWwindow *window, int width, int height);
 };
 
-class ImGuiRenderer : public Renderer {};
+class ImGuiRenderer : public Renderer {
+protected:
+    bool on_new_frame() override;
+    void on_end_frame() override;
+    void window_size_callback(int new_width, int new_height) override;
+};
 
 #endif//EVO_MOTION_RENDERER_H

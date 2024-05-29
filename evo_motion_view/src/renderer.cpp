@@ -36,6 +36,8 @@ Renderer::Renderer(
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+    glfwSetWindowUserPointer(window, this);
+    glfwSetWindowSizeCallback(window, Renderer::window_size_callback_static);
 
     if (!window) {
         std::cerr << "GLFW window initialization failed" << std::endl;
@@ -44,6 +46,7 @@ Renderer::Renderer(
     }
 
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(1);
 
     if (glewInit() != GLEW_OK) {
         std::cerr << "GLEW initialization failed" << std::endl;
@@ -69,6 +72,17 @@ Renderer::Renderer(
     is_open = true;
 }
 
+void Renderer::window_size_callback_static(GLFWwindow *window, int width, int height) {
+    auto *renderer = static_cast<Renderer *>(glfwGetWindowUserPointer(window));
+    renderer->window_size_callback(width, height);
+}
+
+void Renderer::window_size_callback(int new_width, int new_height) {
+    glViewport(0, 0, new_width, new_height);
+    width = new_width;
+    height = new_height;
+}
+
 void Renderer::add_drawable(const std::string &name, const std::shared_ptr<Drawable> &drawable) {
     drawables.insert({name, drawable});
 }
@@ -81,15 +95,28 @@ void Renderer::close() {
 }
 
 void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
+    if (!on_new_frame()) return;
+
+    render_drawables(std::move(model_matrix));
+
+    on_end_frame();
+}
+
+bool Renderer::on_new_frame() {
     if (glfwWindowShouldClose(window)) {
         is_open = false;
-        return;
+        return false;
     }
 
     glfwPollEvents();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    return is_open;
+}
+void Renderer::on_end_frame() { glfwSwapBuffers(window); }
+
+void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix) {
     const glm::mat4 view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
 
     const glm::mat4 proj_matrix = glm::frustum(
@@ -104,6 +131,14 @@ void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
 
         drawable->draw(mvp_matrix, mv_matrix, light_pos, camera->pos());
     }
+}
 
-    glfwSwapBuffers(window);
+/*
+ * ImGUI Renderer
+ */
+
+bool ImGuiRenderer::on_new_frame() { return Renderer::on_new_frame(); }
+void ImGuiRenderer::on_end_frame() { Renderer::on_end_frame(); }
+void ImGuiRenderer::window_size_callback(int new_width, int new_height) {
+    Renderer::window_size_callback(new_width, new_height);
 }
