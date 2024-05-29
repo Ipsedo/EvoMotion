@@ -74,7 +74,8 @@ step MuscleEnv::compute_step() {
 
     const Item root = skeleton.get_items()[0];
 
-    const float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
+    const float reward =
+        (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
 
     if (const float curr_pos = root.get_body()->getCenterOfMassPosition().z();
         curr_pos - last_pos < pos_delta)
