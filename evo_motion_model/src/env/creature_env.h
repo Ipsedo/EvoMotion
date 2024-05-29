@@ -52,7 +52,7 @@ private:
     float seconds_to_add;
 
     float target_velocity;
-    float minimal_velocity;
+    //float minimal_velocity;
 
     int reset_frames;
     int curr_step;
