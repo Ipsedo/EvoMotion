@@ -21,7 +21,9 @@ public:
 
 class ItemState final : public State, public btCollisionWorld::ContactResultCallback {
 public:
-    ItemState(Item item, const Item &floor, btDynamicsWorld *world);
+    ItemState(Item item, const std::optional<Item> &root_item, const Item &floor, btDynamicsWorld *world);
+
+    ItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
 
     int get_size() override;
 
@@ -34,6 +36,7 @@ public:
     ~ItemState() override;
 
 private:
+    std::optional<Item> root_item;
     Item state_item;
     bool floor_touched;
 protected:

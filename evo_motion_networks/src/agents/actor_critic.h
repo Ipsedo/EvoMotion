@@ -79,8 +79,7 @@ protected:
     std::shared_ptr<AbstractCritic> critic;
     std::shared_ptr<torch::optim::Adam> critic_optimizer;
 
-    float actor_loss_factor;
-    float critic_loss_factor;
+    int train_actor_every;
 
     float gamma;
 
@@ -93,6 +92,8 @@ private:
 
     float episode_actor_loss;
     float episode_critic_loss;
+
+    long curr_step;
 
     void train();
 

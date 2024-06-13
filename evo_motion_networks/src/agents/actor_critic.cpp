@@ -88,8 +88,8 @@ ActorCritic::ActorCritic(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
-      actor_loss_factor(1.f), critic_loss_factor(1.f), gamma(0.99f), curr_device(torch::kCPU),
-      episode_actor_loss(0.f), episode_critic_loss(0.f) {
+      train_actor_every(1), gamma(0.99f), curr_device(torch::kCPU),
+      episode_actor_loss(0.f), episode_critic_loss(0.f), curr_step(0L) {
     at::manual_seed(seed);
 }
 
@@ -138,16 +138,16 @@ void ActorCritic::train() {
     const auto actor_loss =
         torch::sum(
             -torch::log(prob)
-            * torch::smooth_l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1))
-        * actor_loss_factor;
+            * torch::smooth_l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1));
 
     const auto critic_loss =
-        torch::sum(torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None))
-        * critic_loss_factor;
+        torch::sum(torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None));
 
-    actor_optimizer->zero_grad();
-    actor_loss.backward();
-    actor_optimizer->step();
+    if (curr_step % train_actor_every == train_actor_every - 1) {
+        actor_optimizer->zero_grad();
+        actor_loss.backward();
+        actor_optimizer->step();
+    }
 
     critic_optimizer->zero_grad();
     critic_loss.backward();
@@ -155,6 +155,8 @@ void ActorCritic::train() {
 
     episode_actor_loss = actor_loss.item().toFloat();
     episode_critic_loss = critic_loss.item().toFloat();
+
+    curr_step++;
 }
 
 void ActorCritic::done(const float reward) {
@@ -264,9 +266,13 @@ float ActorCritic::grad_norm_mean() {
     const auto actor_params = actor->parameters();
     const auto critic_params = critic->parameters();
 
-    for (const auto &p: actor_params) { grad_sum += p.grad().norm().item().toFloat(); }
+    for (const auto &p: actor_params) {
+        if (curr_step > train_actor_every)
+            grad_sum += p.grad().norm().item().toFloat();
+    }
     for (const auto &p: critic_params) { grad_sum += p.grad().norm().item().toFloat(); }
 
     return grad_sum
-           / (static_cast<float>(actor_params.size()) + static_cast<float>(critic_params.size()));
+           / (static_cast<float>(curr_step > train_actor_every ? actor_params.size() : 0) +
+              static_cast<float>(critic_params.size()));
 }

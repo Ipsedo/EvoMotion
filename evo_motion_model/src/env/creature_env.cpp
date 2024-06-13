@@ -22,7 +22,7 @@ MuscleEnv::MuscleEnv(const int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), initial_remaining_seconds(1.f),
-      max_episode_seconds(60.f), seconds_to_add(1.f / 16.f), target_velocity(0.2f),
+      max_episode_seconds(60.f), seconds_to_add(1.f / 4.f), target_velocity(0.1f),
       /*minimal_velocity(0.05f),*/ reset_frames(15), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       max_steps_without_moving(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)),
@@ -34,8 +34,16 @@ MuscleEnv::MuscleEnv(const int seed)
 
     add_item(base);
 
-    for (const auto &item: skeleton.get_items()) {
-        states.push_back(std::make_shared<ItemState>(item, base, m_world));
+    auto items = skeleton.get_items();
+
+    auto root_item = items[0];
+    add_item(root_item);
+    root_item.get_body()->setActivationState(DISABLE_DEACTIVATION);
+
+    states.push_back(std::make_shared<ItemState>(root_item, base, m_world));
+
+    for (const auto &item: std::vector<Item>(items.begin() + 1, items.end())) {
+        states.push_back(std::make_shared<ItemState>(item, root_item, base, m_world));
         add_item(item);
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
@@ -74,8 +82,7 @@ step MuscleEnv::compute_step() {
 
     const Item root = skeleton.get_items()[0];
 
-    const float reward =
-        (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
+    const float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) / target_velocity;
 
     if (const float curr_pos = root.get_body()->getCenterOfMassPosition().z();
         curr_pos - last_pos < pos_delta)
