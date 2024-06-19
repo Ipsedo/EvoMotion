@@ -136,9 +136,9 @@ void ActorCritic::train() {
 
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     const auto actor_loss =
-        torch::sum(
+        torch::sum(torch::mean(
             -torch::log(prob)
-            * torch::smooth_l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1));
+            * torch::smooth_l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1), -1));
 
     const auto critic_loss =
         torch::sum(torch::smooth_l1_loss(values, returns.detach(), at::Reduction::None));

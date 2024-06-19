@@ -149,7 +149,7 @@ ActorCriticLiquid::ActorCriticLiquid(
     critic = std::make_shared<CriticLiquidNetwork>(state_space, hidden_size, 6);
     critic_optimizer = std::make_shared<torch::optim::Adam>(critic->parameters(), lr);
 
-    train_actor_every = 2;
+    train_actor_every = 1;
 }
 
 void ActorCriticLiquid::done(const float reward) {
