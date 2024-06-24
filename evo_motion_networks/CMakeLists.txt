@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(evo_motion_networks)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set(EVO_MOTION_NETWORKS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE INTERNAL "")
 include_directories("${EVO_MOTION_NETWORKS_INCLUDE_DIRS}")

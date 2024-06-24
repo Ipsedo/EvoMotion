@@ -3,6 +3,7 @@
 //
 
 #include <filesystem>
+#include <utility>
 
 #include <indicators/progress_bar.hpp>
 
@@ -73,9 +74,9 @@ void train(int seed, bool cuda, const train_params &params) {
 
             std::string p_bar_description =
                 "Save " + std::to_string(s - 1)
-                + ", actor = " + std::to_string(actor_loss_meter.loss())
-                + ", critic = " + std::to_string(critic_loss_meter.loss())
-                + ", grad_norm = " + std::to_string(agent->grad_norm_mean());
+                          + ", actor = " + std::format("{:.5f}", actor_loss_meter.loss())
+                          + ", critic = " + std::format("{:.5f}", critic_loss_meter.loss())
+                          + ", grad_norm = " + std::format("{:.5f}", agent->grad_norm_mean());
 
             p_bar.set_option(indicators::option::PostfixText{p_bar_description});
 

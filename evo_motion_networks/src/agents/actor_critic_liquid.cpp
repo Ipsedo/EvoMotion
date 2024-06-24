@@ -15,15 +15,17 @@ LiquidCellModule::LiquidCellModule(
     this->neuron_number = neuron_number;
     steps = unfolding_steps;
 
+    int hidden_size = static_cast<int>(state_space[0]);
+
     weight = register_module(
         "weight",
         torch::nn::Sequential(
-            torch::nn::Linear(state_space[0], state_space[0] * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({state_space[0] * 2})),
-            torch::nn::Linear(state_space[0] * 2, state_space[0] * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({state_space[0] * 2})),
+            torch::nn::Linear(state_space[0], hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5f)),
+            torch::nn::Linear(hidden_size * 2, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5f)),
             torch::nn::Linear(
-                torch::nn::LinearOptions(state_space[0] * 2, neuron_number).bias(false))));
+                torch::nn::LinearOptions(hidden_size * 2, neuron_number).bias(false))));
 
     recurrent_weight = register_module(
         "recurrent_weight",
@@ -46,6 +48,7 @@ torch::Tensor
 LiquidCellModule::compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t) {
     return torch::mish(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
 }
+
 torch::Tensor LiquidCellModule::forward(const torch::Tensor &state) {
     const float delta_t = 1.f / static_cast<float>(steps);
 
@@ -77,23 +80,19 @@ ActorLiquidNetwork::ActorLiquidNetwork(
 
     mu = register_module(
         "mu", torch::nn::Sequential(
-                  torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-                  torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
-
-                  torch::nn::Linear(hidden_size * 2, hidden_size * 2), torch::nn::Mish(),
-                  torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
-
-                  torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Tanh()));
+            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5f)),
+            torch::nn::Linear(hidden_size * 2, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5f)),
+            torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-                     torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-                     torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
-
-                     torch::nn::Linear(hidden_size * 2, hidden_size * 2), torch::nn::Mish(),
-                     torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
-
-                     torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Softplus()));
+            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5f)),
+            torch::nn::Linear(hidden_size * 2, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5f)),
+            torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Softplus()));
 
     this->apply(init_weights);
 }
@@ -116,13 +115,11 @@ CriticLiquidNetwork::CriticLiquidNetwork(
 
     critic = register_module(
         "critic", torch::nn::Sequential(
-                      torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-                      torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
-
-                      torch::nn::Linear(hidden_size * 2, hidden_size * 2), torch::nn::Mish(),
-                      torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2})),
-
-                      torch::nn::Linear(hidden_size * 2, 1)));
+            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5f)),
+            torch::nn::Linear(hidden_size * 2, hidden_size * 2), torch::nn::Mish(),
+            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5f)),
+            torch::nn::Linear(hidden_size * 2, 1)));
 
     this->apply(init_weights);
 }
@@ -148,8 +145,6 @@ ActorCriticLiquid::ActorCriticLiquid(
 
     critic = std::make_shared<CriticLiquidNetwork>(state_space, hidden_size, 6);
     critic_optimizer = std::make_shared<torch::optim::Adam>(critic->parameters(), lr);
-
-    train_actor_every = 1;
 }
 
 void ActorCriticLiquid::done(const float reward) {

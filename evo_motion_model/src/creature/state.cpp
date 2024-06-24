@@ -25,7 +25,10 @@ torch::Tensor ItemState::get_point_state(const glm::vec3 point) const {
     glm::vec3 root_pos = root_item.has_value() ? root_item->model_matrix() * glm::vec4(glm::vec3(0.f), 1.f) : glm::vec3(
         0.f);
     glm::vec3 pos = glm::vec3(state_item.model_matrix() * glm::vec4(point, 1.f)) - root_pos;
-    const btVector3 vel = state_item.get_body()->getVelocityInLocalPoint(glm_to_bullet(point));
+
+    const btVector3 root_vel = root_item.has_value() ? root_item->get_body()->getPushVelocityInLocalPoint(
+        glm_to_bullet(point)) : btVector3(0.f, 0.f, 0.f);
+    const btVector3 vel = state_item.get_body()->getVelocityInLocalPoint(glm_to_bullet(point)) - root_vel;
     // const btVector3 push_vel = state_item.get_body()->getPushVelocityInLocalPoint(glm_to_bullet(point));
 
     return torch::tensor({pos.x, pos.y, pos.z, vel.x(), vel.y(), vel.z()});
@@ -68,3 +71,18 @@ btScalar ItemState::addSingleResult(
 }
 
 ItemState::~ItemState() = default;
+
+// Muscle
+MuscleState::MuscleState(Muscle muscle) : muscle_constraints(muscle.get_constraints()) {
+
+}
+
+int MuscleState::get_size() {
+    return static_cast<int>(muscle_constraints.size()) * (1);
+}
+
+torch::Tensor MuscleState::get_state() {
+    std::vector<torch::Tensor> states;
+    for (auto c: muscle_constraints) states.push_back(torch::tensor({c->getAppliedImpulse()}));
+    return torch::cat(states);
+}

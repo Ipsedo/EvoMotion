@@ -79,8 +79,6 @@ protected:
     std::shared_ptr<AbstractCritic> critic;
     std::shared_ptr<torch::optim::Adam> critic_optimizer;
 
-    int train_actor_every;
-
     float gamma;
 
 private:
