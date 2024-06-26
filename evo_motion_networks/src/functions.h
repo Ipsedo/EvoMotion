@@ -20,4 +20,8 @@ torch::Tensor truncated_normal_pdf(
     const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
     float max_value);
 
+torch::Tensor truncated_normal_entropy(
+    const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
+    float max_value);
+
 #endif//EVO_MOTION_FUNCTIONS_H

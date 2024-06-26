@@ -26,10 +26,9 @@ torch::Tensor ItemState::get_point_state(const glm::vec3 point) const {
         0.f);
     glm::vec3 pos = glm::vec3(state_item.model_matrix() * glm::vec4(point, 1.f)) - root_pos;
 
-    const btVector3 root_vel = root_item.has_value() ? root_item->get_body()->getPushVelocityInLocalPoint(
+    const btVector3 root_vel = root_item.has_value() ? root_item->get_body()->getVelocityInLocalPoint(
         glm_to_bullet(point)) : btVector3(0.f, 0.f, 0.f);
     const btVector3 vel = state_item.get_body()->getVelocityInLocalPoint(glm_to_bullet(point)) - root_vel;
-    // const btVector3 push_vel = state_item.get_body()->getPushVelocityInLocalPoint(glm_to_bullet(point));
 
     return torch::tensor({pos.x, pos.y, pos.z, vel.x(), vel.y(), vel.z()});
 }

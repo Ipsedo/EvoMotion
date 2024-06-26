@@ -80,6 +80,7 @@ protected:
     std::shared_ptr<torch::optim::Adam> critic_optimizer;
 
     float gamma;
+    int train_actor_every;
 
 private:
     torch::DeviceType curr_device;
