@@ -130,7 +130,7 @@ void ActorCritic::train() {
     const auto t_steps = torch::arange(
         static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
 
-    const auto returns =
+    auto returns =
         (rewards * torch::pow(gamma, t_steps)).flip({0}).cumsum(0).flip({0}) / torch::pow(gamma, t_steps);
     //returns = (returns - returns.mean()) / (returns.std() + 1e-8f);
 
@@ -139,7 +139,7 @@ void ActorCritic::train() {
         torch::mean(
             torch::log(prob) * torch::l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1));
     const auto actor_entropy = torch::mean(truncated_normal_entropy(mus, sigmas, -1.f, 1.f));
-    const auto actor_loss = -1e-1f * (policy_loss + 1e-1 * actor_entropy);
+    const auto actor_loss = -policy_loss - 1e-2 * actor_entropy;
 
     const auto critic_loss = torch::l1_loss(values, returns.detach(), at::Reduction::Mean);
 
