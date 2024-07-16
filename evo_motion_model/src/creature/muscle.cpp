@@ -65,11 +65,11 @@ Muscle::Muscle(
         attach_b.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
     attach_a_constraint->setOverrideNumSolverIterations(
-        attach_a_constraint->getOverrideNumSolverIterations() * 16);
+        attach_a_constraint->getOverrideNumSolverIterations() * 32);
     attach_b_constraint->setOverrideNumSolverIterations(
-        attach_b_constraint->getOverrideNumSolverIterations() * 16);
+        attach_b_constraint->getOverrideNumSolverIterations() * 32);
     muscle_slider_constraint->setOverrideNumSolverIterations(
-        muscle_slider_constraint->getOverrideNumSolverIterations() * 16);
+        muscle_slider_constraint->getOverrideNumSolverIterations() * 32);
 }
 
 void Muscle::contract(const float speed_factor) const {
@@ -83,6 +83,14 @@ std::vector<Item> Muscle::get_items() { return {attach_a, attach_b}; }
 
 std::vector<btTypedConstraint *> Muscle::get_constraints() {
     return {muscle_slider_constraint, attach_a_constraint, attach_b_constraint};
+}
+
+btSliderConstraint *Muscle::get_slider_constraint() {
+    return muscle_slider_constraint;
+}
+
+std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> Muscle::get_p2p_constraints() {
+    return {attach_a_constraint, attach_b_constraint};
 }
 
 Muscle::~Muscle() = default;

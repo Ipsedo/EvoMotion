@@ -56,7 +56,9 @@ public:
     torch::Tensor get_state() override;
 
 private:
-    std::vector<btTypedConstraint *> muscle_constraints;
+    btSliderConstraint *slider_constraint;
+    btPoint2PointConstraint *p2p_a;
+    btPoint2PointConstraint *p2p_b;
 };
 
 #endif//EVO_MOTION_STATE_H

@@ -1,7 +1,7 @@
 {
   "skeleton": {
     "name": "body",
-    "mass": 1.0,
+    "mass": 4.0,
     "shape": "cube",
     "scale": {
       "x": 0.4,
@@ -77,7 +77,7 @@
         },
         "child_member": {
           "name": "legA",
-          "mass": 0.5,
+          "mass": 0.3,
           "shape": "cube",
           "scale": {
             "x": 0.15,
@@ -154,7 +154,7 @@
               },
               "child_member": {
                 "name": "leg1",
-                "mass": 0.5,
+                "mass": 0.3,
                 "shape": "cube",
                 "scale": {
                   "x": 0.3,
@@ -231,7 +231,7 @@
                     },
                     "child_member": {
                       "name": "leg2",
-                      "mass": 0.5,
+                      "mass": 0.3,
                       "shape": "cube",
                       "scale": {
                         "x": 0.6,
@@ -304,7 +304,7 @@
                           },
                           "child_member": {
                             "name": "leg3",
-                            "mass": 0.2,
+                            "mass": 0.15,
                             "shape": "sphere",
                             "scale": {
                               "x": 0.115,
@@ -394,7 +394,7 @@
         },
         "child_member": {
           "name": "legB",
-          "mass": 0.5,
+          "mass": 0.3,
           "shape": "cube",
           "scale": {
             "x": 0.15,
@@ -471,7 +471,7 @@
               },
               "child_member": {
                 "name": "leg1",
-                "mass": 0.5,
+                "mass": 0.3,
                 "shape": "cube",
                 "scale": {
                   "x": 0.3,
@@ -548,7 +548,7 @@
                     },
                     "child_member": {
                       "name": "leg2",
-                      "mass": 0.5,
+                      "mass": 0.3,
                       "shape": "cube",
                       "scale": {
                         "x": 0.6,
@@ -621,7 +621,7 @@
                           },
                           "child_member": {
                             "name": "leg3",
-                            "mass": 0.2,
+                            "mass": 0.15,
                             "shape": "sphere",
                             "scale": {
                               "x": 0.115,
@@ -711,7 +711,7 @@
         },
         "child_member": {
           "name": "legC",
-          "mass": 0.5,
+          "mass": 0.3,
           "shape": "cube",
           "scale": {
             "x": 0.15,
@@ -788,7 +788,7 @@
               },
               "child_member": {
                 "name": "leg1",
-                "mass": 0.5,
+                "mass": 0.3,
                 "shape": "cube",
                 "scale": {
                   "x": 0.3,
@@ -865,7 +865,7 @@
                     },
                     "child_member": {
                       "name": "leg2",
-                      "mass": 0.5,
+                      "mass": 0.3,
                       "shape": "cube",
                       "scale": {
                         "x": 0.6,
@@ -938,7 +938,7 @@
                           },
                           "child_member": {
                             "name": "leg3",
-                            "mass": 0.2,
+                            "mass": 0.15,
                             "shape": "sphere",
                             "scale": {
                               "x": 0.115,
@@ -1028,7 +1028,7 @@
         },
         "child_member": {
           "name": "legD",
-          "mass": 0.5,
+          "mass": 0.3,
           "shape": "cube",
           "scale": {
             "x": 0.15,
@@ -1104,7 +1104,7 @@
               },
               "child_member": {
                 "name": "leg1",
-                "mass": 0.5,
+                "mass": 0.3,
                 "shape": "cube",
                 "scale": {
                   "x": 0.3,
@@ -1181,7 +1181,7 @@
                     },
                     "child_member": {
                       "name": "leg2",
-                      "mass": 0.5,
+                      "mass": 0.3,
                       "shape": "cube",
                       "scale": {
                         "x": 0.6,
@@ -1254,7 +1254,7 @@
                           },
                           "child_member": {
                             "name": "leg3",
-                            "mass": 0.2,
+                            "mass": 0.15,
                             "shape": "sphere",
                             "scale": {
                               "x": 0.115,
@@ -1372,7 +1372,7 @@
       "name": "muscle_B1",
       "item_a": "body",
       "item_b": "body_legB",
-      "attach_mass": 0.001,
+      "attach_mass": 0.1,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,

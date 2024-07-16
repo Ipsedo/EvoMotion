@@ -21,7 +21,7 @@ MuscleEnv::MuscleEnv(const int seed)
           0.f),
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
-      muscular_system(skeleton, skeleton_json_path), initial_remaining_seconds(2.f),
+      muscular_system(skeleton, skeleton_json_path), initial_remaining_seconds(1.f),
       max_episode_seconds(15.f), target_velocity(1e-1f),
       reset_frames(15), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
@@ -80,7 +80,7 @@ step MuscleEnv::compute_step() {
     const Item root = skeleton.get_items()[0];
 
     const float lin_vel_z = root.get_body()->getLinearVelocity().z();
-    const float reward = (lin_vel_z - target_velocity) / target_velocity;
+    const float reward = std::max(lin_vel_z, 0.f) / target_velocity;
 
     if (lin_vel_z < target_velocity) remaining_steps -= 1;
     else remaining_steps += 1;

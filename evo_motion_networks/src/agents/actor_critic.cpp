@@ -88,7 +88,7 @@ ActorCritic::ActorCritic(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
-      gamma(0.99f), train_actor_every(1), curr_device(torch::kCPU),
+      gamma(0.99f), curr_device(torch::kCPU),
       episode_actor_loss(0.f), episode_critic_loss(0.f), curr_step(0L) {
     at::manual_seed(seed);
 }
@@ -130,18 +130,17 @@ void ActorCritic::train() {
     const auto t_steps = torch::arange(
         static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
 
-    auto returns =
+    const auto returns =
         (rewards * torch::pow(gamma, t_steps)).flip({0}).cumsum(0).flip({0}) / torch::pow(gamma, t_steps);
-    //returns = (returns - returns.mean()) / (returns.std() + 1e-8f);
+    //returns = (returns - returns.mean()) / (returns.std() + 1e-5f);
 
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     const auto policy_loss =
-        torch::mean(
-            torch::log(prob) * torch::l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1));
-    const auto actor_entropy = torch::mean(truncated_normal_entropy(mus, sigmas, -1.f, 1.f));
-    const auto actor_loss = -policy_loss - 1e-2 * actor_entropy;
+        torch::log(prob) * torch::l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1);
+    const auto actor_entropy = truncated_normal_entropy(mus, sigmas, -1.f, 1.f);
+    const auto actor_loss = -torch::mean(torch::sum(policy_loss + 5e-2 * actor_entropy, -1));
 
-    const auto critic_loss = torch::l1_loss(values, returns.detach(), at::Reduction::Mean);
+    const auto critic_loss = torch::mse_loss(values, returns.detach(), at::Reduction::Mean);
 
     actor_optimizer->zero_grad();
     actor_loss.backward();

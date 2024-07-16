@@ -132,7 +132,7 @@ JsonHingeConstraint::JsonHingeConstraint(const Item &parent, const nlohmann::jso
         M_PI * hinge["limit_degree"]["max"].get<float>() / 180.f);
 
     hinge_constraint->setOverrideNumSolverIterations(
-        hinge_constraint->getOverrideNumSolverIterations() * 16);
+        hinge_constraint->getOverrideNumSolverIterations() * 32);
 
     parent.get_body()->setIgnoreCollisionCheck(child->get_item().get_body(), true);
 }
@@ -161,7 +161,7 @@ JsonFixedConstraint::JsonFixedConstraint(const Item &parent, const nlohmann::jso
         new btFixedConstraint(*parent.get_body(), *child->get_item().get_body(), parent_tr, sub_tr);
 
     fixed_constraint->setOverrideNumSolverIterations(
-        fixed_constraint->getOverrideNumSolverIterations() * 16);
+        fixed_constraint->getOverrideNumSolverIterations() * 32);
 }
 
 btTypedConstraint *JsonFixedConstraint::get_constraint() { return fixed_constraint; }
