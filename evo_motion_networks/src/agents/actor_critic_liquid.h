@@ -42,6 +42,7 @@ public:
 private:
     std::shared_ptr<LiquidCellModule> liquid_network;
 
+    torch::nn::Sequential head{nullptr};
     torch::nn::Sequential mu{nullptr};
     torch::nn::Sequential sigma{nullptr};
 };
