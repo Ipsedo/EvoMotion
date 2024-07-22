@@ -33,39 +33,25 @@ struct a2c_response {
 
 // abstract modules
 
-class AbstractActor : public torch::nn::Module {
+class AbstractActorCritic : public torch::nn::Module {
 public:
-    virtual actor_response forward(const torch::Tensor &state) = 0;
+    virtual a2c_response forward(const torch::Tensor &state) = 0;
 };
 
-class AbstractCritic : public torch::nn::Module {
+// module
+
+class ActorCriticModule : public AbstractActorCritic {
 public:
-    virtual critic_response forward(const torch::Tensor &state) = 0;
-};
+    ActorCriticModule(std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
 
-// actor critic
-
-class ActorModule final : public AbstractActor {
-public:
-    ActorModule(
-        std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
-
-    actor_response forward(const torch::Tensor &state) override;
+    a2c_response forward(const torch::Tensor &state) override;
 
 private:
     torch::nn::Sequential head{nullptr};
 
     torch::nn::Sequential mu{nullptr};
     torch::nn::Sequential sigma{nullptr};
-};
 
-class CriticModule final : public AbstractCritic {
-public:
-    CriticModule(std::vector<int64_t> state_space, int hidden_size);
-
-    critic_response forward(const torch::Tensor &state) override;
-
-private:
     torch::nn::Sequential critic{nullptr};
 };
 
@@ -73,11 +59,8 @@ private:
 
 class ActorCritic : public Agent {
 protected:
-    std::shared_ptr<AbstractActor> actor;
-    std::shared_ptr<torch::optim::Adam> actor_optimizer;
-
-    std::shared_ptr<AbstractCritic> critic;
-    std::shared_ptr<torch::optim::Adam> critic_optimizer;
+    std::shared_ptr<AbstractActorCritic> actor_critic;
+    std::shared_ptr<torch::optim::Adam> optimizer;
 
     float gamma;
 

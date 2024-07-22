@@ -65,11 +65,11 @@ Muscle::Muscle(
         attach_b.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
     attach_a_constraint->setOverrideNumSolverIterations(
-        attach_a_constraint->getOverrideNumSolverIterations() * 32);
+        attach_a_constraint->getOverrideNumSolverIterations() * 4);
     attach_b_constraint->setOverrideNumSolverIterations(
-        attach_b_constraint->getOverrideNumSolverIterations() * 32);
+        attach_b_constraint->getOverrideNumSolverIterations() * 4);
     muscle_slider_constraint->setOverrideNumSolverIterations(
-        muscle_slider_constraint->getOverrideNumSolverIterations() * 32);
+        muscle_slider_constraint->getOverrideNumSolverIterations() * 4);
 }
 
 void Muscle::contract(const float speed_factor) const {

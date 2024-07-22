@@ -17,17 +17,17 @@ AgentBuilder::AgentBuilder(
       hidden_size(hidden_size), lr(lr),
       agent_constructors(
           {{"actor_critic",
-            std::make_shared<
-                ActorCritic, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
+               std::make_shared<
+                   ActorCritic, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
            {"actor_critic_liquid",
-            std::make_shared<
-                ActorCriticLiquid, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
+               std::make_shared<
+                   ActorCriticLiquid, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
            {"random",
-            std::make_shared<
-                RandomAgent, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
+               std::make_shared<
+                   RandomAgent, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
            {"constant",
-            std::make_shared<
-                ConstantAgent, int, std::vector<int64_t>, std::vector<int64_t>, int, float>}
+               std::make_shared<
+                   ConstantAgent, int, std::vector<int64_t>, std::vector<int64_t>, int, float>}
 
           }) {
     if (agent_constructors.find(this->name) == agent_constructors.end()) {

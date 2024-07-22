@@ -16,10 +16,10 @@
  * torch Module
  */
 
-// actor
+// shared network
 
-ActorModule::ActorModule(
-    std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {
+ActorCriticModule::ActorCriticModule(std::vector<int64_t> state_space, std::vector<int64_t> action_space,
+                                     int hidden_size) {
     head = register_module(
         "head",
         torch::nn::Sequential(
@@ -48,33 +48,22 @@ ActorModule::ActorModule(
                 torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
             torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
-}
 
-actor_response ActorModule::forward(const torch::Tensor &state) {
-    auto head_out = head->forward(state.unsqueeze(0));
-
-    return {mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0)};
-}
-
-// critic
-
-CriticModule::CriticModule(std::vector<int64_t> state_space, int hidden_size) {
     critic = register_module(
         "critic",
         torch::nn::Sequential(
-            torch::nn::Linear(state_space[0], hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-
             torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
             torch::nn::LayerNorm(
                 torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
             torch::nn::Linear(hidden_size, 1)));
+
 }
 
-critic_response CriticModule::forward(const torch::Tensor &state) {
-    return {critic->forward(state).squeeze(0)};
+a2c_response ActorCriticModule::forward(const torch::Tensor &state) {
+    auto head_out = head->forward(state.unsqueeze(0));
+
+    return {mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0), critic->forward(head_out)};
 }
 
 /*
@@ -84,18 +73,15 @@ critic_response CriticModule::forward(const torch::Tensor &state) {
 ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
-    : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
-      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
-      critic(std::make_shared<CriticModule>(state_space, hidden_size)),
-      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
+    : actor_critic(std::make_shared<ActorCriticModule>(state_space, action_space, hidden_size)),
+      optimizer(std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr)),
       gamma(0.99f), curr_device(torch::kCPU),
       episode_actor_loss(0.f), episode_critic_loss(0.f), curr_step(0L) {
     at::manual_seed(seed);
 }
 
 torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
-    const auto [mu, sigma] = actor->forward(state);
-    const auto [value] = critic->forward(state);
+    const auto [mu, sigma, value] = actor_critic->forward(state);
 
     const a2c_response response = {mu, sigma, value};
 
@@ -130,25 +116,22 @@ void ActorCritic::train() {
     const auto t_steps = torch::arange(
         static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
 
-    const auto returns =
+    auto returns =
         (rewards * torch::pow(gamma, t_steps)).flip({0}).cumsum(0).flip({0}) / torch::pow(gamma, t_steps);
-    //returns = (returns - returns.mean()) / (returns.std() + 1e-5f);
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8f);
 
-    const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
-    const auto policy_loss =
-        torch::log(prob) * torch::l1_loss(returns, values, at::Reduction::None).detach().unsqueeze(-1);
-    const auto actor_entropy = truncated_normal_entropy(mus, sigmas, -1.f, 1.f);
-    const auto actor_loss = -torch::mean(torch::sum(policy_loss + 5e-2 * actor_entropy, -1));
+    const auto prob = torch::clamp_min(truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f), 1e-8f);
+    const auto policy_loss = torch::log(prob) * (returns - values).detach().unsqueeze(-1);
+    const auto policy_entropy = truncated_normal_entropy(mus, sigmas, -1.f, 1.f);
+    const auto actor_loss = -torch::mean(torch::sum(policy_loss + 1e-1 * policy_entropy, -1));
 
     const auto critic_loss = torch::mse_loss(values, returns.detach(), at::Reduction::Mean);
 
-    actor_optimizer->zero_grad();
-    actor_loss.backward();
-    actor_optimizer->step();
+    const auto loss = actor_loss + critic_loss;
 
-    critic_optimizer->zero_grad();
-    critic_loss.backward();
-    critic_optimizer->step();
+    optimizer->zero_grad();
+    loss.backward();
+    optimizer->step();
 
     episode_actor_loss = actor_loss.item().toFloat();
     episode_critic_loss = critic_loss.item().toFloat();
@@ -159,7 +142,7 @@ void ActorCritic::train() {
 void ActorCritic::done(const float reward) {
     rewards_buffer.push_back(reward);
 
-    if (actor->is_training()) train();
+    if (actor_critic->is_training()) train();
 
     results_buffer.clear();
     rewards_buffer.clear();
@@ -169,59 +152,35 @@ void ActorCritic::done(const float reward) {
 void ActorCritic::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
-    const auto actor_file = path / "actor.th";
-    const auto actor_optimizer_file = path / "actor_optimizer.th";
+    const auto model_file = path / "actor_critic.th";
+    const auto optimizer_file = path / "optimizer.th";
 
-    const auto critic_file = path / "critic.th";
-    const auto critic_optimizer_file = path / "critic_optimizer.th";
-
-    torch::serialize::OutputArchive actor_archive;
-    torch::serialize::OutputArchive actor_optimizer_archive;
-
-    torch::serialize::OutputArchive critic_archive;
-    torch::serialize::OutputArchive critic_optimizer_archive;
+    torch::serialize::OutputArchive model_archive;
+    torch::serialize::OutputArchive optimizer_archive;
 
     // Save networks
-    actor->save(actor_archive);
-    actor_optimizer->save(actor_optimizer_archive);
+    actor_critic->save(model_archive);
+    optimizer->save(optimizer_archive);
 
-    critic->save(critic_archive);
-    critic_optimizer->save(critic_optimizer_archive);
-
-    actor_archive.save_to(actor_file);
-    actor_optimizer_archive.save_to(actor_optimizer_file);
-
-    critic_archive.save_to(critic_file);
-    critic_optimizer_archive.save_to(critic_optimizer_file);
+    model_archive.save_to(model_file);
+    optimizer_archive.save_to(optimizer_file);
 }
 
 void ActorCritic::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
-    const auto actor_file = path / "actor.th";
-    const auto actor_optimizer_file = path / "actor_optimizer.th";
-
-    const auto critic_file = path / "critic.th";
-    const auto critic_optimizer_file = path / "critic_optimizer.th";
+    const auto model_file = path / "actor_critic.th";
+    const auto optimizer_file = path / "optimizer.th";
 
     // load
-    torch::serialize::InputArchive actor_archive;
-    torch::serialize::InputArchive actor_optimizer_archive;
+    torch::serialize::InputArchive model_archive;
+    torch::serialize::InputArchive optimizer_archive;
 
-    torch::serialize::InputArchive critic_archive;
-    torch::serialize::InputArchive critic_optimizer_archive;
+    model_archive.load_from(model_file);
+    optimizer_archive.load_from(optimizer_file);
 
-    actor_archive.load_from(actor_file);
-    actor_optimizer_archive.load_from(actor_optimizer_file);
-
-    critic_archive.load_from(critic_file);
-    critic_optimizer_archive.load_from(critic_optimizer_file);
-
-    actor->load(actor_archive);
-    actor_optimizer->load(actor_optimizer_archive);
-
-    critic->load(critic_archive);
-    critic_optimizer->load(critic_optimizer_archive);
+    actor_critic->load(model_archive);
+    optimizer->load(optimizer_archive);
 }
 
 std::map<std::string, float> ActorCritic::get_metrics() {
@@ -231,27 +190,17 @@ std::map<std::string, float> ActorCritic::get_metrics() {
 
 void ActorCritic::to(const torch::DeviceType device) {
     curr_device = device;
-    actor->to(curr_device);
-    critic->to(curr_device);
+    actor_critic->to(curr_device);
 }
 
 void ActorCritic::set_eval(const bool eval) {
-    if (eval) {
-        actor->eval();
-        critic->eval();
-    } else {
-        actor->train();
-        critic->train();
-    }
+    if (eval) actor_critic->eval();
+    else actor_critic->train();
 }
 
 int ActorCritic::count_parameters() {
     int count = 0;
-    for (const auto &p: actor->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    for (const auto &p: critic->parameters()) {
+    for (const auto &p: actor_critic->parameters()) {
         auto sizes = p.sizes();
         count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
     }
@@ -260,14 +209,7 @@ int ActorCritic::count_parameters() {
 
 float ActorCritic::grad_norm_mean() {
     float grad_sum = 0.f;
-
-    const auto actor_params = actor->parameters();
-    const auto critic_params = critic->parameters();
-
-    for (const auto &p: actor_params) { grad_sum += p.grad().norm().item().toFloat(); }
-    for (const auto &p: critic_params) { grad_sum += p.grad().norm().item().toFloat(); }
-
-    return grad_sum
-           / (static_cast<float>(actor_params.size()) +
-              static_cast<float>(critic_params.size()));
+    const auto params = actor_critic->parameters();
+    for (const auto &p: params) grad_sum += p.grad().norm().item().toFloat();
+    return grad_sum / static_cast<float>(params.size());
 }

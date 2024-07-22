@@ -11,55 +11,48 @@ class LiquidCellModule final : public torch::nn::Module {
 public:
     LiquidCellModule(
         const std::vector<int64_t> &state_space, int neuron_number, int unfolding_steps);
+
     void reset_x_t();
+
     torch::Tensor compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t);
+
     torch::Tensor forward(const torch::Tensor &state);
+
     void to(torch::Device device, bool non_blocking) override;
 
 private:
     int steps;
     int neuron_number;
 
-    torch::nn::Sequential weight{nullptr};
+    torch::nn::Linear weight{nullptr};
     torch::nn::Linear recurrent_weight{nullptr};
     torch::Tensor bias;
+
     torch::Tensor a;
     torch::Tensor tau;
 
     torch::Tensor x_t;
 };
 
-class ActorLiquidNetwork final : public AbstractActor {
+// shared layers
+
+class ActorCriticLiquidNetwork final : public AbstractActorCritic {
 public:
-    ActorLiquidNetwork(
+    ActorCriticLiquidNetwork(
         const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
         int unfolding_steps);
 
-    actor_response forward(const torch::Tensor &state) override;
+    a2c_response forward(const torch::Tensor &state) override;
 
     void reset_liquid() const;
 
 private:
     std::shared_ptr<LiquidCellModule> liquid_network;
 
-    torch::nn::Sequential head{nullptr};
     torch::nn::Sequential mu{nullptr};
     torch::nn::Sequential sigma{nullptr};
-};
 
-class CriticLiquidNetwork final : public AbstractCritic {
-public:
-    CriticLiquidNetwork(
-        const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);
-
-    critic_response forward(const torch::Tensor &state) override;
-
-    void reset_liquid() const;
-
-private:
-    std::shared_ptr<LiquidCellModule> liquid_network;
-
-    torch::nn::Sequential critic{nullptr};
+    torch::nn::Linear critic{nullptr};
 };
 
 // Agent

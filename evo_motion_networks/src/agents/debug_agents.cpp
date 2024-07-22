@@ -11,12 +11,19 @@ DebugAgent::DebugAgent(
     : action_space(static_cast<int>(action_space[0])), curr_device(torch::kCPU) {}
 
 void DebugAgent::done(float reward) {}
+
 void DebugAgent::save(const std::string &output_folder_path) {}
+
 void DebugAgent::load(const std::string &input_folder_path) {}
+
 std::map<std::string, float> DebugAgent::get_metrics() { return {}; }
+
 void DebugAgent::to(const torch::DeviceType device) { curr_device = device; }
+
 void DebugAgent::set_eval(bool eval) {}
+
 int DebugAgent::count_parameters() { return 0; }
+
 float DebugAgent::grad_norm_mean() { return 0.f; }
 
 // Random Agent
