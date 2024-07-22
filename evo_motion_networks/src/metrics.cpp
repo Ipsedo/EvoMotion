@@ -14,7 +14,7 @@ Meter<R, I...>::Meter(std::string name, const std::optional<int> window_size)
 
 template<class R, class... I>
 void Meter<R, I...>::add(I... inputs) {
-    if (window_size.has_value() && results.size() >= window_size) results.erase(results.begin());
+    while (window_size.has_value() && results.size() >= window_size) results.erase(results.begin());
 
     results.push_back(process_value(inputs...));
     curr_step++;

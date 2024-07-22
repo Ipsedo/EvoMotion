@@ -25,6 +25,10 @@ public:
 
     std::vector<btTypedConstraint *> get_constraints();
 
+    btSliderConstraint *get_slider_constraint();
+
+    std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> get_p2p_constraints();
+
     ~Muscle();
 
 private:

@@ -8,7 +8,6 @@
 #include <argparse/argparse.hpp>
 
 #include "./run.h"
-#include "./train.h"
 
 int main(const int argc, char **argv) {
     argparse::ArgumentParser parser("evo_motion");

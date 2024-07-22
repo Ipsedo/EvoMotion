@@ -21,22 +21,25 @@ MuscleEnv::MuscleEnv(const int seed)
           0.f),
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
-      muscular_system(skeleton, skeleton_json_path),
-      initial_remaining_seconds(2.f), max_episode_seconds(60.f),
-      target_velocity(0.1f), minimal_velocity(0.05f),
-      reset_frames(30), curr_step(0),
+      muscular_system(skeleton, skeleton_json_path), initial_remaining_seconds(1.f),
+      max_episode_seconds(15.f), target_velocity(2e-1f),
+      reset_frames(10), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
-      max_steps_without_moving(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)),
-      remaining_steps(max_steps_without_moving),
-      frames_to_add(15),
-      pos_delta(minimal_velocity * DELTA_T_MODEL * static_cast<float>(frames_to_add)),
-      last_pos(0.f) {
-    base.get_body()->setFriction(500.f);
+      remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)) {
+    base.get_body()->setFriction(0.2f);
 
     add_item(base);
 
-    for (const auto &item: skeleton.get_items()) {
-        states.push_back(std::make_shared<ItemState>(item, base, m_world));
+    auto items = skeleton.get_items();
+
+    auto root_item = items[0];
+    add_item(root_item);
+    root_item.get_body()->setActivationState(DISABLE_DEACTIVATION);
+
+    states.push_back(std::make_shared<ItemState>(root_item, base, m_world));
+
+    for (const auto &item: std::vector<Item>(items.begin() + 1, items.end())) {
+        states.push_back(std::make_shared<ItemState>(item, root_item, base, m_world));
         add_item(item);
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
@@ -47,6 +50,7 @@ MuscleEnv::MuscleEnv(const int seed)
             item.get_body()->setActivationState(DISABLE_DEACTIVATION);
         }
         for (const auto c: m.get_constraints()) m_world->addConstraint(c);
+        states.push_back(std::make_shared<MuscleState>(m));
     }
 
     for (const auto constraint: skeleton.get_constraints()) m_world->addConstraint(constraint);
@@ -75,19 +79,16 @@ step MuscleEnv::compute_step() {
 
     const Item root = skeleton.get_items()[0];
 
-    if (const float curr_pos = root.get_body()->getCenterOfMassPosition().z();
-        curr_pos - last_pos < pos_delta)
-        remaining_steps -= 1;
-    else {
-        remaining_steps += frames_to_add;
-        last_pos = curr_pos;
-    }
+    const float lin_vel_z = root.get_body()->getLinearVelocity().z();
+    /*glm::vec3 root_pos(1.f, 0.25f, 2.f);
+    const float pos_z = (root.get_body()->getCenterOfMassPosition().z() - root_pos.z);*/
+    const float reward = (lin_vel_z - target_velocity) / target_velocity;
+
+    if (lin_vel_z < target_velocity) remaining_steps -= 1;
+    else remaining_steps += 1;
 
     const bool win = curr_step >= max_steps;
     const bool fail = remaining_steps <= 0;
-
-    const float reward = (root.get_body()->getLinearVelocity().z() - target_velocity) /
-                         target_velocity;
 
     const bool done = win | fail;
 
@@ -96,7 +97,7 @@ step MuscleEnv::compute_step() {
 
 void MuscleEnv::reset_engine() {
     // reset model transform
-    glm::vec3 root_pos(1.f, 0.5f, 2.f);
+    glm::vec3 root_pos(1.f, 0.25f, 2.f);
 
     float angle_limit = static_cast<float>(M_PI) / 4.f;
 
@@ -127,11 +128,9 @@ void MuscleEnv::reset_engine() {
     }
 
     curr_step = 0;
-    remaining_steps = max_steps_without_moving;
+    remaining_steps = static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL);
 
     for (int i = 0; i < reset_frames; i++) m_world->stepSimulation(DELTA_T_MODEL);
-
-    last_pos = skeleton.get_items()[0].get_body()->getCenterOfMassPosition().z();
 }
 
 std::vector<int64_t> MuscleEnv::get_state_space() {

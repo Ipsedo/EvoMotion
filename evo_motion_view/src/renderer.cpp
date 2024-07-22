@@ -6,6 +6,7 @@
 
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <imgui.h>
 
 #include <evo_motion_view/renderer.h>
 
@@ -69,6 +70,11 @@ Renderer::Renderer(
     is_open = true;
 }
 
+Renderer::~Renderer() {
+    glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
 void Renderer::add_drawable(const std::string &name, const std::shared_ptr<Drawable> &drawable) {
     drawables.insert({name, drawable});
 }
@@ -80,7 +86,7 @@ void Renderer::close() {
     is_open = false;
 }
 
-void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
+void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix) {
     if (glfwWindowShouldClose(window)) {
         is_open = false;
         return;
@@ -88,8 +94,21 @@ void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
 
     glfwPollEvents();
 
+    on_new_frame();
+
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    render_drawables(model_matrix);
+
+    on_end_frame();
+
+    glfwSwapBuffers(window);
+}
+
+void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix) {
     const glm::mat4 view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
 
     const glm::mat4 proj_matrix = glm::frustum(
@@ -104,6 +123,27 @@ void Renderer::draw(std::map<std::string, glm::mat4> model_matrix) {
 
         drawable->draw(mvp_matrix, mv_matrix, light_pos, camera->pos());
     }
+}
 
-    glfwSwapBuffers(window);
+void Renderer::on_new_frame() {}
+void Renderer::on_end_frame() {}
+
+/*
+ * ImGUI Rendere
+ */
+ImGuiRenderer::ImGuiRenderer(
+    const std::string &title, const int width, const int height,
+    const std::shared_ptr<Camera> &camera)
+    : Renderer(title, width, height, camera) {}
+
+void ImGuiRenderer::on_new_frame() {
+    //ImGui_ImplOpenGL3_NewFrame();
+    //ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void ImGuiRenderer::on_end_frame() { Renderer::on_end_frame(); }
+
+void ImGuiRenderer::render_drawables(std::map<std::string, glm::mat4> model_matrix) {
+    Renderer::render_drawables(model_matrix);
 }

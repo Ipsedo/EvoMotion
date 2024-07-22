@@ -1,7 +1,7 @@
 {
   "skeleton": {
     "name": "body",
-    "mass": 1.0,
+    "mass": 4.0,
     "shape": "cube",
     "scale": {
       "x": 0.4,
@@ -304,7 +304,7 @@
                           },
                           "child_member": {
                             "name": "leg3",
-                            "mass": 0.2,
+                            "mass": 0.3,
                             "shape": "sphere",
                             "scale": {
                               "x": 0.115,
@@ -312,7 +312,7 @@
                               "z": 0.115
                             },
                             "option": {
-                              "friction": 5000.0
+                              "friction": 0.5
                             },
                             "transformation": {
                               "rotation": {
@@ -621,7 +621,7 @@
                           },
                           "child_member": {
                             "name": "leg3",
-                            "mass": 0.2,
+                            "mass": 0.3,
                             "shape": "sphere",
                             "scale": {
                               "x": 0.115,
@@ -629,7 +629,7 @@
                               "z": 0.115
                             },
                             "option": {
-                              "friction": 5000.0
+                              "friction": 0.5
                             },
                             "transformation": {
                               "rotation": {
@@ -938,7 +938,7 @@
                           },
                           "child_member": {
                             "name": "leg3",
-                            "mass": 0.2,
+                            "mass": 0.3,
                             "shape": "sphere",
                             "scale": {
                               "x": 0.115,
@@ -946,7 +946,7 @@
                               "z": 0.115
                             },
                             "option": {
-                              "friction": 5000.0
+                              "friction": 0.5
                             },
                             "transformation": {
                               "rotation": {
@@ -1254,7 +1254,7 @@
                           },
                           "child_member": {
                             "name": "leg3",
-                            "mass": 0.2,
+                            "mass": 0.3,
                             "shape": "sphere",
                             "scale": {
                               "x": 0.115,
@@ -1262,7 +1262,7 @@
                               "z": 0.115
                             },
                             "option": {
-                              "friction": 5000.0
+                              "friction": 0.5
                             },
                             "transformation": {
                               "rotation": {
@@ -1303,7 +1303,7 @@
       "name": "muscle_A1",
       "item_a": "body",
       "item_b": "body_legA",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1326,7 +1326,7 @@
       "name": "muscle_A2",
       "item_a": "body_legA",
       "item_b": "body_legA_leg1",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1349,7 +1349,7 @@
       "name": "muscle_A3",
       "item_a": "body_legA_leg1",
       "item_b": "body_legA_leg1_leg2",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1372,7 +1372,7 @@
       "name": "muscle_B1",
       "item_a": "body",
       "item_b": "body_legB",
-      "attach_mass": 0.001,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1395,7 +1395,7 @@
       "name": "muscle_B2",
       "item_a": "body_legB",
       "item_b": "body_legB_leg1",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1418,7 +1418,7 @@
       "name": "muscle_B3",
       "item_a": "body_legB_leg1",
       "item_b": "body_legB_leg1_leg2",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1441,7 +1441,7 @@
       "name": "muscle_C1",
       "item_a": "body",
       "item_b": "body_legC",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1464,7 +1464,7 @@
       "name": "muscle_C2",
       "item_a": "body_legC",
       "item_b": "body_legC_leg1",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1487,7 +1487,7 @@
       "name": "muscle_C3",
       "item_a": "body_legC_leg1",
       "item_b": "body_legC_leg1_leg2",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1510,7 +1510,7 @@
       "name": "muscle_D1",
       "item_a": "body",
       "item_b": "body_legD",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1533,7 +1533,7 @@
       "name": "muscle_D2",
       "item_a": "body_legD",
       "item_b": "body_legD_leg1",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,
@@ -1556,7 +1556,7 @@
       "name": "muscle_D3",
       "item_a": "body_legD_leg1",
       "item_b": "body_legD_leg1_leg2",
-      "attach_mass": 0.1,
+      "attach_mass": 0.2,
       "attach_scale": {
         "x": 0.05,
         "y": 0.05,

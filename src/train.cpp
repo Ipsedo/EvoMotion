@@ -2,15 +2,16 @@
 // Created by samuel on 20/12/22.
 //
 
-#include "./train.h"
-
 #include <filesystem>
+#include <utility>
 
 #include <indicators/progress_bar.hpp>
 
 #include <evo_motion_model/env_builder.h>
 #include <evo_motion_networks/agent_builder.h>
 #include <evo_motion_networks/metrics.h>
+
+#include "./run.h"
 
 void train(int seed, bool cuda, const train_params &params) {
 
@@ -73,11 +74,12 @@ void train(int seed, bool cuda, const train_params &params) {
 
             std::string p_bar_description =
                 "Save " + std::to_string(s - 1)
-                + ", actor = " + std::to_string(actor_loss_meter.loss())
-                + ", critic = " + std::to_string(critic_loss_meter.loss())
-                + ", grad_norm = " + std::to_string(agent->grad_norm_mean());
+                          + ", actor = " + std::format("{:.5e}", actor_loss_meter.loss())
+                          + ", critic = " + std::format("{:.5e}", critic_loss_meter.loss())
+                          + ", grad_norm = " + std::format("{:.5e}", agent->grad_norm_mean())
+                          + " ";
 
-            p_bar.set_option(indicators::option::PostfixText{p_bar_description});
+            p_bar.set_option(indicators::option::PrefixText{p_bar_description});
 
             p_bar.tick();
         }

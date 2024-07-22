@@ -10,6 +10,8 @@
 
 #include <evo_motion_model/item.h>
 
+#include "./muscle.h"
+
 class State {
 public:
     virtual int get_size() = 0;
@@ -21,7 +23,9 @@ public:
 
 class ItemState final : public State, public btCollisionWorld::ContactResultCallback {
 public:
-    ItemState(Item item, const Item &floor, btDynamicsWorld *world);
+    ItemState(Item item, const std::optional<Item> &root_item, const Item &floor, btDynamicsWorld *world);
+
+    ItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
 
     int get_size() override;
 
@@ -34,10 +38,27 @@ public:
     ~ItemState() override;
 
 private:
+    std::optional<Item> root_item;
     Item state_item;
-    btVector3 last_lin_velocity;
-    btVector3 last_ang_velocity;
     bool floor_touched;
+protected:
+    torch::Tensor get_point_state(glm::vec3 point) const;
+};
+
+// Muscle
+
+class MuscleState : public State {
+public:
+    MuscleState(Muscle muscle);
+
+    int get_size() override;
+
+    torch::Tensor get_state() override;
+
+private:
+    btSliderConstraint *slider_constraint;
+    btPoint2PointConstraint *p2p_a;
+    btPoint2PointConstraint *p2p_b;
 };
 
 #endif//EVO_MOTION_STATE_H

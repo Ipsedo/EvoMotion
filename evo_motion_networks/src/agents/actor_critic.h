@@ -14,22 +14,39 @@
 
 #include <evo_motion_networks/agent.h>
 
+// responses
+
+struct actor_response {
+    torch::Tensor mu;
+    torch::Tensor sigma;
+};
+
+struct critic_response {
+    torch::Tensor value;
+};
+
 struct a2c_response {
     torch::Tensor mu;
     torch::Tensor sigma;
-    torch::Tensor critic_value;
+    torch::Tensor value;
 };
 
-struct abstract_a2c_networks : torch::nn::Module {
+// abstract modules
+
+class AbstractActorCritic : public torch::nn::Module {
+public:
     virtual a2c_response forward(const torch::Tensor &state) = 0;
 };
 
-struct a2c_networks final : abstract_a2c_networks {
-    a2c_networks(
-        std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
+// module
+
+class ActorCriticModule : public AbstractActorCritic {
+public:
+    ActorCriticModule(std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
 
     a2c_response forward(const torch::Tensor &state) override;
 
+private:
     torch::nn::Sequential head{nullptr};
 
     torch::nn::Sequential mu{nullptr};
@@ -38,18 +55,17 @@ struct a2c_networks final : abstract_a2c_networks {
     torch::nn::Sequential critic{nullptr};
 };
 
+// Agent
+
 class ActorCritic : public Agent {
 protected:
-    std::shared_ptr<abstract_a2c_networks> networks;
+    std::shared_ptr<AbstractActorCritic> actor_critic;
     std::shared_ptr<torch::optim::Adam> optimizer;
 
-    float actor_loss_factor;
-    float critic_loss_factor;
+    float gamma;
 
 private:
     torch::DeviceType curr_device;
-
-    float gamma;
 
     std::vector<a2c_response> results_buffer;
     std::vector<float> rewards_buffer;
@@ -57,6 +73,8 @@ private:
 
     float episode_actor_loss;
     float episode_critic_loss;
+
+    long curr_step;
 
     void train();
 

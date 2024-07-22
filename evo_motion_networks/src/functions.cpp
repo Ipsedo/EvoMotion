@@ -44,3 +44,15 @@ torch::Tensor truncated_normal_sample(
                      * (theta(beta) - theta(alpha)))
            + mu;
 }
+
+
+torch::Tensor
+truncated_normal_entropy(const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
+                         float max_value) {
+    const auto alpha = (min_value - mu) / sigma;
+    const auto beta = (max_value - mu) / sigma;
+
+    const auto z = theta(beta) - theta(alpha);
+
+    return torch::log(sqrt(2.0 * M_PI * std::exp(1.0)) * sigma * z) + 0.5 * (alpha * phi(alpha) - beta * phi(beta)) / z;
+}
