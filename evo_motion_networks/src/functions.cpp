@@ -6,6 +6,10 @@
 
 #include <cmath>
 
+torch::Tensor rand_eps(const torch::Tensor &tensor_like, float epsilon) {
+    return epsilon + torch::rand_like(tensor_like, at::TensorOptions(tensor_like.device())) * (1.f - 2.f * epsilon);
+}
+
 torch::Tensor
 normal_pdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma) {
     return torch::exp(-0.5f * torch::pow((x - mu) / sigma, 2.f)) / (sigma * sqrt(2.f * M_PI));
@@ -31,7 +35,7 @@ torch::Tensor truncated_normal_pdf(
     const float max_value) {
     const auto alpha = (min_value - mu) / sigma;
     const auto beta = (max_value - mu) / sigma;
-    return phi((x - mu) / sigma) / (theta(beta) - theta(alpha)) / sigma;
+    return phi((x - mu) / sigma) / ((theta(beta) - theta(alpha)) * sigma);
 }
 
 torch::Tensor truncated_normal_sample(
@@ -41,7 +45,7 @@ torch::Tensor truncated_normal_sample(
     return theta_inv(
                theta(alpha)
                + at::rand(mu.sizes(), at::TensorOptions(mu.device()))
-                     * (theta(beta) - theta(alpha)))
+                 * (theta(beta) - theta(alpha))) * sigma
            + mu;
 }
 

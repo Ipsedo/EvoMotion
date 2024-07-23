@@ -7,6 +7,8 @@
 
 #include <torch/torch.h>
 
+torch::Tensor rand_eps(const torch::Tensor &tensor_like, float epsilon = 1e-8f);
+
 torch::Tensor
 normal_pdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma);
 
