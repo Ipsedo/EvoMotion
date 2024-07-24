@@ -69,8 +69,9 @@ void infer(int seed, bool cuda, const run_params &params) {
 
         std::chrono::duration<double, std::milli> delta = std::chrono::system_clock::now() - before;
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(
-            static_cast<long>(std::max(0., 1000. / 60. - delta.count()))));
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(
+                static_cast<long>(std::max(0., 1000. / 60. - delta.count()))));
 
         if (step.done) {
             agent->done(step.reward);

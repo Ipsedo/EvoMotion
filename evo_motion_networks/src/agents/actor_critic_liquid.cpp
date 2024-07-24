@@ -22,7 +22,9 @@ LiquidCellModule::LiquidCellModule(
     encoder = register_module(
         "encoder", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5))));
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(
+                    1e-5))));
 
     weight = register_module(
         "weight",
@@ -39,15 +41,17 @@ LiquidCellModule::LiquidCellModule(
 
     encoder->apply(init_weights);
     torch::nn::init::normal_(weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
-    torch::nn::init::normal_(recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
+    torch::nn::init::normal_(
+        recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
     torch::nn::init::normal_(bias, 0, std_b / static_cast<float>(unfolding_steps));
 
     reset_x_t();
 }
 
 void LiquidCellModule::reset_x_t() {
-    x_t = torch::mish(torch::randn(
-        {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
+    x_t = torch::mish(
+        torch::randn(
+            {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
 }
 
 torch::Tensor
@@ -90,19 +94,22 @@ ActorCriticLiquidNetwork::ActorCriticLiquidNetwork(
     mu = register_module(
         "mu", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
             torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
             torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Softplus()));
 
     critic = register_module(
         "critic", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
+            torch::nn::LayerNorm(
+                torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
             torch::nn::Linear(hidden_size * 2, 1)));
 
     mu->apply(init_weights);
@@ -119,9 +126,7 @@ a2c_response ActorCriticLiquidNetwork::forward(const torch::Tensor &state) {
         critic->forward(x_t).squeeze(0)};
 }
 
-void ActorCriticLiquidNetwork::reset_liquid() const {
-    liquid_network->reset_x_t();
-}
+void ActorCriticLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(); }
 
 /*
  * Agent
@@ -134,7 +139,8 @@ ActorCriticLiquid::ActorCriticLiquid(
 
     gamma = 0.99f;
 
-    actor_critic = std::make_shared<ActorCriticLiquidNetwork>(state_space, action_space, hidden_size, 6);
+    actor_critic = std::make_shared<ActorCriticLiquidNetwork>(
+        state_space, action_space, hidden_size, 6);
     optimizer = std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr);
 }
 

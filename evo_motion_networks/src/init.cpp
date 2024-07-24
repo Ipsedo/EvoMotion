@@ -12,7 +12,8 @@ void init_weights(torch::nn::Module &module) {
 
         if (lin->options.bias()) torch::nn::init::normal_(lin->bias, 0.f, 1e-1f);
     } else if (typeid(module) == typeid(torch::nn::LayerNorm)) {
-        if (auto ln = *dynamic_cast<torch::nn::LayerNorm *>(&module); ln->options.elementwise_affine()) {
+        if (auto ln = *dynamic_cast<torch::nn::LayerNorm *>(&module); ln->options.
+            elementwise_affine()) {
             torch::nn::init::ones_(ln->weight);
             torch::nn::init::zeros_(ln->bias);
         }

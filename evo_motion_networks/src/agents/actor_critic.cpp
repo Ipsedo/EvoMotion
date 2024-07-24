@@ -18,8 +18,9 @@
 
 // shared network
 
-ActorCriticModule::ActorCriticModule(std::vector<int64_t> state_space, std::vector<int64_t> action_space,
-                                     int hidden_size) {
+ActorCriticModule::ActorCriticModule(
+    std::vector<int64_t> state_space, std::vector<int64_t> action_space,
+    int hidden_size) {
     head = register_module(
         "head",
         torch::nn::Sequential(
@@ -63,7 +64,8 @@ ActorCriticModule::ActorCriticModule(std::vector<int64_t> state_space, std::vect
 a2c_response ActorCriticModule::forward(const torch::Tensor &state) {
     auto head_out = head->forward(state.unsqueeze(0));
 
-    return {mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0), critic->forward(head_out)};
+    return {mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0),
+            critic->forward(head_out)};
 }
 
 /*
@@ -76,9 +78,7 @@ ActorCritic::ActorCritic(
     : actor_critic(std::make_shared<ActorCriticModule>(state_space, action_space, hidden_size)),
       optimizer(std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr)),
       gamma(0.99f), curr_device(torch::kCPU),
-      episode_actor_loss(0.f), episode_critic_loss(0.f), curr_step(0L) {
-    at::manual_seed(seed);
-}
+      episode_actor_loss(0.f), episode_critic_loss(0.f), curr_step(0L) { at::manual_seed(seed); }
 
 torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma, value] = actor_critic->forward(state);
@@ -184,7 +184,7 @@ void ActorCritic::load(const std::string &input_folder_path) {
 }
 
 std::map<std::string, float> ActorCritic::get_metrics() {
-    return {{"actor_loss",  episode_actor_loss},
+    return {{"actor_loss", episode_actor_loss},
             {"critic_loss", episode_critic_loss}};
 }
 
