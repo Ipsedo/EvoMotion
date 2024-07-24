@@ -132,7 +132,7 @@ ActorCriticLiquid::ActorCriticLiquid(
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
     : ActorCritic(seed, state_space, action_space, hidden_size, lr) {
 
-    gamma = 0.95f;
+    gamma = 0.99f;
 
     actor_critic = std::make_shared<ActorCriticLiquidNetwork>(state_space, action_space, hidden_size, 6);
     optimizer = std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr);

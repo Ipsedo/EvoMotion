@@ -22,8 +22,7 @@ MuscleEnv::MuscleEnv(const int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), initial_remaining_seconds(1.f),
-      max_episode_seconds(15.f), target_velocity(2e-1f),
-      reset_frames(10), curr_step(0),
+      max_episode_seconds(15.f), target_velocity(1e-1f), reset_frames(10), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)) {
     base.get_body()->setFriction(0.2f);
@@ -75,22 +74,19 @@ step MuscleEnv::compute_step() {
 
     for (const auto &state: states) current_states.push_back(state->get_state().to(curr_device));
 
-    curr_step += 1;
-
     const Item root = skeleton.get_items()[0];
 
     const float lin_vel_z = root.get_body()->getLinearVelocity().z();
-    /*glm::vec3 root_pos(1.f, 0.25f, 2.f);
-    const float pos_z = (root.get_body()->getCenterOfMassPosition().z() - root_pos.z);*/
-    const float reward = (lin_vel_z - target_velocity) / target_velocity;
+    const float reward = lin_vel_z / target_velocity;
 
     if (lin_vel_z < target_velocity) remaining_steps -= 1;
     else remaining_steps += 1;
 
     const bool win = curr_step >= max_steps;
     const bool fail = remaining_steps <= 0;
-
     const bool done = win | fail;
+
+    curr_step += 1;
 
     return {torch::cat(current_states, 0), reward, done};
 }
