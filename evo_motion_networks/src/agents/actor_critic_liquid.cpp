@@ -15,20 +15,12 @@ LiquidCellModule::LiquidCellModule(
     this->neuron_number = neuron_number;
     steps = unfolding_steps;
 
-    int hidden_size = static_cast<int>(state_space[0]);
     float std_w = 1e-1;
     float std_b = 1e-1;
 
-    encoder = register_module(
-        "encoder", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(
-                    1e-5))));
-
     weight = register_module(
         "weight",
-        torch::nn::Linear(torch::nn::LinearOptions(hidden_size * 2, neuron_number).bias(false)));
+        torch::nn::Linear(torch::nn::LinearOptions(state_space[0], neuron_number).bias(false)));
 
     recurrent_weight = register_module(
         "recurrent_weight",
@@ -39,7 +31,6 @@ LiquidCellModule::LiquidCellModule(
     a = register_parameter("a", torch::ones({1, neuron_number}));
     tau = register_parameter("tau", torch::ones({1, neuron_number}));
 
-    encoder->apply(init_weights);
     torch::nn::init::normal_(weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
     torch::nn::init::normal_(
         recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
@@ -62,11 +53,9 @@ LiquidCellModule::compute_step(const torch::Tensor &x_t_curr, const torch::Tenso
 torch::Tensor LiquidCellModule::forward(const torch::Tensor &state) {
     const float delta_t = 1.f / static_cast<float>(steps);
 
-    const auto encoded_state = encoder->forward(state);
-
     for (int i = 0; i < steps; i++)
-        x_t = (x_t + delta_t * compute_step(x_t, encoded_state) * a)
-              / (1.f + delta_t * (1.f / tau + compute_step(x_t, encoded_state)));
+        x_t = (x_t + delta_t * compute_step(x_t, state) * a)
+              / (1.f + delta_t * (1.f / tau + compute_step(x_t, state)));
 
     return x_t;
 }
@@ -93,24 +82,14 @@ ActorCriticLiquidNetwork::ActorCriticLiquidNetwork(
 
     mu = register_module(
         "mu", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
-            torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Tanh()));
+            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
-            torch::nn::Linear(hidden_size * 2, action_space[0]), torch::nn::Softplus()));
+            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
     critic = register_module(
-        "critic", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size * 2), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size * 2}).elementwise_affine(true).eps(1e-5)),
-            torch::nn::Linear(hidden_size * 2, 1)));
+        "critic", torch::nn::Linear(hidden_size, 1));
 
     mu->apply(init_weights);
     sigma->apply(init_weights);

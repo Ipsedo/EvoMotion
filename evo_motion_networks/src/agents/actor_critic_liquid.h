@@ -24,8 +24,6 @@ private:
     int steps;
     int neuron_number;
 
-    torch::nn::Sequential encoder{nullptr};
-
     torch::nn::Linear weight{nullptr};
     torch::nn::Linear recurrent_weight{nullptr};
     torch::Tensor bias;
@@ -54,7 +52,7 @@ private:
     torch::nn::Sequential mu{nullptr};
     torch::nn::Sequential sigma{nullptr};
 
-    torch::nn::Sequential critic{nullptr};
+    torch::nn::Linear critic{nullptr};
 };
 
 // Agent
