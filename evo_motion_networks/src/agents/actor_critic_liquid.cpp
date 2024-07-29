@@ -31,9 +31,9 @@ LiquidCellModule::LiquidCellModule(
     a = register_parameter("a", torch::ones({1, neuron_number}));
     tau = register_parameter("tau", torch::ones({1, neuron_number}));
 
-    torch::nn::init::normal_(weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
-    torch::nn::init::normal_(
-        recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
+    torch::nn::init::xavier_normal_(weight->weight, std_w / static_cast<float>(unfolding_steps));
+    torch::nn::init::xavier_normal_(
+        recurrent_weight->weight, std_w / static_cast<float>(unfolding_steps));
     torch::nn::init::normal_(bias, 0, std_b / static_cast<float>(unfolding_steps));
 
     reset_x_t();
@@ -116,7 +116,7 @@ ActorCriticLiquid::ActorCriticLiquid(
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
     : ActorCritic(seed, state_space, action_space, hidden_size, lr) {
 
-    gamma = 0.99f;
+    gamma = 0.9995f;
 
     actor_critic = std::make_shared<ActorCriticLiquidNetwork>(
         state_space, action_space, hidden_size, 6);

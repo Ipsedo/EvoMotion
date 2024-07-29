@@ -77,7 +77,7 @@ step MuscleEnv::compute_step() {
     const Item root = skeleton.get_items()[0];
 
     const float lin_vel_z = root.get_body()->getLinearVelocity().z();
-    const float reward = std::max(lin_vel_z, 0.f);
+    const float reward = lin_vel_z;
 
     if (lin_vel_z < target_velocity) remaining_steps -= 1;
     else remaining_steps += 1;
@@ -88,7 +88,7 @@ step MuscleEnv::compute_step() {
 
     curr_step += 1;
 
-    return {torch::cat(current_states, 0), fail ? -1.f : reward, done};
+    return {torch::cat(current_states, 0), reward, done};
 }
 
 void MuscleEnv::reset_engine() {
