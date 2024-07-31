@@ -76,7 +76,8 @@ JsonMember::JsonMember(
       shape_to_path(
       {{"sphere", "./resources/obj/sphere.obj"},
        {"cube", "./resources/obj/cube.obj"},
-       {"cylinder", "./resources/obj/cylinder.obj"}}),
+       {"cylinder", "./resources/obj/cylinder.obj"},
+       {"feet",     "./resources/obj/feet.obj"}}),
       member(
           name + "_" + json_member["name"].get<std::string>(),
           std::make_shared<ObjShape>(shape_to_path[json_member["shape"].get<std::string>()]),

@@ -53,14 +53,10 @@ target_link_libraries(
 
 set(EVO_MOTION_VIEW_LIBRARIES evo_motion_view PARENT_SCOPE)
 
-function(add_extra_folder source destination)
-    add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${source} ${destination}
-            DEPENDS ${destination}
-            COMMENT "symbolic link resources folder from ${source} => ${destination}"
-    )
-endfunction()
-
-add_extra_folder("${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders")
-
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders"
+        DEPENDS ${destination}
+        COMMENT "symbolic link resources folder from ${source} => ${destination}"
+)
