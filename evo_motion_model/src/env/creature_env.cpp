@@ -25,7 +25,7 @@ MuscleEnv::MuscleEnv(const int seed)
       max_episode_seconds(60.f), target_velocity(1e-1f), reset_frames(10), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)) {
-    base.get_body()->setFriction(0.2f);
+    base.get_body()->setFriction(0.5f);
 
     add_item(base);
 
