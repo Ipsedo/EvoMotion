@@ -32,7 +32,7 @@ torch::Tensor ItemState::get_point_state(const glm::vec3 point) const {
         glm_to_bullet(point)) : btVector3(0, 0, 0);
     btVector3 vel = state_item.get_body()->getVelocityInLocalPoint(
         state_item.get_body()->getCollisionShape()->getLocalScaling() *
-            glm_to_bullet(point)) - root_vel;
+        glm_to_bullet(point)) - root_vel;
 
     return torch::tensor({pos.x, pos.y, pos.z, vel.x(), vel.y(), vel.z()});
 }

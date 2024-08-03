@@ -42,7 +42,8 @@ public:
 
 class ActorCriticModule : public AbstractActorCritic {
 public:
-    ActorCriticModule(std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
+    ActorCriticModule(
+        std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
 
     a2c_response forward(const torch::Tensor &state) override;
 
