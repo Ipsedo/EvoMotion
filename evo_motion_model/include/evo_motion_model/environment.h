@@ -40,7 +40,7 @@ public:
 
     virtual std::vector<Item> get_items() = 0;
 
-    virtual std::vector<std::shared_ptr<Controller>> get_controllers() = 0;
+    virtual std::vector<std::shared_ptr<Controller> > get_controllers() = 0;
 
     step do_step(const torch::Tensor &action);
 

@@ -10,7 +10,8 @@
 
 CartPole::CartPole(int seed)
     : slider_speed(16.f), slider_force(64.f), chariot_push_force(2.f),
-      limit_angle(static_cast<float>(M_PI * 0.5)), reset_frame_nb(8), chariot_mass(1.f), pendulum_mass(1.f),
+      limit_angle(static_cast<float>(M_PI * 0.5)), reset_frame_nb(8), chariot_mass(1.f),
+      pendulum_mass(1.f),
       rng(seed), rd_uni(0.f, 1.f), step_idx(0), max_steps(60 * 60), last_ang_vel(0.f),
       last_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;
@@ -88,7 +89,7 @@ CartPole::CartPole(int seed)
 
 std::vector<Item> CartPole::get_items() { return items; }
 
-std::vector<std::shared_ptr<Controller>> CartPole::get_controllers() { return controllers; }
+std::vector<std::shared_ptr<Controller> > CartPole::get_controllers() { return controllers; }
 
 step CartPole::compute_step() {
     const float pos = chariot_rg->getWorldTransform().getOrigin().x();

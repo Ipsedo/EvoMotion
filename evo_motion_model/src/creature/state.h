@@ -23,7 +23,8 @@ public:
 
 class ItemState : public State, public btCollisionWorld::ContactResultCallback {
 public:
-    ItemState(Item item, const std::optional<Item> &root_item, const Item &floor, btDynamicsWorld *world);
+    ItemState(
+        Item item, const std::optional<Item> &root_item, const Item &floor, btDynamicsWorld *world);
 
     ItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
 
@@ -41,6 +42,7 @@ private:
     std::optional<Item> root_item;
     bool floor_touched;
     bool is_not_root;
+
 protected:
     Item state_item;
 
@@ -52,7 +54,6 @@ public:
     RootItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
 
     int get_size() override;
-
 
 protected:
     torch::Tensor get_point_state(glm::vec3 point) const override;

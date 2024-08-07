@@ -21,8 +21,8 @@ std::vector<std::string> split(const std::string &s, const char delim) {
 }
 
 ObjShape::ObjShape(const std::string &obj_file_path) {
-    std::vector<std::tuple<float, float, float>> vertices_ref;
-    std::vector<std::tuple<float, float, float>> normals_ref;
+    std::vector<std::tuple<float, float, float> > vertices_ref;
+    std::vector<std::tuple<float, float, float> > normals_ref;
 
     std::vector<int> vertices_order;
     std::vector<int> normals_order;
@@ -38,7 +38,6 @@ ObjShape::ObjShape(const std::string &obj_file_path) {
         } else if (split_line[0] == "v") {
             vertices_ref.emplace_back(
                 std::stof(split_line[1]), std::stof(split_line[2]), std::stof(split_line[3]));
-
         } else if (split_line[0] == "f") {
             vertices_order.push_back(std::stoi(split(split_line[1], '/')[0]));
             vertices_order.push_back(std::stoi(split(split_line[2], '/')[0]));
@@ -56,8 +55,8 @@ ObjShape::ObjShape(const std::string &obj_file_path) {
     }
 }
 
-std::vector<std::tuple<float, float, float>> ObjShape::get_vertices() { return vertices; }
+std::vector<std::tuple<float, float, float> > ObjShape::get_vertices() { return vertices; }
 
-std::vector<std::tuple<float, float, float>> ObjShape::get_normals() { return normals; }
+std::vector<std::tuple<float, float, float> > ObjShape::get_normals() { return normals; }
 
 ObjShape::~ObjShape() = default;

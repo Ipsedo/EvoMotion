@@ -13,7 +13,8 @@ State::~State() = default;
 
 ItemState::ItemState(
     Item item, const std::optional<Item> &root_item, const Item &floor, btDynamicsWorld *world)
-    : root_item(root_item), floor_touched(false), is_not_root(root_item.has_value()), state_item(std::move(item)) {
+    : root_item(root_item), floor_touched(false), is_not_root(root_item.has_value()),
+      state_item(std::move(item)) {
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
@@ -23,13 +24,15 @@ ItemState::ItemState(const Item &item, const Item &floor, btDynamicsWorld *world
 int ItemState::get_size() { return 3 + 3 * 4 + 1 + 7 * (3 + 3); }
 
 torch::Tensor ItemState::get_point_state(const glm::vec3 point) const {
-    glm::vec3 root_pos = is_not_root ? root_item->model_matrix() * glm::vec4(glm::vec3(0.f), 1.f) : glm::vec3(
-        0.f);
+    glm::vec3 root_pos = is_not_root
+                             ? root_item->model_matrix() * glm::vec4(glm::vec3(0.f), 1.f)
+                             : glm::vec3(
+                                 0.f);
     glm::vec3 pos = glm::vec3(state_item.model_matrix() * glm::vec4(point, 1.f)) - root_pos;
 
     btVector3 vel = state_item.get_body()->getVelocityInLocalPoint(
         state_item.get_body()->getCollisionShape()->getLocalScaling() *
-            glm_to_bullet(point));
+        glm_to_bullet(point));
 
     return torch::tensor({pos.x, pos.y, pos.z, vel.x(), vel.y(), vel.z()});
 }
@@ -49,12 +52,12 @@ torch::Tensor ItemState::get_state() {
     floor_touched = false;
 
     auto main_state = torch::tensor(
-        {yaw / static_cast<float>(M_PI), pitch / static_cast<float>(M_PI),
-         roll / static_cast<float>(M_PI), center_lin_velocity.x(), center_lin_velocity.y(),
-         center_lin_velocity.z(), center_ang_velocity.x() / static_cast<float>(M_PI),
-         center_ang_velocity.y() / static_cast<float>(M_PI),
-         center_ang_velocity.z() / static_cast<float>(M_PI), force.x(), force.y(), force.z(),
-         torque.x(), torque.y(), torque.z(), touched});
+    {yaw / static_cast<float>(M_PI), pitch / static_cast<float>(M_PI),
+     roll / static_cast<float>(M_PI), center_lin_velocity.x(), center_lin_velocity.y(),
+     center_lin_velocity.z(), center_ang_velocity.x() / static_cast<float>(M_PI),
+     center_ang_velocity.y() / static_cast<float>(M_PI),
+     center_ang_velocity.z() / static_cast<float>(M_PI), force.x(), force.y(), force.z(),
+     torque.x(), torque.y(), torque.z(), touched});
 
     return torch::cat(
         {main_state, get_point_state(glm::vec3(0, 0, 0)), get_point_state(glm::vec3(1, 0, 0)),
@@ -81,25 +84,26 @@ MuscleState::MuscleState(Muscle muscle) : slider_constraint(muscle.get_slider_co
 
 }
 
-int MuscleState::get_size() {
-    return 3 * 1;
-}
+int MuscleState::get_size() { return 3 * 1; }
 
 torch::Tensor MuscleState::get_state() {
-    return torch::tensor({
-                             slider_constraint->getAppliedImpulse(),
-                             p2p_a->getAppliedImpulse(),
-                             p2p_b->getAppliedImpulse()
-                         });
+    return torch::tensor(
+    {
+        slider_constraint->getAppliedImpulse(),
+        p2p_a->getAppliedImpulse(),
+        p2p_b->getAppliedImpulse()
+    });
 }
 
 // Root
 
-RootItemState::RootItemState(const Item &item, const Item &floor, btDynamicsWorld *world) : ItemState(item, floor,
-                                                                                                      world) {}
+RootItemState::RootItemState(
+    const Item &item, const Item &floor, btDynamicsWorld *world) : ItemState(
+    item, floor,
+    world) {}
 
 int RootItemState::get_size() {
-    return ItemState::get_size() - (3 + 3); // no origin point state for root
+    return ItemState::get_size() - (3 + 3);// no origin point state for root
 }
 
 torch::Tensor RootItemState::get_point_state(glm::vec3 point) const {
@@ -116,4 +120,3 @@ torch::Tensor RootItemState::get_point_state(glm::vec3 point) const {
 
     return torch::empty({0});
 }
-
