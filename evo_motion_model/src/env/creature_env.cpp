@@ -35,7 +35,7 @@ MuscleEnv::MuscleEnv(const int seed)
     add_item(root_item);
     root_item.get_body()->setActivationState(DISABLE_DEACTIVATION);
 
-    states.push_back(std::make_shared<ItemState>(root_item, base, m_world));
+    states.push_back(std::make_shared<RootItemState>(root_item, base, m_world));
 
     for (const auto &item: std::vector<Item>(items.begin() + 1, items.end())) {
         states.push_back(std::make_shared<ItemState>(item, root_item, base, m_world));

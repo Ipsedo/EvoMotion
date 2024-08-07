@@ -21,13 +21,13 @@ public:
     virtual ~State();
 };
 
-class ItemState final : public State, public btCollisionWorld::ContactResultCallback {
+class ItemState : public State, public btCollisionWorld::ContactResultCallback {
 public:
     ItemState(Item item, const std::optional<Item> &root_item, const Item &floor, btDynamicsWorld *world);
 
     ItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
 
-    int get_size() override;
+    virtual int get_size() override;
 
     torch::Tensor get_state() override;
 
@@ -39,10 +39,23 @@ public:
 
 private:
     std::optional<Item> root_item;
-    Item state_item;
     bool floor_touched;
+    bool is_not_root;
 protected:
-    torch::Tensor get_point_state(glm::vec3 point) const;
+    Item state_item;
+
+    virtual torch::Tensor get_point_state(glm::vec3 point) const;
+};
+
+class RootItemState : public ItemState {
+public:
+    RootItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
+
+    int get_size() override;
+
+
+protected:
+    torch::Tensor get_point_state(glm::vec3 point) const override;
 };
 
 // Muscle
