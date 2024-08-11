@@ -51,15 +51,4 @@ private:
     GLFWwindow *window;
 };
 
-class ImGuiRenderer : public Renderer {
-public:
-    ImGuiRenderer(
-        const std::string &title, int width, int height, const std::shared_ptr<Camera> &camera);
-
-protected:
-    void on_new_frame() override;
-    void on_end_frame() override;
-    void render_drawables(std::map<std::string, glm::mat4> model_matrix) override;
-};
-
 #endif//EVO_MOTION_RENDERER_H

@@ -35,6 +35,16 @@ $ # as root
 $ unzip /path/to/libtorch-cxx11-abi-shared-with-deps-2.3.0+cu121.zip -d /opt/
 ```
 
+### Docker
+
+need `nvidia-container-toolkit` package
+
+```bash
+$ sudo pacman -Sy nvidia-container-toolki
+$ sudo nvidia-ctk runtime configure --runtime=docker
+$ sudo systemctl restart docker
+```
+
 ### Other OS
 
 Any attempt to build this project on other OS will be appreciated to complete this section.

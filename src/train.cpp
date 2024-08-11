@@ -3,6 +3,8 @@
 //
 
 #include <filesystem>
+#include <iomanip>
+#include <sstream>
 #include <utility>
 
 #include <indicators/progress_bar.hpp>
@@ -72,14 +74,14 @@ void train(int seed, bool cuda, const train_params &params) {
             actor_loss_meter.add(metrics["actor_loss"]);
             critic_loss_meter.add(metrics["critic_loss"]);
 
-            std::string p_bar_description =
-                "Save " + std::to_string(s - 1)
-                + ", actor = " + std::format("{:.5f}", actor_loss_meter.loss())
-                + ", critic = " + std::format("{:.5f}", critic_loss_meter.loss())
-                + ", grad_norm = " + std::format("{:.5f}", agent->grad_norm_mean())
-                + " ";
+            std::stringstream stream;
+            stream << "Save " + std::to_string(s - 1)
+                   << ", actor = " << std::fixed << std::setprecision(5) << actor_loss_meter.loss()
+                   << ", critic = " << std::fixed << std::setprecision(5) << critic_loss_meter.loss()
+                   << ", grad_norm = " << std::fixed << std::setprecision(5) << agent->grad_norm_mean()
+                   << " ";
 
-            p_bar.set_option(indicators::option::PrefixText{p_bar_description});
+            p_bar.set_option(indicators::option::PrefixText{stream.str()});
 
             p_bar.tick();
         }
