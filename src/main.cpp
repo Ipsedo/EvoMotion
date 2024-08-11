@@ -71,7 +71,9 @@ int main(const int argc, char **argv) {
     parser.add_subparser(run_parser);
     parser.add_subparser(train_parser);
 
-    try { parser.parse_args(argc, argv); } catch (const std::runtime_error &err) {
+    try {
+        parser.parse_args(argc, argv);
+    } catch (const std::runtime_error &err) {
         std::cerr << err.what() << std::endl;
         std::cerr << parser;
         std::exit(1);

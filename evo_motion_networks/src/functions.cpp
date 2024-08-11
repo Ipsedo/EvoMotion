@@ -7,8 +7,9 @@
 #include <cmath>
 
 torch::Tensor rand_eps(const torch::Tensor &tensor_like, float epsilon) {
-    return epsilon + torch::rand_like(tensor_like, at::TensorOptions(tensor_like.device())) * (
-               1.f - 2.f * epsilon);
+    return epsilon
+           + torch::rand_like(tensor_like, at::TensorOptions(tensor_like.device()))
+                 * (1.f - 2.f * epsilon);
 }
 
 torch::Tensor
@@ -33,8 +34,7 @@ torch::Tensor theta_inv(const torch::Tensor &theta) {
 
 torch::Tensor truncated_normal_pdf(
     const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma,
-    const float min_value,
-    const float max_value) {
+    const float min_value, const float max_value) {
     const auto alpha = (min_value - mu) / sigma;
     const auto beta = (max_value - mu) / sigma;
     return phi((x - mu) / sigma) / ((theta(beta) - theta(alpha)) * sigma);
@@ -48,20 +48,18 @@ torch::Tensor truncated_normal_sample(
     return theta_inv(
                theta(alpha)
                + at::rand(mu.sizes(), at::TensorOptions(mu.device()))
-               * (theta(beta) - theta(alpha))) * sigma
+                     * (theta(beta) - theta(alpha)))
+               * sigma
            + mu;
 }
 
-
-torch::Tensor
-truncated_normal_entropy(
-    const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
-    float max_value) {
+torch::Tensor truncated_normal_entropy(
+    const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value) {
     const auto alpha = (min_value - mu) / sigma;
     const auto beta = (max_value - mu) / sigma;
 
     const auto z = theta(beta) - theta(alpha);
 
-    return torch::log(sqrt(2.0 * M_PI * std::exp(1.0)) * sigma * z) + 0.5 * (
-               alpha * phi(alpha) - beta * phi(beta)) / z;
+    return torch::log(sqrt(2.0 * M_PI * std::exp(1.0)) * sigma * z)
+           + 0.5 * (alpha * phi(alpha) - beta * phi(beta)) / z;
 }

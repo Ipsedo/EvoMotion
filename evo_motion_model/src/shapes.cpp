@@ -21,8 +21,8 @@ std::vector<std::string> split(const std::string &s, const char delim) {
 }
 
 ObjShape::ObjShape(const std::string &obj_file_path) {
-    std::vector<std::tuple<float, float, float> > vertices_ref;
-    std::vector<std::tuple<float, float, float> > normals_ref;
+    std::vector<std::tuple<float, float, float>> vertices_ref;
+    std::vector<std::tuple<float, float, float>> normals_ref;
 
     std::vector<int> vertices_order;
     std::vector<int> normals_order;
@@ -55,8 +55,8 @@ ObjShape::ObjShape(const std::string &obj_file_path) {
     }
 }
 
-std::vector<std::tuple<float, float, float> > ObjShape::get_vertices() { return vertices; }
+std::vector<std::tuple<float, float, float>> ObjShape::get_vertices() { return vertices; }
 
-std::vector<std::tuple<float, float, float> > ObjShape::get_normals() { return normals; }
+std::vector<std::tuple<float, float, float>> ObjShape::get_normals() { return normals; }
 
 ObjShape::~ObjShape() = default;

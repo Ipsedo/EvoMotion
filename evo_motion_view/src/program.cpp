@@ -23,7 +23,7 @@ Program::Builder::Builder(std::string vertex_shader_path, std::string fragment_s
 Program::Builder::Builder(
     std::string vertex_shader_path, std::string fragment_shader_path,
     const std::vector<std::string> &uniforms, const std::vector<std::string> &attributes,
-    const std::map<std::string, std::vector<float> > &buffers)
+    const std::map<std::string, std::vector<float>> &buffers)
     : vertex_shader_path(std::move(vertex_shader_path)),
       fragment_shader_path(std::move(fragment_shader_path)), uniforms(uniforms),
       attributes(attributes), buffers(buffers) {}
@@ -55,7 +55,7 @@ Program Program::Builder::build() {
 Program::Program(
     const std::string &vertex_shader_path, const std::string &fragment_shader_path,
     const std::vector<std::string> &uniforms, const std::vector<std::string> &attributes,
-    const std::map<std::string, std::vector<float> > &buffers) {
+    const std::map<std::string, std::vector<float>> &buffers) {
     program_id = glCreateProgram();
 
     vertex_shader_id = load_shader(GL_VERTEX_SHADER, vertex_shader_path);
@@ -90,15 +90,12 @@ void Program::kill() {
     glDeleteShader(vertex_shader_id);
     glDeleteShader(fragment_shader_id);
 
-    for (const auto &[name, buffer_id]: buffer_ids)
-        glDeleteBuffers(1, &buffer_id);
+    for (const auto &[name, buffer_id]: buffer_ids) glDeleteBuffers(1, &buffer_id);
 
     glDeleteProgram(program_id);
 }
 
-void Program::use() const {
-    glUseProgram(program_id);
-}
+void Program::use() const { glUseProgram(program_id); }
 
 template<typename F, class... T>
 void Program::_uniform(F uniform_fun, const std::string &name, T... args) {
@@ -135,8 +132,7 @@ void Program::attrib(
 }
 
 void Program::disable_attrib_array() {
-    for (const auto &[name, attrib_id]: attribute_handles)
-        glDisableVertexAttribArray(attrib_id);
+    for (const auto &[name, attrib_id]: attribute_handles) glDisableVertexAttribArray(attrib_id);
 }
 
 void Program::draw_arrays(const GLenum type, const int from, const int nb_vertices) {

@@ -56,7 +56,17 @@ $ # run training
 $  docker run --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 1234 --cuda --hidden_size 256 train ./out_muscle_a2c_liquid --episodes 512 --nb_saves 4096 --learning_rate 1e-3
 ```
 
-At this moment GLFW isn't working on docker, so you can only train the agent.
+To run graphical view of your trained agent you need first :
+
+```bash
+$ xhost +local:docker
+```
+
+And then run the image :
+
+```bash
+$ docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 30543 --hidden_size 32 --cuda run ./out_muscle_a2c_liquid/save_0 -w 1920 -h 1080
+```
 
 ### Other OS
 

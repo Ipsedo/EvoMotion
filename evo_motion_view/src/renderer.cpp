@@ -11,10 +11,9 @@
 
 void GLAPIENTRY message_callback(
     const GLenum source, const GLenum type, const GLuint id, const GLenum severity,
-    const GLsizei length, const GLchar *message,
-    const void *userParam) {
+    const GLsizei length, const GLchar *message, const void *userParam) {
     std::cerr << source << " " << type << " " << id << " " << severity << " " << length << " : "
-        << std::endl;
+              << std::endl;
     std::cerr << "params : " << userParam << std::endl;
     std::cerr << message << std::endl << std::endl;
 }

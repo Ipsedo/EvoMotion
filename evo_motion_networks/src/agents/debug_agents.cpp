@@ -29,8 +29,7 @@ float DebugAgent::grad_norm_mean() { return 0.f; }
 // Random Agent
 RandomAgent::RandomAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space,
-    const int hidden_size, const float lr)
+    const std::vector<int64_t> &action_space, const int hidden_size, const float lr)
     : DebugAgent(seed, state_space, action_space, hidden_size, lr) {}
 
 torch::Tensor RandomAgent::act(torch::Tensor state, float reward) {
@@ -40,8 +39,7 @@ torch::Tensor RandomAgent::act(torch::Tensor state, float reward) {
 // Constant Agent
 ConstantAgent::ConstantAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space,
-    const int hidden_size, const float lr)
+    const std::vector<int64_t> &action_space, const int hidden_size, const float lr)
     : DebugAgent(seed, state_space, action_space, hidden_size, lr) {}
 
 torch::Tensor ConstantAgent::act(torch::Tensor state, float reward) {

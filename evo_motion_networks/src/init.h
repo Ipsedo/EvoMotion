@@ -9,4 +9,4 @@
 
 void init_weights(torch::nn::Module &module);
 
-#endif //INIT_H
+#endif//INIT_H

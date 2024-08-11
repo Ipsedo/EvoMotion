@@ -21,14 +21,11 @@ public:
     virtual ~State();
 };
 
-class ItemState : public State, public btCollisionWorld::ContactResultCallback {
+class ItemProprioceptionState : public State, public btCollisionWorld::ContactResultCallback {
 public:
-    ItemState(
-        Item item, const std::optional<Item> &root_item, const Item &floor, btDynamicsWorld *world);
+    ItemProprioceptionState(const Item &item, const Item &floor, btDynamicsWorld *world);
 
-    ItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
-
-    virtual int get_size() override;
+    int get_size() override;
 
     torch::Tensor get_state() override;
 
@@ -36,34 +33,41 @@ public:
         btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0Wrap, int partId0, int index0,
         const btCollisionObjectWrapper *colObj1Wrap, int partId1, int index1) override;
 
-    ~ItemState() override;
-
-private:
-    std::optional<Item> root_item;
-    bool floor_touched;
-    bool is_not_root;
-
 protected:
     Item state_item;
 
-    virtual torch::Tensor get_point_state(glm::vec3 point) const;
+private:
+    bool floor_touched;
+
+    torch::Tensor get_point_state(glm::vec3 point) const;
 };
 
-class RootItemState : public ItemState {
+class MemberState : public ItemProprioceptionState {
 public:
-    RootItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
+    MemberState(const Item &item, const Item &root_item, const Item &floor, btDynamicsWorld *world);
 
     int get_size() override;
 
-protected:
-    torch::Tensor get_point_state(glm::vec3 point) const override;
+    torch::Tensor get_state() override;
+
+private:
+    Item root_item;
+};
+
+class RootMemberState : public ItemProprioceptionState {
+public:
+    RootMemberState(const Item &item, const Item &floor, btDynamicsWorld *world);
+
+    int get_size() override;
+
+    torch::Tensor get_state() override;
 };
 
 // Muscle
 
 class MuscleState : public State {
 public:
-    MuscleState(Muscle muscle);
+    explicit MuscleState(Muscle muscle);
 
     int get_size() override;
 

@@ -43,7 +43,7 @@ void train(int seed, bool cuda, const train_params &params) {
     step step = env->reset();
 
     std::cout << "state_space = " << env->get_state_space()
-        << ", action_space = " << env->get_action_space() << std::endl;
+              << ", action_space = " << env->get_action_space() << std::endl;
     std::cout << "parameters_count = " << agent->count_parameters() << std::endl;
 
     LossMeter actor_loss_meter("actor_loss", 32);
@@ -75,11 +75,11 @@ void train(int seed, bool cuda, const train_params &params) {
             critic_loss_meter.add(metrics["critic_loss"]);
 
             std::stringstream stream;
-            stream << "Save " + std::to_string(s - 1)
-                   << ", actor = " << std::fixed << std::setprecision(5) << actor_loss_meter.loss()
-                   << ", critic = " << std::fixed << std::setprecision(5) << critic_loss_meter.loss()
-                   << ", grad_norm = " << std::fixed << std::setprecision(5) << agent->grad_norm_mean()
-                   << " ";
+            stream << "Save " + std::to_string(s - 1) << ", actor = " << std::fixed
+                   << std::setprecision(5) << actor_loss_meter.loss() << ", critic = " << std::fixed
+                   << std::setprecision(5) << critic_loss_meter.loss()
+                   << ", grad_norm = " << std::fixed << std::setprecision(5)
+                   << agent->grad_norm_mean() << " ";
 
             p_bar.set_option(indicators::option::PrefixText{stream.str()});
 

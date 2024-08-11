@@ -4,7 +4,6 @@
 
 #include "./muscle_controller.h"
 
-
 MuscleController::MuscleController(const Muscle &muscle, const int action_index)
     : action_index(action_index), muscle(muscle) {}
 

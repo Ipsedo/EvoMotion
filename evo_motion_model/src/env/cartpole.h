@@ -17,7 +17,7 @@ public:
 
     std::vector<Item> get_items() override;
 
-    std::vector<std::shared_ptr<Controller> > get_controllers() override;
+    std::vector<std::shared_ptr<Controller>> get_controllers() override;
 
     std::vector<int64_t> get_state_space() override;
 
@@ -47,7 +47,7 @@ private:
     float pendulum_pos;
 
     std::vector<Item> items;
-    std::vector<std::shared_ptr<Controller> > controllers;
+    std::vector<std::shared_ptr<Controller>> controllers;
 
     btHingeConstraint *hinge;
     btSliderConstraint *slider;

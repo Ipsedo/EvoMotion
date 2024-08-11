@@ -25,4 +25,4 @@ private:
     unsigned int rbo;
 };
 
-#endif //FRAME_BUFFER_H
+#endif//FRAME_BUFFER_H

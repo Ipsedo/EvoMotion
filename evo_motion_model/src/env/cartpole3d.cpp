@@ -129,7 +129,7 @@ CartPole3d::CartPole3d(int seed)
 
 std::vector<Item> CartPole3d::get_items() { return items; }
 
-std::vector<std::shared_ptr<Controller> > CartPole3d::get_controllers() { return controllers; }
+std::vector<std::shared_ptr<Controller>> CartPole3d::get_controllers() { return controllers; }
 
 step CartPole3d::compute_step() {
     float pos_x = cart_z_rg->getWorldTransform().getOrigin().x();

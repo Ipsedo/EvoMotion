@@ -19,8 +19,7 @@
 // shared network
 
 ActorCriticModule::ActorCriticModule(
-    std::vector<int64_t> state_space, std::vector<int64_t> action_space,
-    int hidden_size) {
+    std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {
     head = register_module(
         "head",
         torch::nn::Sequential(
@@ -58,14 +57,14 @@ ActorCriticModule::ActorCriticModule(
                 torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
             torch::nn::Linear(hidden_size, 1)));
-
 }
 
 a2c_response ActorCriticModule::forward(const torch::Tensor &state) {
     auto head_out = head->forward(state.unsqueeze(0));
 
-    return {mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0),
-            critic->forward(head_out)};
+    return {
+        mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0),
+        critic->forward(head_out)};
 }
 
 /*
@@ -76,9 +75,10 @@ ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
     : actor_critic(std::make_shared<ActorCriticModule>(state_space, action_space, hidden_size)),
-      optimizer(std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr)),
-      gamma(0.99f), curr_device(torch::kCPU),
-      episode_actor_loss(0.f), episode_critic_loss(0.f), curr_step(0L) { at::manual_seed(seed); }
+      optimizer(std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr)), gamma(0.99f),
+      curr_device(torch::kCPU), episode_actor_loss(0.f), episode_critic_loss(0.f), curr_step(0L) {
+    at::manual_seed(seed);
+}
 
 torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma, value] = actor_critic->forward(state);
@@ -116,9 +116,8 @@ void ActorCritic::train() {
     const auto t_steps = torch::arange(
         static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
 
-    const auto returns =
-        (rewards * torch::pow(gamma, t_steps)).flip({0}).cumsum(0).flip({0})
-        / torch::pow(gamma, t_steps);
+    const auto returns = (rewards * torch::pow(gamma, t_steps)).flip({0}).cumsum(0).flip({0})
+                         / torch::pow(gamma, t_steps);
 
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     const auto policy_loss = torch::log(prob) * (returns - values.detach()).unsqueeze(-1);
@@ -184,8 +183,7 @@ void ActorCritic::load(const std::string &input_folder_path) {
 }
 
 std::map<std::string, float> ActorCritic::get_metrics() {
-    return {{"actor_loss", episode_actor_loss},
-            {"critic_loss", episode_critic_loss}};
+    return {{"actor_loss", episode_actor_loss}, {"critic_loss", episode_critic_loss}};
 }
 
 void ActorCritic::to(const torch::DeviceType device) {

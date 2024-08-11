@@ -11,23 +11,23 @@
 
 class Shape {
 public:
-    virtual std::vector<std::tuple<float, float, float> > get_vertices() = 0;
+    virtual std::vector<std::tuple<float, float, float>> get_vertices() = 0;
 
-    virtual std::vector<std::tuple<float, float, float> > get_normals() = 0;
+    virtual std::vector<std::tuple<float, float, float>> get_normals() = 0;
 
     virtual ~Shape();
 };
 
 class ObjShape final : public Shape {
-    std::vector<std::tuple<float, float, float> > vertices;
-    std::vector<std::tuple<float, float, float> > normals;
+    std::vector<std::tuple<float, float, float>> vertices;
+    std::vector<std::tuple<float, float, float>> normals;
 
 public:
     explicit ObjShape(const std::string &obj_file_path);
 
-    std::vector<std::tuple<float, float, float> > get_vertices() override;
+    std::vector<std::tuple<float, float, float>> get_vertices() override;
 
-    std::vector<std::tuple<float, float, float> > get_normals() override;
+    std::vector<std::tuple<float, float, float>> get_normals() override;
 
     ~ObjShape() override;
 };
