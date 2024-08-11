@@ -93,7 +93,7 @@ torch::Tensor RootMemberState::get_state() {
     auto center_pos = state_item.get_body()->getCenterOfMassPosition();
     return torch::cat(
         {ItemProprioceptionState::get_state(),
-         torch::tensor({log(center_pos.norm()), atan2(center_pos.y(), center_pos.x())})});
+         torch::tensor({log(center_pos.norm() + 1.f), atan2(center_pos.y(), center_pos.x())})});
 }
 
 // Muscle
