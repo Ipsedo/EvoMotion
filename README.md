@@ -37,13 +37,26 @@ $ unzip /path/to/libtorch-cxx11-abi-shared-with-deps-2.3.0+cu121.zip -d /opt/
 
 ### Docker
 
-need `nvidia-container-toolkit` package
+need `nvidia-container-toolkit` package.
 
 ```bash
+$ # example on arch linux
 $ sudo pacman -Sy nvidia-container-toolki
 $ sudo nvidia-ctk runtime configure --runtime=docker
 $ sudo systemctl restart docker
 ```
+
+Build and run image :
+
+```bash
+$ cd /path/to/EvoMotion
+$ # build image
+$ docker build . --tag evo_motion
+$ # run training
+$  docker run --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 1234 --cuda --hidden_size 256 train ./out_muscle_a2c_liquid --episodes 512 --nb_saves 4096 --learning_rate 1e-3
+```
+
+At this moment GLFW isn't working on docker, so you can only train the agent.
 
 ### Other OS
 
