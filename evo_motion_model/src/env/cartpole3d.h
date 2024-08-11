@@ -15,7 +15,7 @@ public:
 
     std::vector<Item> get_items() override;
 
-    std::vector<std::shared_ptr<Controller>> get_controllers() override;
+    std::vector<std::shared_ptr<Controller> > get_controllers() override;
 
     std::vector<int64_t> get_state_space() override;
 
@@ -62,7 +62,7 @@ private:
     btPoint2PointConstraint *p2p_constraint;
 
     std::vector<Item> items;
-    std::vector<std::shared_ptr<Controller>> controllers;
+    std::vector<std::shared_ptr<Controller> > controllers;
 
     std::mt19937 rng;
     std::uniform_real_distribution<float> rd_uni;

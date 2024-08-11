@@ -85,9 +85,7 @@ std::vector<btTypedConstraint *> Muscle::get_constraints() {
     return {muscle_slider_constraint, attach_a_constraint, attach_b_constraint};
 }
 
-btSliderConstraint *Muscle::get_slider_constraint() {
-    return muscle_slider_constraint;
-}
+btSliderConstraint *Muscle::get_slider_constraint() { return muscle_slider_constraint; }
 
 std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> Muscle::get_p2p_constraints() {
     return {attach_a_constraint, attach_b_constraint};
@@ -125,4 +123,3 @@ JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &jso
 }
 
 std::vector<Muscle> JsonMuscularSystem::get_muscles() { return muscles; }
-

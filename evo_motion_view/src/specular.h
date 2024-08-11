@@ -28,13 +28,13 @@ class OBjSpecular final : public Drawable {
     Program program;
 
     static std::vector<float> to_vbo_date(
-        const std::vector<std::tuple<float, float, float>> &vertices,
-        const std::vector<std::tuple<float, float, float>> &normals);
+        const std::vector<std::tuple<float, float, float> > &vertices,
+        const std::vector<std::tuple<float, float, float> > &normals);
 
 public:
     OBjSpecular(
-        const std::vector<std::tuple<float, float, float>> &vertices,
-        const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color,
+        const std::vector<std::tuple<float, float, float> > &vertices,
+        const std::vector<std::tuple<float, float, float> > &normals, glm::vec4 ambient_color,
         glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess);
 
     void draw(

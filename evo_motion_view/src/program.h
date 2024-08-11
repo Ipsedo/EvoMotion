@@ -30,7 +30,7 @@ public:
         Builder(
             std::string vertex_shader_path, std::string fragment_shader_path,
             const std::vector<std::string> &uniforms, const std::vector<std::string> &attributes,
-            const std::map<std::string, std::vector<float>> &buffers);
+            const std::map<std::string, std::vector<float> > &buffers);
 
         std::string vertex_shader_path;
         std::string fragment_shader_path;
@@ -38,7 +38,7 @@ public:
         std::vector<std::string> uniforms;
         std::vector<std::string> attributes;
 
-        std::map<std::string, std::vector<float>> buffers;
+        std::map<std::string, std::vector<float> > buffers;
     };
 
 private:
@@ -57,7 +57,7 @@ private:
     Program(
         const std::string &vertex_shader_path, const std::string &fragment_shader_path,
         const std::vector<std::string> &uniforms, const std::vector<std::string> &attributes,
-        const std::map<std::string, std::vector<float>> &buffers);
+        const std::map<std::string, std::vector<float> > &buffers);
 
 public:
     void use() const;

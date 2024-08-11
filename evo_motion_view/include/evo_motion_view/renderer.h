@@ -32,7 +32,9 @@ public:
 
 protected:
     virtual void on_new_frame();
+
     virtual void on_end_frame();
+
     virtual void render_drawables(std::map<std::string, glm::mat4> model_matrix);
 
 private:
@@ -46,7 +48,7 @@ private:
     glm::vec3 light_pos;
     std::shared_ptr<Camera> camera;
 
-    std::map<std::string, std::shared_ptr<Drawable>> drawables;
+    std::map<std::string, std::shared_ptr<Drawable> > drawables;
 
     GLFWwindow *window;
 };
