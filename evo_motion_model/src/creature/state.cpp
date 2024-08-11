@@ -19,12 +19,11 @@ ItemProprioceptionState::ItemProprioceptionState(
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
-int ItemProprioceptionState::get_size() { return 3 + 3 * 4 + 1 + 6 * (3 + 3); }
+int ItemProprioceptionState::get_size() { return 3 + 3 * 4 + 1 /*+ 6 * (3 + 3)*/; }
 
 torch::Tensor ItemProprioceptionState::get_state() {
     btScalar yaw, pitch, roll;
     state_item.get_body()->getWorldTransform().getRotation().getEulerZYX(yaw, pitch, roll);
-    glm::quat quat = glm::quat_cast(state_item.model_matrix());
 
     const btVector3 center_lin_velocity = state_item.get_body()->getLinearVelocity();
     const btVector3 center_ang_velocity = state_item.get_body()->getAngularVelocity();
@@ -44,9 +43,9 @@ torch::Tensor ItemProprioceptionState::get_state() {
          torque.x(), torque.y(), torque.z(), touched});
 
     return torch::cat(
-        {main_state, get_point_state(glm::vec3(1, 0, 0)), get_point_state(glm::vec3(-1, 0, 0)),
+        {main_state/*, get_point_state(glm::vec3(1, 0, 0)), get_point_state(glm::vec3(-1, 0, 0)),
          get_point_state(glm::vec3(0, 1, 0)), get_point_state(glm::vec3(0, -1, 0)),
-         get_point_state(glm::vec3(0, 0, 1)), get_point_state(glm::vec3(0, 0, -1))});
+         get_point_state(glm::vec3(0, 0, 1)), get_point_state(glm::vec3(0, 0, -1))*/});
 }
 
 torch::Tensor ItemProprioceptionState::get_point_state(glm::vec3 point) const {
