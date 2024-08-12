@@ -24,7 +24,7 @@ Install dependencies with `pacman` :
 
 ```bash
 $ # as root
-$ pacman -Syu cmake bullet glm glew glfw
+$ pacman -Syu nvidia cuda cmake bullet glm glew glfw
 ```
 
 Download `libtorch` from torch official website and then copy the extracted folder in `/opt/` (here version 2.3.0 with
@@ -37,11 +37,11 @@ $ unzip /path/to/libtorch-cxx11-abi-shared-with-deps-2.3.0+cu121.zip -d /opt/
 
 ### Docker
 
-need `nvidia-container-toolkit` package.
+It needs `nvidia-container-toolkit` package.
 
 ```bash
 $ # example on arch linux
-$ sudo pacman -Sy nvidia-container-toolki
+$ sudo pacman -Sy nvidia-container-toolkit
 $ sudo nvidia-ctk runtime configure --runtime=docker
 $ sudo systemctl restart docker
 ```
@@ -53,7 +53,7 @@ $ cd /path/to/EvoMotion
 $ # build image
 $ docker build . --tag evo_motion
 $ # run training
-$  docker run --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 12345 --cuda --hidden_size 32 train /path/to/out_muscle_a2c_liquid --episodes 512 --nb_saves 4096 --learning_rate 1e-3
+$ docker run -v /path/to/your/local/output_folder:/opt/evo_motion/out_train_muscle_a2c_liquid --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 12345 --cuda --hidden_size 32 train /opt/evo_motion/out_train_muscle_a2c_liquid --episodes 512 --nb_saves 4096 --learning_rate 1e-3
 ```
 
 To run graphical view of your trained agent you need first :
@@ -65,10 +65,8 @@ $ xhost +local:docker
 And then run the image :
 
 ```bash
-$ docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 30543 --hidden_size 32 --cuda run /path/to/out_muscle_a2c_liquid/save_0 -w 1920 -h 1080
+$ docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /path/to/your/local/output_folder:/opt/evo_motion/out_train_muscle_a2c_liquid --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 30543 --hidden_size 32 --cuda run /opt/evo_motion/out_train_muscle_a2c_liquid/save_0 -w 1920 -h 1080
 ```
-
-__/!\ Volume needs to be bind for training and running or model won't be found /!\__
 
 ### Other OS
 
