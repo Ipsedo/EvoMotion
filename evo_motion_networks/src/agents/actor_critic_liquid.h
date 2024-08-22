@@ -10,7 +10,7 @@
 class LiquidCellModule final : public torch::nn::Module {
 public:
     LiquidCellModule(
-        const std::vector<int64_t> &state_space, int neuron_number, int unfolding_steps);
+        const int &input_space, int neuron_number, int unfolding_steps);
 
     void reset_x_t();
 

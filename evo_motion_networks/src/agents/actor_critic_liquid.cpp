@@ -11,16 +11,16 @@
  */
 
 LiquidCellModule::LiquidCellModule(
-    const std::vector<int64_t> &state_space, int neuron_number, const int unfolding_steps) {
+    const int &input_space, int neuron_number, const int unfolding_steps) {
     this->neuron_number = neuron_number;
     steps = unfolding_steps;
 
-    float std_w = 1e-1;
-    float std_b = 1e-1;
+    const float std_w = 1e-1;
+    const float std_b = 1e-1;
 
     weight = register_module(
         "weight",
-        torch::nn::Linear(torch::nn::LinearOptions(state_space[0], neuron_number).bias(false)));
+        torch::nn::Linear(torch::nn::LinearOptions(input_space, neuron_number).bias(false)));
 
     recurrent_weight = register_module(
         "recurrent_weight",
@@ -74,9 +74,11 @@ ActorCriticLiquidNetwork::ActorCriticLiquidNetwork(
     const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
     int unfolding_steps) {
 
+    const auto input_space = state_space[0];
+
     liquid_network = register_module(
         "liquid_network",
-        std::make_shared<LiquidCellModule>(state_space, hidden_size, unfolding_steps));
+        std::make_shared<LiquidCellModule>(input_space, hidden_size, unfolding_steps));
 
     mu = register_module(
         "mu",
