@@ -19,7 +19,7 @@ ItemProprioceptionState::ItemProprioceptionState(
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
-int ItemProprioceptionState::get_size() { return 3 +3*2/*+ 3 * 4*/ + 1/* + 6 * 3*/; }
+int ItemProprioceptionState::get_size() { return 3 + 3 * 2/*+ 3 * 4*/ + 1/* + 6 * 3*/; }
 
 torch::Tensor ItemProprioceptionState::get_state() {
     btScalar yaw, pitch, roll;
@@ -36,10 +36,11 @@ torch::Tensor ItemProprioceptionState::get_state() {
 
     auto main_state = torch::tensor(
         {yaw / static_cast<float>(M_PI), pitch / static_cast<float>(M_PI),
-            roll / static_cast<float>(M_PI)/*, center_lin_velocity.x(), center_lin_velocity.y(),
+         roll / static_cast<float>(M_PI)/*, center_lin_velocity.x(), center_lin_velocity.y(),
          center_lin_velocity.z(), center_ang_velocity.x() / static_cast<float>(M_PI),
          center_ang_velocity.y() / static_cast<float>(M_PI),
-         center_ang_velocity.z() / static_cast<float>(M_PI)*/, force.x(), force.y(), force.z(),
+         center_ang_velocity.z() / static_cast<float>(M_PI)*/,
+         force.x(), force.y(), force.z(),
          torque.x(), torque.y(), torque.z(), touched});
 
     return torch::cat(
@@ -107,6 +108,7 @@ int MuscleState::get_size() { return 0/*3 * 1*/; }
 
 torch::Tensor MuscleState::get_state() {
     return torch::tensor(
-        {/*slider_constraint->getAppliedImpulse(), p2p_a->getAppliedImpulse(),
-         p2p_b->getAppliedImpulse()*/});
+    {
+        /*slider_constraint->getAppliedImpulse(), p2p_a->getAppliedImpulse(),
+                 p2p_b->getAppliedImpulse()*/});
 }
