@@ -19,7 +19,7 @@ ItemProprioceptionState::ItemProprioceptionState(
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
-int ItemProprioceptionState::get_size() { return 3 + 3 * 2/*+ 3 * 4*/ + 1/* + 6 * 3*/; }
+int ItemProprioceptionState::get_size() { return 3 /*+ 3 * 4 */+ 1/* + 6 * 3*/; }
 
 torch::Tensor ItemProprioceptionState::get_state() {
     btScalar yaw, pitch, roll;
@@ -36,12 +36,12 @@ torch::Tensor ItemProprioceptionState::get_state() {
 
     auto main_state = torch::tensor(
         {yaw / static_cast<float>(M_PI), pitch / static_cast<float>(M_PI),
-         roll / static_cast<float>(M_PI)/*, center_lin_velocity.x(), center_lin_velocity.y(),
+         roll / static_cast<float>(M_PI), /*center_lin_velocity.x(), center_lin_velocity.y(),
          center_lin_velocity.z(), center_ang_velocity.x() / static_cast<float>(M_PI),
          center_ang_velocity.y() / static_cast<float>(M_PI),
-         center_ang_velocity.z() / static_cast<float>(M_PI)*/,
+         center_ang_velocity.z() / static_cast<float>(M_PI),
          force.x(), force.y(), force.z(),
-         torque.x(), torque.y(), torque.z(), touched});
+         torque.x(), torque.y(), torque.z(),*/ touched});
 
     return torch::cat(
         {main_state/*, get_point_state(glm::vec3(1, 0, 0)), get_point_state(glm::vec3(-1, 0, 0)),
@@ -56,7 +56,7 @@ torch::Tensor ItemProprioceptionState::get_point_state(glm::vec3 point) const {
     const btVector3 vel = state_item.get_body()->getVelocityInLocalPoint(
         state_item.get_body()->getCollisionShape()->getLocalScaling() * glm_to_bullet(point));
 
-    return torch::tensor({pos.x, pos.y, pos.z/*, vel.x(), vel.y(), vel.z()*/});
+    return torch::tensor({pos.x, pos.y, pos.z, vel.x(), vel.y(), vel.z()});
 }
 
 btScalar ItemProprioceptionState::addSingleResult(
@@ -88,13 +88,13 @@ torch::Tensor MemberState::get_state() {
 RootMemberState::RootMemberState(const Item &item, const Item &floor, btDynamicsWorld *world)
     : ItemProprioceptionState(item, floor, world) {}
 
-int RootMemberState::get_size() { return ItemProprioceptionState::get_size() + 2; }
+int RootMemberState::get_size() { return ItemProprioceptionState::get_size() + 3; }
 
 torch::Tensor RootMemberState::get_state() {
     auto center_pos = state_item.get_body()->getCenterOfMassPosition();
     return torch::cat(
         {ItemProprioceptionState::get_state(),
-         torch::tensor({log(center_pos.norm() + 1.f), atan2(center_pos.y(), center_pos.x())})});
+         torch::tensor({log(center_pos.norm() + 1.f), center_pos.y(), atan2(center_pos.z(), center_pos.x())})});
 }
 
 // Muscle
@@ -104,11 +104,10 @@ MuscleState::MuscleState(Muscle muscle) : slider_constraint(muscle.get_slider_co
     p2p_b = b;
 }
 
-int MuscleState::get_size() { return 0/*3 * 1*/; }
+int MuscleState::get_size() { return 2; }
 
 torch::Tensor MuscleState::get_state() {
+
     return torch::tensor(
-    {
-        /*slider_constraint->getAppliedImpulse(), p2p_a->getAppliedImpulse(),
-                 p2p_b->getAppliedImpulse()*/});
+    {slider_constraint->getLinearPos(), slider_constraint->getAppliedImpulse()});
 }
