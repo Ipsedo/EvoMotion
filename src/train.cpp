@@ -75,9 +75,9 @@ void train(int seed, bool cuda, const train_params &params) {
             critic_loss_meter.add(metrics["critic_loss"]);
 
             std::stringstream stream;
-            stream << "Save " + std::to_string(s - 1) << ", actor = " << std::fixed
-                   << std::setprecision(5) << actor_loss_meter.loss() << ", critic = " << std::fixed
-                   << std::setprecision(5) << critic_loss_meter.loss()
+            stream << "Save " + std::to_string(s - 1)
+                   << ", actor = " << std::setprecision(8) << std::fixed << actor_loss_meter.loss()
+                   << ", critic = " << std::setprecision(8) << std::fixed << critic_loss_meter.loss()
                    << ", grad_norm = " << std::fixed << std::setprecision(5)
                    << agent->grad_norm_mean() << " ";
 

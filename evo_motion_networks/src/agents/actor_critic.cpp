@@ -116,11 +116,12 @@ void ActorCritic::train() {
     const auto t_steps = torch::arange(
         static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device));
 
-    const auto returns = (rewards * torch::pow(gamma, t_steps)).flip({0}).cumsum(0).flip({0})
+    auto returns = (rewards * torch::pow(gamma, t_steps)).flip({0}).cumsum(0).flip({0})
                          / torch::pow(gamma, t_steps);
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8);
 
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
-    const auto policy_loss = torch::log(prob) * (returns - values.detach()).unsqueeze(-1);
+    const auto policy_loss = torch::log(prob) * (returns - values).detach().unsqueeze(-1);
     const auto policy_entropy = truncated_normal_entropy(mus, sigmas, -1.f, 1.f);
     const auto actor_loss = -torch::mean(torch::sum(policy_loss + 1e-1 * policy_entropy, -1));
 
@@ -132,8 +133,8 @@ void ActorCritic::train() {
     loss.backward();
     optimizer->step();
 
-    episode_actor_loss = actor_loss.item().toFloat();
-    episode_critic_loss = critic_loss.item().toFloat();
+    episode_actor_loss = actor_loss.cpu().detach().item().toFloat();
+    episode_critic_loss = critic_loss.cpu().detach().item().toFloat();
 
     curr_step++;
 }

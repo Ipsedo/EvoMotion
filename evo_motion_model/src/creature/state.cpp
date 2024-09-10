@@ -19,7 +19,7 @@ ItemProprioceptionState::ItemProprioceptionState(
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
-int ItemProprioceptionState::get_size() { return 3 /*+ 3 * 4 */+ 1/* + 6 * 3*/; }
+int ItemProprioceptionState::get_size() { return 3 /*+ 3 * 4*/ + 1/* + 6 * 3*/; }
 
 torch::Tensor ItemProprioceptionState::get_state() {
     btScalar yaw, pitch, roll;
