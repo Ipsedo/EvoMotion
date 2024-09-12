@@ -40,8 +40,9 @@ LiquidCellModule::LiquidCellModule(
 }
 
 void LiquidCellModule::reset_x_t() {
-    x_t = torch::mish(torch::randn(
-        {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
+    x_t = torch::mish(
+        torch::randn(
+            {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
 }
 
 torch::Tensor
@@ -86,7 +87,7 @@ ActorCriticLiquidNetwork::ActorCriticLiquidNetwork(
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-                     torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
+            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
     critic = register_module("critic", torch::nn::Linear(hidden_size, 1));
 
@@ -114,7 +115,7 @@ ActorCriticLiquid::ActorCriticLiquid(
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
     : ActorCritic(seed, state_space, action_space, hidden_size, lr) {
 
-    gamma = 0.995f;
+    gamma = 0.95f;
 
     actor_critic =
         std::make_shared<ActorCriticLiquidNetwork>(state_space, action_space, hidden_size, 6);

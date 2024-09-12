@@ -35,8 +35,8 @@ torch::Tensor ItemProprioceptionState::get_state() {
     floor_touched = false;
 
     auto main_state = torch::tensor(
-        {yaw / static_cast<float>(M_PI), pitch / static_cast<float>(M_PI),
-         roll / static_cast<float>(M_PI), /*center_lin_velocity.x(), center_lin_velocity.y(),
+    {yaw / static_cast<float>(M_PI), pitch / static_cast<float>(M_PI),
+     roll / static_cast<float>(M_PI), /*center_lin_velocity.x(), center_lin_velocity.y(),
          center_lin_velocity.z(), center_ang_velocity.x() / static_cast<float>(M_PI),
          center_ang_velocity.y() / static_cast<float>(M_PI),
          center_ang_velocity.z() / static_cast<float>(M_PI),
@@ -44,7 +44,7 @@ torch::Tensor ItemProprioceptionState::get_state() {
          torque.x(), torque.y(), torque.z(),*/ touched});
 
     return torch::cat(
-        {main_state/*, get_point_state(glm::vec3(1, 0, 0)), get_point_state(glm::vec3(-1, 0, 0)),
+    {main_state/*, get_point_state(glm::vec3(1, 0, 0)), get_point_state(glm::vec3(-1, 0, 0)),
          get_point_state(glm::vec3(0, 1, 0)), get_point_state(glm::vec3(0, -1, 0)),
          get_point_state(glm::vec3(0, 0, 1)), get_point_state(glm::vec3(0, 0, -1))*/});
 }
@@ -79,8 +79,8 @@ torch::Tensor MemberState::get_state() {
     glm::vec3 center_pos =
         state_item.model_matrix() * center_point - root_item.model_matrix() * center_point;
     return torch::cat(
-        {ItemProprioceptionState::get_state(),
-         torch::tensor({center_pos.x, center_pos.y, center_pos.z})});
+    {ItemProprioceptionState::get_state(),
+     torch::tensor({center_pos.x, center_pos.y, center_pos.z})});
 }
 
 // Root Member class
@@ -93,8 +93,9 @@ int RootMemberState::get_size() { return ItemProprioceptionState::get_size() + 3
 torch::Tensor RootMemberState::get_state() {
     auto center_pos = state_item.get_body()->getCenterOfMassPosition();
     return torch::cat(
-        {ItemProprioceptionState::get_state(),
-         torch::tensor({log(center_pos.norm() + 1.f), center_pos.y(), atan2(center_pos.z(), center_pos.x())})});
+    {ItemProprioceptionState::get_state(),
+     torch::tensor(
+         {log(center_pos.norm() + 1.f), center_pos.y(), atan2(center_pos.z(), center_pos.x())})});
 }
 
 // Muscle
@@ -107,7 +108,6 @@ MuscleState::MuscleState(Muscle muscle) : slider_constraint(muscle.get_slider_co
 int MuscleState::get_size() { return 2; }
 
 torch::Tensor MuscleState::get_state() {
-
     return torch::tensor(
-    {slider_constraint->getLinearPos(), slider_constraint->getAppliedImpulse()});
+        {slider_constraint->getLinearPos(), slider_constraint->getAppliedImpulse()});
 }
