@@ -76,6 +76,8 @@ ActorCritic::ActorCritic(
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
     : actor_critic(std::make_shared<ActorCriticModule>(state_space, action_space, hidden_size)),
       optimizer(std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr)), gamma(0.99f),
+      first_entropy_factor(0.1), wanted_entropy_factor(0.01), entropy_factor_steps(1L << 13),
+      actor_loss_factor(1e-2),
       curr_device(torch::kCPU), episode_actor_loss(0.f), episode_critic_loss(0.f), curr_step(0L) {
     at::manual_seed(seed);
 }
@@ -123,11 +125,11 @@ void ActorCritic::train() {
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     const auto policy_loss = torch::log(prob) * (returns - values).detach().unsqueeze(-1);
     const auto policy_entropy = truncated_normal_entropy(mus, sigmas, -1.f, 1.f);
-    const auto actor_loss = -torch::mean(torch::sum(policy_loss + 1e-1 * policy_entropy, -1));
+    const auto actor_loss = -torch::mean(torch::sum(policy_loss + get_exponential_entropy_factor() * policy_entropy, -1));
 
-    const auto critic_loss = torch::mse_loss(values, returns, at::Reduction::Mean);
+    const auto critic_loss = torch::smooth_l1_loss(values, returns, at::Reduction::Mean);
 
-    const auto loss = actor_loss + critic_loss;
+    const auto loss = actor_loss_factor * actor_loss + critic_loss;
 
     optimizer->zero_grad();
     loss.backward();
@@ -137,6 +139,11 @@ void ActorCritic::train() {
     episode_critic_loss = critic_loss.cpu().detach().item().toFloat();
 
     curr_step++;
+}
+
+float ActorCritic::get_exponential_entropy_factor() const {
+    const auto lambda = -std::log(wanted_entropy_factor) / static_cast<float>(entropy_factor_steps);
+    return first_entropy_factor * std::exp(-lambda * static_cast<float>(curr_step));
 }
 
 void ActorCritic::done(const float reward) {
@@ -184,7 +191,7 @@ void ActorCritic::load(const std::string &input_folder_path) {
 }
 
 std::map<std::string, float> ActorCritic::get_metrics() {
-    return {{"actor_loss", episode_actor_loss}, {"critic_loss", episode_critic_loss}};
+    return {{"actor_loss", episode_actor_loss}, {"critic_loss", episode_critic_loss}, {"entropy_factor", get_exponential_entropy_factor()}};
 }
 
 void ActorCritic::to(const torch::DeviceType device) {

@@ -78,8 +78,8 @@ void train(int seed, bool cuda, const train_params &params) {
             stream << "Save " + std::to_string(s - 1)
                    << ", actor = " << std::setprecision(8) << std::fixed << actor_loss_meter.loss()
                    << ", critic = " << std::setprecision(8) << std::fixed << critic_loss_meter.loss()
-                   << ", grad_norm = " << std::fixed << std::setprecision(5)
-                   << agent->grad_norm_mean() << " ";
+                   << ", grad_norm = " << std::fixed << std::setprecision(5) << agent->grad_norm_mean()
+                   << ", entropy_factor = " << std::fixed << std::setprecision(5) << metrics["entropy_factor"] << " ";
 
             p_bar.set_option(indicators::option::PrefixText{stream.str()});
 

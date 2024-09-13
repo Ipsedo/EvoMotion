@@ -64,6 +64,11 @@ protected:
     std::shared_ptr<torch::optim::Adam> optimizer;
 
     float gamma;
+    float first_entropy_factor;
+    float wanted_entropy_factor;
+    long entropy_factor_steps;
+
+    float actor_loss_factor;
 
 private:
     torch::DeviceType curr_device;
@@ -78,6 +83,7 @@ private:
     long curr_step;
 
     void train();
+    float get_exponential_entropy_factor() const;
 
 public:
     ActorCritic(
