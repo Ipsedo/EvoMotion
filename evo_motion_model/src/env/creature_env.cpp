@@ -67,7 +67,7 @@ std::vector<Item> MuscleEnv::get_items() {
     return items;
 }
 
-std::vector<std::shared_ptr<Controller>> MuscleEnv::get_controllers() { return controllers; }
+std::vector<std::shared_ptr<Controller> > MuscleEnv::get_controllers() { return controllers; }
 
 step MuscleEnv::compute_step() {
     std::vector<torch::Tensor> current_states;
