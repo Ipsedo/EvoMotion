@@ -119,8 +119,8 @@ void ActorCritic::train() {
         gamma, torch::arange(
             static_cast<int>(rewards_buffer.size()), at::TensorOptions().device(curr_device)));
 
-    const auto returns = (rewards * gamma_factor).flip({0}).cumsum(0).flip({0}) / gamma_factor;
-    //returns = (returns - returns.mean()) / (returns.std() + 1e-8);
+    auto returns = (rewards * gamma_factor).flip({0}).cumsum(0).flip({0}) / gamma_factor;
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8);
 
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     const auto policy_loss = torch::log(prob) * (returns - values).detach().unsqueeze(-1);
