@@ -83,6 +83,7 @@ private:
     long curr_step;
 
     void train();
+
     float get_exponential_entropy_factor() const;
 
 public:

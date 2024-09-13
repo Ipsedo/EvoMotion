@@ -125,7 +125,8 @@ void ActorCritic::train() {
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     const auto policy_loss = torch::log(prob) * (returns - values).detach().unsqueeze(-1);
     const auto policy_entropy = truncated_normal_entropy(mus, sigmas, -1.f, 1.f);
-    const auto actor_loss = -torch::mean(torch::sum(policy_loss + get_exponential_entropy_factor() * policy_entropy, -1));
+    const auto actor_loss = -torch::mean(
+        torch::sum(policy_loss + get_exponential_entropy_factor() * policy_entropy, -1));
 
     const auto critic_loss = torch::smooth_l1_loss(values, returns, at::Reduction::Mean);
 
@@ -191,7 +192,8 @@ void ActorCritic::load(const std::string &input_folder_path) {
 }
 
 std::map<std::string, float> ActorCritic::get_metrics() {
-    return {{"actor_loss", episode_actor_loss}, {"critic_loss", episode_critic_loss}, {"entropy_factor", get_exponential_entropy_factor()}};
+    return {{"actor_loss", episode_actor_loss}, {"critic_loss", episode_critic_loss},
+            {"entropy_factor", get_exponential_entropy_factor()}};
 }
 
 void ActorCritic::to(const torch::DeviceType device) {
