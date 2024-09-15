@@ -109,8 +109,9 @@ void ActorCriticLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(
 
 // separated networks - actor
 
-ActorLiquidNetwork::ActorLiquidNetwork(const std::vector<int64_t> &state_space, std::vector<int64_t> action_space,
-                                       int hidden_size, int unfolding_steps) {
+ActorLiquidNetwork::ActorLiquidNetwork(
+    const std::vector<int64_t> &state_space, std::vector<int64_t> action_space,
+    int hidden_size, int unfolding_steps) {
 
     const auto input_space = state_space[0];
 
@@ -126,15 +127,12 @@ ActorLiquidNetwork::ActorLiquidNetwork(const std::vector<int64_t> &state_space, 
         "sigma", torch::nn::Sequential(
             torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
-
     mu->apply(init_weights);
     sigma->apply(init_weights);
 
 }
 
-void ActorLiquidNetwork::reset_liquid() const {
-    liquid_network->reset_x_t();
-}
+void ActorLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(); }
 
 actor_response ActorLiquidNetwork::forward(const torch::Tensor &state) {
     const auto x_t = liquid_network->forward(state.unsqueeze(0));
@@ -146,8 +144,9 @@ actor_response ActorLiquidNetwork::forward(const torch::Tensor &state) {
 
 // separated networks - critic
 
-CriticLiquidNetwork::CriticLiquidNetwork(const std::vector<int64_t> &state_space, int hidden_size,
-                                         int unfolding_steps) {
+CriticLiquidNetwork::CriticLiquidNetwork(
+    const std::vector<int64_t> &state_space, int hidden_size,
+    int unfolding_steps) {
 
     const auto input_space = state_space[0];
 
@@ -161,9 +160,7 @@ CriticLiquidNetwork::CriticLiquidNetwork(const std::vector<int64_t> &state_space
 
 }
 
-void CriticLiquidNetwork::reset_liquid() const {
-    liquid_network->reset_x_t();
-}
+void CriticLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(); }
 
 critic_response CriticLiquidNetwork::forward(const torch::Tensor &state) {
     const auto x_t = liquid_network->forward(state.unsqueeze(0));
