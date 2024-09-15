@@ -124,7 +124,8 @@ void ActorCritic::train() {
     const auto prob = truncated_normal_pdf(actions.detach(), mus, sigmas, -1.f, 1.f);
     const auto policy_loss = torch::log(prob) * (returns - values).detach().unsqueeze(-1);
     const auto policy_entropy = truncated_normal_entropy(mus, sigmas, -1.f, 1.f);
-    const auto actor_loss = -torch::mean(policy_loss + get_exponential_entropy_factor() * policy_entropy);
+    const auto actor_loss = -torch::mean(
+        policy_loss + get_exponential_entropy_factor() * policy_entropy);
 
     const auto critic_loss = torch::smooth_l1_loss(values, returns, at::Reduction::Mean);
 
