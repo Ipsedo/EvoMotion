@@ -24,8 +24,6 @@ void DebugAgent::set_eval(bool eval) {}
 
 int DebugAgent::count_parameters() { return 0; }
 
-float DebugAgent::grad_norm_mean() { return 0.f; }
-
 // Random Agent
 RandomAgent::RandomAgent(
     const int seed, const std::vector<int64_t> &state_space,

@@ -27,8 +27,6 @@ public:
 
     int count_parameters() override;
 
-    float grad_norm_mean() override;
-
 protected:
     int action_space;
 

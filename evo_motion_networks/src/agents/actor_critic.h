@@ -38,6 +38,16 @@ public:
     virtual a2c_response forward(const torch::Tensor &state) = 0;
 };
 
+class AbstractActor : public torch::nn::Module {
+public:
+    virtual actor_response forward(const torch::Tensor &state) = 0;
+};
+
+class AbstractCritic : public torch::nn::Module {
+public:
+    virtual critic_response forward(const torch::Tensor &state) = 0;
+};
+
 // module
 
 class ActorCriticModule : public AbstractActorCritic {
@@ -56,17 +66,49 @@ private:
     torch::nn::Sequential critic{nullptr};
 };
 
+class ActorModule : public AbstractActor {
+public:
+    ActorModule(
+        std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
+
+    actor_response forward(const torch::Tensor &state) override;
+
+private:
+    torch::nn::Sequential head{nullptr};
+
+    torch::nn::Sequential mu{nullptr};
+    torch::nn::Sequential sigma{nullptr};
+};
+
+class CriticModule : public AbstractCritic {
+public:
+    CriticModule(
+        std::vector<int64_t> state_space, int hidden_size);
+
+    critic_response forward(const torch::Tensor &state) override;
+
+private:
+    torch::nn::Sequential critic{nullptr};
+};
+
 // Agent
 
 class ActorCritic : public Agent {
 protected:
-    std::shared_ptr<AbstractActorCritic> actor_critic;
-    std::shared_ptr<torch::optim::Adam> optimizer;
+    //std::shared_ptr<AbstractActorCritic> actor_critic;
+    //std::shared_ptr<torch::optim::Adam> optimizer;
+    std::shared_ptr<AbstractActor> actor;
+    std::shared_ptr<torch::optim::Optimizer> actor_optimizer;
+
+    std::shared_ptr<AbstractCritic> critic;
+    std::shared_ptr<torch::optim::Optimizer> critic_optimizer;
 
     float gamma;
     float first_entropy_factor;
     float wanted_entropy_factor;
     long entropy_factor_steps;
+
+    int train_actor_every;
 
 private:
     torch::DeviceType curr_device;
@@ -75,7 +117,8 @@ private:
     std::vector<float> rewards_buffer;
     std::vector<torch::Tensor> actions_buffer;
 
-    float episode_actor_loss;
+    float episode_policy_loss;
+    float episode_policy_entropy;
     float episode_critic_loss;
 
     long curr_step;
@@ -104,8 +147,6 @@ public:
     void set_eval(bool eval) override;
 
     int count_parameters() override;
-
-    float grad_norm_mean() override;
 };
 
 #endif//EVO_MOTION_ACTOR_CRITIC_H

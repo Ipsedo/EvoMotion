@@ -46,14 +46,15 @@ void train(int seed, bool cuda, const train_params &params) {
               << ", action_space = " << env->get_action_space() << std::endl;
     std::cout << "parameters_count = " << agent->count_parameters() << std::endl;
 
-    LossMeter actor_loss_meter("actor_loss", 32);
+    LossMeter policy_loss_meter("policy_loss", 32);
+    LossMeter policy_entropy_meter("policy_entropy", 32);
     LossMeter critic_loss_meter("critic_loss", 32);
 
     for (int s = 0; s < params.nb_saves; s++) {
         indicators::ProgressBar p_bar{
             indicators::option::MinProgress{0},
             indicators::option::MaxProgress{params.nb_episodes},
-            indicators::option::BarWidth{100},
+            indicators::option::BarWidth{30},
             indicators::option::Start{"["},
             indicators::option::Fill{"="},
             indicators::option::Lead{">"},
@@ -71,15 +72,18 @@ void train(int seed, bool cuda, const train_params &params) {
 
             auto metrics = agent->get_metrics();
 
-            actor_loss_meter.add(metrics["actor_loss"]);
+            policy_loss_meter.add(metrics["policy_loss"]);
+            policy_entropy_meter.add(metrics["policy_entropy"]);
             critic_loss_meter.add(metrics["critic_loss"]);
 
             std::stringstream stream;
             stream << "Save " + std::to_string(s - 1)
-                   << ", actor = " << std::setprecision(8) << std::fixed << actor_loss_meter.loss()
-                   << ", critic = " << std::setprecision(8) << std::fixed << critic_loss_meter.loss()
-                   << ", grad_norm = " << std::fixed << std::setprecision(5) << agent->grad_norm_mean()
-                   << ", entropy_factor = " << std::fixed << std::setprecision(5) << metrics["entropy_factor"] << " ";
+                   << ", policy_loss = " << std::setprecision(6) << std::fixed << policy_loss_meter.loss()
+                   << ", policy_entropy = " << std::setprecision(6) << std::fixed << policy_entropy_meter.loss()
+                   << ", critic_loss = " << std::setprecision(6) << std::fixed << critic_loss_meter.loss()
+                   << ", actor_grad_norm = " << std::setprecision(4) << std::fixed << metrics["actor_grad_mean"]
+                   << ", critic_grad_norm = " << std::setprecision(4) << std::fixed << metrics["critic_grad_mean"]
+                   << ", entropy_factor = " << std::setprecision(4) << std::fixed << metrics["entropy_factor"] << " ";
 
             p_bar.set_option(indicators::option::PrefixText{stream.str()});
 

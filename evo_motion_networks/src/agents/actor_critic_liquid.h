@@ -55,6 +55,40 @@ private:
     torch::nn::Linear critic{nullptr};
 };
 
+// separated networks
+
+class ActorLiquidNetwork : public AbstractActor {
+public:
+    ActorLiquidNetwork(
+        const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
+        int unfolding_steps);
+
+    void reset_liquid() const;
+
+    actor_response forward(const torch::Tensor &state) override;
+
+private:
+    std::shared_ptr<LiquidCellModule> liquid_network;
+
+    torch::nn::Sequential mu{nullptr};
+    torch::nn::Sequential sigma{nullptr};
+};
+
+class CriticLiquidNetwork : public AbstractCritic {
+public:
+    CriticLiquidNetwork(
+        const std::vector<int64_t> &state_space, int hidden_size,
+        int unfolding_steps);
+
+    void reset_liquid() const;
+
+    critic_response forward(const torch::Tensor &state) override;
+
+private:
+    std::shared_ptr<LiquidCellModule> liquid_network;
+    torch::nn::Linear critic{nullptr};
+};
+
 // Agent
 
 class ActorCriticLiquid final : public ActorCritic {
