@@ -68,8 +68,6 @@ protected:
     float wanted_entropy_factor;
     long entropy_factor_steps;
 
-    float actor_loss_factor;
-
 private:
     torch::DeviceType curr_device;
 
