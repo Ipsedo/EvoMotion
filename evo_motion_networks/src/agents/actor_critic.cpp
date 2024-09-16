@@ -69,7 +69,8 @@ a2c_response ActorCriticModule::forward(const torch::Tensor &state) {
 
 // separated networks - actor
 
-ActorModule::ActorModule(std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {
+ActorModule::ActorModule(
+    std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {
     head = register_module(
         "head",
         torch::nn::Sequential(
@@ -139,17 +140,17 @@ critic_response CriticModule::forward(const torch::Tensor &state) {
 ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
-    : /*actor_critic(std::make_shared<ActorCriticModule>(state_space, action_space, hidden_size)),
+    :/*actor_critic(std::make_shared<ActorCriticModule>(state_space, action_space, hidden_size)),
       optimizer(std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr)),*/
-      actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
-      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
-      critic(std::make_shared<CriticModule>(state_space, hidden_size)),
-      critic_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
-      gamma(0.99f), first_entropy_factor(5e-2), wanted_entropy_factor(1e-3), entropy_factor_steps(1L << 12),
-      curr_device(torch::kCPU), episode_policy_loss(0.f), episode_policy_entropy(0.f), episode_critic_loss(0.f),
-      curr_step(0L) {
-    at::manual_seed(seed);
-}
+    actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
+    actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
+    critic(std::make_shared<CriticModule>(state_space, hidden_size)),
+    critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
+    gamma(0.99f), first_entropy_factor(5e-1), wanted_entropy_factor(1e-2),
+    entropy_factor_steps(1L << 12),
+    curr_device(torch::kCPU), episode_policy_loss(0.f), episode_policy_entropy(0.f),
+    episode_critic_loss(0.f),
+    curr_step(0L) { at::manual_seed(seed); }
 
 torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma] = actor->forward(state);
@@ -196,7 +197,8 @@ void ActorCritic::train() {
     const auto policy_loss = torch::log(prob) * (returns - values).detach().unsqueeze(-1);
     const auto policy_entropy = truncated_normal_entropy(mus, sigmas, -1.f, 1.f);
     const auto entropy_factor = get_exponential_entropy_factor();
-    const auto actor_loss = -torch::mean(torch::sum(policy_loss + entropy_factor * policy_entropy, -1));
+    const auto actor_loss = -torch::mean(
+        torch::sum(policy_loss + entropy_factor * policy_entropy, -1));
 
     const auto critic_loss = torch::smooth_l1_loss(values, returns, at::Reduction::Mean);
 
@@ -215,7 +217,8 @@ void ActorCritic::train() {
     critic_optimizer->step();
 
     episode_policy_loss = -policy_loss.sum(-1).mean().cpu().detach().item().toFloat();
-    episode_policy_entropy = -entropy_factor * policy_entropy.sum(-1).mean().cpu().detach().item().toFloat();
+    episode_policy_entropy = -entropy_factor * policy_entropy.sum(-1).mean().cpu().detach().item().
+                             toFloat();
     episode_critic_loss = critic_loss.cpu().detach().item().toFloat();
 
     curr_step++;
@@ -334,7 +337,8 @@ std::map<std::string, float> ActorCritic::get_metrics() {
     critic_grad /= static_cast<float>(critic_params.size());
 
     return {{"policy_loss", episode_policy_loss}, {"policy_entropy", episode_policy_entropy},
-            {"critic_loss", episode_critic_loss}, {"entropy_factor", get_exponential_entropy_factor()},
+            {"critic_loss", episode_critic_loss},
+            {"entropy_factor", get_exponential_entropy_factor()},
             {"actor_grad_mean", actor_grad}, {"critic_grad_mean", critic_grad}};
 }
 
