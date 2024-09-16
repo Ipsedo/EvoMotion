@@ -103,12 +103,12 @@ protected:
     std::shared_ptr<AbstractCritic> critic;
     std::shared_ptr<torch::optim::Optimizer> critic_optimizer;
 
+private:
     float gamma;
     float first_entropy_factor;
     float wanted_entropy_factor;
     long entropy_factor_steps;
 
-private:
     torch::DeviceType curr_device;
 
     std::vector<a2c_response> results_buffer;
