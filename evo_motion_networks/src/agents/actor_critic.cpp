@@ -146,7 +146,6 @@ ActorCritic::ActorCritic(
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       gamma(0.99f), first_entropy_factor(5e-2), wanted_entropy_factor(1e-3), entropy_factor_steps(1L << 12),
-      train_actor_every(4),
       curr_device(torch::kCPU), episode_policy_loss(0.f), episode_policy_entropy(0.f), episode_critic_loss(0.f),
       curr_step(0L) {
     at::manual_seed(seed);
@@ -207,11 +206,9 @@ void ActorCritic::train() {
     loss.backward();
     optimizer->step();*/
 
-    if (curr_step % train_actor_every == 0) {
-        actor_optimizer->zero_grad();
-        actor_loss.backward();
-        actor_optimizer->step();
-    }
+    actor_optimizer->zero_grad();
+    actor_loss.backward();
+    actor_optimizer->step();
 
     critic_optimizer->zero_grad();
     critic_loss.backward();

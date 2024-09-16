@@ -108,8 +108,6 @@ protected:
     float wanted_entropy_factor;
     long entropy_factor_steps;
 
-    int train_actor_every;
-
 private:
     torch::DeviceType curr_device;
 
