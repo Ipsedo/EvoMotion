@@ -140,17 +140,15 @@ critic_response CriticModule::forward(const torch::Tensor &state) {
 ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, float lr)
-    :/*actor_critic(std::make_shared<ActorCriticModule>(state_space, action_space, hidden_size)),
-      optimizer(std::make_shared<torch::optim::Adam>(actor_critic->parameters(), lr)),*/
-    actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
-    actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
-    critic(std::make_shared<CriticModule>(state_space, hidden_size)),
-    critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
-    gamma(0.99f), first_entropy_factor(5e-1), wanted_entropy_factor(1e-2),
-    entropy_factor_steps(1L << 12),
-    curr_device(torch::kCPU), episode_policy_loss(0.f), episode_policy_entropy(0.f),
-    episode_critic_loss(0.f),
-    curr_step(0L) { at::manual_seed(seed); }
+    : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
+      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
+      critic(std::make_shared<CriticModule>(state_space, hidden_size)),
+      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
+      gamma(0.99f), first_entropy_factor(1e-1), wanted_entropy_factor(1e-2),
+      entropy_factor_steps(1L << 14),
+      curr_device(torch::kCPU), episode_policy_loss(0.f), episode_policy_entropy(0.f),
+      episode_critic_loss(0.f),
+      curr_step(0L) { at::manual_seed(seed); }
 
 torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma] = actor->forward(state);
@@ -202,12 +200,6 @@ void ActorCritic::train() {
 
     const auto critic_loss = torch::smooth_l1_loss(values, returns, at::Reduction::Mean);
 
-    /*const auto loss = actor_loss + critic_loss;
-
-    optimizer->zero_grad();
-    loss.backward();
-    optimizer->step();*/
-
     actor_optimizer->zero_grad();
     actor_loss.backward();
     actor_optimizer->step();
@@ -242,19 +234,6 @@ void ActorCritic::done(const float reward) {
 void ActorCritic::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
-    /*const auto model_file = path / "actor_critic.th";
-    const auto optimizer_file = path / "optimizer.th";
-
-    torch::serialize::OutputArchive model_archive;
-    torch::serialize::OutputArchive optimizer_archive;
-
-    // Save networks
-    actor_critic->save(model_archive);
-    optimizer->save(optimizer_archive);
-
-    model_archive.save_to(model_file);
-    optimizer_archive.save_to(optimizer_file);*/
-
     // actor
     const auto actor_model_file = path / "actor.th";
     const auto actor_optimizer_file = path / "actor_optimizer.th";
@@ -284,19 +263,6 @@ void ActorCritic::save(const std::string &output_folder_path) {
 
 void ActorCritic::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
-
-    /*const auto model_file = path / "actor_critic.th";
-    const auto optimizer_file = path / "optimizer.th";
-
-    // load
-    torch::serialize::InputArchive model_archive;
-    torch::serialize::InputArchive optimizer_archive;
-
-    model_archive.load_from(model_file);
-    optimizer_archive.load_from(optimizer_file);
-
-    actor_critic->load(model_archive);
-    optimizer->load(optimizer_archive);*/
 
     // actor
     const auto actor_model_file = path / "actor.th";

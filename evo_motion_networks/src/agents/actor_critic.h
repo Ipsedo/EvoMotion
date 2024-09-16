@@ -95,8 +95,6 @@ private:
 
 class ActorCritic : public Agent {
 protected:
-    //std::shared_ptr<AbstractActorCritic> actor_critic;
-    //std::shared_ptr<torch::optim::Adam> optimizer;
     std::shared_ptr<AbstractActor> actor;
     std::shared_ptr<torch::optim::Optimizer> actor_optimizer;
 
