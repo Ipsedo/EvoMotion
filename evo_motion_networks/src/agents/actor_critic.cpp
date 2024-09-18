@@ -194,9 +194,9 @@ void ActorCritic::train(
     critic_loss.backward();
     critic_optimizer->step();
 
-    episode_policy_loss = -policy_loss.sum(-1).mean().cpu().detach().item().toFloat();
+    episode_policy_loss = -policy_loss.mean().cpu().detach().item().toFloat();
     episode_policy_entropy =
-        -entropy_factor * policy_entropy.sum(-1).mean().cpu().detach().item().toFloat();
+        -entropy_factor * policy_entropy.mean().cpu().detach().item().toFloat();
     episode_critic_loss = critic_loss.cpu().detach().item().toFloat();
 
     curr_train_step++;
