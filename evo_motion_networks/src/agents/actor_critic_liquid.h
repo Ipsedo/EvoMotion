@@ -9,8 +9,7 @@
 
 class LiquidCellModule final : public torch::nn::Module {
 public:
-    LiquidCellModule(
-        const int &input_space, int neuron_number, int unfolding_steps);
+    LiquidCellModule(const int &input_space, int neuron_number, int unfolding_steps);
 
     void reset_x_t();
 
@@ -77,8 +76,7 @@ private:
 class CriticLiquidNetwork : public AbstractCritic {
 public:
     CriticLiquidNetwork(
-        const std::vector<int64_t> &state_space, int hidden_size,
-        int unfolding_steps);
+        const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);
 
     void reset_liquid() const;
 
@@ -95,7 +93,7 @@ class ActorCriticLiquid final : public ActorCritic {
 public:
     ActorCriticLiquid(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, float lr);
+        int hidden_size, int batch_size, float lr);
 
     void done(float reward) override;
 };

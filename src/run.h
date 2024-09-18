@@ -26,6 +26,7 @@ struct train_params {
     std::string output_path;
 
     float learning_rate;
+    int batch_size;
 
     int nb_saves;
     int nb_episodes;

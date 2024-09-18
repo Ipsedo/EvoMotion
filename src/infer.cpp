@@ -42,7 +42,7 @@ void infer(int seed, bool cuda, const run_params &params) {
 
     AgentBuilder agent_builder(
         params.agent_name, 0, env->get_state_space(), env->get_action_space(), params.hidden_size,
-        1e-4f);
+        1, 1e-4f);
 
     std::shared_ptr<Agent> agent = agent_builder.get();
 

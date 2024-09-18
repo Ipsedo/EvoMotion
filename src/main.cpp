@@ -45,6 +45,11 @@ int main(const int argc, char **argv) {
         .default_value(1000)
         .help("number of save when training");
 
+    train_parser.add_argument("-b", "--batch_size")
+        .scan<'i', int>()
+        .default_value(16)
+        .help("episodes batch size");
+
     train_parser.add_argument("-l", "--learning_rate")
         .scan<'g', float>()
         .default_value(1e-4f)
@@ -84,8 +89,8 @@ int main(const int argc, char **argv) {
             parser.get<int>("seed"), parser.get<bool>("cuda"),
             {parser.get<std::string>("environment"), parser.get<std::string>("agent"),
              train_parser.get<std::string>("output_path"), train_parser.get<float>("learning_rate"),
-             train_parser.get<int>("nb_saves"), train_parser.get<int>("episodes"),
-             parser.get<int>("hidden_size")});
+             train_parser.get<int>("batch_size"), train_parser.get<int>("nb_saves"),
+             train_parser.get<int>("episodes"), parser.get<int>("hidden_size")});
     else if (parser.is_subcommand_used(run_parser))
         infer(
             parser.get<int>("seed"), parser.get<bool>("cuda"),

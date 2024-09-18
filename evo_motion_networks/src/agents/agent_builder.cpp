@@ -12,22 +12,23 @@
 
 AgentBuilder::AgentBuilder(
     std::string name, const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, const int hidden_size, const float lr)
+    const std::vector<int64_t> &action_space, const int hidden_size, const int batch_size,
+    const float lr)
     : name(std::move(name)), seed(seed), state_space(state_space), action_space(action_space),
-      hidden_size(hidden_size), lr(lr),
+      hidden_size(hidden_size), batch_size(batch_size), lr(lr),
       agent_constructors(
           {{"actor_critic",
             std::make_shared<
-                ActorCritic, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
-           {"actor_critic_liquid",
-            std::make_shared<
-                ActorCriticLiquid, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
+                ActorCritic, int, std::vector<int64_t>, std::vector<int64_t>, int, int, float>},
+           {"actor_critic_liquid", std::make_shared<
+                                       ActorCriticLiquid, int, std::vector<int64_t>,
+                                       std::vector<int64_t>, int, int, float>},
            {"random",
             std::make_shared<
-                RandomAgent, int, std::vector<int64_t>, std::vector<int64_t>, int, float>},
+                RandomAgent, int, std::vector<int64_t>, std::vector<int64_t>, int, int, float>},
            {"constant",
             std::make_shared<
-                ConstantAgent, int, std::vector<int64_t>, std::vector<int64_t>, int, float>}
+                ConstantAgent, int, std::vector<int64_t>, std::vector<int64_t>, int, int, float>}
 
           }) {
     if (agent_constructors.find(this->name) == agent_constructors.end()) {
@@ -41,5 +42,5 @@ AgentBuilder::AgentBuilder(
 }
 
 std::shared_ptr<Agent> AgentBuilder::get() {
-    return agent_constructors[name](seed, state_space, action_space, hidden_size, lr);
+    return agent_constructors[name](seed, state_space, action_space, hidden_size, batch_size, lr);
 }

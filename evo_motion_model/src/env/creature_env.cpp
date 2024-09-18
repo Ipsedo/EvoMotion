@@ -22,7 +22,7 @@ MuscleEnv::MuscleEnv(const int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), initial_remaining_seconds(1.f),
-      max_episode_seconds(60.f), target_velocity(1e-1f), reset_frames(10), curr_step(0),
+      max_episode_seconds(60.f), target_velocity(2e-1f), reset_frames(10), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)) {
     base.get_body()->setFriction(0.5f);
@@ -67,7 +67,7 @@ std::vector<Item> MuscleEnv::get_items() {
     return items;
 }
 
-std::vector<std::shared_ptr<Controller> > MuscleEnv::get_controllers() { return controllers; }
+std::vector<std::shared_ptr<Controller>> MuscleEnv::get_controllers() { return controllers; }
 
 step MuscleEnv::compute_step() {
     std::vector<torch::Tensor> current_states;
@@ -77,7 +77,7 @@ step MuscleEnv::compute_step() {
     const Item root = skeleton.get_items()[0];
 
     const float lin_vel_z = root.get_body()->getLinearVelocity().z();
-    const float reward = lin_vel_z;
+    const float reward = (lin_vel_z - target_velocity) / target_velocity;
 
     if (lin_vel_z < target_velocity) remaining_steps -= 1;
     else remaining_steps += 1;

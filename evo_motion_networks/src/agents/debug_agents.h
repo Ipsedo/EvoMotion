@@ -37,7 +37,7 @@ class RandomAgent final : public DebugAgent {
 public:
     RandomAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, float lr);
+        int hidden_size, int batch_size, float lr);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 };
@@ -46,7 +46,7 @@ class ConstantAgent final : public DebugAgent {
 public:
     ConstantAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, float lr);
+        int hidden_size, int batch_size, float lr);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 };

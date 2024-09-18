@@ -29,7 +29,7 @@ void train(int seed, bool cuda, const train_params &params) {
 
     AgentBuilder agent_builder(
         params.agent_name, seed, env->get_state_space(), env->get_action_space(),
-        params.hidden_size, params.learning_rate);
+        params.hidden_size, params.batch_size, params.learning_rate);
 
     std::shared_ptr<Agent> agent = agent_builder.get();
 
@@ -46,9 +46,9 @@ void train(int seed, bool cuda, const train_params &params) {
               << ", action_space = " << env->get_action_space() << std::endl;
     std::cout << "parameters_count = " << agent->count_parameters() << std::endl;
 
-    LossMeter policy_loss_meter("policy_loss", 32);
-    LossMeter policy_entropy_meter("policy_entropy", 32);
-    LossMeter critic_loss_meter("critic_loss", 32);
+    LossMeter policy_loss_meter("policy_loss", 16 * params.batch_size);
+    LossMeter policy_entropy_meter("policy_entropy", 16 * params.batch_size);
+    LossMeter critic_loss_meter("critic_loss", 16 * params.batch_size);
 
     for (int s = 0; s < params.nb_saves; s++) {
         indicators::ProgressBar p_bar{
@@ -77,13 +77,16 @@ void train(int seed, bool cuda, const train_params &params) {
             critic_loss_meter.add(metrics["critic_loss"]);
 
             std::stringstream stream;
-            stream << "Save " + std::to_string(s - 1)
-                   << ", policy_loss = " << std::setprecision(6) << std::fixed << policy_loss_meter.loss()
-                   << ", policy_entropy = " << std::setprecision(6) << std::fixed << policy_entropy_meter.loss()
-                   << ", critic_loss = " << std::setprecision(6) << std::fixed << critic_loss_meter.loss()
-                   << ", actor_grad_norm = " << std::setprecision(4) << std::fixed << metrics["actor_grad_mean"]
-                   << ", critic_grad_norm = " << std::setprecision(4) << std::fixed << metrics["critic_grad_mean"]
-                   << ", entropy_factor = " << std::setprecision(4) << std::fixed << metrics["entropy_factor"] << " ";
+            stream << "Save " + std::to_string(s - 1) << ", policy_loss = " << std::setprecision(6)
+                   << std::fixed << policy_loss_meter.loss()
+                   << ", policy_entropy = " << std::setprecision(6) << std::fixed
+                   << policy_entropy_meter.loss() << ", critic_loss = " << std::setprecision(6)
+                   << std::fixed << critic_loss_meter.loss()
+                   << ", actor_grad_norm = " << std::setprecision(4) << std::fixed
+                   << metrics["actor_grad_mean"] << ", critic_grad_norm = " << std::setprecision(4)
+                   << std::fixed << metrics["critic_grad_mean"]
+                   << ", entropy_factor = " << std::setprecision(4) << std::fixed
+                   << metrics["entropy_factor"] << " ";
 
             p_bar.set_option(indicators::option::PrefixText{stream.str()});
 
