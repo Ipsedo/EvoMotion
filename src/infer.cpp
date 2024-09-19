@@ -16,7 +16,9 @@
 
 #include "./run.h"
 
-void infer(int seed, bool cuda, const run_params &params) {
+void infer(
+    int seed, bool cuda, const run_params &params,
+    const std::shared_ptr<AgentFactory> &agent_factory) {
     EnvBuilder env_builder(seed, params.env_name);
     std::shared_ptr<Environment> env = env_builder.get();
 
@@ -40,11 +42,8 @@ void infer(int seed, bool cuda, const run_params &params) {
         renderer.add_drawable(i.get_name(), specular);
     }
 
-    AgentBuilder agent_builder(
-        params.agent_name, 0, env->get_state_space(), env->get_action_space(), params.hidden_size,
-        1, 1e-4f);
-
-    std::shared_ptr<Agent> agent = agent_builder.get();
+    std::shared_ptr<Agent> agent =
+        agent_factory->create_agent(env->get_state_space(), env->get_action_space());
 
     agent->load(params.input_folder);
 

@@ -182,7 +182,8 @@ void ActorCritic::train(
     const auto policy_loss = torch::log(prob) * (returns - batched_values).detach().unsqueeze(-1);
     const auto policy_entropy = truncated_normal_entropy(batched_mus, batched_sigmas, -1.f, 1.f);
     const auto entropy_factor = get_exponential_entropy_factor();
-    const auto actor_loss = -torch::mean(policy_loss + entropy_factor * policy_entropy);
+    const auto actor_loss =
+        -torch::mean(torch::sum(policy_loss + entropy_factor * policy_entropy, -1));
 
     const auto critic_loss = torch::smooth_l1_loss(batched_values, returns, at::Reduction::Mean);
 
@@ -194,9 +195,9 @@ void ActorCritic::train(
     critic_loss.backward();
     critic_optimizer->step();
 
-    episode_policy_loss = -policy_loss.mean().cpu().detach().item().toFloat();
+    episode_policy_loss = -policy_loss.sum(-1).mean().cpu().detach().item().toFloat();
     episode_policy_entropy =
-        -entropy_factor * policy_entropy.mean().cpu().detach().item().toFloat();
+        -entropy_factor * policy_entropy.sum(-1).mean().cpu().detach().item().toFloat();
     episode_critic_loss = critic_loss.cpu().detach().item().toFloat();
 
     curr_train_step++;

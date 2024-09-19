@@ -167,13 +167,15 @@ critic_response CriticLiquidNetwork::forward(const torch::Tensor &state) {
 
 ActorCriticLiquid::ActorCriticLiquid(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, int batch_size, float lr)
+    const std::vector<int64_t> &action_space, int hidden_size, int batch_size, float lr,
+    int unfolding_steps)
     : ActorCritic(seed, state_space, action_space, hidden_size, batch_size, lr) {
 
-    actor = std::make_shared<ActorLiquidNetwork>(state_space, action_space, hidden_size, 6);
+    actor = std::make_shared<ActorLiquidNetwork>(
+        state_space, action_space, hidden_size, unfolding_steps);
     actor_optimizer = std::make_shared<torch::optim::Adam>(actor->parameters(), lr);
 
-    critic = std::make_shared<CriticLiquidNetwork>(state_space, hidden_size, 6);
+    critic = std::make_shared<CriticLiquidNetwork>(state_space, hidden_size, unfolding_steps);
     critic_optimizer = std::make_shared<torch::optim::Adam>(critic->parameters(), lr);
 }
 
