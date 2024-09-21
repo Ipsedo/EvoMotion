@@ -18,10 +18,39 @@
 AgentFactory::AgentFactory(std::map<std::string, std::string> parameters)
     : parameters(std::move(parameters)) {}
 
-std::string AgentFactory::get_value(const std::string &key) {
+std::string AgentFactory::get_value_str(const std::string &key) {
     if (parameters.find(key) == parameters.end()) throw std::invalid_argument(key);
-
     return parameters[key];
+}
+
+template<>
+int AgentFactory::get_value(const std::string &key) {
+    return std::stoi(get_value_str(key));
+}
+
+template<>
+long AgentFactory::get_value(const std::string &key) {
+    return std::stol(get_value_str(key));
+}
+
+template<>
+float AgentFactory::get_value(const std::string &key) {
+    return std::stof(get_value_str(key));
+}
+
+template<>
+bool AgentFactory::get_value(const std::string &key) {
+    const auto v = get_value_str(key);
+
+    if (v == "true") return true;
+    else if (v == "false") return false;
+
+    throw std::invalid_argument(v);
+}
+
+template<>
+std::string AgentFactory::get_value(const std::string &key) {
+    return get_value_str(key);
 }
 
 // Agents
@@ -45,9 +74,10 @@ ConstantAgentFactory::ConstantAgentFactory(const std::map<std::string, std::stri
 std::shared_ptr<Agent> ActorCriticFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
     return std::make_shared<ActorCritic>(
-        std::stoi(get_value("seed")), state_space, action_space,
-        std::stoi(get_value("hidden_size")), std::stoi(get_value("batch_size")),
-        std::stof(get_value("learning_rate")));
+        get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
+        get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
+        get_value<float>("first_entropy_factor"), get_value<float>("wanted_entropy_factor"),
+        get_value<long>("entropy_factor_steps"));
 }
 
 ActorCriticFactory::ActorCriticFactory(const std::map<std::string, std::string> &parameters)
@@ -56,9 +86,10 @@ ActorCriticFactory::ActorCriticFactory(const std::map<std::string, std::string> 
 std::shared_ptr<Agent> ActorCriticLiquidFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
     return std::make_shared<ActorCriticLiquid>(
-        std::stoi(get_value("seed")), state_space, action_space,
-        std::stoi(get_value("hidden_size")), std::stoi(get_value("batch_size")),
-        std::stof(get_value("learning_rate")), std::stoi(get_value("unfolding_steps")));
+        get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
+        get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
+        get_value<float>("first_entropy_factor"), get_value<float>("wanted_entropy_factor"),
+        get_value<long>("entropy_factor_steps"), get_value<int>("unfolding_steps"));
 }
 
 ActorCriticLiquidFactory::ActorCriticLiquidFactory(

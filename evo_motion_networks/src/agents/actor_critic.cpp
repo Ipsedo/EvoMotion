@@ -137,15 +137,16 @@ critic_response CriticModule::forward(const torch::Tensor &state) {
 
 ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, int batch_size, float lr)
+    const std::vector<int64_t> &action_space, int hidden_size, int batch_size, float lr,
+    float gamma, float first_entropy_factor, float wanted_entropy_factor, long entropy_factor_steps)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
-      gamma(0.99f), first_entropy_factor(1e-1), wanted_entropy_factor(1e-2),
-      entropy_factor_steps(1L << 12), curr_device(torch::kCPU), batch_size(batch_size),
-      episodes_buffer(), episode_policy_loss(0.f), episode_policy_entropy(0.f),
-      episode_critic_loss(0.f), curr_step(0L), curr_train_step(0L) {
+      gamma(gamma), first_entropy_factor(first_entropy_factor),
+      wanted_entropy_factor(wanted_entropy_factor), entropy_factor_steps(entropy_factor_steps),
+      curr_device(torch::kCPU), batch_size(batch_size), episodes_buffer(), episode_policy_loss(0.f),
+      episode_policy_entropy(0.f), episode_critic_loss(0.f), curr_step(0L), curr_train_step(0L) {
     at::manual_seed(seed);
     episodes_buffer.push_back({});
 }
@@ -195,10 +196,9 @@ void ActorCritic::train(
     critic_loss.backward();
     critic_optimizer->step();
 
-    episode_policy_loss = -policy_loss.sum(-1).mean().cpu().detach().item().toFloat();
-    episode_policy_entropy =
-        -entropy_factor * policy_entropy.sum(-1).mean().cpu().detach().item().toFloat();
-    episode_critic_loss = critic_loss.cpu().detach().item().toFloat();
+    episode_policy_loss = -policy_loss.sum(-1).mean().cpu().item().toFloat();
+    episode_policy_entropy = -entropy_factor * policy_entropy.sum(-1).mean().cpu().item().toFloat();
+    episode_critic_loss = critic_loss.cpu().item().toFloat();
 
     curr_train_step++;
 }

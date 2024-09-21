@@ -136,7 +136,8 @@ private:
 public:
     ActorCritic(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr);
+        int hidden_size, int batch_size, float lr, float gamma, float first_entropy_factor,
+        float wanted_entropy_factor, long entropy_factor_steps);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 

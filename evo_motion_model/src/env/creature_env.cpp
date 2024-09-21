@@ -77,7 +77,7 @@ step MuscleEnv::compute_step() {
     const Item root = skeleton.get_items()[0];
 
     const float lin_vel_z = root.get_body()->getLinearVelocity().z();
-    const float reward = (lin_vel_z - target_velocity) / target_velocity;
+    const float reward = lin_vel_z;
 
     if (lin_vel_z < target_velocity) remaining_steps -= 1;
     else remaining_steps += 1;

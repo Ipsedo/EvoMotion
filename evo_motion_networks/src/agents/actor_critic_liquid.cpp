@@ -168,8 +168,11 @@ critic_response CriticLiquidNetwork::forward(const torch::Tensor &state) {
 ActorCriticLiquid::ActorCriticLiquid(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, int batch_size, float lr,
+    float gamma, float first_entropy_factor, float wanted_entropy_factor, long entropy_factor_steps,
     int unfolding_steps)
-    : ActorCritic(seed, state_space, action_space, hidden_size, batch_size, lr) {
+    : ActorCritic(
+          seed, state_space, action_space, hidden_size, batch_size, lr, gamma, first_entropy_factor,
+          wanted_entropy_factor, entropy_factor_steps) {
 
     actor = std::make_shared<ActorLiquidNetwork>(
         state_space, action_space, hidden_size, unfolding_steps);

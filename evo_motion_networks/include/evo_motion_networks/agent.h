@@ -9,6 +9,8 @@
 
 #include <torch/torch.h>
 
+// Agent abstract class
+
 class Agent {
 public:
     virtual torch::Tensor act(torch::Tensor state, float reward) = 0;
@@ -30,6 +32,8 @@ public:
     virtual ~Agent() = default;
 };
 
+// Agent abstract factory
+
 class AgentFactory {
 public:
     explicit AgentFactory(std::map<std::string, std::string> parameters);
@@ -37,7 +41,9 @@ public:
         const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) = 0;
 
 protected:
-    std::string get_value(const std::string &key);
+    template<typename Value>
+    Value get_value(const std::string &key);
+    std::string get_value_str(const std::string &key);
 
 private:
     std::map<std::string, std::string> parameters;
