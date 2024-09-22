@@ -9,8 +9,7 @@
 
 class LiquidCellModule final : public torch::nn::Module {
 public:
-    LiquidCellModule(
-        const std::vector<int64_t> &state_space, int neuron_number, int unfolding_steps);
+    LiquidCellModule(const int &input_space, int neuron_number, int unfolding_steps);
 
     void reset_x_t();
 
@@ -55,13 +54,47 @@ private:
     torch::nn::Linear critic{nullptr};
 };
 
+// separated networks
+
+class ActorLiquidNetwork : public AbstractActor {
+public:
+    ActorLiquidNetwork(
+        const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
+        int unfolding_steps);
+
+    void reset_liquid() const;
+
+    actor_response forward(const torch::Tensor &state) override;
+
+private:
+    std::shared_ptr<LiquidCellModule> liquid_network;
+
+    torch::nn::Sequential mu{nullptr};
+    torch::nn::Sequential sigma{nullptr};
+};
+
+class CriticLiquidNetwork : public AbstractCritic {
+public:
+    CriticLiquidNetwork(
+        const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);
+
+    void reset_liquid() const;
+
+    critic_response forward(const torch::Tensor &state) override;
+
+private:
+    std::shared_ptr<LiquidCellModule> liquid_network;
+    torch::nn::Linear critic{nullptr};
+};
+
 // Agent
 
 class ActorCriticLiquid final : public ActorCritic {
 public:
     ActorCriticLiquid(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, float lr);
+        int hidden_size, int batch_size, float lr, float gamma, float first_entropy_factor,
+        float wanted_entropy_factor, long entropy_factor_steps, int unfolding_steps);
 
     void done(float reward) override;
 };

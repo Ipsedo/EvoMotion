@@ -6,16 +6,14 @@
 
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <imgui.h>
 
 #include <evo_motion_view/renderer.h>
 
 void GLAPIENTRY message_callback(
     const GLenum source, const GLenum type, const GLuint id, const GLenum severity,
-    const GLsizei length, const GLchar *message,
-    const void *userParam) {
+    const GLsizei length, const GLchar *message, const void *userParam) {
     std::cerr << source << " " << type << " " << id << " " << severity << " " << length << " : "
-        << std::endl;
+              << std::endl;
     std::cerr << "params : " << userParam << std::endl;
     std::cerr << message << std::endl << std::endl;
 }
@@ -127,23 +125,3 @@ void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix) {
 
 void Renderer::on_new_frame() {}
 void Renderer::on_end_frame() {}
-
-/*
- * ImGUI Rendere
- */
-ImGuiRenderer::ImGuiRenderer(
-    const std::string &title, const int width, const int height,
-    const std::shared_ptr<Camera> &camera)
-    : Renderer(title, width, height, camera) {}
-
-void ImGuiRenderer::on_new_frame() {
-    //ImGui_ImplOpenGL3_NewFrame();
-    //ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-}
-
-void ImGuiRenderer::on_end_frame() { Renderer::on_end_frame(); }
-
-void ImGuiRenderer::render_drawables(std::map<std::string, glm::mat4> model_matrix) {
-    Renderer::render_drawables(model_matrix);
-}

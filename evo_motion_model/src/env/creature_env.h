@@ -19,7 +19,7 @@ public:
 
     std::vector<Item> get_items() override;
 
-    std::vector<std::shared_ptr<Controller> > get_controllers() override;
+    std::vector<std::shared_ptr<Controller>> get_controllers() override;
 
     std::vector<int64_t> get_state_space() override;
 
@@ -42,10 +42,9 @@ private:
     JsonSkeleton skeleton;
     JsonMuscularSystem muscular_system;
 
-    std::vector<std::shared_ptr<Controller> > controllers;
+    std::vector<std::shared_ptr<Controller>> controllers;
 
-    std::vector<std::shared_ptr<State> > states;
-
+    std::vector<std::shared_ptr<State>> states;
 
     float initial_remaining_seconds;
     float max_episode_seconds;
@@ -57,7 +56,6 @@ private:
     int max_steps;
 
     int remaining_steps;
-
 };
 
 #endif//EVO_MOTION_ENV_TEST_MUSCLE_H

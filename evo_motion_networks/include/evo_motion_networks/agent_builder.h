@@ -16,7 +16,8 @@ class AgentBuilder {
 public:
     AgentBuilder(
         std::string name, int seed, const std::vector<int64_t> &state_space,
-        const std::vector<int64_t> &action_space, int hidden_size, float lr);
+        const std::vector<int64_t> &action_space, int hidden_size, int batch_size, float lr);
+
     std::shared_ptr<Agent> get();
 
 private:
@@ -25,11 +26,12 @@ private:
     std::vector<int64_t> state_space;
     std::vector<int64_t> action_space;
     int hidden_size;
+    int batch_size;
     float lr;
 
     std::map<
         std::string, std::function<std::shared_ptr<Agent>(
-                         int, std::vector<int64_t>, std::vector<int64_t>, int, float)>>
+                         int, std::vector<int64_t>, std::vector<int64_t>, int, int, float)>>
         agent_constructors;
 };
 

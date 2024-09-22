@@ -3,6 +3,8 @@
 //
 
 #include <filesystem>
+#include <iomanip>
+#include <sstream>
 #include <utility>
 
 #include <indicators/progress_bar.hpp>
@@ -13,7 +15,9 @@
 
 #include "./run.h"
 
-void train(int seed, bool cuda, const train_params &params) {
+void train(
+    int seed, bool cuda, const train_params &params,
+    const std::shared_ptr<AgentFactory> &agent_factory) {
 
     if (!std::filesystem::exists(params.output_path))
         std::filesystem::create_directory(params.output_path);
@@ -25,11 +29,8 @@ void train(int seed, bool cuda, const train_params &params) {
     EnvBuilder env_builder(seed, params.env_name);
     std::shared_ptr<Environment> env = env_builder.get();
 
-    AgentBuilder agent_builder(
-        params.agent_name, seed, env->get_state_space(), env->get_action_space(),
-        params.hidden_size, params.learning_rate);
-
-    std::shared_ptr<Agent> agent = agent_builder.get();
+    std::shared_ptr<Agent> agent =
+        agent_factory->create_agent(env->get_state_space(), env->get_action_space());
 
     if (cuda) {
         agent->to(torch::kCUDA);
@@ -41,17 +42,18 @@ void train(int seed, bool cuda, const train_params &params) {
     step step = env->reset();
 
     std::cout << "state_space = " << env->get_state_space()
-        << ", action_space = " << env->get_action_space() << std::endl;
+              << ", action_space = " << env->get_action_space() << std::endl;
     std::cout << "parameters_count = " << agent->count_parameters() << std::endl;
 
-    LossMeter actor_loss_meter("actor_loss", 32);
-    LossMeter critic_loss_meter("critic_loss", 32);
+    LossMeter policy_loss_meter("policy_loss", 128);
+    LossMeter policy_entropy_meter("policy_entropy", 128);
+    LossMeter critic_loss_meter("critic_loss", 128);
 
     for (int s = 0; s < params.nb_saves; s++) {
         indicators::ProgressBar p_bar{
             indicators::option::MinProgress{0},
             indicators::option::MaxProgress{params.nb_episodes},
-            indicators::option::BarWidth{100},
+            indicators::option::BarWidth{30},
             indicators::option::Start{"["},
             indicators::option::Fill{"="},
             indicators::option::Lead{">"},
@@ -69,17 +71,23 @@ void train(int seed, bool cuda, const train_params &params) {
 
             auto metrics = agent->get_metrics();
 
-            actor_loss_meter.add(metrics["actor_loss"]);
+            policy_loss_meter.add(metrics["policy_loss"]);
+            policy_entropy_meter.add(metrics["policy_entropy"]);
             critic_loss_meter.add(metrics["critic_loss"]);
 
-            std::string p_bar_description =
-                "Save " + std::to_string(s - 1)
-                + ", actor = " + std::format("{:.5f}", actor_loss_meter.loss())
-                + ", critic = " + std::format("{:.5f}", critic_loss_meter.loss())
-                + ", grad_norm = " + std::format("{:.5f}", agent->grad_norm_mean())
-                + " ";
+            std::stringstream stream;
+            stream << "Save " + std::to_string(s - 1) << ", policy_loss = " << std::setprecision(6)
+                   << std::fixed << policy_loss_meter.loss()
+                   << ", policy_entropy = " << std::setprecision(6) << std::fixed
+                   << policy_entropy_meter.loss() << ", critic_loss = " << std::setprecision(6)
+                   << std::fixed << critic_loss_meter.loss()
+                   << ", actor_grad_norm = " << std::setprecision(4) << std::fixed
+                   << metrics["actor_grad_mean"] << ", critic_grad_norm = " << std::setprecision(4)
+                   << std::fixed << metrics["critic_grad_mean"]
+                   << ", entropy_factor = " << std::setprecision(4) << std::fixed
+                   << metrics["entropy_factor"] << " ";
 
-            p_bar.set_option(indicators::option::PrefixText{p_bar_description});
+            p_bar.set_option(indicators::option::PrefixText{stream.str()});
 
             p_bar.tick();
         }

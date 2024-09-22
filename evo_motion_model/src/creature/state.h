@@ -21,11 +21,9 @@ public:
     virtual ~State();
 };
 
-class ItemState final : public State, public btCollisionWorld::ContactResultCallback {
+class ItemProprioceptionState : public State, public btCollisionWorld::ContactResultCallback {
 public:
-    ItemState(Item item, const std::optional<Item> &root_item, const Item &floor, btDynamicsWorld *world);
-
-    ItemState(const Item &item, const Item &floor, btDynamicsWorld *world);
+    ItemProprioceptionState(const Item &item, const Item &floor, btDynamicsWorld *world);
 
     int get_size() override;
 
@@ -35,21 +33,41 @@ public:
         btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0Wrap, int partId0, int index0,
         const btCollisionObjectWrapper *colObj1Wrap, int partId1, int index1) override;
 
-    ~ItemState() override;
+protected:
+    Item state_item;
 
 private:
-    std::optional<Item> root_item;
-    Item state_item;
     bool floor_touched;
-protected:
+
     torch::Tensor get_point_state(glm::vec3 point) const;
+};
+
+class MemberState : public ItemProprioceptionState {
+public:
+    MemberState(const Item &item, const Item &root_item, const Item &floor, btDynamicsWorld *world);
+
+    int get_size() override;
+
+    torch::Tensor get_state() override;
+
+private:
+    Item root_item;
+};
+
+class RootMemberState : public ItemProprioceptionState {
+public:
+    RootMemberState(const Item &item, const Item &floor, btDynamicsWorld *world);
+
+    int get_size() override;
+
+    torch::Tensor get_state() override;
 };
 
 // Muscle
 
 class MuscleState : public State {
 public:
-    MuscleState(Muscle muscle);
+    explicit MuscleState(Muscle muscle);
 
     int get_size() override;
 

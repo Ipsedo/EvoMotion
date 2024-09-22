@@ -8,8 +8,7 @@
 
 #include <GL/glew.h>
 
-
-FrameBuffer::FrameBuffer(const int width, const int height): fbo(0L), texture(0L), rbo(0L) {
+FrameBuffer::FrameBuffer(const int width, const int height) : fbo(0L), texture(0L), rbo(0L) {
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -58,4 +57,3 @@ FrameBuffer::~FrameBuffer() {
     glDeleteTextures(1, &texture);
     glDeleteRenderbuffers(1, &rbo);
 }
-

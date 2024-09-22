@@ -35,10 +35,10 @@ MuscleEnv::MuscleEnv(const int seed)
     add_item(root_item);
     root_item.get_body()->setActivationState(DISABLE_DEACTIVATION);
 
-    states.push_back(std::make_shared<ItemState>(root_item, base, m_world));
+    states.push_back(std::make_shared<RootMemberState>(root_item, base, m_world));
 
     for (const auto &item: std::vector<Item>(items.begin() + 1, items.end())) {
-        states.push_back(std::make_shared<ItemState>(item, root_item, base, m_world));
+        states.push_back(std::make_shared<MemberState>(item, root_item, base, m_world));
         add_item(item);
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
@@ -67,7 +67,7 @@ std::vector<Item> MuscleEnv::get_items() {
     return items;
 }
 
-std::vector<std::shared_ptr<Controller> > MuscleEnv::get_controllers() { return controllers; }
+std::vector<std::shared_ptr<Controller>> MuscleEnv::get_controllers() { return controllers; }
 
 step MuscleEnv::compute_step() {
     std::vector<torch::Tensor> current_states;

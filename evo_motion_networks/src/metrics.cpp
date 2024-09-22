@@ -22,8 +22,8 @@ void Meter<R, I...>::add(I... inputs) {
 
 template<class R, class... I>
 R Meter<R, I...>::loss() {
-    R sum = std::accumulate(results.begin(), results.end(), 0);
-    return sum / results.size();
+    R sum = std::accumulate(results.begin(), results.end(), static_cast<R>(0));
+    return sum / static_cast<R>(results.size());
 }
 
 template<class R, class... I>

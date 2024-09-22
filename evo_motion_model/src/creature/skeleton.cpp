@@ -26,7 +26,7 @@ AbstractMember::~AbstractMember() = default;
 Skeleton::Skeleton(std::string root_name, const std::shared_ptr<AbstractMember> &root_member)
     : root_name(std::move(root_name)) {
 
-    std::queue<std::shared_ptr<AbstractMember> > queue;
+    std::queue<std::shared_ptr<AbstractMember>> queue;
     queue.push(root_member);
 
     while (!queue.empty()) {
@@ -44,9 +44,9 @@ Skeleton::Skeleton(std::string root_name, const std::shared_ptr<AbstractMember> 
 
 std::vector<Item> Skeleton::get_items() {
     std::vector<Item> items;
-    std::transform(
-        items_map.begin(), items_map.end(), std::back_inserter(items),
-        [](auto t) { return std::get<1>(t); });
+    std::transform(items_map.begin(), items_map.end(), std::back_inserter(items), [](auto t) {
+        return std::get<1>(t);
+    });
     return items;
 }
 
@@ -65,8 +65,9 @@ std::string Skeleton::get_root_name() { return root_name; }
 JsonSkeleton::JsonSkeleton(
     const std::string &json_path, const std::string &root_name, glm::mat4 model_matrix)
     : Skeleton(
-        root_name,
-        std::make_shared<JsonMember>(root_name, model_matrix, read_json(json_path)["skeleton"])) {}
+          root_name,
+          std::make_shared<JsonMember>(root_name, model_matrix, read_json(json_path)["skeleton"])) {
+}
 
 // member
 
@@ -74,10 +75,10 @@ JsonMember::JsonMember(
     const std::string &name, const glm::mat4 &parent_model_matrix, nlohmann::json json_member_input)
     : json_member(std::move(json_member_input)), name(name), model_matrix(parent_model_matrix),
       shape_to_path(
-      {{"sphere", "./resources/obj/sphere.obj"},
-       {"cube", "./resources/obj/cube.obj"},
-       {"cylinder", "./resources/obj/cylinder.obj"},
-       {"feet",     "./resources/obj/feet.obj"}}),
+          {{"sphere", "./resources/obj/sphere.obj"},
+           {"cube", "./resources/obj/cube.obj"},
+           {"cylinder", "./resources/obj/cylinder.obj"},
+           {"feet", "./resources/obj/feet.obj"}}),
       member(
           name + "_" + json_member["name"].get<std::string>(),
           std::make_shared<ObjShape>(shape_to_path[json_member["shape"].get<std::string>()]),
@@ -98,14 +99,14 @@ JsonMember::JsonMember(const Item &parent, const nlohmann::json &json_member)
 
 Item JsonMember::get_item() { return member; }
 
-std::vector<std::shared_ptr<AbstractConstraint> > JsonMember::get_children() {
-    std::vector<std::shared_ptr<AbstractConstraint> > children;
+std::vector<std::shared_ptr<AbstractConstraint>> JsonMember::get_children() {
+    std::vector<std::shared_ptr<AbstractConstraint>> children;
 
     std::map<
-            std::string,
-            std::function<std::shared_ptr<AbstractConstraint>(Item, const nlohmann::json &)> >
-        const map{{"hinge", std::make_shared<JsonHingeConstraint, Item, const nlohmann::json &>},
-                  {"fixed", std::make_shared<JsonFixedConstraint, Item, const nlohmann::json &>}};
+        std::string,
+        std::function<std::shared_ptr<AbstractConstraint>(Item, const nlohmann::json &)>> const map{
+        {"hinge", std::make_shared<JsonHingeConstraint, Item, const nlohmann::json &>},
+        {"fixed", std::make_shared<JsonFixedConstraint, Item, const nlohmann::json &>}};
 
     for (const auto &child: json_member["children"])
         children.push_back(

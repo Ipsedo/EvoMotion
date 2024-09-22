@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22.1)
 
 project(evo_motion_networks)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 set(EVO_MOTION_NETWORKS_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE INTERNAL "")
 include_directories("${EVO_MOTION_NETWORKS_INCLUDE_DIRS}")
@@ -18,8 +18,6 @@ file(GLOB_RECURSE SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 # Create EvoMotion executable
 add_library(evo_motion_networks SHARED "${SRC}")
-
-target_include_directories(evo_motion_networks PUBLIC "${TORCH_INCLUDE_DIRS}")
 
 # Link libraries
 target_link_libraries(
