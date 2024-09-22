@@ -90,25 +90,12 @@ An internet connexion is also required in order to download dependencies inside 
     ```
 3. Ready for training ! You can choose the environment on which train the agent you want.
 
-   Run training on 3D cartpole
-   ```bash
-    $ cd /path/to/EvoMotion/build
-    $ # /!\ TODO update CLI example /!\
-    $ evo_motion cartpole3d actor_critic --seed 1234 --cuda --hidden_size 32 train ./out/cartpole3d_a2c --episodes 1024 --nb_saves 1024 --learning_rate 1e-3
-   ```
-
    Run training on creature muscles
    ```bash
    $ cd /path/to/EvoMotion/build
    $ evo_motion muscles actor_critic_liquid -p hidden_size=32 -p seed=1234 -p learning_rate=1e-3 -p batch_size=32 -p gamma=0.99 -p first_entropy_factor=1e-1 -p wanted_entropy_factor=1e-2 -p entropy_factor_steps=4096 -p unfolding_steps=6 --env_seed 1234 --cuda train ./out/muscle_a2c_liquid --episodes 512 --nb_saves 4096
    ```
 4. After the first save (here after 1024 episodes), you can now evaluate your trained agent.
-
-   Evaluate agent on 3D cartpole (here the first model save) with GLFW window of 1920 * 1024 pixels
-   ```bash
-   $ # /!\ TODO update CLI example /!\
-   $ evo_motion cartpole3d actor_critic --seed 1234 --hidden_size 32 --cuda run ./out/cartpole3d_a2c/save_0 -w 1920 -h 1024
-   ```
 
    Evaluate agent on creature muscles (here the first model save) with GLFW window of 1920 * 1024 pixels
    ```bash
