@@ -18,39 +18,44 @@
 AgentFactory::AgentFactory(std::map<std::string, std::string> parameters)
     : parameters(std::move(parameters)) {}
 
-std::string AgentFactory::get_value_str(const std::string &key) {
+template<typename Value>
+Value AgentFactory::generic_get_value(
+    std::function<Value(const std::string &)> converter, const std::string &key) {
     if (parameters.find(key) == parameters.end()) throw std::invalid_argument(key);
-    return parameters[key];
+    return converter(parameters[key]);
 }
 
 template<>
 int AgentFactory::get_value(const std::string &key) {
-    return std::stoi(get_value_str(key));
+    return generic_get_value<int>([](const std::string &s) { return std::stoi(s); }, key);
 }
 
 template<>
 long AgentFactory::get_value(const std::string &key) {
-    return std::stol(get_value_str(key));
+    return generic_get_value<long>([](const std::string &s) { return std::stol(s); }, key);
 }
 
 template<>
 float AgentFactory::get_value(const std::string &key) {
-    return std::stof(get_value_str(key));
+    return generic_get_value<float>([](const std::string &s) { return std::stof(s); }, key);
 }
 
 template<>
 bool AgentFactory::get_value(const std::string &key) {
-    const auto v = get_value_str(key);
 
-    if (v == "true") return true;
-    else if (v == "false") return false;
+    return generic_get_value<bool>(
+        [](const std::string &v) {
+            if (v == "true") return true;
+            else if (v == "false") return false;
 
-    throw std::invalid_argument(v);
+            throw std::invalid_argument(v);
+        },
+        key);
 }
 
 template<>
 std::string AgentFactory::get_value(const std::string &key) {
-    return get_value_str(key);
+    return generic_get_value<std::string>([](const std::string &s) { return s; }, key);
 }
 
 // Agents
