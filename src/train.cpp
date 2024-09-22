@@ -10,7 +10,7 @@
 #include <indicators/progress_bar.hpp>
 
 #include <evo_motion_model/env_builder.h>
-#include <evo_motion_networks/agent_builder.h>
+#include <evo_motion_networks/agent.h>
 #include <evo_motion_networks/metrics.h>
 
 #include "./run.h"

@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 
 #include <evo_motion_model/env_builder.h>
-#include <evo_motion_networks/agent_builder.h>
+#include <evo_motion_networks/agent.h>
 #include <evo_motion_view/camera.h>
 #include <evo_motion_view/drawable.h>
 #include <evo_motion_view/renderer.h>
