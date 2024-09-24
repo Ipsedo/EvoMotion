@@ -5,7 +5,6 @@
 #include <filesystem>
 #include <iomanip>
 #include <sstream>
-#include <utility>
 
 #include <indicators/progress_bar.hpp>
 

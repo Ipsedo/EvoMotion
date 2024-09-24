@@ -22,7 +22,7 @@ MuscleEnv::MuscleEnv(const int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), initial_remaining_seconds(1.f),
-      max_episode_seconds(60.f), target_velocity(1e-1f), reset_frames(10), curr_step(0),
+      max_episode_seconds(60.f), target_velocity(5e-1), minimal_velocity(1e-1f), reset_frames(10), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)) {
     base.get_body()->setFriction(0.5f);
@@ -79,8 +79,8 @@ step MuscleEnv::compute_step() {
     const float lin_vel_z = root.get_body()->getLinearVelocity().z();
     const float reward = lin_vel_z;
 
-    if (lin_vel_z < target_velocity) remaining_steps -= 1;
-    else remaining_steps += 1;
+    if (lin_vel_z < minimal_velocity) remaining_steps -= 1;
+    else if (lin_vel_z >= target_velocity) remaining_steps += 1;
 
     const bool win = curr_step >= max_steps;
     const bool fail = remaining_steps <= 0;
@@ -95,7 +95,7 @@ void MuscleEnv::reset_engine() {
     // reset model transform
     glm::vec3 root_pos(1.f, 0.25f, 2.f);
 
-    float angle_limit = static_cast<float>(M_PI) / 4.f;
+    float angle_limit = static_cast<float>(M_PI) / 3.f;
 
     float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
     float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
