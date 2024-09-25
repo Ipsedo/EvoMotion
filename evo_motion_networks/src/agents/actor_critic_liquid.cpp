@@ -40,13 +40,14 @@ LiquidCellModule::LiquidCellModule(
 }
 
 void LiquidCellModule::reset_x_t() {
-    x_t = torch::mish(torch::randn(
-        {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
+    x_t = torch::tanh(
+        torch::randn(
+            {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
 }
 
 torch::Tensor
 LiquidCellModule::compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t) {
-    return torch::mish(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
+    return torch::tanh(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
 }
 
 torch::Tensor LiquidCellModule::forward(const torch::Tensor &state) {

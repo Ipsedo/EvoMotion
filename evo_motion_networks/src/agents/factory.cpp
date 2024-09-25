@@ -42,7 +42,6 @@ float AgentFactory::get_value(const std::string &key) {
 
 template<>
 bool AgentFactory::get_value(const std::string &key) {
-
     return generic_get_value<bool>(
         [](const std::string &v) {
             if (v == "true") return true;

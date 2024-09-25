@@ -22,7 +22,8 @@ MuscleEnv::MuscleEnv(const int seed)
       skeleton_json_path("./resources/skeleton/spider_new.json"),
       skeleton(skeleton_json_path, "spider", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path), initial_remaining_seconds(1.f),
-      max_episode_seconds(60.f), target_velocity(5e-1), minimal_velocity(1e-1f), reset_frames(10), curr_step(0),
+      max_episode_seconds(15.f), target_velocity(5e-1), minimal_velocity(1e-1f), reset_frames(10),
+      curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)) {
     base.get_body()->setFriction(0.5f);

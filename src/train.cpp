@@ -47,6 +47,7 @@ void train(
     LossMeter policy_loss_meter("policy_loss", 128);
     LossMeter policy_entropy_meter("policy_entropy", 128);
     LossMeter critic_loss_meter("critic_loss", 128);
+    LossMeter episode_steps_meter("episode_steps", 128);
 
     for (int s = 0; s < params.nb_saves; s++) {
         indicators::ProgressBar p_bar{
@@ -73,6 +74,7 @@ void train(
             policy_loss_meter.add(metrics["policy_loss"]);
             policy_entropy_meter.add(metrics["policy_entropy"]);
             critic_loss_meter.add(metrics["critic_loss"]);
+            episode_steps_meter.add(metrics["episode_steps"]);
 
             std::stringstream stream;
             stream << "Save " + std::to_string(s - 1) << ", policy_loss = " << std::setprecision(6)
@@ -84,7 +86,8 @@ void train(
                    << metrics["actor_grad_mean"] << ", critic_grad_norm = " << std::setprecision(4)
                    << std::fixed << metrics["critic_grad_mean"]
                    << ", entropy_factor = " << std::setprecision(4) << std::fixed
-                   << metrics["entropy_factor"] << " ";
+                   << metrics["entropy_factor"] << ", steps = " << std::setprecision(2)
+                   << std::fixed << episode_steps_meter.loss() << " ";
 
             p_bar.set_option(indicators::option::PrefixText{stream.str()});
 

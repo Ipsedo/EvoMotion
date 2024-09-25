@@ -146,7 +146,8 @@ ActorCritic::ActorCritic(
       gamma(gamma), first_entropy_factor(first_entropy_factor),
       wanted_entropy_factor(wanted_entropy_factor), entropy_factor_steps(entropy_factor_steps),
       curr_device(torch::kCPU), batch_size(batch_size), episodes_buffer(), episode_policy_loss(0.f),
-      episode_policy_entropy(0.f), episode_critic_loss(0.f), curr_step(0L), curr_train_step(0L) {
+      episode_policy_entropy(0.f), episode_critic_loss(0.f), curr_episode_step(0),
+      last_episode_steps(0), curr_train_step(0L) {
     at::manual_seed(seed);
     episodes_buffer.push_back({});
 }
@@ -162,6 +163,8 @@ torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     episodes_buffer.back().sigma_buffer.push_back(sigma);
     episodes_buffer.back().value_buffer.push_back(value);
     episodes_buffer.back().actions_buffer.push_back(action);
+
+    curr_episode_step++;
 
     return action;
 }
@@ -251,14 +254,14 @@ void ActorCritic::done(const float reward) {
         train(batched_actions, batched_values, batched_mus, batched_sigmas, batched_rewards);
 
         episodes_buffer.clear();
-
     } else if (!actor->is_training()) {
         episodes_buffer.clear();
     }
 
     episodes_buffer.push_back({});
 
-    curr_step++;
+    last_episode_steps = curr_episode_step;
+    curr_episode_step = 0;
 }
 
 void ActorCritic::save(const std::string &output_folder_path) {
@@ -337,7 +340,8 @@ std::map<std::string, float> ActorCritic::get_metrics() {
     return {
         {"policy_loss", episode_policy_loss}, {"policy_entropy", episode_policy_entropy},
         {"critic_loss", episode_critic_loss}, {"entropy_factor", get_exponential_entropy_factor()},
-        {"actor_grad_mean", actor_grad},      {"critic_grad_mean", critic_grad}};
+        {"actor_grad_mean", actor_grad}, {"critic_grad_mean", critic_grad},
+        {"episode_steps", last_episode_steps}};
 }
 
 void ActorCritic::to(const torch::DeviceType device) {

@@ -123,7 +123,9 @@ private:
     float episode_policy_entropy;
     float episode_critic_loss;
 
-    long curr_step;
+    int curr_episode_step;
+    int last_episode_steps;
+
     long curr_train_step;
 
     void train(
