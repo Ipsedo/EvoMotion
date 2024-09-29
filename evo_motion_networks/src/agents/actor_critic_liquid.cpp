@@ -32,7 +32,8 @@ LiquidCellModule::LiquidCellModule(
     tau = register_parameter("tau", torch::ones({1, neuron_number}));
 
     torch::nn::init::normal_(weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
-    torch::nn::init::normal_(recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
+    torch::nn::init::normal_(
+        recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
     torch::nn::init::normal_(bias, 0, std_b);
 
     reset_x_t();
