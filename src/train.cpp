@@ -76,13 +76,13 @@ void train(
 
             std::stringstream stream;
             stream << "Save " + std::to_string(s - 1) << ", actor_loss = " << std::setprecision(6)
-                   << std::fixed << policy_loss_meter.loss()
-                   << ", critic_loss = " << std::setprecision(6) << std::fixed
-                   << critic_loss_meter.loss() << ", actor_grad_norm = " << std::setprecision(4)
-                   << std::fixed << metrics["actor_grad_mean"]
-                   << ", critic_grad_norm = " << std::setprecision(4) << std::fixed
-                   << metrics["critic_grad_mean"] << ", steps = " << std::setprecision(2)
-                   << std::fixed << episode_steps_meter.loss() << " ";
+                << std::fixed << policy_loss_meter.loss()
+                << ", critic_loss = " << std::setprecision(6) << std::fixed
+                << critic_loss_meter.loss() << ", actor_grad_norm = " << std::setprecision(4)
+                << std::fixed << metrics["actor_grad_mean"]
+                << ", critic_grad_norm = " << std::setprecision(4) << std::fixed
+                << metrics["critic_grad_mean"] << ", steps = " << std::setprecision(2)
+                << std::fixed << episode_steps_meter.loss() << " ";
 
             p_bar.set_option(indicators::option::PrefixText{stream.str()});
 
