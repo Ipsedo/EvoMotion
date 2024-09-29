@@ -93,13 +93,13 @@ An internet connexion is also required in order to download dependencies inside 
    Run training on creature muscles
    ```bash
    $ cd /path/to/EvoMotion/build
-   $ evo_motion muscles actor_critic_liquid -p hidden_size=32 -p seed=1234 -p learning_rate=1e-3 -p batch_size=32 -p gamma=0.99 -p first_entropy_factor=1e-1 -p wanted_entropy_factor=1e-2 -p entropy_factor_steps=4096 -p unfolding_steps=6 --env_seed 1234 --cuda train ./out/muscle_a2c_liquid --episodes 512 --nb_saves 4096
+   $ evo_motion muscles actor_critic_liquid -p hidden_size=64 -p seed=1234 -p learning_rate=1e-2 -p batch_size=16 -p gamma=0.995 -p unfolding_steps=6 --env_seed 1234 --cuda train ./out/muscle_a2c_liquid --episodes 512 --nb_saves 4096
    ```
 4. After the first save (here after 1024 episodes), you can now evaluate your trained agent.
 
    Evaluate agent on creature muscles (here the first model save) with GLFW window of 1920 * 1024 pixels
    ```bash
-   $ evo_motion muscles actor_critic_liquid --env_seed 1234 -p hidden_size=1 -p seed=1234 -p learning_rate=1e-3 -p batch_size=32 -p gamma=0.99 -p first_entropy_factor=1e-1 -p wanted_entropy_factor=1e-2 -p entropy_factor_steps=4096 -p unfolding_steps=6 --cuda run ./out/muscles_a2c_liquid/save_0 -w 1920 -h 1024
+   $ evo_motion muscles actor_critic_liquid --env_seed 1234 -p hidden_size=64 -p seed=1234 -p learning_rate=1e-2 -p batch_size=16 -p gamma=0.995 -p unfolding_steps=6 --cuda run ./out/muscles_a2c_liquid/save_0 -w 1920 -h 1024
    ```
 
 ## References

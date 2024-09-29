@@ -181,7 +181,7 @@ void ActorCritic::train(
     const auto prob =
         truncated_normal_pdf(batched_actions.detach(), batched_mus, batched_sigmas, -1.f, 1.f);
     const auto actor_loss =
-        -torch::mean(torch::log(prob) * (returns - batched_values).detach().unsqueeze(-1));
+        -torch::mean(torch::sum(torch::log(prob) * (returns - batched_values).detach().unsqueeze(-1), -1));
     const auto critic_loss = torch::smooth_l1_loss(batched_values, returns, at::Reduction::Mean);
 
     actor_optimizer->zero_grad();
