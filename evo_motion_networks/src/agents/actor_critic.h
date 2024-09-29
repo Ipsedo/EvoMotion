@@ -110,17 +110,13 @@ protected:
 
 private:
     float gamma;
-    float first_entropy_factor;
-    float wanted_entropy_factor;
-    long entropy_factor_steps;
 
     torch::DeviceType curr_device;
 
     int batch_size;
     std::vector<episode_buffer> episodes_buffer;
 
-    float episode_policy_loss;
-    float episode_policy_entropy;
+    float episode_actor_loss;
     float episode_critic_loss;
 
     int curr_episode_step;
@@ -133,13 +129,10 @@ private:
         const torch::Tensor &batched_mus, const torch::Tensor &batched_sigmas,
         const torch::Tensor &batched_rewards);
 
-    float get_exponential_entropy_factor() const;
-
 public:
     ActorCritic(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr, float gamma, float first_entropy_factor,
-        float wanted_entropy_factor, long entropy_factor_steps);
+        int hidden_size, int batch_size, float lr, float gamma);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 

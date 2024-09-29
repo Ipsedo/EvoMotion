@@ -79,9 +79,7 @@ std::shared_ptr<Agent> ActorCriticFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
     return std::make_shared<ActorCritic>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
-        get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
-        get_value<float>("first_entropy_factor"), get_value<float>("wanted_entropy_factor"),
-        get_value<long>("entropy_factor_steps"));
+        get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"));
 }
 
 ActorCriticFactory::ActorCriticFactory(const std::map<std::string, std::string> &parameters)
@@ -92,8 +90,7 @@ std::shared_ptr<Agent> ActorCriticLiquidFactory::create_agent(
     return std::make_shared<ActorCriticLiquid>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
-        get_value<float>("first_entropy_factor"), get_value<float>("wanted_entropy_factor"),
-        get_value<long>("entropy_factor_steps"), get_value<int>("unfolding_steps"));
+        get_value<int>("unfolding_steps"));
 }
 
 ActorCriticLiquidFactory::ActorCriticLiquidFactory(

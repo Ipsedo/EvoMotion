@@ -15,8 +15,8 @@ LiquidCellModule::LiquidCellModule(
     this->neuron_number = neuron_number;
     steps = unfolding_steps;
 
-    const float std_w = 1e-1;
-    const float std_b = 1e-1;
+    constexpr float std_w = 1e-1f;
+    constexpr float std_b = 1e-1f;
 
     weight = register_module(
         "weight",
@@ -31,23 +31,21 @@ LiquidCellModule::LiquidCellModule(
     a = register_parameter("a", torch::ones({1, neuron_number}));
     tau = register_parameter("tau", torch::ones({1, neuron_number}));
 
-    torch::nn::init::xavier_normal_(weight->weight, std_w / static_cast<float>(unfolding_steps));
-    torch::nn::init::xavier_normal_(
-        recurrent_weight->weight, std_w / static_cast<float>(unfolding_steps));
-    torch::nn::init::normal_(bias, 0, std_b / static_cast<float>(unfolding_steps));
+    torch::nn::init::normal_(weight->weight, std_w / static_cast<float>(unfolding_steps));
+    torch::nn::init::normal_(recurrent_weight->weight, std_w / static_cast<float>(unfolding_steps));
+    torch::nn::init::normal_(bias, 0, std_b);
 
     reset_x_t();
 }
 
 void LiquidCellModule::reset_x_t() {
-    x_t = torch::tanh(
-        torch::randn(
-            {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
+    x_t = torch::silu(torch::randn(
+        {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
 }
 
 torch::Tensor
 LiquidCellModule::compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t) {
-    return torch::tanh(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
+    return torch::silu(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
 }
 
 torch::Tensor LiquidCellModule::forward(const torch::Tensor &state) {
@@ -168,12 +166,9 @@ critic_response CriticLiquidNetwork::forward(const torch::Tensor &state) {
 
 ActorCriticLiquid::ActorCriticLiquid(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, int batch_size, float lr,
-    float gamma, float first_entropy_factor, float wanted_entropy_factor, long entropy_factor_steps,
-    int unfolding_steps)
-    : ActorCritic(
-          seed, state_space, action_space, hidden_size, batch_size, lr, gamma, first_entropy_factor,
-          wanted_entropy_factor, entropy_factor_steps) {
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
+    const float gamma, int unfolding_steps)
+    : ActorCritic(seed, state_space, action_space, hidden_size, batch_size, lr, gamma) {
 
     actor = std::make_shared<ActorLiquidNetwork>(
         state_space, action_space, hidden_size, unfolding_steps);
