@@ -31,22 +31,22 @@ LiquidCellModule::LiquidCellModule(
     a = register_parameter("a", torch::ones({1, neuron_number}));
     tau = register_parameter("tau", torch::ones({1, neuron_number}));
 
-    torch::nn::init::normal_(weight->weight, std_w / static_cast<float>(unfolding_steps));
-    torch::nn::init::normal_(recurrent_weight->weight, std_w / static_cast<float>(unfolding_steps));
+    torch::nn::init::normal_(weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
+    torch::nn::init::normal_(recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
     torch::nn::init::normal_(bias, 0, std_b);
 
     reset_x_t();
 }
 
 void LiquidCellModule::reset_x_t() {
-    x_t = torch::silu(
+    x_t = torch::tanh(
         torch::randn(
             {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
 }
 
 torch::Tensor
 LiquidCellModule::compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t) {
-    return torch::silu(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
+    return torch::tanh(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
 }
 
 torch::Tensor LiquidCellModule::forward(const torch::Tensor &state) {
