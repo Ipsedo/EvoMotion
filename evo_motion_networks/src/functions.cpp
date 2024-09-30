@@ -9,7 +9,7 @@
 torch::Tensor rand_eps(const torch::Tensor &tensor_like, float epsilon) {
     return epsilon
            + torch::rand_like(tensor_like, at::TensorOptions(tensor_like.device()))
-                 * (1.f - 2.f * epsilon);
+           * (1.f - 2.f * epsilon);
 }
 
 torch::Tensor
@@ -48,8 +48,8 @@ torch::Tensor truncated_normal_sample(
     return theta_inv(
                theta(alpha)
                + at::rand(mu.sizes(), at::TensorOptions(mu.device()))
-                     * (theta(beta) - theta(alpha)))
-               * sigma
+               * (theta(beta) - theta(alpha)))
+           * sigma
            + mu;
 }
 

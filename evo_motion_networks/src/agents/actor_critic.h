@@ -110,6 +110,7 @@ protected:
 
 private:
     float gamma;
+    float entropy_factor;
 
     torch::DeviceType curr_device;
 
@@ -132,7 +133,7 @@ private:
 public:
     ActorCritic(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr, float gamma);
+        int hidden_size, int batch_size, float lr, float gamma, float entropy_factor);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 
