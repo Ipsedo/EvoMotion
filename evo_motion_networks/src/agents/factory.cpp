@@ -42,7 +42,6 @@ float AgentFactory::get_value(const std::string &key) {
 
 template<>
 bool AgentFactory::get_value(const std::string &key) {
-
     return generic_get_value<bool>(
         [](const std::string &v) {
             if (v == "true") return true;
@@ -81,8 +80,7 @@ std::shared_ptr<Agent> ActorCriticFactory::create_agent(
     return std::make_shared<ActorCritic>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
-        get_value<float>("first_entropy_factor"), get_value<float>("wanted_entropy_factor"),
-        get_value<long>("entropy_factor_steps"));
+        get_value<float>("entropy_factor"));
 }
 
 ActorCriticFactory::ActorCriticFactory(const std::map<std::string, std::string> &parameters)
@@ -93,8 +91,8 @@ std::shared_ptr<Agent> ActorCriticLiquidFactory::create_agent(
     return std::make_shared<ActorCriticLiquid>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
-        get_value<float>("first_entropy_factor"), get_value<float>("wanted_entropy_factor"),
-        get_value<long>("entropy_factor_steps"), get_value<int>("unfolding_steps"));
+        get_value<float>("entropy_factor"),
+        get_value<int>("unfolding_steps"));
 }
 
 ActorCriticLiquidFactory::ActorCriticLiquidFactory(
@@ -104,13 +102,13 @@ ActorCriticLiquidFactory::ActorCriticLiquidFactory(
 // Build factory
 
 std::map<
-    std::string, std::function<std::shared_ptr<AgentFactory>(std::map<std::string, std::string>)>>
-    FACTORY_CONSTRUCTORS = {
-        {"random", std::make_shared<RandomAgentFactory, std::map<std::string, std::string>>},
-        {"constant", std::make_shared<ConstantAgentFactory, std::map<std::string, std::string>>},
-        {"actor_critic", std::make_shared<ActorCriticFactory, std::map<std::string, std::string>>},
-        {"actor_critic_liquid",
-         std::make_shared<ActorCriticLiquidFactory, std::map<std::string, std::string>>}};
+    std::string, std::function<std::shared_ptr<AgentFactory>(std::map<std::string, std::string>)> >
+FACTORY_CONSTRUCTORS = {
+    {"random", std::make_shared<RandomAgentFactory, std::map<std::string, std::string> >},
+    {"constant", std::make_shared<ConstantAgentFactory, std::map<std::string, std::string> >},
+    {"actor_critic", std::make_shared<ActorCriticFactory, std::map<std::string, std::string> >},
+    {"actor_critic_liquid",
+     std::make_shared<ActorCriticLiquidFactory, std::map<std::string, std::string> >}};
 
 std::shared_ptr<AgentFactory>
 get_factory(const std::string &agent_name, std::map<std::string, std::string> parameters) {

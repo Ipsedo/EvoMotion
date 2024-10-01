@@ -50,6 +50,7 @@ private:
     float max_episode_seconds;
 
     float target_velocity;
+    float minimal_velocity;
 
     int reset_frames;
     int curr_step;

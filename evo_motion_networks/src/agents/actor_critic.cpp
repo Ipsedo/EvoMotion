@@ -137,19 +137,16 @@ critic_response CriticModule::forward(const torch::Tensor &state) {
 
 ActorCritic::ActorCritic(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, int batch_size, float lr,
-    float gamma, float first_entropy_factor, float wanted_entropy_factor, long entropy_factor_steps)
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
+    const float gamma, const float entropy_factor)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
-      gamma(gamma), first_entropy_factor(first_entropy_factor),
-      wanted_entropy_factor(wanted_entropy_factor), entropy_factor_steps(entropy_factor_steps),
-      curr_device(torch::kCPU), batch_size(batch_size), episodes_buffer(), episode_policy_loss(0.f),
-      episode_policy_entropy(0.f), episode_critic_loss(0.f), curr_step(0L), curr_train_step(0L) {
-    at::manual_seed(seed);
-    episodes_buffer.push_back({});
-}
+      gamma(gamma), entropy_factor(entropy_factor), curr_device(torch::kCPU),
+      batch_size(batch_size), episodes_buffer({{}}),
+      episode_actor_loss(0.f), episode_critic_loss(0.f), curr_episode_step(0),
+      last_episode_steps(0), curr_train_step(0L) { at::manual_seed(seed); }
 
 torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma] = actor->forward(state);
@@ -163,6 +160,8 @@ torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     episodes_buffer.back().value_buffer.push_back(value);
     episodes_buffer.back().actions_buffer.push_back(action);
 
+    curr_episode_step++;
+
     return action;
 }
 
@@ -173,7 +172,7 @@ void ActorCritic::train(
     const auto gamma_factor =
         torch::pow(
             gamma, torch::arange(batched_rewards.size(1), at::TensorOptions().device(curr_device)))
-            .unsqueeze(0);
+        .unsqueeze(0);
 
     auto returns = (batched_rewards * gamma_factor).flip({1}).cumsum(1).flip({1}) / gamma_factor;
     returns = (returns - returns.mean()) / (returns.std() + 1e-8);
@@ -182,11 +181,9 @@ void ActorCritic::train(
         truncated_normal_pdf(batched_actions.detach(), batched_mus, batched_sigmas, -1.f, 1.f);
     const auto policy_loss = torch::log(prob) * (returns - batched_values).detach().unsqueeze(-1);
     const auto policy_entropy = truncated_normal_entropy(batched_mus, batched_sigmas, -1.f, 1.f);
-    const auto entropy_factor = get_exponential_entropy_factor();
-    const auto actor_loss =
-        -torch::mean(torch::sum(policy_loss + entropy_factor * policy_entropy, -1));
-
-    const auto critic_loss = torch::smooth_l1_loss(batched_values, returns, at::Reduction::Mean);
+    const auto actor_loss = -torch::mean(
+        torch::sum(policy_loss + policy_entropy * entropy_factor, -1));
+    const auto critic_loss = torch::mse_loss(batched_values, returns, at::Reduction::Mean);
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
@@ -196,17 +193,16 @@ void ActorCritic::train(
     critic_loss.backward();
     critic_optimizer->step();
 
-    episode_policy_loss = -policy_loss.sum(-1).mean().cpu().item().toFloat();
-    episode_policy_entropy = -entropy_factor * policy_entropy.sum(-1).mean().cpu().item().toFloat();
+    episode_actor_loss = actor_loss.cpu().item().toFloat();
     episode_critic_loss = critic_loss.cpu().item().toFloat();
 
     curr_train_step++;
 }
 
-float ActorCritic::get_exponential_entropy_factor() const {
+/*float ActorCritic::get_exponential_entropy_factor() const {
     const auto lambda = -std::log(wanted_entropy_factor) / static_cast<float>(entropy_factor_steps);
     return first_entropy_factor * std::exp(-lambda * static_cast<float>(curr_train_step));
-}
+}*/
 
 void ActorCritic::done(const float reward) {
     episodes_buffer.back().rewards_buffer.push_back(reward);
@@ -215,50 +211,43 @@ void ActorCritic::done(const float reward) {
     if (actor->is_training() && static_cast<int>(episodes_buffer.size()) == batch_size) {
         int episode_max_step = 0;
 
-        std::vector<torch::Tensor> actions_per_episode;
-        std::vector<torch::Tensor> values_per_episode;
-        std::vector<torch::Tensor> mus_per_episode;
-        std::vector<torch::Tensor> sigmas_per_episode;
-        std::vector<torch::Tensor> rewards_per_episode;
+        std::vector<torch::Tensor> actions_per_episode, values_per_episode, mus_per_episode,
+            sigmas_per_episode, rewards_per_episode;
 
-        for (const auto &e: episodes_buffer)
-            episode_max_step =
-                std::max(static_cast<int>(e.actions_buffer.size()), episode_max_step);
+        for (const auto &[mu_buffer, sigma_buffer, value_buffer, rewards_buffer, actions_buffer]:
+             episodes_buffer)
+            episode_max_step = std::max(static_cast<int>(actions_buffer.size()), episode_max_step);
 
-        for (const auto &e: episodes_buffer) {
-            int pad = episode_max_step - static_cast<int>(e.actions_buffer.size());
+        for (const auto &[mu_buffer, sigma_buffer, value_buffer, rewards_buffer, actions_buffer]:
+             episodes_buffer) {
+            int pad = episode_max_step - static_cast<int>(actions_buffer.size());
 
-            actions_per_episode.push_back(
-                torch::pad(torch::stack(e.actions_buffer), {0, 0, 0, pad}));
+            actions_per_episode.push_back(torch::pad(torch::stack(actions_buffer), {0, 0, 0, pad}));
 
-            values_per_episode.push_back(torch::pad(torch::cat(e.value_buffer), {0, pad}));
+            values_per_episode.push_back(torch::pad(torch::cat(value_buffer), {0, pad}));
 
-            mus_per_episode.push_back(torch::pad(torch::stack(e.mu_buffer), {0, 0, 0, pad}));
+            mus_per_episode.push_back(torch::pad(torch::stack(mu_buffer), {0, 0, 0, pad}));
             sigmas_per_episode.push_back(
-                torch::pad(torch::stack(e.sigma_buffer), {0, 0, 0, pad}, "constant", 1.f));
+                torch::pad(torch::stack(sigma_buffer), {0, 0, 0, pad}, "constant", 1.f));
 
-            rewards_per_episode.push_back(torch::pad(
-                torch::tensor(e.rewards_buffer, at::TensorOptions().device(curr_device)),
-                {0, pad}));
+            rewards_per_episode.push_back(
+                torch::pad(
+                    torch::tensor(rewards_buffer, at::TensorOptions().device(curr_device)),
+                    {0, pad}));
         }
 
-        const torch::Tensor batched_actions = torch::stack(actions_per_episode);
-        const torch::Tensor batched_values = torch::stack(values_per_episode);
-        const torch::Tensor batched_mus = torch::stack(mus_per_episode);
-        const torch::Tensor batched_sigmas = torch::stack(sigmas_per_episode);
-        const torch::Tensor batched_rewards = torch::stack(rewards_per_episode);
-
-        train(batched_actions, batched_values, batched_mus, batched_sigmas, batched_rewards);
+        train(
+            torch::stack(actions_per_episode), torch::stack(values_per_episode),
+            torch::stack(mus_per_episode), torch::stack(sigmas_per_episode),
+            torch::stack(rewards_per_episode));
 
         episodes_buffer.clear();
-
-    } else if (!actor->is_training()) {
-        episodes_buffer.clear();
-    }
+    } else if (!actor->is_training()) { episodes_buffer.clear(); }
 
     episodes_buffer.push_back({});
 
-    curr_step++;
+    last_episode_steps = curr_episode_step;
+    curr_episode_step = 0;
 }
 
 void ActorCritic::save(const std::string &output_folder_path) {
@@ -335,9 +324,11 @@ std::map<std::string, float> ActorCritic::get_metrics() {
     }
 
     return {
-        {"policy_loss", episode_policy_loss}, {"policy_entropy", episode_policy_entropy},
-        {"critic_loss", episode_critic_loss}, {"entropy_factor", get_exponential_entropy_factor()},
-        {"actor_grad_mean", actor_grad},      {"critic_grad_mean", critic_grad}};
+        {"actor_loss", episode_actor_loss},
+        {"critic_loss", episode_critic_loss},
+        {"actor_grad_mean", actor_grad},
+        {"critic_grad_mean", critic_grad},
+        {"episode_steps", last_episode_steps}};
 }
 
 void ActorCritic::to(const torch::DeviceType device) {
