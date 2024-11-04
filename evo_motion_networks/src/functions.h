@@ -15,6 +15,10 @@ normal_pdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor 
 torch::Tensor
 normal_cdf(const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma);
 
+/*
+ * truncated normal
+ */
+
 torch::Tensor truncated_normal_sample(
     const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value);
 
@@ -24,5 +28,11 @@ torch::Tensor truncated_normal_pdf(
 
 torch::Tensor truncated_normal_entropy(
     const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value);
+
+/*
+ * exponential decrease
+ */
+
+float exponential_decrease(long t, long max_t, float start, float end);
 
 #endif//EVO_MOTION_FUNCTIONS_H

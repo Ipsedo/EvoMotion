@@ -40,9 +40,8 @@ LiquidCellModule::LiquidCellModule(
 }
 
 void LiquidCellModule::reset_x_t() {
-    x_t = torch::silu(
-        torch::randn(
-            {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
+    x_t = torch::silu(torch::randn(
+        {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
 }
 
 torch::Tensor
@@ -87,7 +86,7 @@ ActorCriticLiquidNetwork::ActorCriticLiquidNetwork(
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
+                     torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
     critic = register_module("critic", torch::nn::Linear(hidden_size, 1));
 
@@ -124,7 +123,7 @@ ActorLiquidNetwork::ActorLiquidNetwork(
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
+                     torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
     mu->apply(init_weights);
     sigma->apply(init_weights);
@@ -169,9 +168,11 @@ critic_response CriticLiquidNetwork::forward(const torch::Tensor &state) {
 ActorCriticLiquid::ActorCriticLiquid(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
-    const float gamma, const float entropy_factor, int unfolding_steps)
+    const float gamma, float entropy_start_factor, float entropy_end_factor, long entropy_steps,
+    int unfolding_steps)
     : ActorCritic(
-        seed, state_space, action_space, hidden_size, batch_size, lr, gamma, entropy_factor) {
+          seed, state_space, action_space, hidden_size, batch_size, lr, gamma, entropy_start_factor,
+          entropy_end_factor, entropy_steps) {
 
     actor = std::make_shared<ActorLiquidNetwork>(
         state_space, action_space, hidden_size, unfolding_steps);

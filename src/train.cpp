@@ -44,7 +44,8 @@ void train(
               << ", action_space = " << env->get_action_space() << std::endl;
     std::cout << "parameters_count = " << agent->count_parameters() << std::endl;
 
-    LossMeter policy_loss_meter("actor_loss", 128);
+    LossMeter policy_loss_meter("policy_loss", 128);
+    LossMeter entropy_loss_meter("entropy_loss", 128);
     LossMeter critic_loss_meter("critic_loss", 128);
     LossMeter episode_steps_meter("episode_steps", 128);
 
@@ -70,19 +71,22 @@ void train(
 
             auto metrics = agent->get_metrics();
 
-            policy_loss_meter.add(metrics["actor_loss"]);
+            policy_loss_meter.add(metrics["policy_loss"]);
+            entropy_loss_meter.add(metrics["entropy_loss"]);
             critic_loss_meter.add(metrics["critic_loss"]);
             episode_steps_meter.add(metrics["episode_steps"]);
 
             std::stringstream stream;
-            stream << "Save " + std::to_string(s - 1) << ", actor_loss = " << std::setprecision(6)
-                << std::fixed << policy_loss_meter.loss()
-                << ", critic_loss = " << std::setprecision(6) << std::fixed
-                << critic_loss_meter.loss() << ", actor_grad_norm = " << std::setprecision(4)
-                << std::fixed << metrics["actor_grad_mean"]
-                << ", critic_grad_norm = " << std::setprecision(4) << std::fixed
-                << metrics["critic_grad_mean"] << ", steps = " << std::setprecision(2)
-                << std::fixed << episode_steps_meter.loss() << " ";
+            stream << "Save " + std::to_string(s - 1) << ", policy = " << std::setprecision(6)
+                   << std::fixed << policy_loss_meter.loss()
+                   << ", entropy = " << std::setprecision(6) << std::fixed
+                   << entropy_loss_meter.loss() << ", critic = " << std::setprecision(6)
+                   << std::fixed << critic_loss_meter.loss()
+                   << ", actor_grad_norm = " << std::setprecision(4) << std::fixed
+                   << metrics["actor_grad_mean"] << ", critic_grad_norm = " << std::setprecision(4)
+                   << std::fixed << metrics["critic_grad_mean"]
+                   << ", steps = " << std::setprecision(2) << std::fixed
+                   << episode_steps_meter.loss() << " ";
 
             p_bar.set_option(indicators::option::PrefixText{stream.str()});
 

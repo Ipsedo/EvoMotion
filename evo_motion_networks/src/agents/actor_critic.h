@@ -110,14 +110,17 @@ protected:
 
 private:
     float gamma;
-    float entropy_factor;
+    float entropy_start_factor;
+    float entropy_end_factor;
+    long entropy_steps;
 
     torch::DeviceType curr_device;
 
     int batch_size;
     std::vector<episode_buffer> episodes_buffer;
 
-    float episode_actor_loss;
+    float episode_policy_loss;
+    float episode_entropy_loss;
     float episode_critic_loss;
 
     int curr_episode_step;
@@ -133,7 +136,8 @@ private:
 public:
     ActorCritic(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr, float gamma, float entropy_factor);
+        int hidden_size, int batch_size, float lr, float gamma, float entropy_start_factor,
+        float entropy_end_factor, long entropy_steps);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 

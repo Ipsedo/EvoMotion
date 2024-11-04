@@ -93,8 +93,8 @@ class ActorCriticLiquid final : public ActorCritic {
 public:
     ActorCriticLiquid(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr, float gamma, float entropy_factor,
-        int unfolding_steps);
+        int hidden_size, int batch_size, float lr, float gamma, float entropy_start_factor,
+        float entropy_end_factor, long entropy_steps, int unfolding_steps);
 
     void done(float reward) override;
 };
