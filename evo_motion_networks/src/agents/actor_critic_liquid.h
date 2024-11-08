@@ -6,6 +6,7 @@
 #define EVO_MOTION_ACTOR_CRITIC_LIQUID_H
 
 #include "./actor_critic.h"
+#include "./soft_actor_critic.h"
 
 class LiquidCellModule final : public torch::nn::Module {
 public:
@@ -87,6 +88,21 @@ private:
     torch::nn::Linear critic{nullptr};
 };
 
+class QNetworkLiquid : public AbstractQNetwork {
+public:
+    QNetworkLiquid(
+        const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
+        int unfolding_steps);
+
+    critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
+
+    void reset_liquid() const;
+
+private:
+    std::shared_ptr<LiquidCellModule> liquid_network{nullptr};
+    torch::nn::Linear q_network{nullptr};
+};
+
 // Agent
 
 class ActorCriticLiquid final : public ActorCritic {
@@ -95,6 +111,15 @@ public:
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, int batch_size, float lr, float gamma, float entropy_start_factor,
         float entropy_end_factor, long entropy_steps, int unfolding_steps);
+
+    void done(float reward) override;
+};
+
+class SoftActorCriticLiquid : public SoftActorCritic {
+public:
+    SoftActorCriticLiquid(
+        int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int hidden_size, int batch_size, float lr, float gamma, float tau, int unfolding_steps);
 
     void done(float reward) override;
 };

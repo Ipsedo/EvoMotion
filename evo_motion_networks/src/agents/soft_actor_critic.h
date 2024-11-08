@@ -10,7 +10,6 @@
 #include <evo_motion_networks/agent.h>
 
 #include "./actor_critic.h"
-#include "./actor_critic_liquid.h"
 
 struct soft_episode_buffer {
     std::vector<torch::Tensor> mu_buffer;
@@ -49,8 +48,8 @@ public:
 class SoftActorCritic : public Agent {
 protected:
     std::shared_ptr<AbstractActor> actor;
-    std::shared_ptr<QNetwork> critic_1;
-    std::shared_ptr<QNetwork> critic_2;
+    std::shared_ptr<AbstractQNetwork> critic_1;
+    std::shared_ptr<AbstractQNetwork> critic_2;
     std::shared_ptr<AbstractCritic> value_network;
     std::shared_ptr<AbstractCritic> target_value_network;
 
