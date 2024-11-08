@@ -147,8 +147,10 @@ ActorCritic::ActorCritic(
       gamma(gamma), entropy_start_factor(entropy_start_factor),
       entropy_end_factor(entropy_end_factor), entropy_steps(entropy_steps),
       curr_device(torch::kCPU), batch_size(batch_size), episodes_buffer({{}}),
-      episode_policy_loss(0.f), episode_entropy_loss(0.f), episode_critic_loss(0.f),
-      curr_episode_step(0), last_episode_steps(0), curr_train_step(0L) {
+      policy_loss_meter("policy", 64), entropy_meter("entropy", 64),
+      critic_loss_meter("critic", 64), actor_grad_meter("actor_grad", 64),
+      critic_grad_meter("critic_grad", 64), episode_steps_meter("steps", 64), curr_episode_step(0),
+      curr_train_step(0L) {
     at::manual_seed(seed);
 }
 
@@ -201,9 +203,23 @@ void ActorCritic::train(
     critic_loss.backward();
     critic_optimizer->step();
 
-    episode_policy_loss = -policy_loss.sum(-1).mean().cpu().item().toFloat();
-    episode_entropy_loss = -policy_entropy.sum(-1).mean().cpu().item().toFloat();
-    episode_critic_loss = critic_loss.cpu().item().toFloat();
+    policy_loss_meter.add(-policy_loss.sum(-1).mean().cpu().item().toFloat());
+    entropy_meter.add(-policy_entropy.sum(-1).mean().cpu().item().toFloat());
+    critic_loss_meter.add(critic_loss.cpu().item().toFloat());
+
+    const auto actor_params = actor->parameters();
+    actor_grad_meter.add(
+        std::accumulate(
+            actor_params.begin(), actor_params.end(), 0.f,
+            [](float acc, auto p) { return acc + p.grad().norm().item().toFloat(); })
+        / static_cast<float>(actor_params.size()));
+
+    const auto critic_params = critic->parameters();
+    critic_grad_meter.add(
+        std::accumulate(
+            critic_params.begin(), critic_params.end(), 0.f,
+            [](float acc, auto p) { return acc + p.grad().norm().item().toFloat(); })
+        / static_cast<float>(critic_params.size()));
 
     curr_train_step++;
 }
@@ -255,7 +271,7 @@ void ActorCritic::done(const float reward) {
 
     episodes_buffer.push_back({});
 
-    last_episode_steps = curr_episode_step;
+    episode_steps_meter.add(static_cast<float>(curr_episode_step));
     curr_episode_step = 0;
 }
 
@@ -319,22 +335,9 @@ void ActorCritic::load(const std::string &input_folder_path) {
     critic_optimizer->load(critic_optimizer_archive);
 }
 
-std::map<std::string, float> ActorCritic::get_metrics() {
-    float actor_grad = 0.f, critic_grad = 0.f;
-
-    if (curr_train_step != 0) {
-        const auto actor_params = actor->parameters();
-        for (const auto &p: actor_params) actor_grad += p.grad().norm().item().toFloat();
-        actor_grad /= static_cast<float>(actor_params.size());
-
-        const auto critic_params = critic->parameters();
-        for (const auto &p: critic_params) critic_grad += p.grad().norm().item().toFloat();
-        critic_grad /= static_cast<float>(critic_params.size());
-    }
-
-    return {{"policy_loss", episode_policy_loss}, {"entropy_loss", episode_entropy_loss},
-            {"critic_loss", episode_critic_loss}, {"actor_grad_mean", actor_grad},
-            {"critic_grad_mean", critic_grad},    {"episode_steps", last_episode_steps}};
+std::vector<LossMeter> ActorCritic::get_metrics() {
+    return {policy_loss_meter, entropy_meter,     critic_loss_meter,
+            actor_grad_meter,  critic_grad_meter, episode_steps_meter};
 }
 
 void ActorCritic::to(const torch::DeviceType device) {

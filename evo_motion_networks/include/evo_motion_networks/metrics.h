@@ -11,10 +11,11 @@
 
 template<class R, class... I>
 class Meter {
-    const char csv_sep;
     std::string name;
+    const char csv_sep;
     std::optional<int> window_size;
     long curr_step;
+    R default_value;
 
 protected:
     std::vector<R> results;
@@ -24,7 +25,7 @@ protected:
     virtual std::string loss_to_string(R loss_value) = 0;
 
 public:
-    explicit Meter(std::string name, std::optional<int> window_size);
+    explicit Meter(std::string name, std::optional<int> window_size, R default_value);
 
     virtual void add(I... inputs);
 
@@ -33,6 +34,8 @@ public:
     void to_csv(const std::filesystem::path &output_directory);
 
     virtual R loss();
+
+    virtual std::string to_string();
 
     virtual ~Meter();
 };

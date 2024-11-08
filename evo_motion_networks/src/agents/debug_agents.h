@@ -17,7 +17,7 @@ public:
 
     void load(const std::string &input_folder_path) override;
 
-    std::map<std::string, float> get_metrics() override;
+    std::vector<LossMeter> get_metrics() override;
 
     void to(torch::DeviceType device) override;
 

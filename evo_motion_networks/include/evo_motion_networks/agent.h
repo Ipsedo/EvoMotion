@@ -9,6 +9,8 @@
 
 #include <torch/torch.h>
 
+#include "./metrics.h"
+
 // Agent abstract class
 
 class Agent {
@@ -21,7 +23,7 @@ public:
 
     virtual void load(const std::string &input_folder_path) = 0;
 
-    virtual std::map<std::string, float> get_metrics() = 0;
+    virtual std::vector<LossMeter> get_metrics() = 0;
 
     virtual void to(torch::DeviceType device) = 0;
 

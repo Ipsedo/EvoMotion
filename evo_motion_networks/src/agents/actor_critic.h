@@ -13,6 +13,7 @@
 #include <torch/torch.h>
 
 #include <evo_motion_networks/agent.h>
+#include <evo_motion_networks/metrics.h>
 
 // responses
 
@@ -119,12 +120,14 @@ private:
     int batch_size;
     std::vector<episode_buffer> episodes_buffer;
 
-    float episode_policy_loss;
-    float episode_entropy_loss;
-    float episode_critic_loss;
+    LossMeter policy_loss_meter;
+    LossMeter entropy_meter;
+    LossMeter critic_loss_meter;
+    LossMeter actor_grad_meter;
+    LossMeter critic_grad_meter;
+    LossMeter episode_steps_meter;
 
     int curr_episode_step;
-    int last_episode_steps;
 
     long curr_train_step;
 
@@ -147,7 +150,7 @@ public:
 
     void load(const std::string &input_folder_path) override;
 
-    std::map<std::string, float> get_metrics() override;
+    std::vector<LossMeter> get_metrics() override;
 
     void to(torch::DeviceType device) override;
 

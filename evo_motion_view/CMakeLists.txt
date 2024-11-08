@@ -23,9 +23,9 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 # ImGUI
-#set(IMGUI_BUILD_GLFW_BINDING ON)
-#set(IMGUI_BUILD_OPENGL3_BINDING ON)
-#find_package(imgui REQUIRED)
+set(IMGUI_BUILD_GLFW_BINDING)
+set(IMGUI_BUILD_OPENGL3_BINDING)
+find_package(imgui REQUIRED)
 
 #include(FetchContent)
 #set(IMGUI_BUILD_GLFW_BINDING ON)
@@ -52,6 +52,7 @@ target_link_libraries(
         OpenGL
         GLEW
         glfw
+        imgui
 )
 
 set(EVO_MOTION_VIEW_LIBRARIES evo_motion_view PARENT_SCOPE)

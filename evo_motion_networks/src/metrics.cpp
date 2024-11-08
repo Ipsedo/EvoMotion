@@ -9,8 +9,9 @@
 #include <evo_motion_networks/metrics.h>
 
 template<class R, class... I>
-Meter<R, I...>::Meter(std::string name, const std::optional<int> window_size)
-    : csv_sep(','), name(std::move(name)), window_size(window_size), curr_step(0L), results() {}
+Meter<R, I...>::Meter(std::string name, const std::optional<int> window_size, R default_value)
+    : name(std::move(name)), csv_sep(','), window_size(window_size), curr_step(0L),
+      default_value(default_value), results() {}
 
 template<class R, class... I>
 void Meter<R, I...>::add(I... inputs) {
@@ -22,6 +23,7 @@ void Meter<R, I...>::add(I... inputs) {
 
 template<class R, class... I>
 R Meter<R, I...>::loss() {
+    if (results.empty()) return default_value;
     R sum = std::accumulate(results.begin(), results.end(), static_cast<R>(0));
     return sum / static_cast<R>(results.size());
 }
@@ -47,6 +49,13 @@ void Meter<R, I...>::to_csv(const std::filesystem::path &output_directory) {
 }
 
 template<class R, class... I>
+std::string Meter<R, I...>::to_string() {
+    std::stringstream stream;
+    stream << name << " = " << loss_to_string(loss());
+    return stream.str();
+}
+
+template<class R, class... I>
 Meter<R, I...>::~Meter() = default;
 
 /*
@@ -54,10 +63,14 @@ Meter<R, I...>::~Meter() = default;
  */
 
 LossMeter::LossMeter(const std::string &name, const std::optional<int> window_size)
-    : Meter(name, window_size) {}
+    : Meter(name, window_size, 0.f) {}
 
 float LossMeter::process_value(const float value) { return value; }
 
-std::string LossMeter::loss_to_string(const float loss_value) { return std::to_string(loss_value); }
+std::string LossMeter::loss_to_string(const float loss_value) {
+    std::stringstream stream;
+    stream << std::setprecision(6) << std::fixed << loss_value;
+    return stream.str();
+}
 
 LossMeter::~LossMeter() = default;
