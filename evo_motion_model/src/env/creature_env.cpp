@@ -74,7 +74,7 @@ std::vector<std::shared_ptr<Controller>> RobotWalk::get_controllers() { return c
 step RobotWalk::compute_step() {
     std::vector<torch::Tensor> current_states;
 
-    for (const auto &state: states) current_states.push_back(state->get_state().to(curr_device));
+    for (const auto &state: states) current_states.push_back(state->get_state());
 
     const Item root = skeleton.get_items()[0];
 
@@ -90,7 +90,7 @@ step RobotWalk::compute_step() {
 
     curr_step += 1;
 
-    return {torch::cat(current_states, 0), reward, done};
+    return {torch::cat(current_states, 0).to(curr_device), reward, done};
 }
 
 void RobotWalk::reset_engine() {
