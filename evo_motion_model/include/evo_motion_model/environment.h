@@ -66,8 +66,9 @@ private:
     std::map<std::string, std::string> parameters;
 
 protected:
-    template<typename Value>
-    Value get_value(const std::string &key, Value default_value);
+    int get_value(const std::string &key, int default_value);
+    float get_value(const std::string &key, float default_value);
+    std::string get_value(const std::string &key, std::string default_value);
 
     template<typename Value>
     Value generic_get_value(

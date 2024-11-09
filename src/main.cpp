@@ -19,7 +19,7 @@ std::pair<std::string, std::string> parse_pair(const std::string &k_v) {
     const std::string key = k_v.substr(0, k_v.find(delimiter));
     const std::string value = k_v.substr(k_v.find(delimiter) + 1);
 
-    return std::pair(key, value);
+    return {key, value};
 }
 
 int main(const int argc, char **argv) {
@@ -28,8 +28,8 @@ int main(const int argc, char **argv) {
     parser.add_argument("environment").default_value("cartpole").help("the environment");
     parser.add_argument("agent").default_value("actor_critic_liquid").help("the agent");
 
-    parser.add_argument("--hyper_parameters")
-        .nargs(argparse::nargs_pattern::at_least_one)
+    parser.add_argument("--agent_parameters")
+        .nargs(argparse::nargs_pattern::any)
         .action(parse_pair)
         .help("agent hyper-parameters");
 
@@ -45,11 +45,6 @@ int main(const int argc, char **argv) {
 
     parser.add_argument("--cuda").default_value(false).implicit_value(true).help(
         "enable cuda for neural networks");
-
-    /*parser.add_argument("--hidden_size")
-        .default_value(32)
-        .scan<'i', int>()
-        .help("neural network hidden size");*/
 
     /*
      * Train parser
@@ -70,16 +65,6 @@ int main(const int argc, char **argv) {
         .scan<'i', int>()
         .default_value(1000)
         .help("number of save when training");
-
-    /*train_parser.add_argument("-b", "--batch_size")
-        .scan<'i', int>()
-        .default_value(16)
-        .help("episodes batch size");
-
-    train_parser.add_argument("-l", "--learning_rate")
-        .scan<'g', float>()
-        .default_value(1e-4f)
-        .help("agent learning rate");*/
 
     /*
      * Run parser
@@ -110,11 +95,11 @@ int main(const int argc, char **argv) {
         std::exit(1);
     }
 
-    const auto hyper_parameters =
-        parser.get<std::vector<std::pair<std::string, std::string>>>("hyper_parameters");
+    const auto agent_parameters =
+        parser.get<std::vector<std::pair<std::string, std::string>>>("agent_parameters");
     const auto agent_factory = get_agent_factory(
         parser.get<std::string>("agent"),
-        std::map<std::string, std::string>(hyper_parameters.begin(), hyper_parameters.end()));
+        std::map<std::string, std::string>(agent_parameters.begin(), agent_parameters.end()));
 
     const auto env_parameters =
         parser.get<std::vector<std::pair<std::string, std::string>>>("env_parameters");
