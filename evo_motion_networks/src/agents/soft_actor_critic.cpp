@@ -120,12 +120,11 @@ void SoftActorCritic::train(
     const auto next_target_q_value_1 = torch::slice(batched_target_q_values_1, 1, 1);
     const auto next_target_q_value_2 = torch::slice(batched_target_q_values_2, 1, 1);
 
-    auto target_q_values = (batched_rewards
+    const auto target_q_values = (batched_rewards
                             + gamma * (1.f - batched_done)
                                   * (torch::min(next_target_q_value_1, next_target_q_value_2)
                                      - entropy_parameter.alpha() * next_log_prob.sum(-1)))
                                .detach();
-    target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
     // critic 1
     const auto critic_1_loss =
