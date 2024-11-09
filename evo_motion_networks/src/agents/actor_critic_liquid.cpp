@@ -233,17 +233,22 @@ SoftActorCriticLiquid::SoftActorCriticLiquid(
         std::make_shared<QNetworkLiquid>(state_space, action_space, hidden_size, unfolding_steps);
     critic_2_optimizer = std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr);
 
-    value_network =
-        std::make_shared<CriticLiquidNetwork>(state_space, hidden_size, unfolding_steps);
-    value_optimizer = std::make_shared<torch::optim::Adam>(value_network->parameters(), lr);
+    target_critic_1 =
+        std::make_shared<QNetworkLiquid>(state_space, action_space, hidden_size, unfolding_steps);
 
-    target_value_network =
-        std::make_shared<CriticLiquidNetwork>(state_space, hidden_size, unfolding_steps);
+    target_critic_2 =
+        std::make_shared<QNetworkLiquid>(state_space, action_space, hidden_size, unfolding_steps);
 
-    for (auto n_p: value_network->named_parameters()) {
+    for (auto n_p: critic_1->named_parameters()) {
         const auto &name = n_p.key();
         const auto &param = n_p.value();
-        target_value_network->named_parameters()[name].data().copy_(param.data());
+        target_critic_1->named_parameters()[name].data().copy_(param.data());
+    }
+
+    for (auto n_p: critic_2->named_parameters()) {
+        const auto &name = n_p.key();
+        const auto &param = n_p.value();
+        target_critic_2->named_parameters()[name].data().copy_(param.data());
     }
 }
 
@@ -253,6 +258,6 @@ void SoftActorCriticLiquid::done(const torch::Tensor state, const float reward) 
     std::dynamic_pointer_cast<ActorLiquidNetwork>(actor)->reset_liquid();
     std::dynamic_pointer_cast<QNetworkLiquid>(critic_1)->reset_liquid();
     std::dynamic_pointer_cast<QNetworkLiquid>(critic_2)->reset_liquid();
-    std::dynamic_pointer_cast<CriticLiquidNetwork>(value_network)->reset_liquid();
-    std::dynamic_pointer_cast<CriticLiquidNetwork>(target_value_network)->reset_liquid();
+    std::dynamic_pointer_cast<CriticLiquidNetwork>(target_critic_1)->reset_liquid();
+    std::dynamic_pointer_cast<CriticLiquidNetwork>(target_critic_2)->reset_liquid();
 }

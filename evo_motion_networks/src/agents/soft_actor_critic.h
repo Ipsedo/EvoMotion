@@ -16,8 +16,8 @@ struct soft_episode_buffer {
     std::vector<torch::Tensor> sigma_buffer;
     std::vector<torch::Tensor> q_value_1_buffer;
     std::vector<torch::Tensor> q_value_2_buffer;
-    std::vector<torch::Tensor> value_buffer;
-    std::vector<torch::Tensor> target_value_buffer;
+    std::vector<torch::Tensor> target_q_value_1_buffer;
+    std::vector<torch::Tensor> target_q_value_2_buffer;
     std::vector<float> rewards_buffer;
     std::vector<torch::Tensor> actions_buffer;
     std::vector<float> done_buffer;
@@ -50,13 +50,12 @@ protected:
     std::shared_ptr<AbstractActor> actor;
     std::shared_ptr<AbstractQNetwork> critic_1;
     std::shared_ptr<AbstractQNetwork> critic_2;
-    std::shared_ptr<AbstractCritic> value_network;
-    std::shared_ptr<AbstractCritic> target_value_network;
+    std::shared_ptr<AbstractQNetwork> target_critic_1;
+    std::shared_ptr<AbstractQNetwork> target_critic_2;
 
     std::shared_ptr<torch::optim::Optimizer> actor_optimizer;
     std::shared_ptr<torch::optim::Optimizer> critic_1_optimizer;
     std::shared_ptr<torch::optim::Optimizer> critic_2_optimizer;
-    std::shared_ptr<torch::optim::Optimizer> value_optimizer;
 
 private:
     float target_entropy;
@@ -76,16 +75,15 @@ private:
     LossMeter actor_loss_meter;
     LossMeter critic_1_loss_meter;
     LossMeter critic_2_loss_meter;
-    LossMeter value_loss_meter;
     LossMeter entropy_loss_meter;
     LossMeter episode_steps_meter;
 
     void train(
-        const torch::Tensor &batched_actions, const torch::Tensor &batched_values,
-        const torch::Tensor &batched_target_values, const torch::Tensor &batched_q_values_1,
-        const torch::Tensor &batched_q_values_2, const torch::Tensor &batched_mus,
+        const torch::Tensor &batched_actions, const torch::Tensor &batched_q_values_1,
+        const torch::Tensor &batched_q_values_2, const torch::Tensor &batched_target_q_values_1,
+        const torch::Tensor &batched_target_q_values_2,const torch::Tensor &batched_mus,
         const torch::Tensor &batched_sigmas, const torch::Tensor &batched_rewards,
-        const torch::Tensor &batched_dones);
+        const torch::Tensor &batched_done);
 
 public:
     SoftActorCritic(
