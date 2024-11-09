@@ -13,9 +13,11 @@
 #include "../creature/skeleton.h"
 #include "../creature/state.h"
 
-class MuscleEnv final : public Environment {
+class RobotWalk final : public Environment {
 public:
-    explicit MuscleEnv(int seed);
+    explicit RobotWalk(
+        int seed, std::string skeleton_json_path, float initial_remaining_seconds,
+        float max_episode_seconds, float target_velocity, float minimal_velocity, int reset_frames);
 
     std::vector<Item> get_items() override;
 

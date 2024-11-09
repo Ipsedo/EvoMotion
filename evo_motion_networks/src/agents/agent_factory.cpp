@@ -2,7 +2,7 @@
 // Created by samuel on 19/09/24.
 //
 
-#include "./factory.h"
+#include "./agent_factory.h"
 
 #include <memory>
 #include <utility>
@@ -128,7 +128,7 @@ std::shared_ptr<Agent> SofActorCriticLiquidFactory::create_agent(
 
 std::map<
     std::string, std::function<std::shared_ptr<AgentFactory>(std::map<std::string, std::string>)>>
-    FACTORY_CONSTRUCTORS = {
+    AGENT_FACTORY_CONSTRUCTORS = {
         {"random", std::make_shared<RandomAgentFactory, std::map<std::string, std::string>>},
         {"constant", std::make_shared<ConstantAgentFactory, std::map<std::string, std::string>>},
         {"actor_critic", std::make_shared<ActorCriticFactory, std::map<std::string, std::string>>},
@@ -140,6 +140,8 @@ std::map<
          std::make_shared<SofActorCriticLiquidFactory, std::map<std::string, std::string>>}};
 
 std::shared_ptr<AgentFactory>
-get_factory(const std::string &agent_name, std::map<std::string, std::string> parameters) {
-    return FACTORY_CONSTRUCTORS[agent_name](std::move(parameters));
+get_agent_factory(const std::string &agent_name, std::map<std::string, std::string> parameters) {
+    if (AGENT_FACTORY_CONSTRUCTORS.find(agent_name) == AGENT_FACTORY_CONSTRUCTORS.end())
+        throw std::invalid_argument(agent_name);
+    return AGENT_FACTORY_CONSTRUCTORS[agent_name](std::move(parameters));
 }

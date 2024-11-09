@@ -55,6 +55,6 @@ private:
 };
 
 std::shared_ptr<AgentFactory>
-get_factory(const std::string &agent_name, std::map<std::string, std::string> parameters);
+get_agent_factory(const std::string &agent_name, std::map<std::string, std::string> parameters);
 
 #endif//EVO_MOTION_AGENT_H

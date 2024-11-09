@@ -8,7 +8,7 @@
 
 #include <indicators/progress_bar.hpp>
 
-#include <evo_motion_model/env_builder.h>
+#include <evo_motion_model/environment.h>
 #include <evo_motion_networks/agent.h>
 #include <evo_motion_networks/metrics.h>
 
@@ -16,7 +16,8 @@
 
 void train(
     int seed, bool cuda, const train_params &params,
-    const std::shared_ptr<AgentFactory> &agent_factory) {
+    const std::shared_ptr<AgentFactory> &agent_factory,
+    const std::shared_ptr<EnvironmentFactory> &environment_factory) {
 
     if (!std::filesystem::exists(params.output_path))
         std::filesystem::create_directory(params.output_path);
@@ -25,8 +26,7 @@ void train(
         exit(1);
     }
 
-    EnvBuilder env_builder(seed, params.env_name);
-    std::shared_ptr<Environment> env = env_builder.get();
+    std::shared_ptr<Environment> env = environment_factory->get_env(seed);
 
     std::shared_ptr<Agent> agent =
         agent_factory->create_agent(env->get_state_space(), env->get_action_space());

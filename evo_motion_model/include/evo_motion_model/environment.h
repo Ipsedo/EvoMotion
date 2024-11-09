@@ -57,4 +57,25 @@ public:
     virtual ~Environment();
 };
 
+class EnvironmentFactory {
+public:
+    explicit EnvironmentFactory(std::map<std::string, std::string> parameters);
+    virtual std::shared_ptr<Environment> get_env(int seed) = 0;
+
+private:
+    std::map<std::string, std::string> parameters;
+
+protected:
+    template<typename Value>
+    Value get_value(const std::string &key, Value default_value);
+
+    template<typename Value>
+    Value generic_get_value(
+        std::function<Value(const std::string &)> converter, const std::string &key,
+        Value default_value);
+};
+
+std::shared_ptr<EnvironmentFactory>
+get_environment_factory(const std::string &env_name, std::map<std::string, std::string> parameters);
+
 #endif//EVO_MOTION_ENVIRONMENT_H

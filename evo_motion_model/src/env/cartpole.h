@@ -13,7 +13,10 @@
 
 class CartPole final : public Environment {
 public:
-    explicit CartPole(int seed);
+    CartPole(
+        int seed, float slider_speed, float slider_force, float chariot_push_force,
+        float limit_angle, int reset_frame_nb, float chariot_mass, float pendulum_mass,
+        int max_steps);
 
     std::vector<Item> get_items() override;
 

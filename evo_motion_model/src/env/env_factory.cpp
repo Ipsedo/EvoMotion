@@ -1,0 +1,104 @@
+//
+// Created by samuel on 25/12/22.
+//
+
+#include "./env_factory.h"
+
+#include <utility>
+
+#include "./cartpole.h"
+#include "./cartpole3d.h"
+#include "./constants.h"
+#include "./creature_env.h"
+
+/*
+ * Env factory
+ */
+
+EnvironmentFactory::EnvironmentFactory(std::map<std::string, std::string> parameters)
+    : parameters(std::move(parameters)) {}
+
+template<typename Value>
+Value EnvironmentFactory::generic_get_value(
+    std::function<Value(const std::string &)> converter, const std::string &key,
+    Value default_value) {
+    if (parameters.find(key) == parameters.end()) return default_value;
+    return converter(parameters[key]);
+}
+
+template<>
+int EnvironmentFactory::get_value(const std::string &key, int default_value) {
+    return generic_get_value<int>([](const auto &e) { return std::stoi(e); }, key, default_value);
+}
+
+template<>
+float EnvironmentFactory::get_value(const std::string &key, float default_value) {
+    return generic_get_value<float>([](const auto &e) { return std::stof(e); }, key, default_value);
+}
+
+template<>
+std::string EnvironmentFactory::get_value(const std::string &key, std::string default_value) {
+    return generic_get_value<std::string>([](const auto &s) { return s; }, key, default_value);
+}
+
+/*
+ * Factories
+ */
+
+CartPoleFactory::CartPoleFactory(std::map<std::string, std::string> parameters)
+    : EnvironmentFactory(std::move(parameters)) {}
+
+std::shared_ptr<Environment> CartPoleFactory::get_env(int seed) {
+    return std::make_shared<CartPole>(
+        seed, get_value<float>("slider_speed", 16.f), get_value<float>("slider_force", 64.f),
+        get_value<float>("chariot_push_force", 2.f),
+        get_value<float>("limit_angle", static_cast<float>(M_PI * 0.5)),
+        get_value<int>("reset_frame_nb", 8), get_value<float>("chariot_mass", 1.f),
+        get_value<float>("pendulum_mass", 1.f), get_value<int>("mas_steps", 60 * 60));
+}
+
+CartPole3dFactory::CartPole3dFactory(std::map<std::string, std::string> parameters)
+    : EnvironmentFactory(std::move(parameters)) {}
+
+std::shared_ptr<Environment> CartPole3dFactory::get_env(int seed) {
+    return std::make_shared<CartPole3d>(
+        seed, get_value<float>("slider_speed", 16.f), get_value<float>("slider_force_per_kg", 32.f),
+        get_value<float>("chariot_push_force", 2.f), get_value<int>("reset_frame_nb", 8),
+        get_value<float>("limit_angle", static_cast<float>(M_PI) / 2.f),
+        get_value<float>("cart_x_mass", 1.f), get_value<float>("cart_z_mass", 1.f),
+        get_value<float>("pole_mass", 1.f), get_value<int>("max_steps", 60 * 60));
+}
+
+RobotWalkFactory::RobotWalkFactory(std::map<std::string, std::string> parameters)
+    : EnvironmentFactory(std::move(parameters)) {}
+
+std::shared_ptr<Environment> RobotWalkFactory::get_env(int seed) {
+    return std::make_shared<RobotWalk>(
+        seed,
+        get_value<std::string>(
+            "skeleton_json_path",
+            std::filesystem::path(RESOURCES_PATH) / "./resources/skeleton/spider_new.json"),
+        get_value<float>("initial_remaining_seconds", 1.f),
+        get_value<float>("max_episode_seconds", 30.f), get_value<float>("target_velocity", 5e-1f),
+        get_value<float>("minimal_velocity", 1e-1f), get_value<int>("reset_frames", 10));
+}
+
+/*
+ * Env list
+ */
+
+std::map<
+    std::string,
+    std::function<std::shared_ptr<EnvironmentFactory>(std::map<std::string, std::string>)>>
+    ENV_FACTORY_CONSTRUCTORS = {
+        {"cartpole", std::make_shared<CartPoleFactory, std::map<std::string, std::string>>},
+        {"cartpole3d", std::make_shared<CartPole3dFactory, std::map<std::string, std::string>>},
+        {"robot_walk", std::make_shared<RobotWalkFactory, std::map<std::string, std::string>>},
+};
+
+std::shared_ptr<EnvironmentFactory> get_environment_factory(
+    const std::string &env_name, std::map<std::string, std::string> parameters) {
+    if (ENV_FACTORY_CONSTRUCTORS.find(env_name) == ENV_FACTORY_CONSTRUCTORS.end())
+        throw std::invalid_argument(env_name);
+    return ENV_FACTORY_CONSTRUCTORS[env_name](std::move(parameters));
+}

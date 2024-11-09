@@ -43,8 +43,8 @@ btVector3 json_vec3_to_bt_vector3(nlohmann::json vec3) {
 }
 
 nlohmann::json read_json(const std::string &json_path) {
-    std::filesystem::path resources_path(RESOURCES_PATH);
-    std::ifstream stream(resources_path / json_path, std::ios::in);
+    //std::filesystem::path resources_path(RESOURCES_PATH);
+    std::ifstream stream(json_path, std::ios::in);
 
     nlohmann::json json = nlohmann::json::parse(stream);
 
