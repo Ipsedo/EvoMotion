@@ -11,7 +11,7 @@ class DebugAgent : public Agent {
 public:
     DebugAgent(const std::vector<int64_t> &action_space);
 
-    void done(float reward) override;
+    void done(torch::Tensor state, float reward) override;
 
     void save(const std::string &output_folder_path) override;
 

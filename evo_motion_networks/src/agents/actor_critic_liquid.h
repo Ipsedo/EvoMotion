@@ -112,7 +112,7 @@ public:
         int hidden_size, int batch_size, float lr, float gamma, float entropy_start_factor,
         float entropy_end_factor, long entropy_steps, int unfolding_steps);
 
-    void done(float reward) override;
+    void done(torch::Tensor state, float reward) override;
 };
 
 class SoftActorCriticLiquid : public SoftActorCritic {
@@ -121,7 +121,7 @@ public:
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, int batch_size, float lr, float gamma, float tau, int unfolding_steps);
 
-    void done(float reward) override;
+    void done(torch::Tensor state, float reward) override;
 };
 
 #endif//EVO_MOTION_ACTOR_CRITIC_LIQUID_H

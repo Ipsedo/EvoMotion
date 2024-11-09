@@ -94,7 +94,7 @@ public:
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 
-    void done(float reward) override;
+    void done(torch::Tensor state, float reward) override;
 
     void save(const std::string &output_folder_path) override;
 

@@ -72,7 +72,7 @@ void infer(
             static_cast<long>(std::max(0., 1000. / 60. - delta.count()))));
 
         if (step.done) {
-            agent->done(step.reward);
+            agent->done(step.state, step.reward);
             step = env->reset();
             std::cout << "reset" << std::endl;
         }

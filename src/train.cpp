@@ -61,7 +61,7 @@ void train(
         for (int e = 0; e < params.nb_episodes; e++) {
             while (!step.done) step = env->do_step(agent->act(step.state, step.reward));
 
-            agent->done(step.reward);
+            agent->done(step.state, step.reward);
             step = env->reset();
 
             auto metrics = agent->get_metrics();

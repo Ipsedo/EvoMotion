@@ -205,8 +205,8 @@ ActorCriticLiquid::ActorCriticLiquid(
     critic_optimizer = std::make_shared<torch::optim::Adam>(critic->parameters(), lr);
 }
 
-void ActorCriticLiquid::done(const float reward) {
-    ActorCritic::done(reward);
+void ActorCriticLiquid::done(torch::Tensor state, const float reward) {
+    ActorCritic::done(state, reward);
 
     std::dynamic_pointer_cast<ActorLiquidNetwork>(actor)->reset_liquid();
     std::dynamic_pointer_cast<CriticLiquidNetwork>(critic)->reset_liquid();
@@ -247,8 +247,8 @@ SoftActorCriticLiquid::SoftActorCriticLiquid(
     }
 }
 
-void SoftActorCriticLiquid::done(float reward) {
-    SoftActorCritic::done(reward);
+void SoftActorCriticLiquid::done(const torch::Tensor state, const float reward) {
+    SoftActorCritic::done(state, reward);
 
     std::dynamic_pointer_cast<ActorLiquidNetwork>(actor)->reset_liquid();
     std::dynamic_pointer_cast<QNetworkLiquid>(critic_1)->reset_liquid();

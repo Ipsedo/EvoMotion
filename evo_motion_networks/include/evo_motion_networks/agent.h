@@ -17,7 +17,7 @@ class Agent {
 public:
     virtual torch::Tensor act(torch::Tensor state, float reward) = 0;
 
-    virtual void done(float reward) = 0;
+    virtual void done(torch::Tensor state, float reward) = 0;
 
     virtual void save(const std::string &output_folder_path) = 0;
 
