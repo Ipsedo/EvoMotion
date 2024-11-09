@@ -62,8 +62,8 @@ SoftActorCritic::SoftActorCritic(
       entropy_optimizer(entropy_parameter.parameters(), lr), curr_device(torch::kCPU), gamma(gamma),
       tau(tau), batch_size(batch_size), episodes_buffer({{}}), curr_episode_step(0),
       curr_train_step(0L), actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
-      critic_2_loss_meter("critic_2", 16),
-      entropy_loss_meter("entropy", 16), episode_steps_meter("steps", 16) {
+      critic_2_loss_meter("critic_2", 16), entropy_loss_meter("entropy", 16),
+      episode_steps_meter("steps", 16) {
     at::manual_seed(seed);
 
     for (auto n_p: critic_1->named_parameters()) {
@@ -107,7 +107,7 @@ torch::Tensor SoftActorCritic::act(torch::Tensor state, float reward) {
 void SoftActorCritic::train(
     const torch::Tensor &batched_actions, const torch::Tensor &batched_q_values_1,
     const torch::Tensor &batched_q_values_2, const torch::Tensor &batched_target_q_values_1,
-    const torch::Tensor &batched_target_q_values_2,const torch::Tensor &batched_mus,
+    const torch::Tensor &batched_target_q_values_2, const torch::Tensor &batched_mus,
     const torch::Tensor &batched_sigmas, const torch::Tensor &batched_rewards,
     const torch::Tensor &batched_done) {
 
@@ -120,11 +120,11 @@ void SoftActorCritic::train(
     const auto next_target_q_value_1 = torch::slice(batched_target_q_values_1, 1, 1);
     const auto next_target_q_value_2 = torch::slice(batched_target_q_values_2, 1, 1);
 
-    auto target_q_values =
-        (batched_rewards
-         + gamma * (1.f - batched_done)
-               * (torch::min(next_target_q_value_1, next_target_q_value_2) - entropy_parameter.alpha() * next_log_prob.sum(-1)))
-            .detach();
+    auto target_q_values = (batched_rewards
+                            + gamma * (1.f - batched_done)
+                                  * (torch::min(next_target_q_value_1, next_target_q_value_2)
+                                     - entropy_parameter.alpha() * next_log_prob.sum(-1)))
+                               .detach();
     target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
     // critic 1
@@ -145,8 +145,8 @@ void SoftActorCritic::train(
 
     // policy
     const auto q_value = torch::min(batched_q_values_1, batched_q_values_2);
-    const auto actor_loss = torch::mean(
-        entropy_parameter.alpha().detach() * curr_log_prob.sum(-1) - q_value.detach());
+    const auto actor_loss =
+        torch::mean(entropy_parameter.alpha().detach() * curr_log_prob.sum(-1) - q_value.detach());
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
@@ -182,7 +182,7 @@ void SoftActorCritic::train(
     critic_1_loss_meter.add(critic_1_loss.cpu().item().toFloat());
     critic_2_loss_meter.add(critic_2_loss.cpu().item().toFloat());
     entropy_loss_meter.add(entropy_loss.cpu().item().toFloat());
-    
+
     curr_train_step++;
 }
 
@@ -212,12 +212,13 @@ void SoftActorCritic::done(torch::Tensor state, float reward) {
             target_q_values_2_per_episode, rewards_per_episode, done_per_episode;
 
         for (const auto &t: episodes_buffer)
-            episode_max_step = std::max(static_cast<int>(t.rewards_buffer.size()), episode_max_step);
+            episode_max_step =
+                std::max(static_cast<int>(t.rewards_buffer.size()), episode_max_step);
 
         for (const auto
-                 &[mu_buffer, sigma_buffer, q_value_1_buffer, q_value_2_buffer, target_q_value_1_buffer,
-                target_q_value_2_buffer, rewards_buffer, actions_buffer, done_buffer]:
-             episodes_buffer) {
+                 &[mu_buffer, sigma_buffer, q_value_1_buffer, q_value_2_buffer,
+                   target_q_value_1_buffer, target_q_value_2_buffer, rewards_buffer, actions_buffer,
+                   done_buffer]: episodes_buffer) {
             int pad = episode_max_step - static_cast<int>(rewards_buffer.size());
 
             actions_per_episode.push_back(torch::pad(torch::stack(actions_buffer), {0, 0, 0, pad}));
@@ -225,7 +226,8 @@ void SoftActorCritic::done(torch::Tensor state, float reward) {
             q_values_1_per_episode.push_back(torch::pad(torch::cat(q_value_1_buffer), {0, pad}));
             q_values_2_per_episode.push_back(torch::pad(torch::cat(q_value_2_buffer), {0, pad}));
 
-            target_q_values_1_per_episode.push_back(torch::pad(torch::cat(target_q_value_1_buffer), {0, pad}));
+            target_q_values_1_per_episode.push_back(
+                torch::pad(torch::cat(target_q_value_1_buffer), {0, pad}));
             target_q_values_2_per_episode.push_back(
                 torch::pad(torch::cat(target_q_value_2_buffer), {0, pad}));
 
@@ -396,8 +398,9 @@ void SoftActorCritic::load(const std::string &input_folder_path) {
 }
 
 std::vector<LossMeter> SoftActorCritic::get_metrics() {
-    return {actor_loss_meter, critic_1_loss_meter, critic_2_loss_meter,
-            entropy_loss_meter,  episode_steps_meter};
+    return {
+        actor_loss_meter, critic_1_loss_meter, critic_2_loss_meter, entropy_loss_meter,
+        episode_steps_meter};
 }
 
 void SoftActorCritic::to(torch::DeviceType device) {
