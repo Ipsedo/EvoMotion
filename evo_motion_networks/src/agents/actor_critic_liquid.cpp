@@ -256,4 +256,3 @@ void SoftActorCriticLiquid::done(const torch::Tensor state, const float reward) 
     std::dynamic_pointer_cast<CriticLiquidNetwork>(value_network)->reset_liquid();
     std::dynamic_pointer_cast<CriticLiquidNetwork>(target_value_network)->reset_liquid();
 }
-
