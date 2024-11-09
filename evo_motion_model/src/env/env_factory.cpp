@@ -38,7 +38,8 @@ float EnvironmentFactory::get_value(const std::string &key, float default_value)
 
 template<>
 std::string EnvironmentFactory::get_value(const std::string &key, std::string default_value) {
-    return generic_get_value<std::string>([](const auto &s) { return s; }, key, std::move(default_value));
+    return generic_get_value<std::string>(
+        [](const auto &s) { return s; }, key, std::move(default_value));
 }
 
 /*

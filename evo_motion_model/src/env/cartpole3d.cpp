@@ -18,10 +18,10 @@ CartPole3d::CartPole3d(
       pole_pos(
           base_pos.x(), cart_z_pos.y() + cart_z_scale.y() + pole_scale.y() - pole_scale.y() / 4.f,
           base_pos.z()),
-      base_mass(0.f),
-      last_vel_x(0.f), last_vel_z(0.f), last_ang_vel_vec(0.f, 0.f, 0.f), last_ang(0.f),
-      last_ang_vel(0.f), last_vert_ang(0.f), last_vert_ang_vel(0.f), last_plan_ang(0.f),
-      last_plan_ang_vec(0.f), max_steps(max_steps), rng(seed), rd_uni(0.f, 1.f), step_idx(0) {
+      base_mass(0.f), last_vel_x(0.f), last_vel_z(0.f), last_ang_vel_vec(0.f, 0.f, 0.f),
+      last_ang(0.f), last_ang_vel(0.f), last_vert_ang(0.f), last_vert_ang_vel(0.f),
+      last_plan_ang(0.f), last_plan_ang_vec(0.f), max_steps(max_steps), rng(seed), rd_uni(0.f, 1.f),
+      step_idx(0) {
 
     Item base(
         "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
