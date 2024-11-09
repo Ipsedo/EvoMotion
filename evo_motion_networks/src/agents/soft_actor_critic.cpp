@@ -58,7 +58,7 @@ SoftActorCritic::SoftActorCritic(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
-      target_entropy(-static_cast<float>(action_space[0])), entropy_parameter(),
+      target_entropy(-1.f), entropy_parameter(),
       entropy_optimizer(entropy_parameter.parameters(), lr), curr_device(torch::kCPU), gamma(gamma),
       tau(tau), batch_size(batch_size), episodes_buffer({{}}), curr_episode_step(0),
       curr_train_step(0L), actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
@@ -123,7 +123,7 @@ void SoftActorCritic::train(
     const auto target_q_values = (batched_rewards
                                   + gamma * (1.f - batched_done)
                                         * (torch::min(next_target_q_value_1, next_target_q_value_2)
-                                           - entropy_parameter.alpha() * next_log_prob.sum(-1)))
+                                           - entropy_parameter.alpha() * next_log_prob.mean(-1)))
                                      .detach();
 
     // critic 1
@@ -144,16 +144,16 @@ void SoftActorCritic::train(
 
     // policy
     const auto q_value = torch::min(batched_q_values_1, batched_q_values_2);
-    const auto actor_loss =
-        torch::mean(entropy_parameter.alpha().detach() * curr_log_prob.sum(-1) - q_value.detach());
+    const auto actor_loss = torch::mean(
+        entropy_parameter.alpha().detach() * curr_log_prob - q_value.unsqueeze(-1).detach());
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
     actor_optimizer->step();
 
     // entropy
-    const auto entropy_loss = -torch::mean(
-        entropy_parameter.log_alpha() * (curr_log_prob.sum(-1).detach() + target_entropy));
+    const auto entropy_loss =
+        -torch::mean(entropy_parameter.log_alpha() * (curr_log_prob.detach() + target_entropy));
 
     entropy_optimizer.zero_grad();
     entropy_loss.backward();
