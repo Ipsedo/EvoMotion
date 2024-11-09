@@ -154,7 +154,7 @@ void SoftActorCritic::train(
 
     // entropy
     const auto entropy_loss = -torch::mean(
-        entropy_parameter.log_alpha() * (curr_log_prob.sum(-1) + target_entropy).detach());
+        entropy_parameter.log_alpha() * (curr_log_prob.sum(-1).detach() + target_entropy));
 
     entropy_optimizer.zero_grad();
     entropy_loss.backward();
