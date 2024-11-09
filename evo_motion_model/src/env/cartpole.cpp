@@ -11,9 +11,8 @@
 CartPole::CartPole(
     int seed, float slider_speed, float slider_force, float chariot_push_force, float limit_angle,
     int reset_frame_nb, float chariot_mass, float pendulum_mass, int max_steps)
-    : slider_speed(slider_speed), slider_force(slider_force),
-      chariot_push_force(chariot_push_force), limit_angle(limit_angle),
-      reset_frame_nb(reset_frame_nb), chariot_mass(chariot_mass), pendulum_mass(pendulum_mass),
+    : chariot_push_force(chariot_push_force), limit_angle(limit_angle),
+      reset_frame_nb(reset_frame_nb),
       rng(seed), rd_uni(0.f, 1.f), step_idx(0), max_steps(max_steps), last_ang_vel(0.f),
       last_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;

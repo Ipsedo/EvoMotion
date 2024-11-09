@@ -34,17 +34,11 @@ protected:
     void reset_engine() override;
 
 private:
-    float slider_speed;
-    float slider_force;
-
     float chariot_push_force;
 
     float limit_angle;
 
     int reset_frame_nb;
-
-    float chariot_mass;
-    float pendulum_mass;
 
     float chariot_pos;
     float pendulum_pos;

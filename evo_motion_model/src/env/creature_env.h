@@ -16,7 +16,7 @@
 class RobotWalk final : public Environment {
 public:
     explicit RobotWalk(
-        int seed, std::string skeleton_json_path, float initial_remaining_seconds,
+        int seed, const std::string& skeleton_json_path, float initial_remaining_seconds,
         float max_episode_seconds, float target_velocity, float minimal_velocity, int reset_frames);
 
     std::vector<Item> get_items() override;
@@ -49,7 +49,6 @@ private:
     std::vector<std::shared_ptr<State>> states;
 
     float initial_remaining_seconds;
-    float max_episode_seconds;
 
     float target_velocity;
     float minimal_velocity;

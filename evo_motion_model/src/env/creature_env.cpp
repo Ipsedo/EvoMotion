@@ -14,7 +14,7 @@
 #include <glm/gtx/euler_angles.hpp>
 
 RobotWalk::RobotWalk(
-    const int seed, std::string skeleton_json_path, float initial_remaining_seconds,
+    const int seed, const std::string& skeleton_json_path, float initial_remaining_seconds,
     float max_episode_seconds, float target_velocity, float minimal_velocity, int reset_frames)
     : rng(seed), rd_uni(0.f, 1.f),
       base(
@@ -24,7 +24,7 @@ RobotWalk::RobotWalk(
       skeleton_json_path(skeleton_json_path), skeleton(skeleton_json_path, "robot", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path),
       initial_remaining_seconds(initial_remaining_seconds),
-      max_episode_seconds(max_episode_seconds), target_velocity(target_velocity),
+      target_velocity(target_velocity),
       minimal_velocity(minimal_velocity), reset_frames(reset_frames), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)) {

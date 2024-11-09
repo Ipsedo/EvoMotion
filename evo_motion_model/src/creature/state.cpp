@@ -25,11 +25,11 @@ torch::Tensor ItemProprioceptionState::get_state() {
     btScalar yaw, pitch, roll;
     state_item.get_body()->getWorldTransform().getRotation().getEulerZYX(yaw, pitch, roll);
 
-    const btVector3 center_lin_velocity = state_item.get_body()->getLinearVelocity();
-    const btVector3 center_ang_velocity = state_item.get_body()->getAngularVelocity();
+    //const btVector3 center_lin_velocity = state_item.get_body()->getLinearVelocity();
+    //const btVector3 center_ang_velocity = state_item.get_body()->getAngularVelocity();
 
-    const btVector3 force = state_item.get_body()->getTotalForce();
-    const btVector3 torque = state_item.get_body()->getTotalTorque();
+    //const btVector3 force = state_item.get_body()->getTotalForce();
+    //const btVector3 torque = state_item.get_body()->getTotalTorque();
 
     float touched = floor_touched ? 1.f : 0.f;
     floor_touched = false;

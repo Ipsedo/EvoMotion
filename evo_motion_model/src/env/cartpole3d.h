@@ -34,9 +34,6 @@ protected:
 private:
     int reset_frame_nb;
 
-    float slider_force_per_kg;
-    float slider_speed;
-
     float chariot_push_force;
 
     btVector3 cart_x_scale;
@@ -49,9 +46,6 @@ private:
     btVector3 cart_z_pos;
     btVector3 pole_pos;
 
-    float cart_x_mass;
-    float cart_z_mass;
-    float pole_mass;
     float base_mass;
 
     btRigidBody *cart_x_rg;
