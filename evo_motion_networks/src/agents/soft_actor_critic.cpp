@@ -111,8 +111,8 @@ void SoftActorCritic::train(
     auto target_q_values =
         (batched_rewards
          + gamma * (1.f - torch::slice(batched_dones, 1, 1))
-               * (torch::slice(batched_target_values, 1, 1)
-                  - entropy_parameter.alpha() * torch::slice(log_prob.sum(-1), 1, 1)))
+         * (torch::slice(batched_target_values, 1, 1)
+            - entropy_parameter.alpha() * torch::slice(log_prob.sum(-1), 1, 1)))
             .detach();
     target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
@@ -137,7 +137,8 @@ void SoftActorCritic::train(
     // value
     const auto q_value_min = torch::min(batched_q_values_1, batched_q_values_2);
     auto target_v_value =
-        (q_value_min - entropy_parameter.alpha() * torch::slice(log_prob.sum(-1), 1, 0, log_prob.size(1) - 1)).detach();
+        (q_value_min - entropy_parameter.alpha() * torch::slice(
+             log_prob.sum(-1), 1, 0, log_prob.size(1) - 1)).detach();
     target_v_value = (target_v_value - target_v_value.mean()) / (target_v_value.std() + 1e-8);
 
     const auto value_loss = torch::mse_loss(batched_values, target_v_value, at::Reduction::Mean);
@@ -212,8 +213,10 @@ void SoftActorCritic::done(torch::Tensor state, float reward) {
 
             actions_per_episode.push_back(torch::pad(torch::stack(actions_buffer), {0, 0, 0, pad}));
 
-            q_values_1_per_episode.push_back(torch::pad(torch::cat(q_value_1_buffer), {0, std::max(pad - 1, 0)}));
-            q_values_2_per_episode.push_back(torch::pad(torch::cat(q_value_2_buffer), {0, std::max(pad - 1, 0)}));
+            q_values_1_per_episode.push_back(
+                torch::pad(torch::cat(q_value_1_buffer), {0, std::max(pad - 1, 0)}));
+            q_values_2_per_episode.push_back(
+                torch::pad(torch::cat(q_value_2_buffer), {0, std::max(pad - 1, 0)}));
 
             values_per_episode.push_back(torch::pad(torch::cat(value_buffer), {0, std::max(pad - 1, 0)}));
             target_values_per_episode.push_back(
@@ -223,8 +226,9 @@ void SoftActorCritic::done(torch::Tensor state, float reward) {
             sigmas_per_episode.push_back(
                 torch::pad(torch::stack(sigma_buffer), {0, 0, 0, pad}, "constant", 1.f));
 
-            rewards_per_episode.push_back(torch::pad(
-                torch::tensor(rewards_buffer, at::TensorOptions().device(curr_device)), {0, std::max(pad - 1, 0)}));
+            rewards_per_episode.push_back(
+                torch::pad(
+                    torch::tensor(rewards_buffer, at::TensorOptions().device(curr_device)), {0, std::max(pad - 1, 0)}));
 
             dones_per_episode.push_back(torch::pad(
                 torch::tensor(done_buffer, at::TensorOptions().device(curr_device)), {0, pad},
