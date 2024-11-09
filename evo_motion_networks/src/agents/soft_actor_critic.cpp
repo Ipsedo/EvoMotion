@@ -109,11 +109,15 @@ void SoftActorCritic::train(
     const auto log_prob =
         truncated_normal_pdf(batched_actions, batched_mus, batched_sigmas, -1.f, 1.f);
 
+    const auto curr_log_prob = torch::slice(log_prob, 1, 0, log_prob.size(1) - 1);
+    const auto next_log_prob = torch::slice(log_prob, 1, 1);
+
+    const auto next_target_value = torch::slice(batched_target_values, 1, 1);
+
     auto target_q_values =
         (batched_rewards
          + gamma * (1.f - batched_dones)
-               * (torch::slice(batched_target_values, 1, 1)
-                  - entropy_parameter.alpha() * torch::slice(log_prob.sum(-1), 1, 1)))
+               * (next_target_value - entropy_parameter.alpha() * next_log_prob.sum(-1)))
             .detach();
     target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
@@ -136,9 +140,7 @@ void SoftActorCritic::train(
     // value
     const auto q_value_min = torch::min(batched_q_values_1, batched_q_values_2);
     auto target_v_value =
-        (q_value_min
-         - entropy_parameter.alpha() * torch::slice(log_prob.sum(-1), 1, 0, log_prob.size(1) - 1))
-            .detach();
+        (q_value_min - entropy_parameter.alpha() * curr_log_prob.sum(-1)).detach();
     target_v_value = (target_v_value - target_v_value.mean()) / (target_v_value.std() + 1e-8);
 
     const auto value_loss = torch::mse_loss(batched_values, target_v_value, at::Reduction::Mean);
@@ -149,9 +151,7 @@ void SoftActorCritic::train(
 
     // actor
     const auto actor_loss = torch::mean(
-        entropy_parameter.alpha().detach()
-            * torch::slice(log_prob, 1, 0, log_prob.size(1) - 1).sum(-1)
-        - q_value_min.detach());
+        entropy_parameter.alpha().detach() * curr_log_prob.sum(-1) - q_value_min.detach());
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
@@ -159,8 +159,7 @@ void SoftActorCritic::train(
 
     // entropy
     const auto entropy_loss = -torch::mean(
-        entropy_parameter.log_alpha()
-        * (torch::slice(log_prob, 1, 0, log_prob.size(1) - 1).sum(-1) + target_entropy).detach());
+        entropy_parameter.log_alpha() * (curr_log_prob.sum(-1) + target_entropy).detach());
 
     entropy_optimizer.zero_grad();
     entropy_loss.backward();
