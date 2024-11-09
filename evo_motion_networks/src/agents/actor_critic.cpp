@@ -229,7 +229,7 @@ void ActorCritic::train(
     return first_entropy_factor * std::exp(-lambda * static_cast<float>(curr_train_step));
 }*/
 
-void ActorCritic::done(const float reward) {
+void ActorCritic::done(torch::Tensor state, const float reward) {
     episodes_buffer.back().rewards_buffer.push_back(reward);
     episodes_buffer.back().rewards_buffer.erase(episodes_buffer.back().rewards_buffer.begin());
 
