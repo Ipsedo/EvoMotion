@@ -2,17 +2,15 @@
 // Created by samuel on 19/09/24.
 //
 
-#include "./agent_factory.h"
-
 #include <memory>
 #include <utility>
 
 #include <evo_motion_networks/agent.h>
-
-#include "./actor_critic.h"
-#include "./actor_critic_liquid.h"
-#include "./debug_agents.h"
-#include "./soft_actor_critic.h"
+#include <evo_motion_networks/agent_factory.h>
+#include <evo_motion_networks/agents/actor_critic.h>
+#include <evo_motion_networks/agents/actor_critic_liquid.h>
+#include <evo_motion_networks/agents/debug_agents.h>
+#include <evo_motion_networks/agents/soft_actor_critic.h>
 
 // Abstract
 
@@ -78,7 +76,7 @@ ConstantAgentFactory::ConstantAgentFactory(const std::map<std::string, std::stri
 
 std::shared_ptr<Agent> ActorCriticFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
-    return std::make_shared<ActorCritic>(
+    return std::make_shared<ActorCriticAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
         get_value<float>("entropy_start_factor"), get_value<float>("entropy_end_factor"),
@@ -90,7 +88,7 @@ ActorCriticFactory::ActorCriticFactory(const std::map<std::string, std::string> 
 
 std::shared_ptr<Agent> ActorCriticLiquidFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
-    return std::make_shared<ActorCriticLiquid>(
+    return std::make_shared<ActorCriticLiquidAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
         get_value<float>("entropy_start_factor"), get_value<float>("entropy_end_factor"),
@@ -106,7 +104,7 @@ SofActorCriticFactory::SofActorCriticFactory(const std::map<std::string, std::st
 
 std::shared_ptr<Agent> SofActorCriticFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
-    return std::make_shared<SoftActorCritic>(
+    return std::make_shared<SoftActorCriticAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
         get_value<float>("tau"));
@@ -118,7 +116,7 @@ SofActorCriticLiquidFactory::SofActorCriticLiquidFactory(
 
 std::shared_ptr<Agent> SofActorCriticLiquidFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
-    return std::make_shared<SoftActorCriticLiquid>(
+    return std::make_shared<SoftActorCriticLiquidAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
         get_value<float>("tau"), get_value<int>("unfolding_steps"));

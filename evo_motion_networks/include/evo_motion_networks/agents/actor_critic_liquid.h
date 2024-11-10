@@ -36,9 +36,9 @@ private:
 
 // shared layers
 
-class ActorCriticLiquidNetwork final : public AbstractActorCritic {
+class ActorCriticLiquidModule final : public AbstractActorCritic {
 public:
-    ActorCriticLiquidNetwork(
+    ActorCriticLiquidModule(
         const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
         int unfolding_steps);
 
@@ -57,9 +57,9 @@ private:
 
 // separated networks
 
-class ActorLiquidNetwork : public AbstractActor {
+class ActorLiquidModule : public AbstractActor {
 public:
-    ActorLiquidNetwork(
+    ActorLiquidModule(
         const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
         int unfolding_steps);
 
@@ -74,9 +74,9 @@ private:
     torch::nn::Sequential sigma{nullptr};
 };
 
-class CriticLiquidNetwork : public AbstractCritic {
+class CriticLiquidModule : public AbstractCritic {
 public:
-    CriticLiquidNetwork(
+    CriticLiquidModule(
         const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);
 
     void reset_liquid() const;
@@ -88,9 +88,9 @@ private:
     torch::nn::Linear critic{nullptr};
 };
 
-class QNetworkLiquid : public AbstractQNetwork {
+class QNetworkLiquidModule : public AbstractQNetwork {
 public:
-    QNetworkLiquid(
+    QNetworkLiquidModule(
         const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
         int unfolding_steps);
 
@@ -105,9 +105,9 @@ private:
 
 // Agent
 
-class ActorCriticLiquid final : public ActorCritic {
+class ActorCriticLiquidAgent final : public ActorCriticAgent {
 public:
-    ActorCriticLiquid(
+    ActorCriticLiquidAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, int batch_size, float lr, float gamma, float entropy_start_factor,
         float entropy_end_factor, long entropy_steps, int unfolding_steps);
@@ -115,9 +115,9 @@ public:
     void done(torch::Tensor state, float reward) override;
 };
 
-class SoftActorCriticLiquid : public SoftActorCritic {
+class SoftActorCriticLiquidAgent : public SoftActorCriticAgent {
 public:
-    SoftActorCriticLiquid(
+    SoftActorCriticLiquidAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, int batch_size, float lr, float gamma, float tau, int unfolding_steps);
 

@@ -2,17 +2,16 @@
 // Created by samuel on 08/11/24.
 //
 
-#include "./soft_actor_critic.h"
-
 #include <filesystem>
 
-#include "../functions.h"
+#include <evo_motion_networks/agents/soft_actor_critic.h>
+#include <evo_motion_networks/functions.h>
 
 /*
  * Torch module
  */
 
-QNetwork::QNetwork(
+QNetworkModule::QNetworkModule(
     std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {
     q_network = register_module(
         "q_network",
@@ -31,7 +30,7 @@ QNetwork::QNetwork(
             torch::nn::Linear(hidden_size, 1)));
 }
 
-critic_response QNetwork::forward(const torch::Tensor &state, const torch::Tensor &action) {
+critic_response QNetworkModule::forward(const torch::Tensor &state, const torch::Tensor &action) {
     return {q_network->forward(torch::cat({state, action}, 0).unsqueeze(0)).squeeze(0)};
 }
 
@@ -47,14 +46,14 @@ torch::Tensor EntropyParameter::alpha() { return log_alpha().exp(); }
  * Agents
  */
 
-SoftActorCritic::SoftActorCritic(
+SoftActorCriticAgent::SoftActorCriticAgent(
     int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
     int hidden_size, int batch_size, float lr, float gamma, float tau)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
-      critic_1(std::make_shared<QNetwork>(state_space, action_space, hidden_size)),
-      critic_2(std::make_shared<QNetwork>(state_space, action_space, hidden_size)),
-      target_critic_1(std::make_shared<QNetwork>(state_space, action_space, hidden_size)),
-      target_critic_2(std::make_shared<QNetwork>(state_space, action_space, hidden_size)),
+      critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
+      critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
+      target_critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
+      target_critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
@@ -79,7 +78,7 @@ SoftActorCritic::SoftActorCritic(
     }
 }
 
-torch::Tensor SoftActorCritic::act(torch::Tensor state, float reward) {
+torch::Tensor SoftActorCriticAgent::act(torch::Tensor state, float reward) {
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
@@ -104,7 +103,7 @@ torch::Tensor SoftActorCritic::act(torch::Tensor state, float reward) {
     return action;
 }
 
-void SoftActorCritic::train(
+void SoftActorCriticAgent::train(
     const torch::Tensor &batched_actions, const torch::Tensor &batched_q_values_1,
     const torch::Tensor &batched_q_values_2, const torch::Tensor &batched_target_q_values_1,
     const torch::Tensor &batched_target_q_values_2, const torch::Tensor &batched_mus,
@@ -185,7 +184,7 @@ void SoftActorCritic::train(
     curr_train_step++;
 }
 
-void SoftActorCritic::done(torch::Tensor state, float reward) {
+void SoftActorCriticAgent::done(torch::Tensor state, float reward) {
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
@@ -260,7 +259,7 @@ void SoftActorCritic::done(torch::Tensor state, float reward) {
     curr_episode_step = 0;
 }
 
-void SoftActorCritic::save(const std::string &output_folder_path) {
+void SoftActorCriticAgent::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
     // actor
@@ -328,7 +327,7 @@ void SoftActorCritic::save(const std::string &output_folder_path) {
     entropy_optimizer_archive.save_to(entropy_optimizer_file);
 }
 
-void SoftActorCritic::load(const std::string &input_folder_path) {
+void SoftActorCriticAgent::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
     // actor
@@ -396,13 +395,13 @@ void SoftActorCritic::load(const std::string &input_folder_path) {
     entropy_optimizer.load(entropy_optimizer_archive);
 }
 
-std::vector<LossMeter> SoftActorCritic::get_metrics() {
+std::vector<LossMeter> SoftActorCriticAgent::get_metrics() {
     return {
         actor_loss_meter, critic_1_loss_meter, critic_2_loss_meter, entropy_loss_meter,
         episode_steps_meter};
 }
 
-void SoftActorCritic::to(torch::DeviceType device) {
+void SoftActorCriticAgent::to(torch::DeviceType device) {
     curr_device = device;
     actor->to(device);
     critic_1->to(device);
@@ -412,7 +411,7 @@ void SoftActorCritic::to(torch::DeviceType device) {
     entropy_parameter.to(device);
 }
 
-void SoftActorCritic::set_eval(bool eval) {
+void SoftActorCriticAgent::set_eval(bool eval) {
     if (eval) {
         actor->eval();
         critic_1->eval();
@@ -430,7 +429,7 @@ void SoftActorCritic::set_eval(bool eval) {
     }
 }
 
-int SoftActorCritic::count_parameters() {
+int SoftActorCriticAgent::count_parameters() {
     int count = 0;
     for (const auto &p: actor->parameters()) {
         auto sizes = p.sizes();

@@ -28,9 +28,10 @@ public:
     virtual critic_response forward(const torch::Tensor &state, const torch::Tensor &action) = 0;
 };
 
-class QNetwork : public AbstractQNetwork {
+class QNetworkModule : public AbstractQNetwork {
 public:
-    QNetwork(std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
+    QNetworkModule(
+        std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
 
     critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
 
@@ -45,7 +46,7 @@ public:
     torch::Tensor alpha();
 };
 
-class SoftActorCritic : public Agent {
+class SoftActorCriticAgent : public Agent {
 protected:
     std::shared_ptr<AbstractActor> actor;
     std::shared_ptr<AbstractQNetwork> critic_1;
@@ -86,7 +87,7 @@ private:
         const torch::Tensor &batched_done);
 
 public:
-    SoftActorCritic(
+    SoftActorCriticAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, int batch_size, float lr, float gamma, float tau);
 

@@ -101,7 +101,7 @@ private:
 
 // Agent
 
-class ActorCritic : public Agent {
+class ActorCriticAgent : public Agent {
 protected:
     std::shared_ptr<AbstractActor> actor;
     std::shared_ptr<torch::optim::Optimizer> actor_optimizer;
@@ -137,7 +137,7 @@ private:
         const torch::Tensor &batched_rewards);
 
 public:
-    ActorCritic(
+    ActorCriticAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, int batch_size, float lr, float gamma, float entropy_start_factor,
         float entropy_end_factor, long entropy_steps);

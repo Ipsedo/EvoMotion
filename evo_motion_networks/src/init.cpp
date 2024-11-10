@@ -2,7 +2,7 @@
 // Created by samuel on 04/05/24.
 //
 
-#include "./init.h"
+#include <evo_motion_networks/init.h>
 
 void init_weights(torch::nn::Module &module) {
     if (typeid(module) == typeid(torch::nn::Linear)) {

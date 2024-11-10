@@ -9,7 +9,7 @@
 
 class DebugAgent : public Agent {
 public:
-    DebugAgent(const std::vector<int64_t> &action_space);
+    explicit DebugAgent(const std::vector<int64_t> &action_space);
 
     void done(torch::Tensor state, float reward) override;
 
@@ -33,14 +33,14 @@ protected:
 
 class RandomAgent final : public DebugAgent {
 public:
-    RandomAgent(const std::vector<int64_t> &action_space);
+    explicit RandomAgent(const std::vector<int64_t> &action_space);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 };
 
 class ConstantAgent final : public DebugAgent {
 public:
-    ConstantAgent(const std::vector<int64_t> &action_space);
+    explicit ConstantAgent(const std::vector<int64_t> &action_space);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 };

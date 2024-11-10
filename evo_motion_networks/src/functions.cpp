@@ -2,9 +2,9 @@
 // Created by samuel on 07/04/24.
 //
 
-#include "./functions.h"
-
 #include <cmath>
+
+#include <evo_motion_networks/functions.h>
 
 torch::Tensor rand_eps(const torch::Tensor &tensor_like, float epsilon) {
     return epsilon

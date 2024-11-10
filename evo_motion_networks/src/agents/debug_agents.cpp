@@ -2,7 +2,7 @@
 // Created by samuel on 14/04/24.
 //
 
-#include "./debug_agents.h"
+#include <evo_motion_networks/agents/debug_agents.h>
 
 // Debug agent
 DebugAgent::DebugAgent(const std::vector<int64_t> &action_space)

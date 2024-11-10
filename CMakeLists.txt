@@ -9,6 +9,10 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_view")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_networks")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_model")
 
+# add evo_motion tests submodule
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_networks/tests")
+# add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests")
+
 # FetchContent -> get libraries from git
 include(FetchContent)
 

@@ -2,15 +2,14 @@
 // Created by samuel on 19/12/22.
 //
 
-#include "./actor_critic.h"
-
 #include <algorithm>
 #include <filesystem>
 #include <numeric>
 
 #include <torch/torch.h>
 
-#include "../functions.h"
+#include <evo_motion_networks/agents/actor_critic.h>
+#include <evo_motion_networks/functions.h>
 
 /*
  * torch Module
@@ -135,7 +134,7 @@ critic_response CriticModule::forward(const torch::Tensor &state) {
  * Agent class
  */
 
-ActorCritic::ActorCritic(
+ActorCriticAgent::ActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
     const float gamma, const float entropy_start_factor, float entropy_end_factor,
@@ -154,7 +153,7 @@ ActorCritic::ActorCritic(
     at::manual_seed(seed);
 }
 
-torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
+torch::Tensor ActorCriticAgent::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma] = actor->forward(state);
     const auto [value] = critic->forward(state);
 
@@ -171,7 +170,7 @@ torch::Tensor ActorCritic::act(const torch::Tensor state, const float reward) {
     return action;
 }
 
-void ActorCritic::train(
+void ActorCriticAgent::train(
     const torch::Tensor &batched_actions, const torch::Tensor &batched_values,
     const torch::Tensor &batched_mus, const torch::Tensor &batched_sigmas,
     const torch::Tensor &batched_rewards) {
@@ -229,7 +228,7 @@ void ActorCritic::train(
     return first_entropy_factor * std::exp(-lambda * static_cast<float>(curr_train_step));
 }*/
 
-void ActorCritic::done(torch::Tensor state, const float reward) {
+void ActorCriticAgent::done(torch::Tensor state, const float reward) {
     episodes_buffer.back().rewards_buffer.push_back(reward);
     episodes_buffer.back().rewards_buffer.erase(episodes_buffer.back().rewards_buffer.begin());
 
@@ -275,7 +274,7 @@ void ActorCritic::done(torch::Tensor state, const float reward) {
     curr_episode_step = 0;
 }
 
-void ActorCritic::save(const std::string &output_folder_path) {
+void ActorCriticAgent::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
     // actor
@@ -305,7 +304,7 @@ void ActorCritic::save(const std::string &output_folder_path) {
     critic_optimizer_archive.save_to(critic_optimizer_file);
 }
 
-void ActorCritic::load(const std::string &input_folder_path) {
+void ActorCriticAgent::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
     // actor
@@ -335,18 +334,18 @@ void ActorCritic::load(const std::string &input_folder_path) {
     critic_optimizer->load(critic_optimizer_archive);
 }
 
-std::vector<LossMeter> ActorCritic::get_metrics() {
+std::vector<LossMeter> ActorCriticAgent::get_metrics() {
     return {policy_loss_meter, entropy_meter,     critic_loss_meter,
             actor_grad_meter,  critic_grad_meter, episode_steps_meter};
 }
 
-void ActorCritic::to(const torch::DeviceType device) {
+void ActorCriticAgent::to(const torch::DeviceType device) {
     curr_device = device;
     actor->to(curr_device);
     critic->to(curr_device);
 }
 
-void ActorCritic::set_eval(const bool eval) {
+void ActorCriticAgent::set_eval(const bool eval) {
     if (eval) {
         actor->eval();
         critic->eval();
@@ -356,7 +355,7 @@ void ActorCritic::set_eval(const bool eval) {
     }
 }
 
-int ActorCritic::count_parameters() {
+int ActorCriticAgent::count_parameters() {
     int count = 0;
     for (const auto &p: actor->parameters()) {
         auto sizes = p.sizes();
