@@ -11,7 +11,7 @@
  * Liquid Cell
  */
 
-TEST_P(ParamLiquidCellModule, TestLiquidCellFun) {
+TEST_P(ParamLiquidCellModule, TestLiquidCell) {
     const int input_size = std::get<0>(GetParam());
     const int neuron_number = std::get<1>(GetParam());
     const int unfolding_steps = std::get<2>(GetParam());
@@ -40,7 +40,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Actor
 
-TEST_P(ParamLiquidModule, TestLiquidActorFun) {
+TEST_P(ParamLiquidModule, TestLiquidActor) {
     const int state_space = std::get<0>(GetParam());
     const int hidden_space = std::get<1>(GetParam());
     const int action_space = std::get<2>(GetParam());
@@ -62,15 +62,9 @@ TEST_P(ParamLiquidModule, TestLiquidActorFun) {
     ASSERT_TRUE(torch::all(sigma > 0).item().toBool());
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestLiquidActor, ParamLiquidModule,
-    testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 3), testing::Values(1, 2, 100),
-        testing::Values(1, 2, 3)));
-
 // Critic
 
-TEST_P(ParamLiquidModule, TestLiquidCriticFun) {
+TEST_P(ParamLiquidModule, TestLiquidCritic) {
     const int state_space = std::get<0>(GetParam());
     const int hidden_space = std::get<1>(GetParam());
     const int unfolding_steps = std::get<3>(GetParam());
@@ -84,15 +78,9 @@ TEST_P(ParamLiquidModule, TestLiquidCriticFun) {
     ASSERT_EQ(out.size(0), 1);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestLiquidCritic, ParamLiquidModule,
-    testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 3), testing::Values(1, 2, 100),
-        testing::Values(1, 2, 3)));
-
 // QNetwork
 
-TEST_P(ParamLiquidModule, TestLiquidQNetworkFun) {
+TEST_P(ParamLiquidModule, TestLiquidQNetwork) {
     const int state_space = std::get<0>(GetParam());
     const int hidden_space = std::get<1>(GetParam());
     const int action_space = std::get<2>(GetParam());
@@ -110,7 +98,7 @@ TEST_P(ParamLiquidModule, TestLiquidQNetworkFun) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TestLiquidQNetwork, ParamLiquidModule,
+    TestLiquid, ParamLiquidModule,
     testing::Combine(
         testing::Values(1, 2, 3), testing::Values(1, 2, 3), testing::Values(1, 2, 100),
         testing::Values(1, 2, 3)));

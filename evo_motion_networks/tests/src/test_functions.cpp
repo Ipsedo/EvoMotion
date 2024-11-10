@@ -36,9 +36,7 @@ INSTANTIATE_TEST_SUITE_P(
  * Test normal dist
  */
 
-// PDF Normal
-
-TEST_P(ParamTestNormal, TestNormalPDFFun) {
+TEST_P(ParamTestNormal, TestPDF) {
     const auto sizes = GetParam();
 
     const auto x = torch::randn(sizes);
@@ -54,14 +52,7 @@ TEST_P(ParamTestNormal, TestNormalPDFFun) {
     ASSERT_TRUE(torch::all(out >= 0.f).item().toBool());
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestNormalPDF, ParamTestNormal,
-    testing::Values(
-        std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{9}, std::vector<int64_t>{2, 6}));
-
-// CDF Normal
-
-TEST_P(ParamTestNormal, TestNormalCDFFun) {
+TEST_P(ParamTestNormal, TestCDF) {
     const auto sizes = GetParam();
 
     const auto x = torch::randn(sizes);
@@ -79,7 +70,7 @@ TEST_P(ParamTestNormal, TestNormalCDFFun) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TestNormalCDF, ParamTestNormal,
+    TestNormal, ParamTestNormal,
     testing::Values(
         std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{9}, std::vector<int64_t>{2, 6}));
 
@@ -89,7 +80,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 // Sample
 
-TEST_P(ParamTestTruncNormal, TestTruncNormalSampleFun) {
+TEST_P(ParamTestTruncNormal, TestSample) {
     const auto sizes = std::get<0>(GetParam());
     const float min_value = std::get<1>(GetParam());
     const float max_value = std::get<2>(GetParam());
@@ -105,16 +96,9 @@ TEST_P(ParamTestTruncNormal, TestTruncNormalSampleFun) {
     ASSERT_TRUE(torch::all(out <= max_value).item().toBool());
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestTruncNormalSample, ParamTestTruncNormal,
-    testing::Combine(
-        testing::Values(
-            std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{9}, std::vector<int64_t>{2, 6}),
-        testing::Values(-2.f, -1.f, -0.1f), testing::Values(0.1f, 1.f, 2.f)));
-
 // PDF
 
-TEST_P(ParamTestTruncNormal, TestTruncNormalPDFFun) {
+TEST_P(ParamTestTruncNormal, TestPDF) {
     const auto sizes = std::get<0>(GetParam());
     const float min_value = std::get<1>(GetParam());
     const float max_value = std::get<2>(GetParam());
@@ -130,16 +114,9 @@ TEST_P(ParamTestTruncNormal, TestTruncNormalPDFFun) {
     ASSERT_TRUE(torch::all(out >= 0.f).item().toBool());
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestTruncNormalPDF, ParamTestTruncNormal,
-    testing::Combine(
-        testing::Values(
-            std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{9}, std::vector<int64_t>{2, 6}),
-        testing::Values(-2.f, -1.f, -0.1f), testing::Values(0.1f, 1.f, 2.f)));
-
 // Entropy
 
-TEST_P(ParamTestTruncNormal, TestTruncNormalEntropyFun) {
+TEST_P(ParamTestTruncNormal, TestEntropy) {
     const auto sizes = std::get<0>(GetParam());
     const float min_value = std::get<1>(GetParam());
     const float max_value = std::get<2>(GetParam());
@@ -153,7 +130,7 @@ TEST_P(ParamTestTruncNormal, TestTruncNormalEntropyFun) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TestTruncNormalEntropy, ParamTestTruncNormal,
+    TestTruncNormal, ParamTestTruncNormal,
     testing::Combine(
         testing::Values(
             std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{9}, std::vector<int64_t>{2, 6}),

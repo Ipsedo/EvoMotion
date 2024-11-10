@@ -10,7 +10,7 @@
 
 // Actor
 
-TEST_P(ParamLinearModule, TestActorModuleFun) {
+TEST_P(ParamLinearModule, TestActorModule) {
     const int state_space = std::get<0>(GetParam());
     const int hidden_size = std::get<1>(GetParam());
     const int action_space = std::get<2>(GetParam());
@@ -30,14 +30,9 @@ TEST_P(ParamLinearModule, TestActorModuleFun) {
     ASSERT_TRUE(torch::all(sigma > 0).item().toBool());
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestActorModule, ParamLinearModule,
-    testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 3), testing::Values(1, 2, 100)));
-
 // Critic
 
-TEST_P(ParamLinearModule, TestCriticModuleFun) {
+TEST_P(ParamLinearModule, TestCriticModule) {
     const int state_space = std::get<0>(GetParam());
     const int hidden_size = std::get<1>(GetParam());
 
@@ -50,14 +45,9 @@ TEST_P(ParamLinearModule, TestCriticModuleFun) {
     ASSERT_EQ(out.size(0), 1);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestCriticModule, ParamLinearModule,
-    testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 3), testing::Values(1, 2, 100)));
-
 // Q-Network
 
-TEST_P(ParamLinearModule, TestQNetworkModuleFun) {
+TEST_P(ParamLinearModule, TestQNetworkModule) {
     const int state_space = std::get<0>(GetParam());
     const int hidden_size = std::get<1>(GetParam());
     const int action_space = std::get<2>(GetParam());
@@ -74,6 +64,6 @@ TEST_P(ParamLinearModule, TestQNetworkModuleFun) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TestQNetworkModule, ParamLinearModule,
+    TestLinearModule, ParamLinearModule,
     testing::Combine(
         testing::Values(1, 2, 3), testing::Values(1, 2, 3), testing::Values(1, 2, 100)));

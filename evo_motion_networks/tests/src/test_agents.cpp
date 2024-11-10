@@ -11,7 +11,7 @@
 
 // Actor Critic
 
-TEST_P(ParamActorCriticAgent, TestActorCriticAgentFun) {
+TEST_P(ParamActorCriticAgent, TestActorCritic) {
     const int state_space = std::get<0>(GetParam());
     const int action_space = std::get<1>(GetParam());
     const int hidden_size = std::get<2>(GetParam());
@@ -37,15 +37,9 @@ TEST_P(ParamActorCriticAgent, TestActorCriticAgentFun) {
     for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestActorCriticAgent, ParamActorCriticAgent,
-    testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 100), testing::Values(1, 2, 3),
-        testing::Values(1, 2, 3)));
-
 // Soft Actor Critic
 
-TEST_P(ParamActorCriticAgent, TestSoftActorCriticAgentFun) {
+TEST_P(ParamActorCriticAgent, TestSoftActorCritic) {
     const int state_space = std::get<0>(GetParam());
     const int action_space = std::get<1>(GetParam());
     const int hidden_size = std::get<2>(GetParam());
@@ -71,15 +65,9 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCriticAgentFun) {
     for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestSoftActorCriticAgent, ParamActorCriticAgent,
-    testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 100), testing::Values(1, 2, 3),
-        testing::Values(1, 2, 3)));
-
 // Actor Critic Liquid
 
-TEST_P(ParamActorCriticAgent, TestActorCriticLiquidAgentFun) {
+TEST_P(ParamActorCriticAgent, TestActorCriticLiquid) {
     const int state_space = std::get<0>(GetParam());
     const int action_space = std::get<1>(GetParam());
     const int hidden_size = std::get<2>(GetParam());
@@ -105,15 +93,9 @@ TEST_P(ParamActorCriticAgent, TestActorCriticLiquidAgentFun) {
     for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TestActorCriticLiquidAgent, ParamActorCriticAgent,
-    testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 100), testing::Values(1, 2, 3),
-        testing::Values(1, 2, 3)));
-
 // Soft Actor Critic Liquid
 
-TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquidAgentFun) {
+TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquid) {
     const int state_space = std::get<0>(GetParam());
     const int action_space = std::get<1>(GetParam());
     const int hidden_size = std::get<2>(GetParam());
@@ -140,7 +122,7 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquidAgentFun) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TestSoftActorCriticLiquidAgent, ParamActorCriticAgent,
+    TestAgent, ParamActorCriticAgent,
     testing::Combine(
         testing::Values(1, 2, 3), testing::Values(1, 2, 100), testing::Values(1, 2, 3),
         testing::Values(1, 2, 3)));
