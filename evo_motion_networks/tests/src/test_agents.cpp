@@ -121,6 +121,8 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquid) {
     for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
 }
 
+// Create parametrized tests
+
 INSTANTIATE_TEST_SUITE_P(
     TestAgent, ParamActorCriticAgent,
     testing::Combine(

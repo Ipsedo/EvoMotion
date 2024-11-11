@@ -123,8 +123,6 @@ private:
     LossMeter policy_loss_meter;
     LossMeter entropy_meter;
     LossMeter critic_loss_meter;
-    LossMeter actor_grad_meter;
-    LossMeter critic_grad_meter;
     LossMeter episode_steps_meter;
 
     int curr_episode_step;

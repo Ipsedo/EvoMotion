@@ -101,9 +101,24 @@ ActorModule::ActorModule(
 }
 
 actor_response ActorModule::forward(const torch::Tensor &state) {
-    auto head_out = head->forward(state.unsqueeze(0));
+    bool only_one = false;
+    torch::Tensor out_head;
+    if (state.sizes().size() == 1) {
+        out_head = state.unsqueeze(0);
+        only_one = true;
+    }
+    else out_head = state;
 
-    return {mu->forward(head_out).squeeze(0), sigma->forward(head_out).squeeze(0)};
+    auto head_out = head->forward(out_head);
+    auto out_mu = mu->forward(head_out);
+    auto out_sigma = sigma->forward(head_out);
+
+    if (only_one) {
+        out_mu = out_mu.squeeze(0);
+        out_sigma = out_sigma.squeeze(0);
+    }
+
+    return {out_mu, out_sigma};
 }
 
 // separated networks - critic
@@ -127,7 +142,20 @@ CriticModule::CriticModule(std::vector<int64_t> state_space, int hidden_size) {
 }
 
 critic_response CriticModule::forward(const torch::Tensor &state) {
-    return {critic->forward(state.unsqueeze(0)).squeeze(0)};
+    bool only_one = false;
+    torch::Tensor in_critic;
+    if (state.sizes().size() == 1) {
+        in_critic = state.unsqueeze(0);
+        only_one = true;
+    }
+    else in_critic = state;
+
+    auto out_critic = critic->forward(in_critic);
+
+    if (only_one) {
+        out_critic = out_critic.squeeze(0);
+    }
+    return {out_critic};
 }
 
 /*
@@ -147,8 +175,7 @@ ActorCriticAgent::ActorCriticAgent(
       entropy_end_factor(entropy_end_factor), entropy_steps(entropy_steps),
       curr_device(torch::kCPU), batch_size(batch_size), episodes_buffer({{}}),
       policy_loss_meter("policy", 64), entropy_meter("entropy", 64),
-      critic_loss_meter("critic", 64), actor_grad_meter("actor_grad", 64),
-      critic_grad_meter("critic_grad", 64), episode_steps_meter("steps", 64), curr_episode_step(0),
+      critic_loss_meter("critic", 64), episode_steps_meter("steps", 64), curr_episode_step(0),
       curr_train_step(0L) {
     at::manual_seed(seed);
 }
@@ -205,20 +232,6 @@ void ActorCriticAgent::train(
     policy_loss_meter.add(-policy_loss.sum(-1).mean().cpu().item().toFloat());
     entropy_meter.add(-policy_entropy.sum(-1).mean().cpu().item().toFloat());
     critic_loss_meter.add(critic_loss.cpu().item().toFloat());
-
-    const auto actor_params = actor->parameters();
-    actor_grad_meter.add(
-        std::accumulate(
-            actor_params.begin(), actor_params.end(), 0.f,
-            [](float acc, auto p) { return acc + p.grad().norm().item().toFloat(); })
-        / static_cast<float>(actor_params.size()));
-
-    const auto critic_params = critic->parameters();
-    critic_grad_meter.add(
-        std::accumulate(
-            critic_params.begin(), critic_params.end(), 0.f,
-            [](float acc, auto p) { return acc + p.grad().norm().item().toFloat(); })
-        / static_cast<float>(critic_params.size()));
 
     curr_train_step++;
 }
@@ -335,8 +348,7 @@ void ActorCriticAgent::load(const std::string &input_folder_path) {
 }
 
 std::vector<LossMeter> ActorCriticAgent::get_metrics() {
-    return {policy_loss_meter, entropy_meter,     critic_loss_meter,
-            actor_grad_meter,  critic_grad_meter, episode_steps_meter};
+    return {policy_loss_meter, entropy_meter, critic_loss_meter, episode_steps_meter};
 }
 
 void ActorCriticAgent::to(const torch::DeviceType device) {

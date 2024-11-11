@@ -44,6 +44,8 @@ public:
     EntropyParameter();
     torch::Tensor log_alpha();
     torch::Tensor alpha();
+private:
+    torch::Tensor log_alpha_t;
 };
 
 class SoftActorCriticAgent : public Agent {

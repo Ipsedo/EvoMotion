@@ -31,16 +31,31 @@ QNetworkModule::QNetworkModule(
 }
 
 critic_response QNetworkModule::forward(const torch::Tensor &state, const torch::Tensor &action) {
-    return {q_network->forward(torch::cat({state, action}, 0).unsqueeze(0)).squeeze(0)};
+    bool only_one = false;
+
+    torch::Tensor in_q_net = torch::cat({state, action}, -1);
+
+    if (in_q_net.sizes().size() == 1) {
+        in_q_net = in_q_net.unsqueeze(0);
+        only_one = true;
+    }
+    else in_q_net = in_q_net;
+
+    auto q_value = q_network->forward(in_q_net);
+
+    if (only_one) {
+        q_value = q_value.squeeze(0);
+    }
+    return {q_value};
 }
 
 // Entropy Parameter
 
-EntropyParameter::EntropyParameter() { register_parameter("log_alpha", torch::zeros({1})); }
+EntropyParameter::EntropyParameter() { log_alpha_t = register_parameter("log_alpha", torch::zeros({1}, at::TensorOptions().requires_grad(true))); }
 
-torch::Tensor EntropyParameter::log_alpha() { return named_parameters()["log_alpha"]; }
+torch::Tensor EntropyParameter::log_alpha() { return log_alpha_t; }
 
-torch::Tensor EntropyParameter::alpha() { return log_alpha().exp(); }
+torch::Tensor EntropyParameter::alpha() { return log_alpha().exp().detach(); }
 
 /*
  * Agents
@@ -120,7 +135,7 @@ void SoftActorCriticAgent::train(
     const auto next_target_q_value_2 = torch::slice(batched_target_q_values_2, 1, 1);
 
     const auto target_q_values = (batched_rewards
-                                  + gamma * (1.f - batched_done)
+                                  + (1.f - batched_done) * gamma
                                         * (torch::min(next_target_q_value_1, next_target_q_value_2)
                                            - entropy_parameter.alpha() * next_log_prob.mean(-1)))
                                      .detach();
@@ -142,9 +157,8 @@ void SoftActorCriticAgent::train(
     critic_2_optimizer->step();
 
     // policy
-    const auto q_value = torch::min(batched_q_values_1, batched_q_values_2);
-    const auto actor_loss = torch::mean(
-        entropy_parameter.alpha().detach() * curr_log_prob - q_value.unsqueeze(-1).detach());
+    const auto q_value = torch::min(batched_q_values_1, batched_q_values_2).unsqueeze(-1).detach();
+    const auto actor_loss = torch::mean(entropy_parameter.alpha() * curr_log_prob - q_value);
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
@@ -163,16 +177,14 @@ void SoftActorCriticAgent::train(
         const auto &name = n_p.key();
         const auto &param = n_p.value();
 
-        auto target_param = target_critic_1->named_parameters()[name];
-        target_param.data().copy_(tau * param.data() + (1.f - tau) * target_param.data());
+        target_critic_1->named_parameters()[name].data().copy_(tau * param.data() + (1.f - tau) * target_critic_1->named_parameters()[name].data());
     }
 
     for (auto n_p: critic_2->named_parameters()) {
         const auto &name = n_p.key();
         const auto &param = n_p.value();
 
-        auto target_param = target_critic_2->named_parameters()[name];
-        target_param.data().copy_(tau * param.data() + (1.f - tau) * target_param.data());
+        target_critic_2->named_parameters()[name].data().copy_(tau * param.data() + (1.f - tau) * target_critic_2->named_parameters()[name].data());
     }
 
     // metrics

@@ -129,6 +129,8 @@ TEST_P(ParamTestTruncNormal, TestEntropy) {
     for (int i = 0; i < sizes.size(); i++) { ASSERT_EQ(sizes[i], out.size(i)); }
 }
 
+// Create parametrized tests
+
 INSTANTIATE_TEST_SUITE_P(
     TestTruncNormal, ParamTestTruncNormal,
     testing::Combine(

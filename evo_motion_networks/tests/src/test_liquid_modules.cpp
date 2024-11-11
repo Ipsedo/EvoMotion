@@ -97,6 +97,8 @@ TEST_P(ParamLiquidModule, TestLiquidQNetwork) {
     ASSERT_EQ(out.size(0), 1);
 }
 
+// Create parametrized tests
+
 INSTANTIATE_TEST_SUITE_P(
     TestLiquid, ParamLiquidModule,
     testing::Combine(

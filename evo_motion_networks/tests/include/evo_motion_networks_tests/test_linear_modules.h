@@ -7,6 +7,6 @@
 
 #include <gtest/gtest.h>
 
-class ParamLinearModule : public testing::TestWithParam<std::tuple<int, int, int>> {};
+class ParamLinearModule : public testing::TestWithParam<std::tuple<int, int, int, int>> {};
 
 #endif//EVO_MOTION_TEST_LINEAR_MODULES_H
