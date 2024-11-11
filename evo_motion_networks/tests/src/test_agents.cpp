@@ -48,8 +48,8 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCritic) {
     auto agent = SoftActorCriticAgent(
         1234, {state_space}, {action_space}, hidden_size, batch_size, 1.f, 0.9f, 0.005f, 128);
 
-    for (int i = 0; i < batch_size * 2; i++) {
-        for (int j = 0; j < 5; j++) {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < batch_size * 2; j++) {
             const auto state = torch::randn({state_space});
             const auto action = agent.act(state, 1.f);
 

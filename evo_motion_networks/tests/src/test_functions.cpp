@@ -135,5 +135,5 @@ INSTANTIATE_TEST_SUITE_P(
     TestTruncNormal, ParamTestTruncNormal,
     testing::Combine(
         testing::Values(
-            std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{9}, std::vector<int64_t>{2, 6}),
+            std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{1000}, std::vector<int64_t>{2, 6}),
         testing::Values(-2.f, -1.f, -0.1f), testing::Values(0.1f, 1.f, 2.f)));

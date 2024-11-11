@@ -106,9 +106,10 @@ MuscleState::MuscleState(Muscle muscle) : slider_constraint(muscle.get_slider_co
     p2p_b = b;
 }
 
-int MuscleState::get_size() { return 2; }
+int MuscleState::get_size() { return 4; }
 
 torch::Tensor MuscleState::get_state() {
     return torch::tensor(
-        {slider_constraint->getLinearPos(), slider_constraint->getAppliedImpulse()});
+        {slider_constraint->getLinearPos(), slider_constraint->getAppliedImpulse(),
+         p2p_a->getAppliedImpulse(), p2p_b->getAppliedImpulse()});
 }
