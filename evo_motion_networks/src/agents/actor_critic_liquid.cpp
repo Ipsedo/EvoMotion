@@ -7,14 +7,14 @@
 
 ActorCriticLiquidAgent::ActorCriticLiquidAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int neuron_number, const int batch_size,
-    float actor_lr, float critic_lr, const float gamma, float entropy_start_factor,
-    float entropy_end_factor, long entropy_steps, int unfolding_steps, int replay_buffer_size)
+    const std::vector<int64_t> &action_space, int neuron_number, const int batch_size, float lr,
+    const float gamma, float entropy_start_factor, float entropy_end_factor, long entropy_steps,
+    int unfolding_steps, int replay_buffer_size)
     : actor(std::make_shared<ActorLiquidModule>(
           state_space, action_space, neuron_number, unfolding_steps)),
-      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), actor_lr)),
+      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic(std::make_shared<CriticLiquidModule>(state_space, neuron_number, unfolding_steps)),
-      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), critic_lr)),
+      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
       gamma(gamma), entropy_start_factor(entropy_start_factor),
       entropy_end_factor(entropy_end_factor), entropy_steps(entropy_steps),
       curr_device(torch::kCPU), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
@@ -67,9 +67,8 @@ void ActorCriticLiquidAgent::train(
         critic->forward(curr_memory.critic_x_t.detach(), batched_states);
 
     const auto target = batched_rewards + (1.f - batched_done) * gamma * next_value;
-    const auto advantage = target - value;
 
-    const auto critic_loss = torch::mean(torch::pow(advantage, 2.f));
+    const auto critic_loss = torch::mse_loss(value, target.detach(), at::Reduction::Mean);
 
     critic_optimizer->zero_grad();
     critic_loss.backward();
@@ -77,13 +76,13 @@ void ActorCriticLiquidAgent::train(
 
     const auto [mu, sigma, next_actor_x] =
         actor->forward(curr_memory.actor_x_t.detach(), batched_states);
-    const auto new_action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
-    const auto log_prob = truncated_normal_pdf(new_action, mu, sigma, -1.f, 1.f);
+    const auto log_prob =
+        torch::log(truncated_normal_pdf(batched_actions.detach(), mu, sigma, -1.f, 1.f));
     const auto policy_entropy =
         truncated_normal_entropy(mu, sigma, -1.f, 1.f)
         * exponential_decrease(
             curr_train_step, entropy_steps, entropy_start_factor, entropy_end_factor);
-    const auto policy_loss = log_prob * advantage.detach().unsqueeze(-1);
+    const auto policy_loss = log_prob * (target - value).detach().unsqueeze(-1);
 
     const auto actor_loss = -torch::mean(torch::sum(policy_loss + policy_entropy, -1));
 
@@ -101,14 +100,11 @@ torch::Tensor ActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
     liquid_step_memory input_memory{actor->get_x(), critic->get_x()};
 
     const auto [mu, sigma] = actor->forward(state);
-    const auto [value] = critic->forward(state);
-
     auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
     liquid_step_memory next_memory{actor->get_x(), critic->get_x()};
 
     if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
-
     replay_buffer.add({state, input_memory, action, 0.f, false, state, next_memory});
 
     curr_episode_step++;

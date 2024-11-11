@@ -13,13 +13,13 @@
 
 ActorCriticAgent::ActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float actor_lr,
-    float critic_lr, const float gamma, const float entropy_start_factor, float entropy_end_factor,
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
+    const float gamma, const float entropy_start_factor, float entropy_end_factor,
     long entropy_steps, int replay_buffer_size)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
-      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), actor_lr)),
+      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
-      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), critic_lr)),
+      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
       gamma(gamma), entropy_start_factor(entropy_start_factor),
       entropy_end_factor(entropy_end_factor), entropy_steps(entropy_steps),
       curr_device(torch::kCPU), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
@@ -31,7 +31,6 @@ ActorCriticAgent::ActorCriticAgent(
 
 torch::Tensor ActorCriticAgent::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma] = actor->forward(state);
-    const auto [value] = critic->forward(state);
 
     auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
@@ -80,21 +79,21 @@ void ActorCriticAgent::train(
     const auto [value] = critic->forward(batched_states);
 
     const auto target = batched_rewards + (1.f - batched_done) * gamma * next_value;
-    const auto advantage = target - value;
 
-    const auto critic_loss = torch::mse_loss(value, target, at::Reduction::Mean);
+    const auto critic_loss = torch::mse_loss(value, target.detach(), at::Reduction::Mean);
 
     critic_optimizer->zero_grad();
     critic_loss.backward();
     critic_optimizer->step();
 
     const auto [mu, sigma] = actor->forward(batched_states);
-    const auto log_prob = truncated_normal_pdf(batched_actions.detach(), mu, sigma, -1.f, 1.f);
+    const auto log_prob =
+        torch::log(truncated_normal_pdf(batched_actions.detach(), mu, sigma, -1.f, 1.f));
     const auto policy_entropy =
         truncated_normal_entropy(mu, sigma, -1.f, 1.f)
         * exponential_decrease(
             curr_train_step, entropy_steps, entropy_start_factor, entropy_end_factor);
-    const auto policy_loss = log_prob * advantage.detach().unsqueeze(-1);
+    const auto policy_loss = log_prob * (target - value).detach().unsqueeze(-1);
 
     const auto actor_loss = -torch::mean(policy_loss + policy_entropy);
 
