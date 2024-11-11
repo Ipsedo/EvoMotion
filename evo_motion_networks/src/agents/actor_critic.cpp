@@ -95,7 +95,7 @@ void ActorCriticAgent::train(
             curr_train_step, entropy_steps, entropy_start_factor, entropy_end_factor);
     const auto policy_loss = log_prob * (target - value).detach().unsqueeze(-1);
 
-    const auto actor_loss = -torch::mean(policy_loss + policy_entropy);
+    const auto actor_loss = -torch::mean(torch::sum(policy_loss + policy_entropy, -1));
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
