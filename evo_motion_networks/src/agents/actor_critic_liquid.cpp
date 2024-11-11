@@ -102,6 +102,7 @@ torch::Tensor ActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
 
     const auto [mu, sigma] = actor->forward(state);
     auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
+    const auto _ = critic->forward(state);
 
     liquid_step_memory next_memory{actor->get_x(), critic->get_x()};
 
