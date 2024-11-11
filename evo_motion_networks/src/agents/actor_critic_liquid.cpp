@@ -48,8 +48,9 @@ void ActorCriticLiquidAgent::check_train() {
         }
 
         train(
-            torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards).unsqueeze(1),
-            torch::stack(vec_done).unsqueeze(1), torch::stack(vec_next_state),
+            torch::stack(vec_states), torch::stack(vec_actions),
+            torch::stack(vec_rewards).unsqueeze(1), torch::stack(vec_done).unsqueeze(1),
+            torch::stack(vec_next_state),
             {torch::stack(input_actor_x), torch::stack(input_critic_x)},
             {torch::stack(output_actor_x), torch::stack(output_critic_x)});
     }
