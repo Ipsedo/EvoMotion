@@ -2,8 +2,8 @@
 // Created by samuel on 11/11/24.
 //
 
-#include <evo_motion_networks/networks/critic.h>
 #include <evo_motion_networks/init.h>
+#include <evo_motion_networks/networks/critic.h>
 
 CriticModule::CriticModule(std::vector<int64_t> state_space, int hidden_size) {
     critic = register_module(

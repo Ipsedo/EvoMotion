@@ -48,8 +48,9 @@ private:
 public:
     ActorCriticLiquidAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int neuron_number, int batch_size, float actor_lr, float critic_lr, float gamma, float entropy_start_factor,
-        float entropy_end_factor, long entropy_steps, int unfolding_steps, int replay_buffer_size);
+        int neuron_number, int batch_size, float actor_lr, float critic_lr, float gamma,
+        float entropy_start_factor, float entropy_end_factor, long entropy_steps,
+        int unfolding_steps, int replay_buffer_size);
 
     void done(torch::Tensor state, float reward) override;
 

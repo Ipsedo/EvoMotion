@@ -13,8 +13,8 @@
 
 ActorCriticAgent::ActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float actor_lr, float critic_lr,
-    const float gamma, const float entropy_start_factor, float entropy_end_factor,
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float actor_lr,
+    float critic_lr, const float gamma, const float entropy_start_factor, float entropy_end_factor,
     long entropy_steps, int replay_buffer_size)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), actor_lr)),
@@ -65,8 +65,9 @@ void ActorCriticAgent::check_train() {
         }
 
         train(
-            torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards).unsqueeze(1),
-            torch::stack(vec_done).unsqueeze(1), torch::stack(vec_next_state));
+            torch::stack(vec_states), torch::stack(vec_actions),
+            torch::stack(vec_rewards).unsqueeze(1), torch::stack(vec_done).unsqueeze(1),
+            torch::stack(vec_next_state));
     }
 }
 

@@ -7,9 +7,9 @@
 
 ActorCriticLiquidAgent::ActorCriticLiquidAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int neuron_number, const int batch_size, float actor_lr, float critic_lr,
-    const float gamma, float entropy_start_factor, float entropy_end_factor, long entropy_steps,
-    int unfolding_steps, int replay_buffer_size)
+    const std::vector<int64_t> &action_space, int neuron_number, const int batch_size,
+    float actor_lr, float critic_lr, const float gamma, float entropy_start_factor,
+    float entropy_end_factor, long entropy_steps, int unfolding_steps, int replay_buffer_size)
     : actor(std::make_shared<ActorLiquidModule>(
           state_space, action_space, neuron_number, unfolding_steps)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), actor_lr)),
