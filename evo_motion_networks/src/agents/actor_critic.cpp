@@ -106,8 +106,7 @@ actor_response ActorModule::forward(const torch::Tensor &state) {
     if (state.sizes().size() == 1) {
         out_head = state.unsqueeze(0);
         only_one = true;
-    }
-    else out_head = state;
+    } else out_head = state;
 
     auto head_out = head->forward(out_head);
     auto out_mu = mu->forward(head_out);
@@ -147,14 +146,11 @@ critic_response CriticModule::forward(const torch::Tensor &state) {
     if (state.sizes().size() == 1) {
         in_critic = state.unsqueeze(0);
         only_one = true;
-    }
-    else in_critic = state;
+    } else in_critic = state;
 
     auto out_critic = critic->forward(in_critic);
 
-    if (only_one) {
-        out_critic = out_critic.squeeze(0);
-    }
+    if (only_one) { out_critic = out_critic.squeeze(0); }
     return {out_critic};
 }
 

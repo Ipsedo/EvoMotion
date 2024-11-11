@@ -38,20 +38,20 @@ critic_response QNetworkModule::forward(const torch::Tensor &state, const torch:
     if (in_q_net.sizes().size() == 1) {
         in_q_net = in_q_net.unsqueeze(0);
         only_one = true;
-    }
-    else in_q_net = in_q_net;
+    } else in_q_net = in_q_net;
 
     auto q_value = q_network->forward(in_q_net);
 
-    if (only_one) {
-        q_value = q_value.squeeze(0);
-    }
+    if (only_one) { q_value = q_value.squeeze(0); }
     return {q_value};
 }
 
 // Entropy Parameter
 
-EntropyParameter::EntropyParameter() { log_alpha_t = register_parameter("log_alpha", torch::zeros({1}, at::TensorOptions().requires_grad(true))); }
+EntropyParameter::EntropyParameter() {
+    log_alpha_t =
+        register_parameter("log_alpha", torch::zeros({1}, at::TensorOptions().requires_grad(true)));
+}
 
 torch::Tensor EntropyParameter::log_alpha() { return log_alpha_t; }
 
@@ -177,14 +177,16 @@ void SoftActorCriticAgent::train(
         const auto &name = n_p.key();
         const auto &param = n_p.value();
 
-        target_critic_1->named_parameters()[name].data().copy_(tau * param.data() + (1.f - tau) * target_critic_1->named_parameters()[name].data());
+        target_critic_1->named_parameters()[name].data().copy_(
+            tau * param.data() + (1.f - tau) * target_critic_1->named_parameters()[name].data());
     }
 
     for (auto n_p: critic_2->named_parameters()) {
         const auto &name = n_p.key();
         const auto &param = n_p.value();
 
-        target_critic_2->named_parameters()[name].data().copy_(tau * param.data() + (1.f - tau) * target_critic_2->named_parameters()[name].data());
+        target_critic_2->named_parameters()[name].data().copy_(
+            tau * param.data() + (1.f - tau) * target_critic_2->named_parameters()[name].data());
     }
 
     // metrics

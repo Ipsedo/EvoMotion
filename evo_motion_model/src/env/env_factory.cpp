@@ -50,9 +50,9 @@ std::shared_ptr<Environment> CartPoleFactory::get_env(int seed) {
     return std::make_shared<CartPole>(
         seed, get_value("slider_speed", 16.f), get_value("slider_force", 64.f),
         get_value("chariot_push_force", 2.f),
-        get_value("limit_angle", static_cast<float>(M_PI * 0.5)),
-        get_value("reset_frame_nb", 8), get_value("chariot_mass", 1.f),
-        get_value("pendulum_mass", 1.f), get_value("mas_steps", 60 * 60));
+        get_value("limit_angle", static_cast<float>(M_PI * 0.5)), get_value("reset_frame_nb", 8),
+        get_value("chariot_mass", 1.f), get_value("pendulum_mass", 1.f),
+        get_value("mas_steps", 60 * 60));
 }
 
 CartPole3dFactory::CartPole3dFactory(std::map<std::string, std::string> parameters)
@@ -62,9 +62,9 @@ std::shared_ptr<Environment> CartPole3dFactory::get_env(int seed) {
     return std::make_shared<CartPole3d>(
         seed, get_value("slider_speed", 16.f), get_value("slider_force_per_kg", 32.f),
         get_value("chariot_push_force", 2.f), get_value("reset_frame_nb", 8),
-        get_value("limit_angle", static_cast<float>(M_PI) / 2.f),
-        get_value("cart_x_mass", 1.f), get_value("cart_z_mass", 1.f),
-        get_value("pole_mass", 1.f), get_value("max_steps", 60 * 60));
+        get_value("limit_angle", static_cast<float>(M_PI) / 2.f), get_value("cart_x_mass", 1.f),
+        get_value("cart_z_mass", 1.f), get_value("pole_mass", 1.f),
+        get_value("max_steps", 60 * 60));
 }
 
 RobotWalkFactory::RobotWalkFactory(std::map<std::string, std::string> parameters)
@@ -76,9 +76,9 @@ std::shared_ptr<Environment> RobotWalkFactory::get_env(int seed) {
         get_value(
             "skeleton_json_path",
             std::filesystem::path(RESOURCES_PATH) / "./resources/skeleton/spider_new.json"),
-        get_value("initial_remaining_seconds", 1.f),
-        get_value("max_episode_seconds", 30.f), get_value("target_velocity", 5e-1f),
-        get_value("minimal_velocity", 1e-1f), get_value("reset_frames", 10));
+        get_value("initial_remaining_seconds", 1.f), get_value("max_episode_seconds", 30.f),
+        get_value("target_velocity", 5e-1f), get_value("minimal_velocity", 1e-1f),
+        get_value("reset_frames", 10));
 }
 
 /*
