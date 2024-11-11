@@ -158,7 +158,8 @@ void SoftActorCriticAgent::train(
                                   + (1.f - batched_done) * gamma
                                         * torch::mean(
                                             torch::min(next_target_q_value_1, next_target_q_value_2)
-                                            - entropy_parameter.alpha() * next_log_prob))
+                                                - entropy_parameter.alpha() * next_log_prob,
+                                            -1))
                                      .detach();
 
     // critic 1
