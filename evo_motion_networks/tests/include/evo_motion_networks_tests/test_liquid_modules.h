@@ -9,6 +9,6 @@
 
 class ParamLiquidCellModule : public testing::TestWithParam<std::tuple<int, int, int, int>> {};
 
-class ParamLiquidModule : public testing::TestWithParam<std::tuple<int, int, int, int>> {};
+class ParamLiquidModule : public testing::TestWithParam<std::tuple<int, int, int, int, int>> {};
 
 #endif//EVO_MOTION_TEST_LIQUID_MODULES_H

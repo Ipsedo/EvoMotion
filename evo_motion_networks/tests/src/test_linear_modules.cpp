@@ -4,8 +4,9 @@
 
 #include <gtest/gtest.h>
 
-#include <evo_motion_networks/agents/actor_critic.h>
-#include <evo_motion_networks/agents/soft_actor_critic.h>
+#include <evo_motion_networks/networks/actor.h>
+#include <evo_motion_networks/networks/critic.h>
+#include <evo_motion_networks/networks/q_net.h>
 #include <evo_motion_networks_tests/test_linear_modules.h>
 
 // Actor

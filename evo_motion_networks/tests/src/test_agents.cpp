@@ -18,20 +18,22 @@ TEST_P(ParamActorCriticAgent, TestActorCritic) {
     const int batch_size = std::get<3>(GetParam());
 
     auto agent = ActorCriticAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 1.f, 0.9f, 1.f, 0.1f, 16);
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 1.f, 0.1f, 16,
+        32);
 
     for (int i = 0; i < batch_size * 2; i++) {
         for (int j = 0; j < 5; j++) {
             const auto state = torch::randn({state_space});
-            const auto action = agent.act(state, 1.f);
+            const auto action = agent.act(state, torch::randn({1}).item().toFloat());
 
             ASSERT_EQ(action.sizes().size(), 1);
             ASSERT_EQ(action.size(0), action_space);
+            ASSERT_TRUE(torch::all(~torch::isnan(action)).item().toBool());
             ASSERT_TRUE(torch::all(action >= -1.f).item().toBool());
             ASSERT_TRUE(torch::all(action <= 1.f).item().toBool());
         }
 
-        agent.done(torch::randn({state_space}), 1.f);
+        agent.done(torch::randn({state_space}), torch::randn({1}).item().toFloat());
     }
 
     for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
@@ -46,20 +48,21 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCritic) {
     const int batch_size = std::get<3>(GetParam());
 
     auto agent = SoftActorCriticAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 1.f, 0.9f, 0.005f, 128);
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 0.005f, 128);
 
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < batch_size * 2; j++) {
             const auto state = torch::randn({state_space});
-            const auto action = agent.act(state, 1.f);
+            const auto action = agent.act(state, torch::randn({1}).item().toFloat());
 
             ASSERT_EQ(action.sizes().size(), 1);
             ASSERT_EQ(action.size(0), action_space);
+            ASSERT_TRUE(torch::all(~torch::isnan(action)).item().toBool());
             ASSERT_TRUE(torch::all(action >= -1.f).item().toBool());
             ASSERT_TRUE(torch::all(action <= 1.f).item().toBool());
         }
 
-        agent.done(torch::randn({state_space}), 1.f);
+        agent.done(torch::randn({state_space}), torch::randn({1}).item().toFloat());
     }
 
     for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
@@ -74,20 +77,22 @@ TEST_P(ParamActorCriticAgent, TestActorCriticLiquid) {
     const int batch_size = std::get<3>(GetParam());
 
     auto agent = ActorCriticLiquidAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 1.f, 0.9f, 1.f, 0.1f, 16, 6);
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 1.f, 0.1f, 16, 6,
+        32);
 
     for (int i = 0; i < batch_size * 2; i++) {
         for (int j = 0; j < 5; j++) {
             const auto state = torch::randn({state_space});
-            const auto action = agent.act(state, 1.f);
+            const auto action = agent.act(state, torch::randn({1}).item().toFloat());
 
             ASSERT_EQ(action.sizes().size(), 1);
             ASSERT_EQ(action.size(0), action_space);
+            ASSERT_TRUE(torch::all(~torch::isnan(action)).item().toBool());
             ASSERT_TRUE(torch::all(action >= -1.f).item().toBool());
             ASSERT_TRUE(torch::all(action <= 1.f).item().toBool());
         }
 
-        agent.done(torch::randn({state_space}), 1.f);
+        agent.done(torch::randn({state_space}), torch::randn({1}).item().toFloat());
     }
 
     for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);

@@ -6,56 +6,7 @@
 
 #include <evo_motion_networks/agents/soft_actor_critic.h>
 #include <evo_motion_networks/functions.h>
-
-/*
- * Torch module
- */
-
-QNetworkModule::QNetworkModule(
-    std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {
-    q_network = register_module(
-        "q_network",
-        torch::nn::Sequential(
-            torch::nn::Linear(state_space[0] + action_space[0], hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-
-            torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-            torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-
-            torch::nn::Linear(hidden_size, 1)));
-}
-
-critic_response QNetworkModule::forward(const torch::Tensor &state, const torch::Tensor &action) {
-    bool only_one = false;
-
-    torch::Tensor in_q_net = torch::cat({state, action}, -1);
-
-    if (in_q_net.sizes().size() == 1) {
-        in_q_net = in_q_net.unsqueeze(0);
-        only_one = true;
-    } else in_q_net = in_q_net;
-
-    auto q_value = q_network->forward(in_q_net);
-
-    if (only_one) { q_value = q_value.squeeze(0); }
-    return {q_value};
-}
-
-// Entropy Parameter
-
-EntropyParameter::EntropyParameter() {
-    log_alpha_t =
-        register_parameter("log_alpha", torch::zeros({1}, at::TensorOptions().requires_grad(true)));
-}
-
-torch::Tensor EntropyParameter::log_alpha() { return log_alpha_t; }
-
-torch::Tensor EntropyParameter::alpha() { return log_alpha().exp().detach(); }
+#include <evo_motion_networks/networks/actor.h>
 
 /*
  * Agents
@@ -74,10 +25,11 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
       target_entropy(-1.f), entropy_parameter(),
       entropy_optimizer(entropy_parameter.parameters(), lr), curr_device(torch::kCPU), gamma(gamma),
-      tau(tau), batch_size(batch_size), replay_buffer({}), replay_buffer_size(replay_buffer_size),
-      rand_gen(seed), curr_episode_step(0), curr_train_step(0L), actor_loss_meter("actor", 16),
-      critic_1_loss_meter("critic_1", 16), critic_2_loss_meter("critic_2", 16),
-      entropy_loss_meter("entropy", 16), episode_steps_meter("steps", 16) {
+      tau(tau), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
+      curr_episode_step(0), curr_train_step(0L), global_curr_step(0L),
+      actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
+      critic_2_loss_meter("critic_2", 16), entropy_loss_meter("entropy", 16),
+      episode_steps_meter("steps", 16) {
     at::manual_seed(seed);
 
     for (auto n_p: critic_1->named_parameters()) {
@@ -97,18 +49,11 @@ torch::Tensor SoftActorCriticAgent::act(torch::Tensor state, float reward) {
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
-    if (!replay_buffer.empty()) {
-        auto rp = replay_buffer.back();
-        rp.reward = reward;
-        rp.next_state = state;
-        rp.done = false;
-
-        replay_buffer.erase(replay_buffer.end());
-        replay_buffer.push_back(rp);
-    }
-    replay_buffer.push_back({state, action, 0.f, false, state});
+    if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
+    replay_buffer.add({state, action, 0.f, false, state});
 
     curr_episode_step++;
+    global_curr_step++;
 
     check_train();
 
@@ -116,9 +61,8 @@ torch::Tensor SoftActorCriticAgent::act(torch::Tensor state, float reward) {
 }
 
 void SoftActorCriticAgent::check_train() {
-    if (replay_buffer.size() % batch_size == 0) {
-        std::vector<soft_replay_buffer> tmp_replay_buffer(replay_buffer);
-        std::shuffle(tmp_replay_buffer.begin(), tmp_replay_buffer.end(), rand_gen);
+    if (global_curr_step % batch_size == 0) {
+        std::vector<step_replay_buffer> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
 
@@ -138,8 +82,6 @@ void SoftActorCriticAgent::check_train() {
             torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards),
             torch::stack(vec_done), torch::stack(vec_next_state));
     }
-
-    while (replay_buffer.size() > replay_buffer_size) replay_buffer.erase(replay_buffer.begin());
 }
 
 void SoftActorCriticAgent::train(
@@ -230,15 +172,7 @@ void SoftActorCriticAgent::train(
 }
 
 void SoftActorCriticAgent::done(torch::Tensor state, float reward) {
-    auto rp = replay_buffer.back();
-    rp.reward = reward;
-    rp.next_state = state;
-    rp.done = true;
-
-    replay_buffer.erase(replay_buffer.end());
-    replay_buffer.push_back(rp);
-
-    check_train();
+    replay_buffer.update_last(reward, state, true);
 
     episode_steps_meter.add(static_cast<float>(curr_episode_step));
     curr_episode_step = 0;
