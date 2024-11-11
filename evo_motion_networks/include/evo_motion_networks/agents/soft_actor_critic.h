@@ -5,6 +5,8 @@
 #ifndef EVO_MOTION_SOFT_ACTOR_CRITIC_H
 #define EVO_MOTION_SOFT_ACTOR_CRITIC_H
 
+#include <random>
+
 #include <torch/torch.h>
 
 #include <evo_motion_networks/agent.h>
@@ -21,6 +23,14 @@ struct soft_episode_buffer {
     std::vector<float> rewards_buffer;
     std::vector<torch::Tensor> actions_buffer;
     std::vector<float> done_buffer;
+};
+
+struct soft_replay_buffer {
+    torch::Tensor state;
+    torch::Tensor action;
+    float reward;
+    bool done;
+    torch::Tensor next_state;
 };
 
 class AbstractQNetwork : public torch::nn::Module {
@@ -50,7 +60,7 @@ private:
 };
 
 class SoftActorCriticAgent : public Agent {
-protected:
+private:
     std::shared_ptr<AbstractActor> actor;
     std::shared_ptr<AbstractQNetwork> critic_1;
     std::shared_ptr<AbstractQNetwork> critic_2;
@@ -61,7 +71,6 @@ protected:
     std::shared_ptr<torch::optim::Optimizer> critic_1_optimizer;
     std::shared_ptr<torch::optim::Optimizer> critic_2_optimizer;
 
-private:
     float target_entropy;
     EntropyParameter entropy_parameter;
     torch::optim::Adam entropy_optimizer;
@@ -71,7 +80,10 @@ private:
     float gamma;
     float tau;
     int batch_size;
-    std::vector<soft_episode_buffer> episodes_buffer;
+    std::vector<soft_replay_buffer> replay_buffer;
+    int replay_buffer_size;
+
+    std::mt19937 rand_gen;
 
     int curr_episode_step;
     long curr_train_step;
@@ -82,17 +94,17 @@ private:
     LossMeter entropy_loss_meter;
     LossMeter episode_steps_meter;
 
+    void check_train();
+
     void train(
-        const torch::Tensor &batched_actions, const torch::Tensor &batched_q_values_1,
-        const torch::Tensor &batched_q_values_2, const torch::Tensor &batched_target_q_values_1,
-        const torch::Tensor &batched_target_q_values_2, const torch::Tensor &batched_mus,
-        const torch::Tensor &batched_sigmas, const torch::Tensor &batched_rewards,
-        const torch::Tensor &batched_done);
+        const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
+        const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
+        const torch::Tensor &batched_next_state);
 
 public:
     SoftActorCriticAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr, float gamma, float tau);
+        int hidden_size, int batch_size, float lr, float gamma, float tau, int replay_buffer_size);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 

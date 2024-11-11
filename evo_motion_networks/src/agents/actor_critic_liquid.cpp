@@ -216,7 +216,7 @@ void ActorCriticLiquidAgent::done(torch::Tensor state, const float reward) {
  * SAC
  */
 
-SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
+/*SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
     int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
     int hidden_size, int batch_size, float lr, float gamma, float tau, int unfolding_steps)
     : SoftActorCriticAgent(
@@ -261,4 +261,4 @@ void SoftActorCriticLiquidAgent::done(const torch::Tensor state, const float rew
     std::dynamic_pointer_cast<QNetworkLiquidModule>(critic_2)->reset_liquid();
     std::dynamic_pointer_cast<QNetworkLiquidModule>(target_critic_1)->reset_liquid();
     std::dynamic_pointer_cast<QNetworkLiquidModule>(target_critic_2)->reset_liquid();
-}
+}*/

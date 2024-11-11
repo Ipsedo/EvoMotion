@@ -63,7 +63,7 @@ torch::Tensor EntropyParameter::alpha() { return log_alpha().exp().detach(); }
 
 SoftActorCriticAgent::SoftActorCriticAgent(
     int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, int batch_size, float lr, float gamma, float tau)
+    int hidden_size, int batch_size, float lr, float gamma, float tau, int replay_buffer_size)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
       critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
@@ -74,10 +74,10 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
       target_entropy(-1.f), entropy_parameter(),
       entropy_optimizer(entropy_parameter.parameters(), lr), curr_device(torch::kCPU), gamma(gamma),
-      tau(tau), batch_size(batch_size), episodes_buffer({{}}), curr_episode_step(0),
-      curr_train_step(0L), actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
-      critic_2_loss_meter("critic_2", 16), entropy_loss_meter("entropy", 16),
-      episode_steps_meter("steps", 16) {
+      tau(tau), batch_size(batch_size), replay_buffer({}), replay_buffer_size(replay_buffer_size),
+      rand_gen(seed), curr_episode_step(0), curr_train_step(0L), actor_loss_meter("actor", 16),
+      critic_1_loss_meter("critic_1", 16), critic_2_loss_meter("critic_2", 16),
+      entropy_loss_meter("entropy", 16), episode_steps_meter("steps", 16) {
     at::manual_seed(seed);
 
     for (auto n_p: critic_1->named_parameters()) {
@@ -97,67 +97,97 @@ torch::Tensor SoftActorCriticAgent::act(torch::Tensor state, float reward) {
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
-    const auto [q_value_1] = critic_1->forward(state, action.detach());
-    const auto [q_value_2] = critic_2->forward(state, action.detach());
+    if (!replay_buffer.empty()) {
+        auto rp = replay_buffer.back();
+        rp.reward = reward;
+        rp.next_state = state;
+        rp.done = false;
 
-    const auto [target_q_value_1] = target_critic_1->forward(state, action.detach());
-    const auto [target_q_value_2] = target_critic_2->forward(state, action.detach());
-
-    episodes_buffer.back().rewards_buffer.push_back(reward);
-    episodes_buffer.back().mu_buffer.push_back(mu);
-    episodes_buffer.back().sigma_buffer.push_back(sigma);
-    episodes_buffer.back().q_value_1_buffer.push_back(q_value_1);
-    episodes_buffer.back().q_value_2_buffer.push_back(q_value_2);
-    episodes_buffer.back().target_q_value_1_buffer.push_back(target_q_value_1);
-    episodes_buffer.back().target_q_value_2_buffer.push_back(target_q_value_2);
-    episodes_buffer.back().actions_buffer.push_back(action);
-    episodes_buffer.back().done_buffer.push_back(0.f);
+        replay_buffer.erase(replay_buffer.end());
+        replay_buffer.push_back(rp);
+    }
+    replay_buffer.push_back({state, action, 0.f, false, state});
 
     curr_episode_step++;
+
+    check_train();
 
     return action;
 }
 
+void SoftActorCriticAgent::check_train() {
+    if (replay_buffer.size() % batch_size == 0) {
+        std::vector<soft_replay_buffer> tmp_replay_buffer(replay_buffer);
+        std::shuffle(tmp_replay_buffer.begin(), tmp_replay_buffer.end(), rand_gen);
+
+        std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
+
+        for (int i = 0; i < batch_size; i++) {
+            const auto &rp = tmp_replay_buffer[i];
+
+            vec_states.push_back(rp.state);
+            vec_actions.push_back(rp.action);
+            vec_rewards.push_back(
+                torch::tensor(rp.reward, at::TensorOptions().device(curr_device)));
+            vec_done.push_back(
+                torch::tensor(rp.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+            vec_next_state.push_back(rp.next_state);
+        }
+
+        train(
+            torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards),
+            torch::stack(vec_done), torch::stack(vec_next_state));
+    }
+
+    while (replay_buffer.size() > replay_buffer_size) replay_buffer.erase(replay_buffer.begin());
+}
+
 void SoftActorCriticAgent::train(
-    const torch::Tensor &batched_actions, const torch::Tensor &batched_q_values_1,
-    const torch::Tensor &batched_q_values_2, const torch::Tensor &batched_target_q_values_1,
-    const torch::Tensor &batched_target_q_values_2, const torch::Tensor &batched_mus,
-    const torch::Tensor &batched_sigmas, const torch::Tensor &batched_rewards,
-    const torch::Tensor &batched_done) {
+    const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
+    const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
+    const torch::Tensor &batched_next_state) {
 
-    const auto log_prob =
-        truncated_normal_pdf(batched_actions, batched_mus, batched_sigmas, -1.f, 1.f);
+    const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
+    const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
+    const auto next_log_prob = truncated_normal_pdf(next_action, next_mu, next_sigma, -1.f, 1.f);
 
-    const auto curr_log_prob = torch::slice(log_prob, 1, 0, log_prob.size(1) - 1);
-    const auto next_log_prob = torch::slice(log_prob, 1, 1);
-
-    const auto next_target_q_value_1 = torch::slice(batched_target_q_values_1, 1, 1);
-    const auto next_target_q_value_2 = torch::slice(batched_target_q_values_2, 1, 1);
+    const auto [next_target_q_value_1] = target_critic_1->forward(batched_next_state, next_action);
+    const auto [next_target_q_value_2] = target_critic_2->forward(batched_next_state, next_action);
 
     const auto target_q_values = (batched_rewards
                                   + (1.f - batched_done) * gamma
-                                        * (torch::min(next_target_q_value_1, next_target_q_value_2)
-                                           - entropy_parameter.alpha() * next_log_prob.mean(-1)))
+                                        * torch::mean(
+                                            torch::min(next_target_q_value_1, next_target_q_value_2)
+                                            - entropy_parameter.alpha() * next_log_prob))
                                      .detach();
 
     // critic 1
+    const auto [q_value_1] = critic_1->forward(batched_states, batched_actions.detach());
     const auto critic_1_loss =
-        torch::mse_loss(batched_q_values_1, target_q_values, at::Reduction::Mean);
+        torch::mse_loss(q_value_1.squeeze(1), target_q_values, at::Reduction::Mean);
 
     critic_1_optimizer->zero_grad();
     critic_1_loss.backward();
     critic_1_optimizer->step();
 
     // critic 2
+    const auto [q_value_2] = critic_2->forward(batched_states, batched_actions.detach());
     const auto critic_2_loss =
-        torch::mse_loss(batched_q_values_2, target_q_values, at::Reduction::Mean);
+        torch::mse_loss(q_value_2.squeeze(1), target_q_values, at::Reduction::Mean);
 
     critic_2_optimizer->zero_grad();
     critic_2_loss.backward();
     critic_2_optimizer->step();
 
     // policy
-    const auto q_value = torch::min(batched_q_values_1, batched_q_values_2).unsqueeze(-1).detach();
+    const auto [curr_mu, curr_sigma] = actor->forward(batched_states);
+    const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
+    const auto curr_log_prob = truncated_normal_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f);
+
+    const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
+    const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
+    const auto q_value = torch::min(curr_q_value_1, curr_q_value_2);
+
     const auto actor_loss = torch::mean(entropy_parameter.alpha() * curr_log_prob - q_value);
 
     actor_optimizer->zero_grad();
@@ -199,75 +229,15 @@ void SoftActorCriticAgent::train(
 }
 
 void SoftActorCriticAgent::done(torch::Tensor state, float reward) {
-    const auto [mu, sigma] = actor->forward(state);
-    const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
+    auto rp = replay_buffer.back();
+    rp.reward = reward;
+    rp.next_state = state;
+    rp.done = true;
 
-    const auto [target_q_value_1] = target_critic_1->forward(state, action.detach());
-    const auto [target_q_value_2] = target_critic_2->forward(state, action.detach());
+    replay_buffer.erase(replay_buffer.end());
+    replay_buffer.push_back(rp);
 
-    episodes_buffer.back().rewards_buffer.push_back(reward);
-    episodes_buffer.back().mu_buffer.push_back(mu);
-    episodes_buffer.back().sigma_buffer.push_back(sigma);
-    episodes_buffer.back().target_q_value_1_buffer.push_back(target_q_value_1);
-    episodes_buffer.back().target_q_value_2_buffer.push_back(target_q_value_2);
-    episodes_buffer.back().actions_buffer.push_back(action);
-    episodes_buffer.back().done_buffer.push_back(1.f);
-
-    episodes_buffer.back().done_buffer.erase(episodes_buffer.back().done_buffer.begin());
-    episodes_buffer.back().rewards_buffer.erase(episodes_buffer.back().rewards_buffer.begin());
-
-    if (actor->is_training() && static_cast<int>(episodes_buffer.size()) == batch_size) {
-        int episode_max_step = 0;
-
-        std::vector<torch::Tensor> actions_per_episode, mus_per_episode, sigmas_per_episode,
-            q_values_1_per_episode, q_values_2_per_episode, target_q_values_1_per_episode,
-            target_q_values_2_per_episode, rewards_per_episode, done_per_episode;
-
-        for (const auto &t: episodes_buffer)
-            episode_max_step =
-                std::max(static_cast<int>(t.rewards_buffer.size()), episode_max_step);
-
-        for (const auto
-                 &[mu_buffer, sigma_buffer, q_value_1_buffer, q_value_2_buffer,
-                   target_q_value_1_buffer, target_q_value_2_buffer, rewards_buffer, actions_buffer,
-                   done_buffer]: episodes_buffer) {
-            int pad = episode_max_step - static_cast<int>(rewards_buffer.size());
-
-            actions_per_episode.push_back(torch::pad(torch::stack(actions_buffer), {0, 0, 0, pad}));
-
-            q_values_1_per_episode.push_back(torch::pad(torch::cat(q_value_1_buffer), {0, pad}));
-            q_values_2_per_episode.push_back(torch::pad(torch::cat(q_value_2_buffer), {0, pad}));
-
-            target_q_values_1_per_episode.push_back(
-                torch::pad(torch::cat(target_q_value_1_buffer), {0, pad}));
-            target_q_values_2_per_episode.push_back(
-                torch::pad(torch::cat(target_q_value_2_buffer), {0, pad}));
-
-            mus_per_episode.push_back(torch::pad(torch::stack(mu_buffer), {0, 0, 0, pad}));
-            sigmas_per_episode.push_back(
-                torch::pad(torch::stack(sigma_buffer), {0, 0, 0, pad}, "constant", 1.f));
-
-            rewards_per_episode.push_back(torch::pad(
-                torch::tensor(rewards_buffer, at::TensorOptions().device(curr_device)), {0, pad}));
-
-            done_per_episode.push_back(torch::pad(
-                torch::tensor(done_buffer, at::TensorOptions().device(curr_device)), {0, pad},
-                "constant", 1.f));
-        }
-
-        train(
-            torch::stack(actions_per_episode), torch::stack(q_values_1_per_episode),
-            torch::stack(q_values_2_per_episode), torch::stack(target_q_values_1_per_episode),
-            torch::stack(target_q_values_2_per_episode), torch::stack(mus_per_episode),
-            torch::stack(sigmas_per_episode), torch::stack(rewards_per_episode),
-            torch::stack(done_per_episode));
-
-        episodes_buffer.clear();
-    } else if (!actor->is_training()) {
-        episodes_buffer.clear();
-    }
-
-    episodes_buffer.push_back({});
+    check_train();
 
     episode_steps_meter.add(static_cast<float>(curr_episode_step));
     curr_episode_step = 0;

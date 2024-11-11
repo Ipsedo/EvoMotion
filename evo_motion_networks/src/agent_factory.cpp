@@ -107,10 +107,10 @@ std::shared_ptr<Agent> SofActorCriticFactory::create_agent(
     return std::make_shared<SoftActorCriticAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
-        get_value<float>("tau"));
+        get_value<float>("tau"), get_value<int>("replay_buffer_size"));
 }
 
-SofActorCriticLiquidFactory::SofActorCriticLiquidFactory(
+/*SofActorCriticLiquidFactory::SofActorCriticLiquidFactory(
     const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
 
@@ -120,7 +120,7 @@ std::shared_ptr<Agent> SofActorCriticLiquidFactory::create_agent(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
         get_value<float>("tau"), get_value<int>("unfolding_steps"));
-}
+}*/
 
 // Build factory
 
@@ -133,9 +133,9 @@ std::map<
         {"actor_critic_liquid",
          std::make_shared<ActorCriticLiquidFactory, std::map<std::string, std::string>>},
         {"soft_actor_critic",
-         std::make_shared<SofActorCriticFactory, std::map<std::string, std::string>>},
+         std::make_shared<SofActorCriticFactory, std::map<std::string, std::string>>}/*,
         {"soft_actor_critic_liquid",
-         std::make_shared<SofActorCriticLiquidFactory, std::map<std::string, std::string>>}};
+         std::make_shared<SofActorCriticLiquidFactory, std::map<std::string, std::string>>}*/};
 
 std::shared_ptr<AgentFactory>
 get_agent_factory(const std::string &agent_name, std::map<std::string, std::string> parameters) {
