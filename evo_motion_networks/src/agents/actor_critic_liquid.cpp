@@ -97,13 +97,13 @@ void ActorCriticLiquidAgent::train(
 
 torch::Tensor ActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
 
-    liquid_a2c_step_memory input_memory{actor->get_x(), critic->get_x()};
+    const liquid_a2c_step_memory input_memory{actor->get_x(), critic->get_x()};
 
     const auto [mu, sigma] = actor->forward(state);
     auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
     const auto _ = critic->forward(state);
 
-    liquid_a2c_step_memory next_memory{actor->get_x(), critic->get_x()};
+    const liquid_a2c_step_memory next_memory{actor->get_x(), critic->get_x()};
 
     if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
     replay_buffer.add({{state, action, 0.f, false, state}, input_memory, next_memory});

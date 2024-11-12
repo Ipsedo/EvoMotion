@@ -35,7 +35,7 @@ SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
 }
 
 torch::Tensor SoftActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
-    liquid_sac_step_memory x_t{
+    const liquid_sac_step_memory x_t{
         actor->get_x().detach(), critic_1->get_x().detach(), critic_2->get_x().detach(),
         target_critic_1->get_x().detach(), target_critic_2->get_x().detach()};
 
@@ -47,7 +47,7 @@ torch::Tensor SoftActorCriticLiquidAgent::act(torch::Tensor state, float reward)
     const auto _3 = target_critic_1->forward(state, action);
     const auto _4 = target_critic_2->forward(state, action);
 
-    liquid_sac_step_memory next_x_t{
+    const liquid_sac_step_memory next_x_t{
         actor->get_x().detach(), critic_1->get_x().detach(), critic_2->get_x().detach(),
         target_critic_1->get_x().detach(), target_critic_2->get_x().detach()};
 
