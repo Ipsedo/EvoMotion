@@ -7,6 +7,6 @@
 
 #include <gtest/gtest.h>
 
-class ParamActorCriticAgent : public testing::TestWithParam<std::tuple<int, int, int, int>> {};
+class ParamActorCriticAgent : public testing::TestWithParam<std::tuple<int, int, int, int, int>> {};
 
 #endif//EVO_MOTION_TEST_AGENTS_H

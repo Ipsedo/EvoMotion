@@ -48,6 +48,8 @@ private:
     LossMeter entropy_loss_meter;
     LossMeter episode_steps_meter;
 
+    int train_every;
+
     void check_train();
 
     void train(
@@ -58,7 +60,8 @@ private:
 public:
     SoftActorCriticAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr, float gamma, float tau, int replay_buffer_size);
+        int hidden_size, int batch_size, float lr, float gamma, float tau, int replay_buffer_size,
+        int train_every);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 

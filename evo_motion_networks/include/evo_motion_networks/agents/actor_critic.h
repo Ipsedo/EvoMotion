@@ -47,6 +47,8 @@ private:
     long curr_train_step;
     long global_curr_step;
 
+    int train_every;
+
     void check_train();
 
     void train(
@@ -59,7 +61,7 @@ public:
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, int batch_size, float learning_rate, float gamma,
         float entropy_start_factor, float entropy_end_factor, long entropy_steps,
-        int replay_buffer_size);
+        int replay_buffer_size, int train_every);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 

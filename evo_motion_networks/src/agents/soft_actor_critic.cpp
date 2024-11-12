@@ -14,7 +14,8 @@
 
 SoftActorCriticAgent::SoftActorCriticAgent(
     int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, int batch_size, float lr, float gamma, float tau, int replay_buffer_size)
+    int hidden_size, int batch_size, float lr, float gamma, float tau, int replay_buffer_size,
+    int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
       critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
@@ -29,7 +30,7 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       curr_episode_step(0), curr_train_step(0L), global_curr_step(0L),
       actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
       critic_2_loss_meter("critic_2", 16), entropy_loss_meter("entropy", 16),
-      episode_steps_meter("steps", 16) {
+      episode_steps_meter("steps", 16), train_every(train_every) {
     at::manual_seed(seed);
 
     hard_update(target_critic_1, critic_1);
@@ -52,14 +53,12 @@ torch::Tensor SoftActorCriticAgent::act(torch::Tensor state, float reward) {
 }
 
 void SoftActorCriticAgent::check_train() {
-    if (global_curr_step % batch_size == 0) {
+    if (global_curr_step % train_every == train_every - 1) {
         std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
 
-        for (int i = 0; i < batch_size; i++) {
-            const auto &rp = tmp_replay_buffer[i];
-
+        for (const auto &rp: tmp_replay_buffer) {
             vec_states.push_back(rp.state);
             vec_actions.push_back(rp.action);
             vec_rewards.push_back(

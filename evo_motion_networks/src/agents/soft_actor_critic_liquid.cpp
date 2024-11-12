@@ -8,7 +8,7 @@
 SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
     int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
     int hidden_size, int batch_size, float lr, float gamma, float tau, int unfolding_steps,
-    int replay_buffer_size)
+    int replay_buffer_size, int train_every)
     : actor(std::make_shared<ActorLiquidModule>(
           state_space, action_space, hidden_size, unfolding_steps)),
       critic_1(std::make_shared<QNetworkLiquidModule>(
@@ -28,7 +28,7 @@ SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
       curr_episode_step(0), curr_train_step(0L), global_curr_step(0L),
       actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
       critic_2_loss_meter("critic_2", 16), entropy_loss_meter("entropy", 16),
-      episode_steps_meter("steps", 16) {
+      episode_steps_meter("steps", 16), train_every(train_every) {
 
     hard_update(target_critic_1, critic_1);
     hard_update(target_critic_2, critic_2);
@@ -76,7 +76,7 @@ void SoftActorCriticLiquidAgent::done(torch::Tensor state, float reward) {
 }
 
 void SoftActorCriticLiquidAgent::check_train() {
-    if (global_curr_step % batch_size == 0) {
+    if (global_curr_step % train_every == train_every - 1) {
         std::vector<liquid_sac_episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state,
@@ -84,9 +84,7 @@ void SoftActorCriticLiquidAgent::check_train() {
             actor_next_x_t, critic_1_next_x_t, critic_2_next_x_t, target_critic_1_next_x_t,
             target_critic_2_next_x_t;
 
-        for (int i = 0; i < batch_size; i++) {
-            const auto &rp = tmp_replay_buffer[i];
-
+        for (const auto &rp: tmp_replay_buffer) {
             vec_states.push_back(rp.replay_buffer.state);
             vec_actions.push_back(rp.replay_buffer.action);
             vec_rewards.push_back(

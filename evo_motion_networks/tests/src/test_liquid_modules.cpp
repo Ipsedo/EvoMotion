@@ -15,10 +15,7 @@
  */
 
 TEST_P(ParamLiquidCellModule, TestLiquidCell) {
-    const int input_size = std::get<0>(GetParam());
-    const int neuron_number = std::get<1>(GetParam());
-    const int unfolding_steps = std::get<2>(GetParam());
-    const int batch_size = std::get<3>(GetParam());
+    const auto [input_size, neuron_number, unfolding_steps, batch_size] = GetParam();
 
     const auto x = torch::randn({batch_size, input_size});
 
@@ -64,11 +61,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Actor
 
 TEST_P(ParamLiquidModule, TestLiquidActor) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_space = std::get<1>(GetParam());
-    const int action_space = std::get<2>(GetParam());
-    const int unfolding_steps = std::get<3>(GetParam());
-    const int batch_size = std::get<4>(GetParam());
+    const auto [state_space, hidden_space, action_space, unfolding_steps, batch_size] = GetParam();
 
     const auto state = torch::randn({state_space});
     auto actor_liquid =
@@ -109,10 +102,7 @@ TEST_P(ParamLiquidModule, TestLiquidActor) {
 // Critic
 
 TEST_P(ParamLiquidModule, TestLiquidCritic) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_space = std::get<1>(GetParam());
-    const int unfolding_steps = std::get<3>(GetParam());
-    const int batch_size = std::get<4>(GetParam());
+    const auto [state_space, hidden_space, action_space, unfolding_steps, batch_size] = GetParam();
 
     const auto state = torch::randn({state_space});
     auto critic_liquid = CriticLiquidModule({state_space}, hidden_space, unfolding_steps);
@@ -139,11 +129,7 @@ TEST_P(ParamLiquidModule, TestLiquidCritic) {
 // QNetwork
 
 TEST_P(ParamLiquidModule, TestLiquidQNetwork) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_space = std::get<1>(GetParam());
-    const int action_space = std::get<2>(GetParam());
-    const int unfolding_steps = std::get<3>(GetParam());
-    const int batch_size = std::get<4>(GetParam());
+    const auto [state_space, hidden_space, action_space, unfolding_steps, batch_size] = GetParam();
 
     const auto state = torch::randn({state_space});
     const auto action = torch::rand({action_space}) * 2.f - 1.f;

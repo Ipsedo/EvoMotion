@@ -19,7 +19,8 @@ AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::sample(int batch_size) {
     std::shuffle(tmp_replay_buffer.begin(), tmp_replay_buffer.end(), rand_gen);
 
     std::vector<ReplayBufferType> result;
-    for (int i = 0; i < batch_size; i++) result.push_back(tmp_replay_buffer[i]);
+    for (int i = 0; i < batch_size && i < tmp_replay_buffer.size(); i++)
+        result.push_back(tmp_replay_buffer[i]);
 
     return result;
 }

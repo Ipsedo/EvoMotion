@@ -37,6 +37,8 @@ private:
     long curr_train_step;
     long global_curr_step;
 
+    int train_every;
+
     void check_train();
 
     void train(
@@ -49,7 +51,8 @@ public:
     ActorCriticLiquidAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int neuron_number, int batch_size, float lr, float gamma, float entropy_start_factor,
-        float entropy_end_factor, long entropy_steps, int unfolding_steps, int replay_buffer_size);
+        float entropy_end_factor, long entropy_steps, int unfolding_steps, int replay_buffer_size,
+        int train_every);
 
     void done(torch::Tensor state, float reward) override;
 

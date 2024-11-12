@@ -15,7 +15,7 @@ ActorCriticAgent::ActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
     const float gamma, const float entropy_start_factor, float entropy_end_factor,
-    long entropy_steps, int replay_buffer_size)
+    long entropy_steps, int replay_buffer_size, int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
@@ -25,7 +25,7 @@ ActorCriticAgent::ActorCriticAgent(
       curr_device(torch::kCPU), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
       policy_loss_meter("policy", 64), entropy_meter("entropy", 64),
       critic_loss_meter("critic", 64), episode_steps_meter("steps", 64), curr_episode_step(0),
-      curr_train_step(0L), global_curr_step(0L) {
+      curr_train_step(0L), global_curr_step(0L), train_every(train_every) {
     at::manual_seed(seed);
 }
 
@@ -46,14 +46,12 @@ torch::Tensor ActorCriticAgent::act(const torch::Tensor state, const float rewar
 }
 
 void ActorCriticAgent::check_train() {
-    if (global_curr_step % batch_size == 0) {
+    if (global_curr_step % train_every == train_every - 1) {
         std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
 
-        for (int i = 0; i < batch_size; i++) {
-            const auto &rp = tmp_replay_buffer[i];
-
+        for (const auto &rp: tmp_replay_buffer) {
             vec_states.push_back(rp.state);
             vec_actions.push_back(rp.action);
             vec_rewards.push_back(

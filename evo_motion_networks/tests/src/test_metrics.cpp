@@ -6,9 +6,7 @@
 #include <evo_motion_networks_tests/test_metrics.h>
 
 TEST_P(ParamLossMetric, TestLossMetric) {
-    const auto values = std::get<0>(GetParam());
-    const auto window_size = std::get<1>(GetParam());
-    const auto expected_value = std::get<2>(GetParam());
+    const auto [values, window_size, expected_value] = GetParam();
 
     LossMeter meter("test", window_size);
 

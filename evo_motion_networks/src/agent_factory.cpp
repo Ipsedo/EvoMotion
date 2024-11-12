@@ -81,7 +81,8 @@ std::shared_ptr<Agent> ActorCriticFactory::create_agent(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("lr"), get_value<float>("gamma"),
         get_value<float>("entropy_start_factor"), get_value<float>("entropy_end_factor"),
-        get_value<long>("entropy_steps"), get_value<int>("replay_buffer_size"));
+        get_value<long>("entropy_steps"), get_value<int>("replay_buffer_size"),
+        get_value<int>("train_every"));
 }
 
 ActorCriticFactory::ActorCriticFactory(const std::map<std::string, std::string> &parameters)
@@ -94,7 +95,7 @@ std::shared_ptr<Agent> ActorCriticLiquidFactory::create_agent(
         get_value<int>("batch_size"), get_value<float>("lr"), get_value<float>("gamma"),
         get_value<float>("entropy_start_factor"), get_value<float>("entropy_end_factor"),
         get_value<long>("entropy_steps"), get_value<int>("unfolding_steps"),
-        get_value<int>("replay_buffer_size"));
+        get_value<int>("replay_buffer_size"), get_value<int>("train_every"));
 }
 
 ActorCriticLiquidFactory::ActorCriticLiquidFactory(
@@ -109,7 +110,8 @@ std::shared_ptr<Agent> SofActorCriticFactory::create_agent(
     return std::make_shared<SoftActorCriticAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
-        get_value<float>("tau"), get_value<int>("replay_buffer_size"));
+        get_value<float>("tau"), get_value<int>("replay_buffer_size"),
+        get_value<int>("train_every"));
 }
 
 SofActorCriticLiquidFactory::SofActorCriticLiquidFactory(
@@ -122,7 +124,7 @@ std::shared_ptr<Agent> SofActorCriticLiquidFactory::create_agent(
         get_value<int>("seed"), state_space, action_space, get_value<int>("neuron_number"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"), get_value<float>("gamma"),
         get_value<float>("tau"), get_value<int>("unfolding_steps"),
-        get_value<int>("replay_buffer_size"));
+        get_value<int>("replay_buffer_size"), get_value<int>("train_every"));
 }
 
 // Build factory

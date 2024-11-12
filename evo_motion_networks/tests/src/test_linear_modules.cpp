@@ -12,9 +12,7 @@
 // Actor
 
 TEST_P(ParamLinearModule, TestActorModule) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_size = std::get<1>(GetParam());
-    const int action_space = std::get<2>(GetParam());
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
 
     const auto state = torch::randn({state_space});
     auto actor = ActorModule({state_space}, {action_space}, hidden_size);
@@ -32,10 +30,7 @@ TEST_P(ParamLinearModule, TestActorModule) {
 }
 
 TEST_P(ParamLinearModule, TestBatchedActorModule) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_size = std::get<1>(GetParam());
-    const int action_space = std::get<2>(GetParam());
-    const int batch_size = std::get<3>(GetParam());
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
 
     const auto state = torch::randn({batch_size, state_space});
     auto actor = ActorModule({state_space}, {action_space}, hidden_size);
@@ -57,8 +52,7 @@ TEST_P(ParamLinearModule, TestBatchedActorModule) {
 // Critic
 
 TEST_P(ParamLinearModule, TestCriticModule) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_size = std::get<1>(GetParam());
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
 
     const auto state = torch::randn({state_space});
     auto critic = CriticModule({state_space}, hidden_size);
@@ -70,9 +64,7 @@ TEST_P(ParamLinearModule, TestCriticModule) {
 }
 
 TEST_P(ParamLinearModule, TestBatchedCriticModule) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_size = std::get<1>(GetParam());
-    const int batch_size = std::get<3>(GetParam());
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
 
     const auto state = torch::randn({batch_size, state_space});
     auto critic = CriticModule({state_space}, hidden_size);
@@ -87,9 +79,7 @@ TEST_P(ParamLinearModule, TestBatchedCriticModule) {
 // Q-Network
 
 TEST_P(ParamLinearModule, TestQNetworkModule) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_size = std::get<1>(GetParam());
-    const int action_space = std::get<2>(GetParam());
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
 
     const auto state = torch::randn({state_space});
     const auto action = torch::rand({action_space}) * 2.f - 1.f;
@@ -103,10 +93,7 @@ TEST_P(ParamLinearModule, TestQNetworkModule) {
 }
 
 TEST_P(ParamLinearModule, TestBatchedQNetworkModule) {
-    const int state_space = std::get<0>(GetParam());
-    const int hidden_size = std::get<1>(GetParam());
-    const int action_space = std::get<2>(GetParam());
-    const int batch_size = std::get<3>(GetParam());
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
 
     const auto state = torch::randn({batch_size, state_space});
     const auto action = torch::rand({batch_size, action_space}) * 2.f - 1.f;

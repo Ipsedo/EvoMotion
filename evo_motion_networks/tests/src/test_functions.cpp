@@ -13,8 +13,7 @@
  */
 
 TEST_P(ParamTestRand, TestRandFun) {
-    torch::Tensor t = std::get<0>(GetParam());
-    float epsilon = std::get<1>(GetParam());
+    const auto [t, epsilon] = GetParam();
 
     torch::Tensor rand = rand_eps(t, epsilon);
 
@@ -81,9 +80,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Sample
 
 TEST_P(ParamTestTruncNormal, TestSample) {
-    const auto sizes = std::get<0>(GetParam());
-    const float min_value = std::get<1>(GetParam());
-    const float max_value = std::get<2>(GetParam());
+    const auto [sizes, min_value, max_value] = GetParam();
 
     const auto mu = torch::rand(sizes) * (max_value - min_value) + min_value;
     const auto sigma = torch::randn(sizes).exp();
@@ -99,9 +96,7 @@ TEST_P(ParamTestTruncNormal, TestSample) {
 // PDF
 
 TEST_P(ParamTestTruncNormal, TestPDF) {
-    const auto sizes = std::get<0>(GetParam());
-    const float min_value = std::get<1>(GetParam());
-    const float max_value = std::get<2>(GetParam());
+    const auto [sizes, min_value, max_value] = GetParam();
 
     const auto x = torch::rand(sizes) * (max_value - min_value) + min_value;
     const auto mu = torch::rand(sizes) * (max_value - min_value) + min_value;
@@ -117,9 +112,7 @@ TEST_P(ParamTestTruncNormal, TestPDF) {
 // Entropy
 
 TEST_P(ParamTestTruncNormal, TestEntropy) {
-    const auto sizes = std::get<0>(GetParam());
-    const float min_value = std::get<1>(GetParam());
-    const float max_value = std::get<2>(GetParam());
+    const auto [sizes, min_value, max_value] = GetParam();
 
     const auto mu = torch::rand(sizes) * (max_value - min_value) + min_value;
     const auto sigma = torch::randn(sizes).exp();

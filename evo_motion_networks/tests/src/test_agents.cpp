@@ -13,14 +13,11 @@
 // Actor Critic
 
 TEST_P(ParamActorCriticAgent, TestActorCritic) {
-    const int state_space = std::get<0>(GetParam());
-    const int action_space = std::get<1>(GetParam());
-    const int hidden_size = std::get<2>(GetParam());
-    const int batch_size = std::get<3>(GetParam());
+    const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = ActorCriticAgent(
         1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 1.f, 0.1f, 16,
-        32);
+        32, train_every);
 
     for (int i = 0; i < batch_size * 2; i++) {
         for (int j = 0; j < 5; j++) {
@@ -43,13 +40,11 @@ TEST_P(ParamActorCriticAgent, TestActorCritic) {
 // Soft Actor Critic
 
 TEST_P(ParamActorCriticAgent, TestSoftActorCritic) {
-    const int state_space = std::get<0>(GetParam());
-    const int action_space = std::get<1>(GetParam());
-    const int hidden_size = std::get<2>(GetParam());
-    const int batch_size = std::get<3>(GetParam());
+    const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = SoftActorCriticAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 0.005f, 128);
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 0.005f, 128,
+        train_every);
 
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < batch_size * 2; j++) {
@@ -72,14 +67,11 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCritic) {
 // Actor Critic Liquid
 
 TEST_P(ParamActorCriticAgent, TestActorCriticLiquid) {
-    const int state_space = std::get<0>(GetParam());
-    const int action_space = std::get<1>(GetParam());
-    const int hidden_size = std::get<2>(GetParam());
-    const int batch_size = std::get<3>(GetParam());
+    const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = ActorCriticLiquidAgent(
         1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 1.f, 0.1f, 16, 6,
-        32);
+        32, train_every);
 
     for (int i = 0; i < batch_size * 2; i++) {
         for (int j = 0; j < 5; j++) {
@@ -102,13 +94,11 @@ TEST_P(ParamActorCriticAgent, TestActorCriticLiquid) {
 // Soft Actor Critic Liquid
 
 TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquid) {
-    const int state_space = std::get<0>(GetParam());
-    const int action_space = std::get<1>(GetParam());
-    const int hidden_size = std::get<2>(GetParam());
-    const int batch_size = std::get<3>(GetParam());
+    const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = SoftActorCriticLiquidAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-1f, 0.9f, 0.005f, 6, 128);
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-1f, 0.9f, 0.005f, 6, 128,
+        train_every);
 
     for (int i = 0; i < batch_size * 2; i++) {
         for (int j = 0; j < 5; j++) {
@@ -133,4 +123,4 @@ INSTANTIATE_TEST_SUITE_P(
     TestAgent, ParamActorCriticAgent,
     testing::Combine(
         testing::Values(1, 2, 3), testing::Values(1, 2, 100), testing::Values(1, 2, 3),
-        testing::Values(1, 2, 3)));
+        testing::Values(1, 2, 3), testing::Values(1, 2, 3)));
