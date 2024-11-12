@@ -49,8 +49,8 @@ bool AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::empty() {
 
 ReplayBuffer::ReplayBuffer(int size, int seed) : AbstractReplayBuffer(size, seed) {}
 
-step_replay_buffer ReplayBuffer::update_last_item(
-    step_replay_buffer last_item, float reward, torch::Tensor next_state, bool done) {
+episode_step ReplayBuffer::update_last_item(
+    episode_step last_item, float reward, torch::Tensor next_state, bool done) {
     last_item.reward = reward;
     last_item.next_state = next_state;
     last_item.done = done;
@@ -66,16 +66,26 @@ step_replay_buffer ReplayBuffer::update_last_item(
  * Liquid replay buffer
  */
 
-LiquidReplayBuffer::LiquidReplayBuffer(int size, int seed) : AbstractReplayBuffer(size, seed) {}
+LiquidA2cReplayBuffer::LiquidA2cReplayBuffer(int size, int seed)
+    : AbstractReplayBuffer(size, seed) {}
 
-liquid_step_replay_buffer LiquidReplayBuffer::update_last_item(
-    liquid_step_replay_buffer last_item, float reward, torch::Tensor next_state, bool done) {
-    last_item.reward = reward;
-    last_item.next_state = next_state;
-    last_item.done = done;
+liquid_a2c_episode_step LiquidA2cReplayBuffer::update_last_item(
+    liquid_a2c_episode_step last_item, float reward, torch::Tensor next_state, bool done) {
+    last_item.replay_buffer.reward = reward;
+    last_item.replay_buffer.next_state = next_state;
+    last_item.replay_buffer.done = done;
     return last_item;
 }
 
-/*void LiquidReplayBuffer::update_last(float reward, torch::Tensor next_state, bool done) {
-    AbstractReplayBuffer::update_last(reward, next_state, done);
-}*/
+// SAC
+
+LiquidSacReplayBuffer::LiquidSacReplayBuffer(int size, int seed)
+    : AbstractReplayBuffer(size, seed) {}
+
+liquid_sac_episode_step LiquidSacReplayBuffer::update_last_item(
+    liquid_sac_episode_step last_item, float reward, torch::Tensor next_state, bool done) {
+    last_item.replay_buffer.reward = reward;
+    last_item.replay_buffer.next_state = next_state;
+    last_item.replay_buffer.done = done;
+    return last_item;
+}

@@ -7,6 +7,7 @@
 #include <evo_motion_networks/agents/actor_critic.h>
 #include <evo_motion_networks/agents/actor_critic_liquid.h>
 #include <evo_motion_networks/agents/soft_actor_critic.h>
+#include <evo_motion_networks/agents/soft_actor_critic_liquid.h>
 #include <evo_motion_networks_tests/test_agents.h>
 
 // Actor Critic
@@ -100,14 +101,14 @@ TEST_P(ParamActorCriticAgent, TestActorCriticLiquid) {
 
 // Soft Actor Critic Liquid
 
-/*TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquid) {
+TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquid) {
     const int state_space = std::get<0>(GetParam());
     const int action_space = std::get<1>(GetParam());
     const int hidden_size = std::get<2>(GetParam());
     const int batch_size = std::get<3>(GetParam());
 
     auto agent = SoftActorCriticLiquidAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 1.f, 0.9f, 0.005f, 6);
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-1f, 0.9f, 0.005f, 6, 128);
 
     for (int i = 0; i < batch_size * 2; i++) {
         for (int j = 0; j < 5; j++) {
@@ -124,7 +125,7 @@ TEST_P(ParamActorCriticAgent, TestActorCriticLiquid) {
     }
 
     for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
-}*/
+}
 
 // Create parametrized tests
 

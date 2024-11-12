@@ -26,7 +26,7 @@ private:
     torch::DeviceType curr_device;
 
     int batch_size;
-    LiquidReplayBuffer replay_buffer;
+    LiquidA2cReplayBuffer replay_buffer;
 
     LossMeter policy_loss_meter;
     LossMeter entropy_meter;
@@ -42,8 +42,8 @@ private:
     void train(
         const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
         const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
-        const torch::Tensor &batched_next_state, const liquid_step_memory &curr_memory,
-        const liquid_step_memory &next_memory);
+        const torch::Tensor &batched_next_state, const liquid_a2c_step_memory &curr_memory,
+        const liquid_a2c_step_memory &next_memory);
 
 public:
     ActorCriticLiquidAgent(

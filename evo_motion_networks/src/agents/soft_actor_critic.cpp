@@ -32,17 +32,8 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       episode_steps_meter("steps", 16) {
     at::manual_seed(seed);
 
-    for (auto n_p: critic_1->named_parameters()) {
-        const auto &name = n_p.key();
-        const auto &param = n_p.value();
-        target_critic_1->named_parameters()[name].data().copy_(param.data());
-    }
-
-    for (auto n_p: critic_2->named_parameters()) {
-        const auto &name = n_p.key();
-        const auto &param = n_p.value();
-        target_critic_2->named_parameters()[name].data().copy_(param.data());
-    }
+    hard_update(target_critic_1, critic_1);
+    hard_update(target_critic_2, critic_2);
 }
 
 torch::Tensor SoftActorCriticAgent::act(torch::Tensor state, float reward) {
@@ -62,7 +53,7 @@ torch::Tensor SoftActorCriticAgent::act(torch::Tensor state, float reward) {
 
 void SoftActorCriticAgent::check_train() {
     if (global_curr_step % batch_size == 0) {
-        std::vector<step_replay_buffer> tmp_replay_buffer = replay_buffer.sample(batch_size);
+        std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
 
@@ -146,21 +137,8 @@ void SoftActorCriticAgent::train(
     entropy_optimizer.step();
 
     // target value soft update
-    for (auto n_p: critic_1->named_parameters()) {
-        const auto &name = n_p.key();
-        const auto &param = n_p.value();
-
-        target_critic_1->named_parameters()[name].data().copy_(
-            tau * param.data() + (1.f - tau) * target_critic_1->named_parameters()[name].data());
-    }
-
-    for (auto n_p: critic_2->named_parameters()) {
-        const auto &name = n_p.key();
-        const auto &param = n_p.value();
-
-        target_critic_2->named_parameters()[name].data().copy_(
-            tau * param.data() + (1.f - tau) * target_critic_2->named_parameters()[name].data());
-    }
+    soft_update(target_critic_1, critic_1, tau);
+    soft_update(target_critic_2, critic_2, tau);
 
     // metrics
     actor_loss_meter.add(actor_loss.cpu().item().toFloat());

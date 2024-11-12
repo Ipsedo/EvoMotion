@@ -68,3 +68,28 @@ float exponential_decrease(long t, long max_t, float start, float end) {
     const auto k = -std::log(end / start) / static_cast<float>(max_t);
     return std::max(start * std::exp(-k * static_cast<float>(t)), end);
 }
+
+/*
+ * Torch module functions
+ */
+
+void hard_update(
+    const std::shared_ptr<torch::nn::Module> &to, const std::shared_ptr<torch::nn::Module> &from) {
+    for (auto n_p: from->named_parameters()) {
+        const auto &name = n_p.key();
+        const auto &param = n_p.value();
+        to->named_parameters()[name].data().copy_(param.data());
+    }
+}
+
+void soft_update(
+    const std::shared_ptr<torch::nn::Module> &to, const std::shared_ptr<torch::nn::Module> &from,
+    float tau) {
+    for (auto n_p: from->named_parameters()) {
+        const auto &name = n_p.key();
+        const auto &param = n_p.value();
+
+        to->named_parameters()[name].data().copy_(
+            tau * param.data() + (1.f - tau) * to->named_parameters()[name].data());
+    }
+}

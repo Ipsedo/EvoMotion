@@ -35,4 +35,14 @@ torch::Tensor truncated_normal_entropy(
 
 float exponential_decrease(long t, long max_t, float start, float end);
 
+/*
+ * Torch module function
+ */
+
+void hard_update(
+    const std::shared_ptr<torch::nn::Module> &to, const std::shared_ptr<torch::nn::Module> &from);
+void soft_update(
+    const std::shared_ptr<torch::nn::Module> &to, const std::shared_ptr<torch::nn::Module> &from,
+    float tau);
+
 #endif//EVO_MOTION_FUNCTIONS_H

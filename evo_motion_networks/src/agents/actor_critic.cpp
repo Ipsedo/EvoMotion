@@ -47,7 +47,7 @@ torch::Tensor ActorCriticAgent::act(const torch::Tensor state, const float rewar
 
 void ActorCriticAgent::check_train() {
     if (global_curr_step % batch_size == 0) {
-        std::vector<step_replay_buffer> tmp_replay_buffer = replay_buffer.sample(batch_size);
+        std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
 
