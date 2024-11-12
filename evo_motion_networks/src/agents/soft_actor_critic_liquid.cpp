@@ -35,7 +35,7 @@ SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
 }
 
 torch::Tensor SoftActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
-    const liquid_sac_step_memory x_t{
+    const liquid_sac_memory x_t{
         actor->get_x().detach(), critic_1->get_x().detach(), critic_2->get_x().detach(),
         target_critic_1->get_x().detach(), target_critic_2->get_x().detach()};
 
@@ -47,7 +47,7 @@ torch::Tensor SoftActorCriticLiquidAgent::act(torch::Tensor state, float reward)
     const auto _3 = target_critic_1->forward(state, action);
     const auto _4 = target_critic_2->forward(state, action);
 
-    const liquid_sac_step_memory next_x_t{
+    const liquid_sac_memory next_x_t{
         actor->get_x().detach(), critic_1->get_x().detach(), critic_2->get_x().detach(),
         target_critic_1->get_x().detach(), target_critic_2->get_x().detach()};
 
@@ -77,7 +77,8 @@ void SoftActorCriticLiquidAgent::done(torch::Tensor state, float reward) {
 
 void SoftActorCriticLiquidAgent::check_train() {
     if (global_curr_step % train_every == train_every - 1) {
-        std::vector<liquid_sac_episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
+        std::vector<liquid_episode_step<liquid_sac_memory>> tmp_replay_buffer =
+            replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state,
             actor_x_t, critic_1_x_t, critic_2_x_t, target_critic_1_x_t, target_critic_2_x_t,
@@ -120,8 +121,8 @@ void SoftActorCriticLiquidAgent::check_train() {
 void SoftActorCriticLiquidAgent::train(
     const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
-    const torch::Tensor &batched_next_state, const liquid_sac_step_memory &x_t,
-    const liquid_sac_step_memory &next_x_t) {
+    const torch::Tensor &batched_next_state, const liquid_sac_memory &x_t,
+    const liquid_sac_memory &next_x_t) {
 
     const auto [next_mu, next_sigma, actor_next_next_x_t] =
         actor->forward(next_x_t.actor_x_t, batched_next_state);

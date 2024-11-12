@@ -24,7 +24,8 @@ ActorCriticLiquidAgent::ActorCriticLiquidAgent(
 
 void ActorCriticLiquidAgent::check_train() {
     if (global_curr_step % train_every == train_every - 1) {
-        std::vector<liquid_a2c_episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
+        std::vector<liquid_episode_step<liquid_a2c_memory>> tmp_replay_buffer =
+            replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state,
             input_actor_x, input_critic_x, output_actor_x, output_critic_x;
@@ -56,8 +57,8 @@ void ActorCriticLiquidAgent::check_train() {
 void ActorCriticLiquidAgent::train(
     const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
-    const torch::Tensor &batched_next_state, const liquid_a2c_step_memory &curr_memory,
-    const liquid_a2c_step_memory &next_memory) {
+    const torch::Tensor &batched_next_state, const liquid_a2c_memory &curr_memory,
+    const liquid_a2c_memory &next_memory) {
 
     const auto [next_value, next_next_critic_x] =
         critic->forward(next_memory.critic_x_t.detach(), batched_next_state);
@@ -97,13 +98,13 @@ void ActorCriticLiquidAgent::train(
 
 torch::Tensor ActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
 
-    const liquid_a2c_step_memory input_memory{actor->get_x(), critic->get_x()};
+    const liquid_a2c_memory input_memory{actor->get_x(), critic->get_x()};
 
     const auto [mu, sigma] = actor->forward(state);
     auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
     const auto _ = critic->forward(state);
 
-    const liquid_a2c_step_memory next_memory{actor->get_x(), critic->get_x()};
+    const liquid_a2c_memory next_memory{actor->get_x(), critic->get_x()};
 
     if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
     replay_buffer.add({{state, action, 0.f, false, state}, input_memory, next_memory});

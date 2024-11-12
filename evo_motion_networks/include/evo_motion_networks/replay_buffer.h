@@ -19,12 +19,12 @@ struct episode_step {
     torch::Tensor next_state;
 };
 
-struct liquid_a2c_step_memory {
+struct liquid_a2c_memory {
     torch::Tensor actor_x_t;
     torch::Tensor critic_x_t;
 };
 
-struct liquid_sac_step_memory {
+struct liquid_sac_memory {
     torch::Tensor actor_x_t;
     torch::Tensor critic_1_x_t;
     torch::Tensor critic_2_x_t;
@@ -32,21 +32,20 @@ struct liquid_sac_step_memory {
     torch::Tensor target_critic_2_x_t;
 };
 
-struct liquid_a2c_episode_step {
+template<typename LiquidMemory>
+struct liquid_episode_step {
     episode_step replay_buffer;
-    liquid_a2c_step_memory x_t;
-    liquid_a2c_step_memory next_x_t;
+    LiquidMemory x_t;
+    LiquidMemory next_x_t;
 };
 
-struct liquid_sac_episode_step {
-    episode_step replay_buffer;
-    liquid_sac_step_memory x_t;
-    liquid_sac_step_memory next_x_t;
-};
+/*
+ * Replay buffer classes
+ */
 
-// Replay buffer classes
+// Abstract
 
-template<typename ReplayBufferType, class... UpdateArgs>
+template<class ReplayBufferType, class... UpdateArgs>
 class AbstractReplayBuffer {
 public:
     AbstractReplayBuffer(int size, int seed);
@@ -64,6 +63,8 @@ private:
     std::mt19937 rand_gen;
 };
 
+// replay buffer classes
+
 class ReplayBuffer : public AbstractReplayBuffer<episode_step, float, torch::Tensor, bool> {
 public:
     ReplayBuffer(int size, int seed);
@@ -73,26 +74,19 @@ protected:
         episode_step last_item, float reward, torch::Tensor next_state, bool done) override;
 };
 
-class LiquidA2cReplayBuffer
-    : public AbstractReplayBuffer<liquid_a2c_episode_step, float, torch::Tensor, bool> {
+template<typename LiquidMemory>
+class LiquidReplayBuffer
+    : public AbstractReplayBuffer<liquid_episode_step<LiquidMemory>, float, torch::Tensor, bool> {
 public:
-    LiquidA2cReplayBuffer(int size, int seed);
+    LiquidReplayBuffer(int size, int seed);
 
 protected:
-    liquid_a2c_episode_step update_last_item(
-        liquid_a2c_episode_step last_item, float reward, torch::Tensor next_state,
+    liquid_episode_step<LiquidMemory> update_last_item(
+        liquid_episode_step<LiquidMemory> last_item, float reward, torch::Tensor next_state,
         bool done) override;
 };
 
-class LiquidSacReplayBuffer
-    : public AbstractReplayBuffer<liquid_sac_episode_step, float, torch::Tensor, bool> {
-public:
-    LiquidSacReplayBuffer(int size, int seed);
-
-protected:
-    liquid_sac_episode_step update_last_item(
-        liquid_sac_episode_step last_item, float reward, torch::Tensor next_state,
-        bool done) override;
-};
+template class LiquidReplayBuffer<liquid_a2c_memory>;
+template class LiquidReplayBuffer<liquid_sac_memory>;
 
 #endif//EVO_MOTION_REPLAY_BUFFER_H

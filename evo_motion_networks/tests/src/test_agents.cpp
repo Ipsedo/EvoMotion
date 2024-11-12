@@ -97,7 +97,7 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquid) {
     const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = SoftActorCriticLiquidAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-1f, 0.9f, 0.005f, 6, 128,
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 0.005f, 6, 128,
         train_every);
 
     for (int i = 0; i < batch_size * 2; i++) {
@@ -107,6 +107,7 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquid) {
 
             ASSERT_EQ(action.sizes().size(), 1);
             ASSERT_EQ(action.size(0), action_space);
+            ASSERT_TRUE(torch::all(~torch::isnan(action)).item().toBool());
             ASSERT_TRUE(torch::all(action >= -1.f).item().toBool());
             ASSERT_TRUE(torch::all(action <= 1.f).item().toBool());
         }

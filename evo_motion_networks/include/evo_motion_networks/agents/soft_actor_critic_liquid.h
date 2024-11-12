@@ -36,7 +36,7 @@ private:
     float gamma;
     float tau;
     int batch_size;
-    LiquidSacReplayBuffer replay_buffer;
+    LiquidReplayBuffer<liquid_sac_memory> replay_buffer;
 
     int curr_episode_step;
     long curr_train_step;
@@ -55,8 +55,8 @@ private:
     void train(
         const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
         const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
-        const torch::Tensor &batched_next_state, const liquid_sac_step_memory &x_t,
-        const liquid_sac_step_memory &next_x_t);
+        const torch::Tensor &batched_next_state, const liquid_sac_memory &x_t,
+        const liquid_sac_memory &next_x_t);
 
 public:
     SoftActorCriticLiquidAgent(
