@@ -66,5 +66,5 @@ torch::Tensor truncated_normal_entropy(
 
 float exponential_decrease(long t, long max_t, float start, float end) {
     const auto k = -std::log(end / start) / static_cast<float>(max_t);
-    return start * std::exp(-k * static_cast<float>(t));
+    return std::max(start * std::exp(-k * static_cast<float>(t)), end);
 }
