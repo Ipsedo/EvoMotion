@@ -224,13 +224,15 @@ void SoftActorCriticLiquidAgent::save(const std::string &output_folder_path) {
     save_torch<std::shared_ptr<QNetworkLiquidModule> >(output_folder_path, critic_2, "critic_2.th");
     save_torch<std::shared_ptr<QNetworkLiquidModule> >(
         output_folder_path, target_critic_2, "target_critic_2.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer> >(output_folder_path, critic_2_optimizer,
-                                                          "critic_2_optimizer.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer> >(
+        output_folder_path, critic_2_optimizer,
+        "critic_2_optimizer.th");
 
     // Entropy
     save_torch<std::shared_ptr<EntropyParameter> >(
         output_folder_path, entropy_parameter, "entropy.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer> >(output_folder_path, entropy_optimizer, "entropy_optimizer.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer> >(
+        output_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 void SoftActorCriticLiquidAgent::load(const std::string &input_folder_path) {
@@ -255,7 +257,8 @@ void SoftActorCriticLiquidAgent::load(const std::string &input_folder_path) {
         input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
     // Entropy
-    load_torch<std::shared_ptr<EntropyParameter> >(input_folder_path, entropy_parameter, "entropy.th");
+    load_torch<std::shared_ptr<EntropyParameter> >(
+        input_folder_path, entropy_parameter, "entropy.th");
     load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
