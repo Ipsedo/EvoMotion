@@ -26,7 +26,8 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
       target_entropy(-1.f), entropy_parameter(std::make_shared<EntropyParameter>()),
-      entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)), curr_device(torch::kCPU), gamma(gamma),
+      entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)),
+      curr_device(torch::kCPU), gamma(gamma),
       tau(tau), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
       curr_episode_step(0), curr_train_step(0L), global_curr_step(0L),
       actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
@@ -161,41 +162,52 @@ void SoftActorCriticAgent::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
     // actor
-    save_torch<std::shared_ptr<ActorModule>>(output_folder_path, actor, "actor.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, actor_optimizer, "actor.th");
+    save_torch<std::shared_ptr<ActorModule> >(output_folder_path, actor, "actor.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer> >(
+        output_folder_path, actor_optimizer, "actor.th");
 
     // critic
-    save_torch<std::shared_ptr<QNetworkModule>>(output_folder_path, critic_1, "critic_1.th");
-    save_torch<std::shared_ptr<QNetworkModule>>(output_folder_path, target_critic_1, "target_critic_1.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
+    save_torch<std::shared_ptr<QNetworkModule> >(output_folder_path, critic_1, "critic_1.th");
+    save_torch<std::shared_ptr<QNetworkModule> >(
+        output_folder_path, target_critic_1, "target_critic_1.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer> >(
+        output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
-    save_torch<std::shared_ptr<QNetworkModule>>(output_folder_path, critic_2, "critic_2.th");
-    save_torch<std::shared_ptr<QNetworkModule>>(output_folder_path, target_critic_2, "target_critic_2.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
+    save_torch<std::shared_ptr<QNetworkModule> >(output_folder_path, critic_2, "critic_2.th");
+    save_torch<std::shared_ptr<QNetworkModule> >(
+        output_folder_path, target_critic_2, "target_critic_2.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer> >(output_folder_path, critic_2_optimizer,
+                                                          "critic_2_optimizer.th");
 
     // Entropy
-    save_torch<std::shared_ptr<EntropyParameter>>(output_folder_path, entropy_parameter, "entropy.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, entropy_optimizer, "entropy_optimizer.th");
+    save_torch<std::shared_ptr<EntropyParameter> >(
+        output_folder_path, entropy_parameter, "entropy.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer> >(output_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 void SoftActorCriticAgent::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
     // actor
-    load_torch<std::shared_ptr<ActorModule>>(input_folder_path, actor, "actor.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, actor_optimizer, "actor.th");
+    load_torch<std::shared_ptr<ActorModule> >(input_folder_path, actor, "actor.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer> >(
+        input_folder_path, actor_optimizer, "actor.th");
 
     // critic
-    load_torch<std::shared_ptr<QNetworkModule>>(input_folder_path, critic_1, "critic_1.th");
-    load_torch<std::shared_ptr<QNetworkModule>>(input_folder_path, target_critic_1, "target_critic_1.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
+    load_torch<std::shared_ptr<QNetworkModule> >(input_folder_path, critic_1, "critic_1.th");
+    load_torch<std::shared_ptr<QNetworkModule> >(
+        input_folder_path, target_critic_1, "target_critic_1.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer> >(
+        input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
-    load_torch<std::shared_ptr<QNetworkModule>>(input_folder_path, critic_2, "critic_2.th");
-    load_torch<std::shared_ptr<QNetworkModule>>(input_folder_path, target_critic_2, "target_critic_2.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
+    load_torch<std::shared_ptr<QNetworkModule> >(input_folder_path, critic_2, "critic_2.th");
+    load_torch<std::shared_ptr<QNetworkModule> >(
+        input_folder_path, target_critic_2, "target_critic_2.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer> >(
+        input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
     // Entropy
-    load_torch<std::shared_ptr<EntropyParameter>>(input_folder_path, entropy_parameter, "entropy.th");
+    load_torch<std::shared_ptr<EntropyParameter> >(input_folder_path, entropy_parameter, "entropy.th");
     load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
