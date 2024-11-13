@@ -17,7 +17,7 @@ ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
       gamma(gamma), lam(lam), epsilon(epsilon), epoch(epoch), curr_train_step(0L),
       curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
       replay_buffer(replay_buffer_size, seed), train_every(train_every),
-      actor_loss_meter("actor_loss", 16), critic_loss_meter("critic_loss", 16),
+      actor_loss_meter("actor_loss", 128), critic_loss_meter("critic_loss", 128),
       episode_steps_meter("steps", 16), curr_device(torch::kCPU) {
     at::manual_seed(seed);
 }
