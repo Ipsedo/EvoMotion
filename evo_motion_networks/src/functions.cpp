@@ -6,7 +6,7 @@
 
 #include <evo_motion_networks/functions.h>
 
-torch::Tensor rand_eps(const torch::Tensor &tensor_like, float epsilon) {
+torch::Tensor rand_eps(const torch::Tensor &tensor_like, const float epsilon) {
     return epsilon
            + torch::rand_like(tensor_like, at::TensorOptions(tensor_like.device()))
                  * (1.f - 2.f * epsilon);
@@ -54,7 +54,8 @@ torch::Tensor truncated_normal_sample(
 }
 
 torch::Tensor truncated_normal_entropy(
-    const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value) {
+    const torch::Tensor &mu, const torch::Tensor &sigma, const float min_value,
+    const float max_value) {
     const auto alpha = (min_value - mu) / sigma;
     const auto beta = (max_value - mu) / sigma;
 
@@ -64,7 +65,7 @@ torch::Tensor truncated_normal_entropy(
            + 0.5 * (alpha * phi(alpha) - beta * phi(beta)) / z;
 }
 
-float exponential_decrease(long t, long max_t, float start, float end) {
+float exponential_decrease(const long t, const long max_t, const float start, const float end) {
     const auto k = -std::log(end / start) / static_cast<float>(max_t);
     return std::max(start * std::exp(-k * static_cast<float>(t)), end);
 }
@@ -84,7 +85,7 @@ void hard_update(
 
 void soft_update(
     const std::shared_ptr<torch::nn::Module> &to, const std::shared_ptr<torch::nn::Module> &from,
-    float tau) {
+    const float tau) {
     for (auto n_p: from->named_parameters()) {
         const auto &name = n_p.key();
         const auto &param = n_p.value();

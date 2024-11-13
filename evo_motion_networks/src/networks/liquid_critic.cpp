@@ -21,7 +21,7 @@ CriticLiquidModule::CriticLiquidModule(
 
 void CriticLiquidModule::reset_liquid() const { liquid_network->reset_x_t(); }
 
-torch::Tensor CriticLiquidModule::get_x() { return liquid_network->get_x_t(); }
+torch::Tensor CriticLiquidModule::get_x() const { return liquid_network->get_x_t(); }
 
 critic_response CriticLiquidModule::forward(const torch::Tensor &state) {
     const auto x_t = liquid_network->get_x_t().squeeze(0);

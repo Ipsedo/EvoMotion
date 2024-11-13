@@ -10,7 +10,7 @@ TEST_P(ParamLossMetric, TestLossMetric) {
 
     LossMeter meter("test", window_size);
 
-    for (auto v: values) meter.add(v);
+    for (const auto v: values) meter.add(v);
 
     ASSERT_EQ(meter.loss(), expected_value);
 }

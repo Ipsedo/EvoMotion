@@ -13,9 +13,9 @@
  */
 
 SoftActorCriticAgent::SoftActorCriticAgent(
-    int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, int batch_size, float lr, float gamma, float tau, int replay_buffer_size,
-    int train_every)
+    const int seed, const std::vector<int64_t> &state_space,
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
+    const float gamma, const float tau, const int replay_buffer_size, const int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
       critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
@@ -37,7 +37,7 @@ SoftActorCriticAgent::SoftActorCriticAgent(
     hard_update(target_critic_2, critic_2);
 }
 
-torch::Tensor SoftActorCriticAgent::act(torch::Tensor state, float reward) {
+torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
@@ -58,14 +58,13 @@ void SoftActorCriticAgent::check_train() {
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
 
-        for (const auto &rp: tmp_replay_buffer) {
-            vec_states.push_back(rp.state);
-            vec_actions.push_back(rp.action);
-            vec_rewards.push_back(
-                torch::tensor(rp.reward, at::TensorOptions().device(curr_device)));
+        for (const auto &[state, action, reward, done, next_state]: tmp_replay_buffer) {
+            vec_states.push_back(state);
+            vec_actions.push_back(action);
+            vec_rewards.push_back(torch::tensor(reward, at::TensorOptions().device(curr_device)));
             vec_done.push_back(
-                torch::tensor(rp.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
-            vec_next_state.push_back(rp.next_state);
+                torch::tensor(done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+            vec_next_state.push_back(next_state);
         }
 
         train(
@@ -148,7 +147,7 @@ void SoftActorCriticAgent::train(
     curr_train_step++;
 }
 
-void SoftActorCriticAgent::done(torch::Tensor state, float reward) {
+void SoftActorCriticAgent::done(const torch::Tensor state, const float reward) {
     replay_buffer.update_last(reward, state, true);
 
     episode_steps_meter.add(static_cast<float>(curr_episode_step));

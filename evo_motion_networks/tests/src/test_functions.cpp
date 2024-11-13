@@ -15,7 +15,7 @@
 TEST_P(ParamTestRand, TestRandFun) {
     const auto [t, epsilon] = GetParam();
 
-    torch::Tensor rand = rand_eps(t, epsilon);
+    const torch::Tensor rand = rand_eps(t, epsilon);
 
     ASSERT_EQ(t.sizes().size(), rand.sizes().size());
 

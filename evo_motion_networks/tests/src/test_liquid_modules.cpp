@@ -41,7 +41,7 @@ TEST_P(ParamLiquidCellModule, TestLiquidCell) {
     ASSERT_EQ(out.size(1), neuron_number);
 
     liquid_cell.set_x_t(out);
-    auto new_out = liquid_cell.get_x_t();
+    const auto new_out = liquid_cell.get_x_t();
 
     ASSERT_EQ(new_out.sizes().size(), 2);
     ASSERT_EQ(new_out.size(0), batch_size * 2);

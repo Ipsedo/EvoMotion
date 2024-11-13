@@ -13,13 +13,14 @@
 
 ActorCriticAgent::ActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
-    const float gamma, const float entropy_start_factor, float entropy_end_factor,
-    long entropy_steps, int replay_buffer_size, int train_every)
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size,
+    float learning_rate, const float gamma, const float entropy_start_factor,
+    const float entropy_end_factor, const long entropy_steps, const int replay_buffer_size,
+    const int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
-      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
+      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
-      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
+      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
       gamma(gamma), entropy_start_factor(entropy_start_factor),
       entropy_end_factor(entropy_end_factor), entropy_steps(entropy_steps),
       curr_device(torch::kCPU), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
@@ -106,7 +107,7 @@ void ActorCriticAgent::train(
     curr_train_step++;
 }
 
-void ActorCriticAgent::done(torch::Tensor state, const float reward) {
+void ActorCriticAgent::done(const torch::Tensor state, const float reward) {
     replay_buffer.update_last(reward, state, true);
 
     episode_steps_meter.add(static_cast<float>(curr_episode_step));

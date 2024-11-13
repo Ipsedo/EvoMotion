@@ -71,13 +71,4 @@ public:
     int count_parameters() override;
 };
 
-/*class SoftActorCriticLiquidAgent : public SoftActorCriticAgent {
-public:
-    SoftActorCriticLiquidAgent(
-        int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr, float gamma, float tau, int unfolding_steps);
-
-    void done(torch::Tensor state, float reward) override;
-};*/
-
 #endif//EVO_MOTION_ACTOR_CRITIC_LIQUID_H

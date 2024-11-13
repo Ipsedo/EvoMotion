@@ -6,9 +6,10 @@
 #include <evo_motion_networks/functions.h>
 
 SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
-    int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, int batch_size, float lr, float gamma, float tau, int unfolding_steps,
-    int replay_buffer_size, int train_every)
+    const int seed, const std::vector<int64_t> &state_space,
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
+    const float gamma, const float tau, int unfolding_steps, const int replay_buffer_size,
+    const int train_every)
     : actor(std::make_shared<ActorLiquidModule>(
           state_space, action_space, hidden_size, unfolding_steps)),
       critic_1(std::make_shared<QNetworkLiquidModule>(
@@ -34,7 +35,7 @@ SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
     hard_update(target_critic_2, critic_2);
 }
 
-torch::Tensor SoftActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
+torch::Tensor SoftActorCriticLiquidAgent::act(const torch::Tensor state, const float reward) {
     const liquid_sac_memory x_t{
         actor->get_x().detach(), critic_1->get_x().detach(), critic_2->get_x().detach(),
         target_critic_1->get_x().detach(), target_critic_2->get_x().detach()};
@@ -62,7 +63,7 @@ torch::Tensor SoftActorCriticLiquidAgent::act(torch::Tensor state, float reward)
     return action;
 }
 
-void SoftActorCriticLiquidAgent::done(torch::Tensor state, float reward) {
+void SoftActorCriticLiquidAgent::done(const torch::Tensor state, const float reward) {
     replay_buffer.update_last(reward, state, true);
 
     actor->reset_liquid();
@@ -85,26 +86,26 @@ void SoftActorCriticLiquidAgent::check_train() {
             actor_next_x_t, critic_1_next_x_t, critic_2_next_x_t, target_critic_1_next_x_t,
             target_critic_2_next_x_t;
 
-        for (const auto &rp: tmp_replay_buffer) {
-            vec_states.push_back(rp.replay_buffer.state);
-            vec_actions.push_back(rp.replay_buffer.action);
+        for (const auto &[replay_buffer, x_t, next_x_t]: tmp_replay_buffer) {
+            vec_states.push_back(replay_buffer.state);
+            vec_actions.push_back(replay_buffer.action);
             vec_rewards.push_back(
-                torch::tensor(rp.replay_buffer.reward, at::TensorOptions().device(curr_device)));
+                torch::tensor(replay_buffer.reward, at::TensorOptions().device(curr_device)));
             vec_done.push_back(torch::tensor(
-                rp.replay_buffer.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
-            vec_next_state.push_back(rp.replay_buffer.next_state);
+                replay_buffer.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+            vec_next_state.push_back(replay_buffer.next_state);
 
-            actor_x_t.push_back(rp.x_t.actor_x_t);
-            critic_1_x_t.push_back(rp.x_t.critic_1_x_t);
-            critic_2_x_t.push_back(rp.x_t.critic_2_x_t);
-            target_critic_1_x_t.push_back(rp.x_t.target_critic_1_x_t);
-            target_critic_2_x_t.push_back(rp.x_t.target_critic_2_x_t);
+            actor_x_t.push_back(x_t.actor_x_t);
+            critic_1_x_t.push_back(x_t.critic_1_x_t);
+            critic_2_x_t.push_back(x_t.critic_2_x_t);
+            target_critic_1_x_t.push_back(x_t.target_critic_1_x_t);
+            target_critic_2_x_t.push_back(x_t.target_critic_2_x_t);
 
-            actor_next_x_t.push_back(rp.next_x_t.actor_x_t);
-            critic_1_next_x_t.push_back(rp.next_x_t.critic_1_x_t);
-            critic_2_next_x_t.push_back(rp.next_x_t.critic_2_x_t);
-            target_critic_1_next_x_t.push_back(rp.next_x_t.target_critic_1_x_t);
-            target_critic_2_next_x_t.push_back(rp.next_x_t.target_critic_2_x_t);
+            actor_next_x_t.push_back(next_x_t.actor_x_t);
+            critic_1_next_x_t.push_back(next_x_t.critic_1_x_t);
+            critic_2_next_x_t.push_back(next_x_t.critic_2_x_t);
+            target_critic_1_next_x_t.push_back(next_x_t.target_critic_1_x_t);
+            target_critic_2_next_x_t.push_back(next_x_t.target_critic_2_x_t);
         }
 
         train(

@@ -6,7 +6,8 @@
 #include <evo_motion_networks/networks/q_net.h>
 
 QNetworkModule::QNetworkModule(
-    std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size) {
+    const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+    int hidden_size) {
     q_network = register_module(
         "q_network",
         torch::nn::Sequential(

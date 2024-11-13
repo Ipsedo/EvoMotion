@@ -54,7 +54,7 @@ public:
         int unfolding_steps);
 
     void reset_liquid() const;
-    torch::Tensor get_x();
+    torch::Tensor get_x() const;
 
     actor_response forward(const torch::Tensor &state) override;
     liquid_actor_response forward(const torch::Tensor &x_t, const torch::Tensor &state);

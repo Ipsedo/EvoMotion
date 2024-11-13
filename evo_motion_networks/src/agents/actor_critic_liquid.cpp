@@ -8,8 +8,9 @@
 ActorCriticLiquidAgent::ActorCriticLiquidAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int neuron_number, const int batch_size, float lr,
-    const float gamma, float entropy_start_factor, float entropy_end_factor, long entropy_steps,
-    int unfolding_steps, int replay_buffer_size, int train_every)
+    const float gamma, const float entropy_start_factor, const float entropy_end_factor,
+    const long entropy_steps, int unfolding_steps, const int replay_buffer_size,
+    const int train_every)
     : actor(std::make_shared<ActorLiquidModule>(
           state_space, action_space, neuron_number, unfolding_steps)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
@@ -30,20 +31,20 @@ void ActorCriticLiquidAgent::check_train() {
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state,
             input_actor_x, input_critic_x, output_actor_x, output_critic_x;
 
-        for (const auto &rp: tmp_replay_buffer) {
-            vec_states.push_back(rp.replay_buffer.state);
-            vec_actions.push_back(rp.replay_buffer.action);
+        for (const auto &[replay_buffer, x_t, next_x_t]: tmp_replay_buffer) {
+            vec_states.push_back(replay_buffer.state);
+            vec_actions.push_back(replay_buffer.action);
             vec_rewards.push_back(
-                torch::tensor(rp.replay_buffer.reward, at::TensorOptions().device(curr_device)));
+                torch::tensor(replay_buffer.reward, at::TensorOptions().device(curr_device)));
             vec_done.push_back(torch::tensor(
-                rp.replay_buffer.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
-            vec_next_state.push_back(rp.replay_buffer.next_state);
+                replay_buffer.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+            vec_next_state.push_back(replay_buffer.next_state);
 
-            input_actor_x.push_back(rp.x_t.actor_x_t);
-            input_critic_x.push_back(rp.x_t.critic_x_t);
+            input_actor_x.push_back(x_t.actor_x_t);
+            input_critic_x.push_back(x_t.critic_x_t);
 
-            output_actor_x.push_back(rp.next_x_t.actor_x_t);
-            output_critic_x.push_back(rp.next_x_t.critic_x_t);
+            output_actor_x.push_back(next_x_t.actor_x_t);
+            output_critic_x.push_back(next_x_t.critic_x_t);
         }
 
         train(
@@ -96,7 +97,7 @@ void ActorCriticLiquidAgent::train(
     curr_train_step++;
 }
 
-torch::Tensor ActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
+torch::Tensor ActorCriticLiquidAgent::act(const torch::Tensor state, const float reward) {
 
     const liquid_a2c_memory input_memory{actor->get_x(), critic->get_x()};
 
@@ -117,7 +118,7 @@ torch::Tensor ActorCriticLiquidAgent::act(torch::Tensor state, float reward) {
     return action;
 }
 
-void ActorCriticLiquidAgent::done(torch::Tensor state, const float reward) {
+void ActorCriticLiquidAgent::done(const torch::Tensor state, const float reward) {
     replay_buffer.update_last(reward, state, true);
 
     actor->reset_liquid();
@@ -219,54 +220,3 @@ int ActorCriticLiquidAgent::count_parameters() {
     }
     return count;
 }
-
-/*
- * SAC
- */
-
-/*SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
-    int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, int batch_size, float lr, float gamma, float tau, int unfolding_steps)
-    : SoftActorCriticAgent(
-          seed, state_space, action_space, hidden_size, batch_size, lr, gamma, tau) {
-
-    actor = std::make_shared<ActorLiquidModule>(
-        state_space, action_space, hidden_size, unfolding_steps);
-    actor_optimizer = std::make_shared<torch::optim::Adam>(actor->parameters(), lr);
-
-    critic_1 = std::make_shared<QNetworkLiquidModule>(
-        state_space, action_space, hidden_size, unfolding_steps);
-    critic_1_optimizer = std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr);
-
-    critic_2 = std::make_shared<QNetworkLiquidModule>(
-        state_space, action_space, hidden_size, unfolding_steps);
-    critic_2_optimizer = std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr);
-
-    target_critic_1 = std::make_shared<QNetworkLiquidModule>(
-        state_space, action_space, hidden_size, unfolding_steps);
-
-    target_critic_2 = std::make_shared<QNetworkLiquidModule>(
-        state_space, action_space, hidden_size, unfolding_steps);
-
-    for (auto n_p: critic_1->named_parameters()) {
-        const auto &name = n_p.key();
-        const auto &param = n_p.value();
-        target_critic_1->named_parameters()[name].data().copy_(param.data());
-    }
-
-    for (auto n_p: critic_2->named_parameters()) {
-        const auto &name = n_p.key();
-        const auto &param = n_p.value();
-        target_critic_2->named_parameters()[name].data().copy_(param.data());
-    }
-}
-
-void SoftActorCriticLiquidAgent::done(const torch::Tensor state, const float reward) {
-    SoftActorCriticAgent::done(state, reward);
-
-    std::dynamic_pointer_cast<ActorLiquidModule>(actor)->reset_liquid();
-    std::dynamic_pointer_cast<QNetworkLiquidModule>(critic_1)->reset_liquid();
-    std::dynamic_pointer_cast<QNetworkLiquidModule>(critic_2)->reset_liquid();
-    std::dynamic_pointer_cast<QNetworkLiquidModule>(target_critic_1)->reset_liquid();
-    std::dynamic_pointer_cast<QNetworkLiquidModule>(target_critic_2)->reset_liquid();
-}*/

@@ -9,12 +9,13 @@
  */
 
 template<class ReplayBufferType, class... UpdateArgs>
-AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::AbstractReplayBuffer(int size, int seed)
+AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::AbstractReplayBuffer(
+    const int size, const int seed)
     : size(size), memory(), rand_gen(seed) {}
 
 template<class ReplayBufferType, class... UpdateArgs>
 std::vector<ReplayBufferType>
-AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::sample(int batch_size) {
+AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::sample(const int batch_size) {
     std::vector<ReplayBufferType> tmp_replay_buffer(memory);
     std::shuffle(tmp_replay_buffer.begin(), tmp_replay_buffer.end(), rand_gen);
 
@@ -48,10 +49,10 @@ bool AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::empty() {
  * Linear module replay buffer
  */
 
-ReplayBuffer::ReplayBuffer(int size, int seed) : AbstractReplayBuffer(size, seed) {}
+ReplayBuffer::ReplayBuffer(const int size, const int seed) : AbstractReplayBuffer(size, seed) {}
 
 episode_step ReplayBuffer::update_last_item(
-    episode_step last_item, float reward, torch::Tensor next_state, bool done) {
+    episode_step last_item, const float reward, const torch::Tensor next_state, const bool done) {
     last_item.reward = reward;
     last_item.next_state = next_state;
     last_item.done = done;

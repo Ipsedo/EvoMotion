@@ -21,7 +21,8 @@ public:
 class QNetworkModule : public AbstractQNetwork {
 public:
     QNetworkModule(
-        std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
+        const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int hidden_size);
 
     critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
 
@@ -34,15 +35,15 @@ private:
 class QNetworkLiquidModule : public AbstractQNetwork {
 public:
     QNetworkLiquidModule(
-        const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
-        int unfolding_steps);
+        const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int hidden_size, int unfolding_steps);
 
     critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
     liquid_critic_response
     forward(const torch::Tensor &x_t, const torch::Tensor &state, const torch::Tensor &action);
 
     void reset_liquid() const;
-    torch::Tensor get_x();
+    torch::Tensor get_x() const;
 
 private:
     std::shared_ptr<LiquidCellModule> liquid_network{nullptr};

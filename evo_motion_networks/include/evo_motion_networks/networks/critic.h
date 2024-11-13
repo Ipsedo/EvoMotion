@@ -47,7 +47,7 @@ public:
         const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);
 
     void reset_liquid() const;
-    torch::Tensor get_x();
+    torch::Tensor get_x() const;
 
     critic_response forward(const torch::Tensor &state) override;
     liquid_critic_response forward(const torch::Tensor &x_t, const torch::Tensor &state);

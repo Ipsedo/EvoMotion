@@ -29,7 +29,7 @@ ActorLiquidModule::ActorLiquidModule(
 
 void ActorLiquidModule::reset_liquid() const { liquid_network->reset_x_t(); }
 
-torch::Tensor ActorLiquidModule::get_x() { return liquid_network->get_x_t(); }
+torch::Tensor ActorLiquidModule::get_x() const { return liquid_network->get_x_t(); }
 
 actor_response ActorLiquidModule::forward(const torch::Tensor &state) {
     const auto x_t = liquid_network->get_x_t().squeeze(0);
