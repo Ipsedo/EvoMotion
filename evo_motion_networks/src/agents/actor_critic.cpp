@@ -10,6 +10,7 @@
 
 #include <evo_motion_networks/agents/actor_critic.h>
 #include <evo_motion_networks/functions.h>
+#include <evo_motion_networks/saver.h>
 
 ActorCriticAgent::ActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
@@ -120,60 +121,24 @@ void ActorCriticAgent::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
     // actor
-    const auto actor_model_file = path / "actor.th";
-    const auto actor_optimizer_file = path / "actor_optimizer.th";
-
-    torch::serialize::OutputArchive actor_model_archive;
-    torch::serialize::OutputArchive actor_optimizer_archive;
-
-    actor->save(actor_model_archive);
-    actor_optimizer->save(actor_optimizer_archive);
-
-    actor_model_archive.save_to(actor_model_file);
-    actor_optimizer_archive.save_to(actor_optimizer_file);
+    save_torch<std::shared_ptr<ActorModule>>(output_folder_path, actor, "actor.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, actor_optimizer, "actor.th");
 
     // critic
-    const auto critic_model_file = path / "critic.th";
-    const auto critic_optimizer_file = path / "critic_optimizer.th";
-
-    torch::serialize::OutputArchive critic_model_archive;
-    torch::serialize::OutputArchive critic_optimizer_archive;
-
-    critic->save(critic_model_archive);
-    critic_optimizer->save(critic_optimizer_archive);
-
-    critic_model_archive.save_to(critic_model_file);
-    critic_optimizer_archive.save_to(critic_optimizer_file);
+    save_torch<std::shared_ptr<CriticModule>>(output_folder_path, critic, "critic.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
 void ActorCriticAgent::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
     // actor
-    const auto actor_model_file = path / "actor.th";
-    const auto actor_optimizer_file = path / "actor_optimizer.th";
-
-    torch::serialize::InputArchive actor_model_archive;
-    torch::serialize::InputArchive actor_optimizer_archive;
-
-    actor_model_archive.load_from(actor_model_file);
-    actor_optimizer_archive.load_from(actor_optimizer_file);
-
-    actor->load(actor_model_archive);
-    actor_optimizer->load(actor_optimizer_archive);
+    load_torch<std::shared_ptr<ActorModule>>(input_folder_path, actor, "actor.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, actor_optimizer, "actor_optimizer.th");
 
     // critic
-    const auto critic_model_file = path / "critic.th";
-    const auto critic_optimizer_file = path / "critic_optimizer.th";
-
-    torch::serialize::InputArchive critic_model_archive;
-    torch::serialize::InputArchive critic_optimizer_archive;
-
-    critic_model_archive.load_from(critic_model_file);
-    critic_optimizer_archive.load_from(critic_optimizer_file);
-
-    critic->load(critic_model_archive);
-    critic_optimizer->load(critic_optimizer_archive);
+    load_torch<std::shared_ptr<CriticModule>>(input_folder_path, critic, "critic.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
 std::vector<LossMeter> ActorCriticAgent::get_metrics() {

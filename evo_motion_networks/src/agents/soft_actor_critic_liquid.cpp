@@ -4,6 +4,7 @@
 
 #include <evo_motion_networks/agents/soft_actor_critic_liquid.h>
 #include <evo_motion_networks/functions.h>
+#include <evo_motion_networks/saver.h>
 
 SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
     const int seed, const std::vector<int64_t> &state_space,
@@ -23,8 +24,8 @@ SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
-      target_entropy(-1.f), entropy_parameter(),
-      entropy_optimizer(entropy_parameter.parameters(), lr), curr_device(torch::kCPU), gamma(gamma),
+      target_entropy(-1.f), entropy_parameter(std::make_shared<EntropyParameter>()),
+      entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)), curr_device(torch::kCPU), gamma(gamma),
       tau(tau), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
       curr_episode_step(0), curr_train_step(0L), global_curr_step(0L),
       actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
@@ -141,7 +142,7 @@ void SoftActorCriticLiquidAgent::train(
                                   + (1.f - batched_done) * gamma
                                   * torch::mean(
                                       torch::min(next_target_q_value_1, next_target_q_value_2)
-                                      - entropy_parameter.alpha() * next_log_prob,
+                                      - entropy_parameter->alpha() * next_log_prob,
                                       -1))
                                      .detach()
                                      .unsqueeze(1);
@@ -177,7 +178,7 @@ void SoftActorCriticLiquidAgent::train(
         critic_2->forward(x_t.critic_2_x_t, batched_states, curr_action);
     const auto q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
-    const auto actor_loss = torch::mean(entropy_parameter.alpha() * curr_log_prob - q_value);
+    const auto actor_loss = torch::mean(entropy_parameter->alpha() * curr_log_prob - q_value);
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
@@ -185,11 +186,11 @@ void SoftActorCriticLiquidAgent::train(
 
     // entropy
     const auto entropy_loss =
-        -torch::mean(entropy_parameter.log_alpha() * (curr_log_prob.detach() + target_entropy));
+        -torch::mean(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy));
 
-    entropy_optimizer.zero_grad();
+    entropy_optimizer->zero_grad();
     entropy_loss.backward();
-    entropy_optimizer.step();
+    entropy_optimizer->step();
 
     // target value soft update
     soft_update(target_critic_1, critic_1, tau);
@@ -208,136 +209,42 @@ void SoftActorCriticLiquidAgent::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
     // actor
-    const auto actor_model_file = path / "actor.th";
-    const auto actor_optimizer_file = path / "actor_optimizer.th";
+    save_torch<std::shared_ptr<ActorLiquidModule>>(output_folder_path, actor, "actor.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, actor_optimizer, "actor.th");
 
-    torch::serialize::OutputArchive actor_model_archive;
-    torch::serialize::OutputArchive actor_optimizer_archive;
+    // critic
+    save_torch<std::shared_ptr<QNetworkLiquidModule>>(output_folder_path, critic_1, "critic_1.th");
+    save_torch<std::shared_ptr<QNetworkLiquidModule>>(output_folder_path, target_critic_1, "target_critic_1.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
-    actor->save(actor_model_archive);
-    actor_optimizer->save(actor_optimizer_archive);
+    save_torch<std::shared_ptr<QNetworkLiquidModule>>(output_folder_path, critic_2, "critic_2.th");
+    save_torch<std::shared_ptr<QNetworkLiquidModule>>(output_folder_path, target_critic_2, "target_critic_2.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
-    actor_model_archive.save_to(actor_model_file);
-    actor_optimizer_archive.save_to(actor_optimizer_file);
-
-    // target_critic_1
-    const auto target_critic_1_model_file = path / "target_critic_1.th";
-    torch::serialize::OutputArchive target_critic_1_model_archive;
-    target_critic_1->save(target_critic_1_model_archive);
-    target_critic_1_model_archive.save_to(target_critic_1_model_file);
-
-    // target_critic_2
-    const auto target_critic_2_model_file = path / "target_critic_2.th";
-    torch::serialize::OutputArchive target_critic_2_model_archive;
-    target_critic_2->save(target_critic_2_model_archive);
-    target_critic_2_model_archive.save_to(target_critic_2_model_file);
-
-    // Critic 1
-    const auto critic_1_model_file = path / "critic_1.th";
-    const auto critic_1_optimizer_file = path / "critic_1_optimizer.th";
-
-    torch::serialize::OutputArchive critic_1_model_archive;
-    torch::serialize::OutputArchive critic_1_optimizer_archive;
-
-    critic_1->save(critic_1_model_archive);
-    critic_1_optimizer->save(critic_1_optimizer_archive);
-
-    critic_1_model_archive.save_to(critic_1_model_file);
-    critic_1_optimizer_archive.save_to(critic_1_optimizer_file);
-
-    // Critic 2
-    const auto critic_2_model_file = path / "critic_2.th";
-    const auto critic_2_optimizer_file = path / "critic_2_optimizer.th";
-
-    torch::serialize::OutputArchive critic_2_model_archive;
-    torch::serialize::OutputArchive critic_2_optimizer_archive;
-
-    critic_2->save(critic_2_model_archive);
-    critic_2_optimizer->save(critic_2_optimizer_archive);
-
-    critic_2_model_archive.save_to(critic_2_model_file);
-    critic_2_optimizer_archive.save_to(critic_2_optimizer_file);
-
-    // entropy
-    const auto entropy_model_file = path / "entropy.th";
-    const auto entropy_optimizer_file = path / "entropy_optimizer.th";
-
-    torch::serialize::OutputArchive entropy_model_archive;
-    torch::serialize::OutputArchive entropy_optimizer_archive;
-
-    entropy_parameter.save(entropy_model_archive);
-    entropy_optimizer.save(entropy_optimizer_archive);
-
-    entropy_model_archive.save_to(entropy_model_file);
-    entropy_optimizer_archive.save_to(entropy_optimizer_file);
+    // Entropy
+    save_torch<std::shared_ptr<EntropyParameter>>(output_folder_path, entropy_parameter, "entropy.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer>>(output_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 void SoftActorCriticLiquidAgent::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
     // actor
-    const auto actor_model_file = path / "actor.th";
-    const auto actor_optimizer_file = path / "actor_optimizer.th";
+    load_torch<std::shared_ptr<ActorLiquidModule>>(input_folder_path, actor, "actor.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, actor_optimizer, "actor.th");
 
-    torch::serialize::InputArchive actor_model_archive;
-    torch::serialize::InputArchive actor_optimizer_archive;
+    // critic
+    load_torch<std::shared_ptr<QNetworkLiquidModule>>(input_folder_path, critic_1, "critic_1.th");
+    load_torch<std::shared_ptr<QNetworkLiquidModule>>(input_folder_path, target_critic_1, "target_critic_1.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
-    actor_model_archive.load_from(actor_model_file);
-    actor_optimizer_archive.load_from(actor_optimizer_file);
+    load_torch<std::shared_ptr<QNetworkLiquidModule>>(input_folder_path, critic_2, "critic_2.th");
+    load_torch<std::shared_ptr<QNetworkLiquidModule>>(input_folder_path, target_critic_2, "target_critic_2.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
-    actor->load(actor_model_archive);
-    actor_optimizer->load(actor_optimizer_archive);
-
-    // target_critic_1_network
-    const auto target_critic_1_model_file = path / "target_critic_1.th";
-    torch::serialize::InputArchive target_critic_1_model_archive;
-    target_critic_1_model_archive.load_from(target_critic_1_model_file);
-    target_critic_1->load(target_critic_1_model_archive);
-
-    // target_critic_2_network
-    const auto target_critic_2_model_file = path / "target_critic_2.th";
-    torch::serialize::InputArchive target_critic_2_model_archive;
-    target_critic_2_model_archive.load_from(target_critic_2_model_file);
-    target_critic_2->load(target_critic_2_model_archive);
-
-    // critic_1
-    const auto critic_1_model_file = path / "critic_1.th";
-    const auto critic_1_optimizer_file = path / "critic_1_optimizer.th";
-
-    torch::serialize::InputArchive critic_1_model_archive;
-    torch::serialize::InputArchive critic_1_optimizer_archive;
-
-    critic_1_model_archive.load_from(critic_1_model_file);
-    critic_1_optimizer_archive.load_from(critic_1_optimizer_file);
-
-    critic_1->load(critic_1_model_archive);
-    critic_1_optimizer->load(critic_1_optimizer_archive);
-
-    // critic_2
-    const auto critic_2_model_file = path / "critic_2.th";
-    const auto critic_2_optimizer_file = path / "critic_2_optimizer.th";
-
-    torch::serialize::InputArchive critic_2_model_archive;
-    torch::serialize::InputArchive critic_2_optimizer_archive;
-
-    critic_2_model_archive.load_from(critic_2_model_file);
-    critic_2_optimizer_archive.load_from(critic_2_optimizer_file);
-
-    critic_2->load(critic_2_model_archive);
-    critic_2_optimizer->load(critic_2_optimizer_archive);
-
-    // entropy
-    const auto entropy_model_file = path / "entropy.th";
-    const auto entropy_optimizer_file = path / "entropy_optimizer.th";
-
-    torch::serialize::InputArchive entropy_model_archive;
-    torch::serialize::InputArchive entropy_optimizer_archive;
-
-    entropy_model_archive.load_from(entropy_model_file);
-    entropy_optimizer_archive.load_from(entropy_optimizer_file);
-
-    entropy_parameter.load(entropy_model_archive);
-    entropy_optimizer.load(entropy_optimizer_archive);
+    // Entropy
+    load_torch<std::shared_ptr<EntropyParameter>>(input_folder_path, entropy_parameter, "entropy.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer>>(input_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 std::vector<LossMeter> SoftActorCriticLiquidAgent::get_metrics() {
@@ -353,7 +260,7 @@ void SoftActorCriticLiquidAgent::to(torch::DeviceType device) {
     critic_2->to(device);
     target_critic_1->to(device);
     target_critic_2->to(device);
-    entropy_parameter.to(device);
+    entropy_parameter->to(device);
 }
 
 void SoftActorCriticLiquidAgent::set_eval(bool eval) {
@@ -363,14 +270,14 @@ void SoftActorCriticLiquidAgent::set_eval(bool eval) {
         critic_2->eval();
         target_critic_1->eval();
         target_critic_2->eval();
-        entropy_parameter.eval();
+        entropy_parameter->eval();
     } else {
         actor->train();
         critic_1->train();
         critic_2->train();
         target_critic_1->train();
         target_critic_2->train();
-        entropy_parameter.train();
+        entropy_parameter->train();
     }
 }
 

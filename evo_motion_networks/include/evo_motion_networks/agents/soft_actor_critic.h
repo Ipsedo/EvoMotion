@@ -17,19 +17,19 @@
 
 class SoftActorCriticAgent : public Agent {
 private:
-    std::shared_ptr<AbstractActor> actor;
-    std::shared_ptr<AbstractQNetwork> critic_1;
-    std::shared_ptr<AbstractQNetwork> critic_2;
-    std::shared_ptr<AbstractQNetwork> target_critic_1;
-    std::shared_ptr<AbstractQNetwork> target_critic_2;
+    std::shared_ptr<ActorModule> actor;
+    std::shared_ptr<QNetworkModule> critic_1;
+    std::shared_ptr<QNetworkModule> critic_2;
+    std::shared_ptr<QNetworkModule> target_critic_1;
+    std::shared_ptr<QNetworkModule> target_critic_2;
 
     std::shared_ptr<torch::optim::Optimizer> actor_optimizer;
     std::shared_ptr<torch::optim::Optimizer> critic_1_optimizer;
     std::shared_ptr<torch::optim::Optimizer> critic_2_optimizer;
 
     float target_entropy;
-    EntropyParameter entropy_parameter;
-    torch::optim::Adam entropy_optimizer;
+    std::shared_ptr<EntropyParameter> entropy_parameter;
+    std::shared_ptr<torch::optim::Optimizer> entropy_optimizer;
 
     torch::DeviceType curr_device;
 

@@ -45,6 +45,11 @@ bool AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::empty() {
     return memory.empty();
 }
 
+template<class ReplayBufferType, class ... UpdateArgs>
+AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::~AbstractReplayBuffer() {
+    memory.clear();
+}
+
 /*
  * Linear module replay buffer
  */

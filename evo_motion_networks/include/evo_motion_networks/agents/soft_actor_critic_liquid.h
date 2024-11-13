@@ -28,8 +28,8 @@ private:
     std::shared_ptr<torch::optim::Optimizer> critic_2_optimizer;
 
     float target_entropy;
-    EntropyParameter entropy_parameter;
-    torch::optim::Adam entropy_optimizer;
+    std::shared_ptr<EntropyParameter> entropy_parameter;
+    std::shared_ptr<torch::optim::Adam> entropy_optimizer;
 
     torch::DeviceType curr_device;
 

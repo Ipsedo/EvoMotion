@@ -54,6 +54,8 @@ public:
     virtual void update_last(UpdateArgs... args);
     virtual bool empty();
 
+    virtual ~AbstractReplayBuffer();
+
 protected:
     virtual ReplayBufferType update_last_item(ReplayBufferType last_item, UpdateArgs... args) = 0;
 
