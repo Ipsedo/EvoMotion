@@ -46,6 +46,7 @@ struct trajectory_step {
     torch::Tensor value;
     float reward;
     bool done;
+    torch::Tensor next_value;
 };
 
 template<typename EpisodeStep>
@@ -85,6 +86,7 @@ public:
     AbstractTrajectoryBuffer(int size, int seed);
 
     virtual episode_trajectory<EpisodeStep> sample();
+    virtual episode_trajectory<EpisodeStep> last();
     virtual void new_trajectory();
     virtual void add(EpisodeStep step);
     virtual void update_last(UpdateArgs... args);
@@ -126,12 +128,12 @@ protected:
         bool done) override;
 };
 
-class TrajectoryReplayBuffer : public AbstractTrajectoryBuffer<trajectory_step, float, bool> {
+class TrajectoryReplayBuffer : public AbstractTrajectoryBuffer<trajectory_step, float, bool, torch::Tensor> {
 public:
     TrajectoryReplayBuffer(int size, int seed);
 
 protected:
-    trajectory_step update_last_step(trajectory_step last_step, float reward, bool done) override;
+    trajectory_step update_last_step(trajectory_step last_step, float reward, bool done, torch::Tensor next_value) override;
 
     bool is_finish(trajectory_step step) override;
 };

@@ -71,6 +71,11 @@ episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs
 }
 
 template<typename EpisodeStep, class... UpdateArgs>
+episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::last() {
+    return memory.back();
+}
+
+template<typename EpisodeStep, class... UpdateArgs>
 void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::new_trajectory() {
     memory.push_back({});
 }
@@ -142,9 +147,10 @@ TrajectoryReplayBuffer::TrajectoryReplayBuffer(int size, int seed)
     : AbstractTrajectoryBuffer(size, seed) {}
 
 trajectory_step TrajectoryReplayBuffer::update_last_step(
-    trajectory_step last_step, const float reward, const bool done) {
+    trajectory_step last_step, const float reward, const bool done, torch::Tensor next_value) {
     last_step.reward = reward;
     last_step.done = done;
+    last_step.next_value;
 
     return last_step;
 }
