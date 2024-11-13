@@ -53,4 +53,12 @@ public:
         const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) override;
 };
 
+class ProximalPolicyOptimizationFactory : public AgentFactory {
+public:
+    explicit ProximalPolicyOptimizationFactory(
+        const std::map<std::string, std::string> &parameters);
+    std::shared_ptr<Agent> create_agent(
+        const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) override;
+};
+
 #endif//EVO_MOTION_AGENT_FACTORY_H

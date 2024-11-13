@@ -135,13 +135,13 @@ void ActorCriticLiquidAgent::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
     // actor
-    save_torch<std::shared_ptr<ActorLiquidModule> >(output_folder_path, actor, "actor.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer> >(
+    save_torch<std::shared_ptr<ActorLiquidModule>>(output_folder_path, actor, "actor.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer>>(
         output_folder_path, actor_optimizer, "actor.th");
 
     // critic
-    save_torch<std::shared_ptr<CriticLiquidModule> >(output_folder_path, critic, "critic.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer> >(
+    save_torch<std::shared_ptr<CriticLiquidModule>>(output_folder_path, critic, "critic.th");
+    save_torch<std::shared_ptr<torch::optim::Optimizer>>(
         output_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
@@ -149,13 +149,13 @@ void ActorCriticLiquidAgent::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
     // actor
-    load_torch<std::shared_ptr<ActorLiquidModule> >(input_folder_path, actor, "actor.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer> >(
+    load_torch<std::shared_ptr<ActorLiquidModule>>(input_folder_path, actor, "actor.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer>>(
         input_folder_path, actor_optimizer, "actor_optimizer.th");
 
     // critic
-    load_torch<std::shared_ptr<CriticLiquidModule> >(input_folder_path, critic, "critic.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer> >(
+    load_torch<std::shared_ptr<CriticLiquidModule>>(input_folder_path, critic, "critic.th");
+    load_torch<std::shared_ptr<torch::optim::Optimizer>>(
         input_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 

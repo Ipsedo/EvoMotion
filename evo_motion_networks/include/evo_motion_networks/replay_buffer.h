@@ -39,6 +39,20 @@ struct liquid_episode_step {
     LiquidMemory next_x_t;
 };
 
+// trajectory
+struct trajectory_step {
+    torch::Tensor state;
+    torch::Tensor action;
+    torch::Tensor value;
+    float reward;
+    bool done;
+};
+
+template<typename EpisodeStep>
+struct episode_trajectory {
+    std::vector<EpisodeStep> trajectory;
+};
+
 /*
  * Replay buffer classes
  */
@@ -65,6 +79,30 @@ private:
     std::mt19937 rand_gen;
 };
 
+template<typename EpisodeStep, class... UpdateArgs>
+class AbstractTrajectoryBuffer {
+public:
+    AbstractTrajectoryBuffer(int size, int seed);
+
+    virtual episode_trajectory<EpisodeStep> sample();
+    virtual void new_trajectory();
+    virtual void add(EpisodeStep step);
+    virtual void update_last(UpdateArgs... args);
+    virtual bool empty();
+    virtual bool trajectory_empty();
+
+    virtual ~AbstractTrajectoryBuffer();
+
+protected:
+    virtual EpisodeStep update_last_step(EpisodeStep last_step, UpdateArgs... args) = 0;
+    virtual bool is_finish(EpisodeStep step) = 0;
+
+private:
+    int size;
+    std::vector<episode_trajectory<EpisodeStep>> memory;
+    std::mt19937 rand_gen;
+};
+
 // replay buffer classes
 
 class ReplayBuffer : public AbstractReplayBuffer<episode_step, float, torch::Tensor, bool> {
@@ -86,6 +124,16 @@ protected:
     liquid_episode_step<LiquidMemory> update_last_item(
         liquid_episode_step<LiquidMemory> last_item, float reward, torch::Tensor next_state,
         bool done) override;
+};
+
+class TrajectoryReplayBuffer : public AbstractTrajectoryBuffer<trajectory_step, float, bool> {
+public:
+    TrajectoryReplayBuffer(int size, int seed);
+
+protected:
+    trajectory_step update_last_step(trajectory_step last_step, float reward, bool done) override;
+
+    bool is_finish(trajectory_step step) override;
 };
 
 template class LiquidReplayBuffer<liquid_a2c_memory>;

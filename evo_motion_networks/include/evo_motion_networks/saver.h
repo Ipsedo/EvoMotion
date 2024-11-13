@@ -7,6 +7,7 @@
 
 #include <filesystem>
 #include <string>
+
 #include <torch/torch.h>
 
 template<typename T>
@@ -27,5 +28,4 @@ void load_torch(const std::string &input_folder_path, T to_fill, const std::stri
     to_fill->load(archive);
 }
 
-
-#endif //SAVER_H
+#endif//SAVER_H

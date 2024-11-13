@@ -46,7 +46,61 @@ bool AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::empty() {
 }
 
 template<class ReplayBufferType, class... UpdateArgs>
-AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::~AbstractReplayBuffer() { memory.clear(); }
+AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::~AbstractReplayBuffer() {
+    memory.clear();
+}
+
+/*
+ * Abstract trajectory replay buffer
+ */
+
+template<typename EpisodeStep, class... UpdateArgs>
+AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::AbstractTrajectoryBuffer(int size, int seed)
+    : size(size), memory(), rand_gen(seed) {}
+
+template<typename EpisodeStep, class... UpdateArgs>
+episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample() {
+    std::uniform_int_distribution<> uni_dist(0, memory.size() - 1);
+
+    const auto trajectory = memory[uni_dist(rand_gen)];
+    episode_trajectory<EpisodeStep> result{trajectory.trajectory};
+
+    if (!is_finish(result.trajectory.back())) result.trajectory.erase(result.trajectory.end());
+
+    return result;
+}
+
+template<typename EpisodeStep, class... UpdateArgs>
+void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::new_trajectory() {
+    memory.push_back({});
+}
+
+template<typename EpisodeStep, class... UpdateArgs>
+void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::add(EpisodeStep step) {
+    memory.back().trajectory.push_back(step);
+}
+
+template<typename EpisodeStep, class... UpdateArgs>
+void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::update_last(UpdateArgs... args) {
+    auto last_step = memory.back().trajectory.back();
+    memory.back().trajectory.erase(memory.back().trajectory.end());
+    memory.back().trajectory.push_back(update_last_step(last_step, args...));
+}
+
+template<typename EpisodeStep, class... UpdateArgs>
+bool AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::empty() {
+    return memory.empty();
+}
+
+template<typename EpisodeStep, class... UpdateArgs>
+bool AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::trajectory_empty() {
+    return empty() || memory.back().trajectory.empty();
+}
+
+template<typename EpisodeStep, class... UpdateArgs>
+AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::~AbstractTrajectoryBuffer() {
+    memory.clear();
+}
 
 /*
  * Linear module replay buffer
@@ -81,3 +135,18 @@ liquid_episode_step<LiquidMemory> LiquidReplayBuffer<LiquidMemory>::update_last_
     last_item.replay_buffer.done = done;
     return last_item;
 }
+
+// Trajectory
+
+TrajectoryReplayBuffer::TrajectoryReplayBuffer(int size, int seed)
+    : AbstractTrajectoryBuffer(size, seed) {}
+
+trajectory_step TrajectoryReplayBuffer::update_last_step(
+    trajectory_step last_step, const float reward, const bool done) {
+    last_step.reward = reward;
+    last_step.done = done;
+
+    return last_step;
+}
+
+bool TrajectoryReplayBuffer::is_finish(trajectory_step step) { return step.done; }
