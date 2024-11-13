@@ -66,7 +66,9 @@ void ActorCriticLiquidAgent::train(
     const auto [value, next_critic_x] =
         critic->forward(curr_memory.critic_x_t.detach(), batched_states);
 
-    const auto target = batched_rewards + (1.f - batched_done) * gamma * next_value;
+    const auto norm_reward =
+        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
+    const auto target = norm_reward + (1.f - batched_done) * gamma * next_value;
 
     const auto critic_loss = torch::mse_loss(value, target, at::Reduction::Mean);
 
