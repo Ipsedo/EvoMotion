@@ -60,9 +60,12 @@ AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::AbstractTrajectoryBuffer(i
 
 template<typename EpisodeStep, class... UpdateArgs>
 episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample() {
-    std::uniform_int_distribution<> uni_dist(0, memory.size() - 1);
+    std::vector<episode_trajectory<EpisodeStep>> filtered;
+    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t){return !t.trajectory.empty();} );
 
-    const auto trajectory = memory[uni_dist(rand_gen)];
+    std::uniform_int_distribution<> uni_dist(0, filtered.size() - 1);
+
+    const auto trajectory = filtered[uni_dist(rand_gen)];
     episode_trajectory<EpisodeStep> result{trajectory.trajectory};
 
     if (!is_finish(result.trajectory.back())) result.trajectory.erase(result.trajectory.end());
@@ -78,6 +81,8 @@ episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs
 template<typename EpisodeStep, class... UpdateArgs>
 void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::new_trajectory() {
     memory.push_back({});
+
+    while (memory.size() > size) memory.erase(memory.begin());
 }
 
 template<typename EpisodeStep, class... UpdateArgs>

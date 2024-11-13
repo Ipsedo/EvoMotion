@@ -91,9 +91,8 @@ void ProximalPolicyOptimizationAgent::train(
 
     const auto gae_coeff = gamma * lam;
     auto advantages = torch::flip(torch::cumsum(torch::flip(deltas * (1 - batched_done), {0}) * gae_coeff, 0), {0});
-    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
-
-
+    if (advantages.size(0) > 1)
+        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
 
     /*const auto gamma_factor =
         torch::pow(
