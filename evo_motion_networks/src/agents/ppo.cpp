@@ -89,18 +89,10 @@ void ProximalPolicyOptimizationAgent::train(
 
     const auto deltas = batched_rewards + gamma * next_values * (1 - batched_done) - curr_values;
 
-    const auto gae_coeff = gamma * lam;
-    auto advantages = torch::flip(torch::cumsum(torch::flip(deltas * (1 - batched_done), {0}) * gae_coeff, 0), {0});
+    const auto gae_coefficient = gamma * lam;
+    auto advantages = torch::flip(torch::cumsum(torch::flip(deltas * (1 - batched_done), {0}) * gae_coefficient, 0), {0});
     if (advantages.size(0) > 1)
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
-
-    /*const auto gamma_factor =
-        torch::pow(
-            gamma, torch::arange(batched_rewards.size(1), at::TensorOptions().device(curr_device)))
-            .unsqueeze(0);
-
-    auto returns = (batched_rewards * gamma_factor).flip({1}).cumsum(1).flip({1}) / gamma_factor;
-    returns = (returns - returns.mean()) / (returns.std() + 1e-8);*/
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
     const auto old_log_prob =
@@ -112,7 +104,7 @@ void ProximalPolicyOptimizationAgent::train(
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
         const auto log_prob = truncated_normal_pdf(batched_actions, mu, sigma, -1.f, 1.f);
-        //const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
+        const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
 
         const auto [value] = critic->forward(batched_states);
 
@@ -122,7 +114,7 @@ void ProximalPolicyOptimizationAgent::train(
         const auto surrogate_2 = torch::clamp(ratios, 1.f - epsilon, 1 + epsilon) * advantages.detach();
 
         // actor
-        const auto actor_loss = -torch::mean(torch::min(surrogate_1, surrogate_2));
+        const auto actor_loss = -torch::mean(torch::min(surrogate_1, surrogate_2) + 1e-2 * entropy);
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
