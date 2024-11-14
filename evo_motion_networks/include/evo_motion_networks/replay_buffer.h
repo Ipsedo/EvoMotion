@@ -86,6 +86,7 @@ public:
     AbstractTrajectoryBuffer(int size, int seed);
 
     virtual episode_trajectory<EpisodeStep> sample();
+    virtual std::vector<episode_trajectory<EpisodeStep>> sample(int batch_size);
     virtual episode_trajectory<EpisodeStep> last();
     virtual void new_trajectory();
     virtual void add(EpisodeStep step);
