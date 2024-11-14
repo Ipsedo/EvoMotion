@@ -31,8 +31,6 @@ torch::Tensor ProximalPolicyOptimizationAgent::act(torch::Tensor state, float re
     if (!replay_buffer.trajectory_empty()) replay_buffer.update_last(reward, false, value.detach());
     replay_buffer.add({state, action.detach(), value.detach(), 0.f, false, value.detach()});
 
-    check_train();
-
     curr_episode_step++;
 
     return action;
