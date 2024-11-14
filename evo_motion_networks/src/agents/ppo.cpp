@@ -114,7 +114,8 @@ void ProximalPolicyOptimizationAgent::train(
     const auto gae_coefficient = gamma * lam;
     auto advantages = torch::flip(
         torch::cumsum(torch::flip(deltas * (1 - batched_done), {1}) * gae_coefficient, 1), {1});
-    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
+    if (advantages.size(1) > 1)
+        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
     const auto old_log_prob =
