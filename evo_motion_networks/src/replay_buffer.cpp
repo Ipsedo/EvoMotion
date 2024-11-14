@@ -66,17 +66,19 @@ episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs
 template<typename EpisodeStep, class... UpdateArgs>
 std::vector<episode_trajectory<EpisodeStep>>
 AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample(int batch_size) {
-    std::vector<int> index(memory.size() - 2);
-    std::iota(index.begin(), index.end(), 0);
-
-    std::shuffle(index.begin(), index.end(), rand_gen);
+    std::vector<episode_trajectory<EpisodeStep>> filtered;
+    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t){return t.trajectory.size() > 1;});
+    std::shuffle(filtered.begin(), filtered.end(), rand_gen);
 
     std::vector<episode_trajectory<EpisodeStep>> result;
 
-    for (int i = 0; i < batch_size && index[i] < memory.size(); i++) {
-        const auto trajectory = memory[index[i]];
+    for (int i = 0; i < batch_size && i < filtered.size(); i++) {
+        const auto trajectory = filtered[i];
 
         episode_trajectory<EpisodeStep> episode{trajectory.trajectory};
+
+        if (!is_finish(episode.trajectory.back()))
+            episode.trajectory.erase(episode.trajectory.end());
 
         result.push_back(episode);
     }
@@ -175,7 +177,7 @@ trajectory_step TrajectoryReplayBuffer::update_last_step(
     trajectory_step last_step, const float reward, const bool done, torch::Tensor next_value) {
     last_step.reward = reward;
     last_step.done = done;
-    last_step.next_value;
+    last_step.next_value = next_value;
 
     return last_step;
 }
