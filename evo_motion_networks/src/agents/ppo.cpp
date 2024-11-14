@@ -34,7 +34,6 @@ torch::Tensor ProximalPolicyOptimizationAgent::act(torch::Tensor state, float re
     check_train();
 
     curr_episode_step++;
-    global_curr_step++;
 
     return action;
 }
@@ -46,6 +45,7 @@ void ProximalPolicyOptimizationAgent::done(torch::Tensor state, float reward) {
     check_train();
 
     replay_buffer.new_trajectory();
+    global_curr_step++;
 
     episode_steps_meter.add(static_cast<float>(curr_episode_step));
     curr_episode_step = 0L;
