@@ -40,7 +40,7 @@ torch::Tensor ProximalPolicyOptimizationAgent::act(torch::Tensor state, float re
 
 void ProximalPolicyOptimizationAgent::done(torch::Tensor state, float reward) {
     const auto [value] = critic->forward(state);
-    replay_buffer.update_last(reward, true, value);
+    replay_buffer.update_last(reward, true, value.detach());
 
     check_train();
 
