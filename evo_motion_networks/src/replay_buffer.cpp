@@ -68,7 +68,7 @@ std::vector<episode_trajectory<EpisodeStep>>
 AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample(int batch_size) {
     std::vector<episode_trajectory<EpisodeStep>> filtered;
     std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t) {
-        return t.trajectory.size() > 1;
+        return t.trajectory.size() > 2;
     });
 
     std::shuffle(filtered.begin(), filtered.end(), rand_gen);
