@@ -93,6 +93,7 @@ public:
     virtual void update_last(UpdateArgs... args);
     virtual bool empty();
     virtual bool trajectory_empty();
+    virtual bool enough_trajectory(int batch_size);
 
     virtual ~AbstractTrajectoryBuffer();
 

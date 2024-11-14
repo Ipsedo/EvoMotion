@@ -52,7 +52,7 @@ void ProximalPolicyOptimizationAgent::done(torch::Tensor state, float reward) {
 }
 
 void ProximalPolicyOptimizationAgent::check_train() {
-    if (global_curr_step % train_every == train_every - 1) {
+    if ((global_curr_step % train_every == train_every - 1) && replay_buffer.enough_trajectory(batch_size)) {
         const auto episodes = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> batch_vec_states, batch_vec_actions, batch_vec_values,
