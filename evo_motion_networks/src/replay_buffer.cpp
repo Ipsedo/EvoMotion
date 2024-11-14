@@ -66,21 +66,16 @@ episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs
 template<typename EpisodeStep, class... UpdateArgs>
 std::vector<episode_trajectory<EpisodeStep>>
 AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample(int batch_size) {
-    std::vector<episode_trajectory<EpisodeStep>> filtered;
-    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t){return t.trajectory.size() > 1;});
-    std::shuffle(filtered.begin(), filtered.end(), rand_gen);
+    std::vector<int> index(memory.size() - 1);
+    std::iota(index.begin(), index.end(), 0);
+    std::shuffle(index.begin(), index.end(), rand_gen);
 
     std::vector<episode_trajectory<EpisodeStep>> result;
 
-    for (int i = 0; i < batch_size && i < filtered.size(); i++) {
-        const auto trajectory = filtered[i];
-
-        episode_trajectory<EpisodeStep> episode{trajectory.trajectory};
-
-        if (!is_finish(episode.trajectory.back()))
-            episode.trajectory.erase(episode.trajectory.end());
-
-        result.push_back(episode);
+    for (int i = 0; i < batch_size && i < index.size(); i++) {
+        const auto trajectory = memory[index[i]];
+        if (trajectory.trajectory.size() <= 1) continue;
+        result.push_back(trajectory);
     }
 
     return result;

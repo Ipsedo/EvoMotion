@@ -52,7 +52,8 @@ void ProximalPolicyOptimizationAgent::done(torch::Tensor state, float reward) {
 }
 
 void ProximalPolicyOptimizationAgent::check_train() {
-    if ((global_curr_step % train_every == train_every - 1) && replay_buffer.enough_trajectory(batch_size)) {
+    if ((global_curr_step % train_every == train_every - 1)
+        && replay_buffer.enough_trajectory(batch_size)) {
         const auto episodes = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> batch_vec_states, batch_vec_actions, batch_vec_values,
@@ -114,8 +115,7 @@ void ProximalPolicyOptimizationAgent::train(
     const auto gae_coefficient = gamma * lam;
     auto advantages = torch::flip(
         torch::cumsum(torch::flip(deltas * (1 - batched_done), {1}) * gae_coefficient, 1), {1});
-    if (advantages.size(1) > 1)
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
+    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
     const auto old_log_prob =
