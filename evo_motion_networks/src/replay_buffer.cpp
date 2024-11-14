@@ -61,7 +61,9 @@ AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::AbstractTrajectoryBuffer(i
 template<typename EpisodeStep, class... UpdateArgs>
 episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample() {
     std::vector<episode_trajectory<EpisodeStep>> filtered;
-    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t){return t.trajectory.size() > 1;} );
+    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t) {
+        return t.trajectory.size() > 1;
+    });
 
     std::uniform_int_distribution<> uni_dist(0, filtered.size() - 1);
 

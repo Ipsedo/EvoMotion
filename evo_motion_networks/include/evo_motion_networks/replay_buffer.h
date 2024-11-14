@@ -128,12 +128,14 @@ protected:
         bool done) override;
 };
 
-class TrajectoryReplayBuffer : public AbstractTrajectoryBuffer<trajectory_step, float, bool, torch::Tensor> {
+class TrajectoryReplayBuffer
+    : public AbstractTrajectoryBuffer<trajectory_step, float, bool, torch::Tensor> {
 public:
     TrajectoryReplayBuffer(int size, int seed);
 
 protected:
-    trajectory_step update_last_step(trajectory_step last_step, float reward, bool done, torch::Tensor next_value) override;
+    trajectory_step update_last_step(
+        trajectory_step last_step, float reward, bool done, torch::Tensor next_value) override;
 
     bool is_finish(trajectory_step step) override;
 };

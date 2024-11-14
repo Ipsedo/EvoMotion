@@ -55,7 +55,8 @@ void ProximalPolicyOptimizationAgent::check_train() {
     if (global_curr_step % train_every == train_every - 1) {
         const auto episode = replay_buffer.sample();
 
-        std::vector<torch::Tensor> vec_states, vec_actions, vec_values, vec_rewards, vec_done, vec_next_values;
+        std::vector<torch::Tensor> vec_states, vec_actions, vec_values, vec_rewards, vec_done,
+            vec_next_values;
 
         for (const auto &s: episode.trajectory) {
             vec_states.push_back(s.state);
@@ -72,8 +73,9 @@ void ProximalPolicyOptimizationAgent::check_train() {
         const auto next_values = torch::stack(vec_next_values);
 
         train(
-            torch::stack(vec_states), torch::stack(vec_actions), torch::cat({values[0].unsqueeze(0), next_values}),
-            torch::stack(vec_rewards), torch::stack(vec_done));
+            torch::stack(vec_states), torch::stack(vec_actions),
+            torch::cat({values[0].unsqueeze(0), next_values}), torch::stack(vec_rewards),
+            torch::stack(vec_done));
     }
 
     curr_train_step++;
@@ -90,7 +92,8 @@ void ProximalPolicyOptimizationAgent::train(
     const auto deltas = batched_rewards + gamma * next_values * (1 - batched_done) - curr_values;
 
     const auto gae_coefficient = gamma * lam;
-    auto advantages = torch::flip(torch::cumsum(torch::flip(deltas * (1 - batched_done), {0}) * gae_coefficient, 0), {0});
+    auto advantages = torch::flip(
+        torch::cumsum(torch::flip(deltas * (1 - batched_done), {0}) * gae_coefficient, 0), {0});
     if (advantages.size(0) > 1)
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
 
@@ -111,7 +114,8 @@ void ProximalPolicyOptimizationAgent::train(
         const auto ratios = torch::exp(log_prob - old_log_prob.detach());
 
         const auto surrogate_1 = ratios * advantages.detach();
-        const auto surrogate_2 = torch::clamp(ratios, 1.f - epsilon, 1 + epsilon) * advantages.detach();
+        const auto surrogate_2 =
+            torch::clamp(ratios, 1.f - epsilon, 1 + epsilon) * advantages.detach();
 
         // actor
         const auto actor_loss = -torch::mean(torch::min(surrogate_1, surrogate_2) + 1e-2 * entropy);
