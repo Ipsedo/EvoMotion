@@ -75,7 +75,7 @@ AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample(int batch_size) {
 
     std::vector<episode_trajectory<EpisodeStep>> result;
 
-    for (int i = 0; i < batch_size && i < memory.size(); i++) {
+    for (int i = 0; i < batch_size && i < filtered.size(); i++) {
         const auto trajectory = filtered[i];
         episode_trajectory<EpisodeStep> episode{trajectory.trajectory};
 
