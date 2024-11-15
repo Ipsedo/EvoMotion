@@ -8,15 +8,15 @@
 
 ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space,
-    int hidden_size, const float gamma, const float lam, const float epsilon, const int epoch,
-    const int batch_size,
-    float learning_rate, const int replay_buffer_size, const int train_every)
+    const std::vector<int64_t> &action_space, int hidden_size, const float gamma, const float lam,
+    const float epsilon, float entropy_factor, float critic_loss_factor, const int epoch,
+    const int batch_size, float learning_rate, const int replay_buffer_size, const int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
-      gamma(gamma), lambda(lam), epsilon(epsilon), epoch(epoch), curr_train_step(0L),
+      gamma(gamma), lambda(lam), epsilon(epsilon), entropy_factor(entropy_factor),
+      critic_loss_factor(critic_loss_factor), epoch(epoch), curr_train_step(0L),
       curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
       replay_buffer(replay_buffer_size, seed), train_every(train_every),
       actor_loss_meter("actor_loss", 16), critic_loss_meter("critic_loss", 16),
@@ -73,8 +73,8 @@ void ProximalPolicyOptimizationAgent::check_train() {
                 vec_values.push_back(value);
                 vec_rewards.push_back(
                     torch::tensor({reward}, torch::TensorOptions().device(curr_device)));
-                vec_done.push_back(torch::tensor(
-                    {done ? 1.f : 0.f}, torch::TensorOptions().device(curr_device)));
+                vec_done.push_back(
+                    torch::tensor({done ? 1.f : 0.f}, torch::TensorOptions().device(curr_device)));
                 vec_next_values.push_back(next_value);
             }
 
@@ -84,7 +84,8 @@ void ProximalPolicyOptimizationAgent::check_train() {
             batch_vec_actions.push_back(torch::pad(torch::stack(vec_actions), {0, 0, 0, pad}));
             batch_vec_values.push_back(torch::pad(torch::stack(vec_values), {0, 0, 0, pad}));
             batch_vec_rewards.push_back(torch::pad(torch::stack(vec_rewards), {0, 0, 0, pad}));
-            batch_vec_done.push_back(torch::pad(torch::stack(vec_done), {0, 0, 0, pad}, "constant", 1.f));
+            batch_vec_done.push_back(
+                torch::pad(torch::stack(vec_done), {0, 0, 0, pad}, "constant", 1.f));
             batch_vec_next_values.push_back(
                 torch::pad(torch::stack(vec_next_values), {0, 0, 0, pad}));
         }
@@ -121,7 +122,7 @@ void ProximalPolicyOptimizationAgent::train(
         truncated_normal_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f).detach();
     const auto [old_value] = critic->forward(batched_states);
 
-    const auto returns = advantages.detach() + old_value.detach();
+    const auto returns = advantages + old_value;
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
@@ -137,7 +138,8 @@ void ProximalPolicyOptimizationAgent::train(
             torch::clip(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach();
 
         // actor
-        const auto actor_loss = -torch::mean(torch::min(surrogate_1, surrogate_2) + 1e-2 * entropy);
+        const auto actor_loss =
+            -torch::mean(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy);
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
@@ -145,7 +147,7 @@ void ProximalPolicyOptimizationAgent::train(
 
         // critic
         const auto critic_loss =
-            0.5 * torch::mse_loss(value, returns, torch::Reduction::Mean);
+            critic_loss_factor * torch::mse_loss(value, returns.detach(), torch::Reduction::Mean);
 
         critic_optimizer->zero_grad();
         critic_loss.backward();

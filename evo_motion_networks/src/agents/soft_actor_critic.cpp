@@ -88,11 +88,11 @@ void SoftActorCriticAgent::train(
 
     auto target_q_values = (batched_rewards
                             + (1.f - batched_done) * gamma
-                            * torch::mean(
-                                torch::min(next_target_q_value_1, next_target_q_value_2)
-                                - entropy_parameter->alpha() * next_log_prob,
-                                -1))
-        .detach();
+                                  * torch::mean(
+                                      torch::min(next_target_q_value_1, next_target_q_value_2)
+                                          - entropy_parameter->alpha() * next_log_prob,
+                                      -1))
+                               .detach();
     target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
     // critic 1
@@ -161,27 +161,20 @@ void SoftActorCriticAgent::save(const std::string &output_folder_path) {
 
     // actor
     save_torch(output_folder_path, actor, "actor.th");
-    save_torch(
-        output_folder_path, actor_optimizer, "actor.th");
+    save_torch(output_folder_path, actor_optimizer, "actor.th");
 
     // critic
     save_torch(output_folder_path, critic_1, "critic_1.th");
-    save_torch(
-        output_folder_path, target_critic_1, "target_critic_1.th");
-    save_torch(
-        output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
+    save_torch(output_folder_path, target_critic_1, "target_critic_1.th");
+    save_torch(output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
     save_torch(output_folder_path, critic_2, "critic_2.th");
-    save_torch(
-        output_folder_path, target_critic_2, "target_critic_2.th");
-    save_torch(
-        output_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
+    save_torch(output_folder_path, target_critic_2, "target_critic_2.th");
+    save_torch(output_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
     // Entropy
-    save_torch(
-        output_folder_path, entropy_parameter, "entropy.th");
-    save_torch(
-        output_folder_path, entropy_optimizer, "entropy_optimizer.th");
+    save_torch(output_folder_path, entropy_parameter, "entropy.th");
+    save_torch(output_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 void SoftActorCriticAgent::load(const std::string &input_folder_path) {
@@ -189,27 +182,20 @@ void SoftActorCriticAgent::load(const std::string &input_folder_path) {
 
     // actor
     load_torch(input_folder_path, actor, "actor.th");
-    load_torch(
-        input_folder_path, actor_optimizer, "actor.th");
+    load_torch(input_folder_path, actor_optimizer, "actor.th");
 
     // critic
     load_torch(input_folder_path, critic_1, "critic_1.th");
-    load_torch(
-        input_folder_path, target_critic_1, "target_critic_1.th");
-    load_torch(
-        input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
+    load_torch(input_folder_path, target_critic_1, "target_critic_1.th");
+    load_torch(input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
     load_torch(input_folder_path, critic_2, "critic_2.th");
-    load_torch(
-        input_folder_path, target_critic_2, "target_critic_2.th");
-    load_torch(
-        input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
+    load_torch(input_folder_path, target_critic_2, "target_critic_2.th");
+    load_torch(input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
     // Entropy
-    load_torch(
-        input_folder_path, entropy_parameter, "entropy.th");
-    load_torch(
-        input_folder_path, entropy_optimizer, "entropy_optimizer.th");
+    load_torch(input_folder_path, entropy_parameter, "entropy.th");
+    load_torch(input_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 std::vector<LossMeter> SoftActorCriticAgent::get_metrics() {

@@ -15,8 +15,9 @@ class ProximalPolicyOptimizationAgent : public Agent {
 public:
     ProximalPolicyOptimizationAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, float gamma, float lam, float epsilon, int epoch, int batch_size,
-        float learning_rate, int replay_buffer_size, int train_every);
+        int hidden_size, float gamma, float lam, float epsilon, float entropy_factor,
+        float critic_loss_factor, int epoch, int batch_size, float learning_rate,
+        int replay_buffer_size, int train_every);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 
@@ -44,6 +45,9 @@ private:
     float lambda;
     float epsilon;
     int epoch;
+
+    float entropy_factor;
+    float critic_loss_factor;
 
     long curr_train_step;
     long curr_episode_step;
