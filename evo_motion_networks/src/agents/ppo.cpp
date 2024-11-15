@@ -7,9 +7,11 @@
 #include <evo_motion_networks/saver.h>
 
 ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
-    int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, float gamma, float lam, float epsilon, int epoch, int batch_size,
-    float learning_rate, int replay_buffer_size, int train_every)
+    const int seed, const std::vector<int64_t> &state_space,
+    const std::vector<int64_t> &action_space,
+    int hidden_size, const float gamma, const float lam, const float epsilon, const int epoch,
+    const int batch_size,
+    float learning_rate, const int replay_buffer_size, const int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
@@ -61,23 +63,23 @@ void ProximalPolicyOptimizationAgent::check_train() {
         for (const auto &e: episodes)
             max_steps = std::max(max_steps, static_cast<int>(e.trajectory.size()));
 
-        for (const auto &episode: episodes) {
+        for (const auto &[trajectory]: episodes) {
 
             std::vector<torch::Tensor> vec_states, vec_actions, vec_values, vec_rewards, vec_done,
                 vec_next_values;
 
-            for (const auto &s: episode.trajectory) {
-                vec_states.push_back(s.state);
-                vec_actions.push_back(s.action);
-                vec_values.push_back(s.value);
+            for (const auto &[state, action, value, reward, done, next_value]: trajectory) {
+                vec_states.push_back(state);
+                vec_actions.push_back(action);
+                vec_values.push_back(value);
                 vec_rewards.push_back(
-                    torch::tensor({s.reward}, torch::TensorOptions().device(curr_device)));
+                    torch::tensor({reward}, torch::TensorOptions().device(curr_device)));
                 vec_done.push_back(torch::tensor(
-                    {s.done ? 1.f : 0.f}, torch::TensorOptions().device(curr_device)));
-                vec_next_values.push_back(s.next_value);
+                    {done ? 1.f : 0.f}, torch::TensorOptions().device(curr_device)));
+                vec_next_values.push_back(next_value);
             }
 
-            const int pad = max_steps - static_cast<int>(episode.trajectory.size());
+            const int pad = max_steps - static_cast<int>(trajectory.size());
 
             batch_vec_states.push_back(torch::pad(torch::stack(vec_states), {0, 0, 0, pad}));
             batch_vec_actions.push_back(torch::pad(torch::stack(vec_actions), {0, 0, 0, pad}));
