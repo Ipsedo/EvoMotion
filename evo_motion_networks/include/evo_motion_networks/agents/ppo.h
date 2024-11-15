@@ -41,7 +41,7 @@ private:
     std::shared_ptr<torch::optim::Optimizer> critic_optimizer;
 
     float gamma;
-    float lam;
+    float lambda;
     float epsilon;
     int epoch;
 

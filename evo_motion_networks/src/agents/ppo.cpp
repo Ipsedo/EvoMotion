@@ -16,10 +16,10 @@ ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
-      gamma(gamma), lam(lam), epsilon(epsilon), epoch(epoch), curr_train_step(0L),
+      gamma(gamma), lambda(lam), epsilon(epsilon), epoch(epoch), curr_train_step(0L),
       curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
       replay_buffer(replay_buffer_size, seed), train_every(train_every),
-      actor_loss_meter("actor_loss", 128), critic_loss_meter("critic_loss", 128),
+      actor_loss_meter("actor_loss", 16), critic_loss_meter("critic_loss", 16),
       episode_steps_meter("steps", 16), curr_device(torch::kCPU) {
     at::manual_seed(seed);
 }
@@ -84,7 +84,7 @@ void ProximalPolicyOptimizationAgent::check_train() {
             batch_vec_actions.push_back(torch::pad(torch::stack(vec_actions), {0, 0, 0, pad}));
             batch_vec_values.push_back(torch::pad(torch::stack(vec_values), {0, 0, 0, pad}));
             batch_vec_rewards.push_back(torch::pad(torch::stack(vec_rewards), {0, 0, 0, pad}));
-            batch_vec_done.push_back(torch::pad(torch::stack(vec_done), {0, 0, 0, pad}));
+            batch_vec_done.push_back(torch::pad(torch::stack(vec_done), {0, 0, 0, pad}, "constant", 1.f));
             batch_vec_next_values.push_back(
                 torch::pad(torch::stack(vec_next_values), {0, 0, 0, pad}));
         }
@@ -109,9 +109,9 @@ void ProximalPolicyOptimizationAgent::train(
     const auto curr_values = torch::slice(batched_values, 1, 0, batched_values.size(1) - 1);
     const auto next_values = torch::slice(batched_values, 1, 1);
 
-    const auto deltas = batched_rewards + gamma * next_values * (1 - batched_done) - curr_values;
+    const auto deltas = batched_rewards + gamma * next_values * (1.f - batched_done) - curr_values;
 
-    const auto gae_coefficient = gamma * lam;
+    const auto gae_coefficient = gamma * lambda;
     auto advantages = torch::flip(
         torch::cumsum(torch::flip(deltas * (1 - batched_done), {1}) * gae_coefficient, 1), {1});
     advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
@@ -121,7 +121,7 @@ void ProximalPolicyOptimizationAgent::train(
         truncated_normal_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f).detach();
     const auto [old_value] = critic->forward(batched_states);
 
-    const auto returns = advantages + old_value;
+    const auto returns = advantages.detach() + old_value.detach();
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
@@ -134,7 +134,7 @@ void ProximalPolicyOptimizationAgent::train(
 
         const auto surrogate_1 = ratios * advantages.detach();
         const auto surrogate_2 =
-            torch::clamp(ratios, 1.f - epsilon, 1 + epsilon) * advantages.detach();
+            torch::clip(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach();
 
         // actor
         const auto actor_loss = -torch::mean(torch::min(surrogate_1, surrogate_2) + 1e-2 * entropy);
@@ -145,7 +145,7 @@ void ProximalPolicyOptimizationAgent::train(
 
         // critic
         const auto critic_loss =
-            0.5 * torch::mse_loss(returns.detach(), value, torch::Reduction::Mean);
+            0.5 * torch::mse_loss(value, returns, torch::Reduction::Mean);
 
         critic_optimizer->zero_grad();
         critic_loss.backward();
