@@ -120,7 +120,7 @@ void ProximalPolicyOptimizationAgent::train(
     const auto gamma_factor =
         torch::pow(
             gamma, torch::arange(batched_rewards.size(1), at::TensorOptions().device(curr_device)))
-            .unsqueeze(1);
+        .unsqueeze(1);
 
     const auto returns =
         (batched_rewards * gamma_factor).flip({1}).cumsum(1).flip({1}) / gamma_factor;
