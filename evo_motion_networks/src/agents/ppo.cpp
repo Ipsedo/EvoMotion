@@ -64,7 +64,6 @@ void ProximalPolicyOptimizationAgent::check_train() {
             max_steps = std::max(max_steps, static_cast<int>(e.trajectory.size()));
 
         for (const auto &[trajectory]: episodes) {
-
             std::vector<torch::Tensor> vec_states, vec_actions, vec_values, vec_rewards, vec_done,
                 vec_next_values;
 

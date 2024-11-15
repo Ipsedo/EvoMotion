@@ -137,12 +137,12 @@ void SoftActorCriticLiquidAgent::train(
         target_critic_2->forward(next_x_t.target_critic_2_x_t, batched_next_state, next_action);
 
     auto target_q_values = (batched_rewards
-                                  + (1.f - batched_done) * gamma
-                                        * torch::mean(
-                                            torch::min(next_target_q_value_1, next_target_q_value_2)
-                                                - entropy_parameter->alpha() * next_log_prob,
-                                            -1))
-                                     .detach()
+                            + (1.f - batched_done) * gamma
+                            * torch::mean(
+                                torch::min(next_target_q_value_1, next_target_q_value_2)
+                                - entropy_parameter->alpha() * next_log_prob,
+                                -1))
+        .detach()
                                      .unsqueeze(1);
     target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
