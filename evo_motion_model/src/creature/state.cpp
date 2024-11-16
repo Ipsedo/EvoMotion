@@ -15,20 +15,26 @@ State::~State() = default;
 // Base class for proprioception
 ItemProprioceptionState::ItemProprioceptionState(
     const Item &item, const Item &floor, btDynamicsWorld *world)
-    : state_item(item), floor_touched(false) {
+    : state_item(item), floor_touched(false), last_ang_vel(0, 0, 0), last_lin_vel(0, 0, 0) {
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
-int ItemProprioceptionState::get_size() { return 3 + /*3 * 4 +*/ 1 /* + 6 * 3*/; }
+int ItemProprioceptionState::get_size() { return 3 + 3 * 4 + 1 /* + 6 * 3*/; }
 
 torch::Tensor ItemProprioceptionState::get_state() {
     btScalar yaw, pitch, roll;
     state_item.get_body()->getWorldTransform().getRotation().getEulerZYX(yaw, pitch, roll);
 
-    /*const btVector3 center_lin_velocity = state_item.get_body()->getLinearVelocity();
+    const btVector3 center_lin_velocity = state_item.get_body()->getLinearVelocity();
     const btVector3 center_ang_velocity = state_item.get_body()->getAngularVelocity();
 
-    const btVector3 force = state_item.get_body()->getTotalForce();
+    const btVector3 center_lin_acceleration = last_lin_vel - center_lin_velocity;
+    const btVector3 center_ang_acceleration = last_ang_vel - center_ang_velocity;
+
+    last_lin_vel = center_lin_velocity;
+    last_ang_vel = center_ang_velocity;
+
+    /*const btVector3 force = state_item.get_body()->getTotalForce();
     const btVector3 torque = state_item.get_body()->getTotalTorque();*/
 
     float touched = floor_touched ? 1.f : 0.f;
@@ -36,12 +42,13 @@ torch::Tensor ItemProprioceptionState::get_state() {
 
     auto main_state = torch::tensor(
         {yaw / static_cast<float>(M_PI), pitch / static_cast<float>(M_PI),
-         roll / static_cast<float>(M_PI)/*, center_lin_velocity.x(), center_lin_velocity.y(),
+         roll / static_cast<float>(M_PI), center_lin_velocity.x(), center_lin_velocity.y(),
          center_lin_velocity.z(), center_ang_velocity.x() / static_cast<float>(M_PI),
          center_ang_velocity.y() / static_cast<float>(M_PI),
          center_ang_velocity.z() / static_cast<float>(M_PI),
-         force.x(), force.y(), force.z(),
-         torque.x(), torque.y(), torque.z()*/,
+         center_ang_acceleration.x() / static_cast<float>(M_PI), center_ang_acceleration.y() / static_cast<float>(M_PI),
+         center_ang_acceleration.z() / static_cast<float>(M_PI),
+         center_lin_acceleration.x(), center_lin_acceleration.y(), center_lin_acceleration.z(),
          touched});
 
     return torch::cat(

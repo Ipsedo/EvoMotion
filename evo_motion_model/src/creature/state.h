@@ -35,6 +35,8 @@ public:
 
 protected:
     Item state_item;
+    btVector3 last_ang_vel;
+    btVector3 last_lin_vel;
 
 private:
     bool floor_touched;
