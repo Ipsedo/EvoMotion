@@ -148,9 +148,9 @@ void ProximalPolicyOptimizationAgent::train(
 
         const auto ratios = torch::exp(torch::log(prob) - torch::log(old_prob).detach());
 
-        const auto surrogate_1 = ratios * norm_advantages.detach();
+        const auto surrogate_1 = ratios.log() * norm_advantages.detach();
         const auto surrogate_2 =
-            torch::clip(ratios, 1.f - epsilon, 1.f + epsilon) * norm_advantages.detach();
+            torch::clip(ratios, 1.f - epsilon, 1.f + epsilon).log() * norm_advantages.detach();
 
         // actor
         const auto actor_loss =
