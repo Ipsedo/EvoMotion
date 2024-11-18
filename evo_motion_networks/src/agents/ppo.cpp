@@ -116,7 +116,7 @@ void ProximalPolicyOptimizationAgent::train(
         torch::pow(
             gamma * lambda,
             torch::arange(batched_rewards.size(1), torch::TensorOptions().device(curr_device)))
-            .unsqueeze(1);
+        .unsqueeze(1);
     const auto advantages = (deltas * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
     const auto returns = advantages + curr_values;
 
