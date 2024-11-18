@@ -10,21 +10,22 @@ ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const float gamma, const float lam,
     const float epsilon, float entropy_factor, float critic_loss_factor, const int epoch,
-    const int batch_size, float learning_rate, const int replay_buffer_size, const int train_every)
+    const int batch_size, float learning_rate, const int replay_buffer_size, const int train_every,
+    const float grad_norm_clip)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
       gamma(gamma), lambda(lam), epsilon(epsilon), entropy_factor(entropy_factor),
-      critic_loss_factor(critic_loss_factor), epoch(epoch), curr_train_step(0L),
-      curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
+      critic_loss_factor(critic_loss_factor), grad_norm_clip(grad_norm_clip), epoch(epoch),
+      curr_train_step(0L), curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
       replay_buffer(replay_buffer_size, seed), train_every(train_every),
       actor_loss_meter("actor_loss", 16), critic_loss_meter("critic_loss", 16),
       episode_steps_meter("steps", 16), curr_device(torch::kCPU) {
     at::manual_seed(seed);
 }
 
-torch::Tensor ProximalPolicyOptimizationAgent::act(torch::Tensor state, float reward) {
+torch::Tensor ProximalPolicyOptimizationAgent::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
     const auto [value] = critic->forward(state);
@@ -38,7 +39,7 @@ torch::Tensor ProximalPolicyOptimizationAgent::act(torch::Tensor state, float re
     return action;
 }
 
-void ProximalPolicyOptimizationAgent::done(torch::Tensor state, float reward) {
+void ProximalPolicyOptimizationAgent::done(const torch::Tensor state, const float reward) {
     const auto [value] = critic->forward(state);
     replay_buffer.update_last(reward, true, value.detach());
 
@@ -111,13 +112,13 @@ void ProximalPolicyOptimizationAgent::train(
     const auto next_values = torch::slice(batched_values, 1, 1);
 
     const auto deltas = batched_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
-    const auto gae_factor = torch::pow(gamma * lambda, torch::arange(batched_rewards.size(1), torch::TensorOptions().device(curr_device))).unsqueeze(1);
-
+    const auto gae_factor =
+        torch::pow(
+            gamma * lambda,
+            torch::arange(batched_rewards.size(1), torch::TensorOptions().device(curr_device)))
+            .unsqueeze(1);
     const auto advantages = (deltas * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
-    //const auto norm_advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
-
     const auto returns = advantages + curr_values;
-    //const auto norm_returns = (returns - returns.mean()) / (returns.std() + 1e-8);
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
     const auto old_log_prob =
@@ -142,15 +143,16 @@ void ProximalPolicyOptimizationAgent::train(
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
+        torch::nn::utils::clip_grad_norm_(actor->parameters(), grad_norm_clip);
         actor_optimizer->step();
 
         // critic
         const auto critic_loss =
-            critic_loss_factor
-            * torch::mse_loss(value, returns.detach(), torch::Reduction::Mean);
+            critic_loss_factor * torch::mse_loss(value, returns.detach(), torch::Reduction::Mean);
 
         critic_optimizer->zero_grad();
         critic_loss.backward();
+        torch::nn::utils::clip_grad_norm_(critic->parameters(), grad_norm_clip);
         critic_optimizer->step();
 
         actor_loss_meter.add(actor_loss.item().toFloat());
