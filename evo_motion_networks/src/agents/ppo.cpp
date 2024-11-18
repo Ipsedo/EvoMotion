@@ -136,12 +136,11 @@ void ProximalPolicyOptimizationAgent::train(
     const auto norm_returns = (returns - returns.mean()) / (returns.std() + 1e-8f);
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
-    const auto old_prob =
-        torch::clamp_min(truncated_normal_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f).detach(), 1e-5);
+    const auto old_prob = torch::clamp_min(truncated_normal_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f), 1e-8);
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
-        const auto prob = torch::clamp_min(truncated_normal_pdf(batched_actions, mu, sigma, -1.f, 1.f), 1e-5);
+        const auto prob = torch::clamp_min(truncated_normal_pdf(batched_actions, mu, sigma, -1.f, 1.f), 1e-8);
         const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
 
         const auto [value] = critic->forward(batched_states);
