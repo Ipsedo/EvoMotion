@@ -110,30 +110,18 @@ void ProximalPolicyOptimizationAgent::train(
     const auto curr_values = torch::slice(batched_values, 1, 0, batched_values.size(1) - 1);
     const auto next_values = torch::slice(batched_values, 1, 1);
 
-    /*const auto norm_rewards = (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
-    const auto deltas = norm_rewards + gamma * next_values * (1.f - batched_done) - curr_values;
+    const auto deltas = batched_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
+    const auto gae_factor = torch::pow(gamma * lambda, torch::arange(batched_rewards.size(1), torch::TensorOptions().device(curr_device))).unsqueeze(1);
 
-    const auto gae_coefficient = gamma * lambda;
-    const auto advantages = torch::flip(
-        torch::cumsum(torch::flip(deltas * (1.f - batched_done), {1}) * gae_coefficient, 1), {1});*/
+    const auto advantages = (deltas * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
+    //const auto norm_advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
 
-    const auto gamma_factor =
-        torch::pow(
-            gamma, torch::arange(batched_rewards.size(1), at::TensorOptions().device(curr_device)))
-        .unsqueeze(1);
-
-    const auto returns =
-        (batched_rewards * gamma_factor).flip({1}).cumsum(1).flip({1}) / gamma_factor;
-    const auto norm_returns = (returns - returns.mean()) / (returns.std() + 1e-8);
+    const auto returns = advantages + curr_values;
+    //const auto norm_returns = (returns - returns.mean()) / (returns.std() + 1e-8);
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
     const auto old_log_prob =
         truncated_normal_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f).detach();
-    const auto [old_value] = critic->forward(batched_states);
-
-    //const auto returns = advantages + old_value;
-
-    const auto advantages = norm_returns - old_value;
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
@@ -159,7 +147,7 @@ void ProximalPolicyOptimizationAgent::train(
         // critic
         const auto critic_loss =
             critic_loss_factor
-            * torch::mse_loss(value, norm_returns.detach(), torch::Reduction::Mean);
+            * torch::mse_loss(value, returns.detach(), torch::Reduction::Mean);
 
         critic_optimizer->zero_grad();
         critic_loss.backward();

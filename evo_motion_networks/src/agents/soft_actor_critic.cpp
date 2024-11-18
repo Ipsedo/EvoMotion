@@ -90,11 +90,11 @@ void SoftActorCriticAgent::train(
                                   batched_rewards.std() + 1e-8);*/
     auto target_q_values = (batched_rewards
                             + (1.f - batched_done) * gamma
-                            * torch::mean(
-                                torch::min(next_target_q_value_1, next_target_q_value_2)
-                                - entropy_parameter->alpha() * next_log_prob,
-                                -1))
-        .detach();
+                                  * torch::mean(
+                                      torch::min(next_target_q_value_1, next_target_q_value_2)
+                                          - entropy_parameter->alpha() * next_log_prob,
+                                      -1))
+                               .detach();
     target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
     // critic 1

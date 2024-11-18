@@ -46,9 +46,9 @@ torch::Tensor ItemProprioceptionState::get_state() {
          center_lin_velocity.z(), center_ang_velocity.x() / static_cast<float>(M_PI),
          center_ang_velocity.y() / static_cast<float>(M_PI),
          center_ang_velocity.z() / static_cast<float>(M_PI),
+         center_lin_acceleration.x(), center_lin_acceleration.y(), center_lin_acceleration.z(),
          center_ang_acceleration.x() / static_cast<float>(M_PI), center_ang_acceleration.y() / static_cast<float>(M_PI),
          center_ang_acceleration.z() / static_cast<float>(M_PI),
-         center_lin_acceleration.x(), center_lin_acceleration.y(), center_lin_acceleration.z(),
          touched});
 
     return torch::cat(
