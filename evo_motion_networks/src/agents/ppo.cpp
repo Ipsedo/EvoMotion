@@ -27,7 +27,7 @@ ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
 }
 
 torch::Tensor ProximalPolicyOptimizationAgent::act(const torch::Tensor state, const float reward) {
-    //set_eval(true);
+    set_eval(true);
 
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
@@ -56,19 +56,19 @@ void ProximalPolicyOptimizationAgent::check_train() {
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
 
-        for (const auto &rp: tmp_replay_buffer) {
-            vec_states.push_back(rp.state);
-            vec_actions.push_back(rp.action);
+        for (const auto &[state, action, reward, done, next_state]: tmp_replay_buffer) {
+            vec_states.push_back(state);
+            vec_actions.push_back(action);
             vec_rewards.push_back(
-                torch::tensor(rp.reward, at::TensorOptions().device(curr_device)));
+                torch::tensor({reward}, at::TensorOptions().device(curr_device)));
             vec_done.push_back(
-                torch::tensor(rp.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
-            vec_next_state.push_back(rp.next_state);
+                torch::tensor({done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
+            vec_next_state.push_back(next_state);
         }
 
         train(
             torch::stack(vec_states), torch::stack(vec_actions),
-            torch::stack(vec_rewards).unsqueeze(1), torch::stack(vec_done).unsqueeze(1),
+            torch::stack(vec_rewards), torch::stack(vec_done),
             torch::stack(vec_next_state));
     }
 }
@@ -80,7 +80,7 @@ void ProximalPolicyOptimizationAgent::train(
 
     //torch::autograd::DetectAnomalyGuard guard;
 
-    //set_eval(false);
+    set_eval(false);
 
     const auto [curr_values] = critic->forward(batched_states);
     const auto [next_values] = critic->forward(batched_next_state);
