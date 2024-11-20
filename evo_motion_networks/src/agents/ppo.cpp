@@ -9,19 +9,19 @@
 ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const float gamma, const float lam,
-    const float epsilon, float entropy_factor, float critic_loss_factor, const int epoch,
+    const float epsilon, const float entropy_factor, const float critic_loss_factor, const int epoch,
     const int batch_size, float learning_rate, const int replay_buffer_size, const int train_every,
     const float grad_norm_clip)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
-      gamma(gamma), lambda(lam), epsilon(epsilon), entropy_factor(entropy_factor),
-      critic_loss_factor(critic_loss_factor), grad_norm_clip(grad_norm_clip), epoch(epoch),
+      gamma(gamma), lambda(lam), epsilon(epsilon), epoch(epoch),
+      entropy_factor(entropy_factor), critic_loss_factor(critic_loss_factor), grad_norm_clip(grad_norm_clip),
       curr_train_step(0L), curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
       replay_buffer(replay_buffer_size, seed), train_every(train_every),
-      actor_loss_meter("actor_loss", 16), critic_loss_meter("critic_loss", 16),
-      episode_steps_meter("steps", 16), curr_device(torch::kCPU) {
+      actor_loss_meter("actor_loss", 64), critic_loss_meter("critic_loss", 64),
+      episode_steps_meter("steps", 64), curr_device(torch::kCPU) {
 
     at::manual_seed(seed);
 }
@@ -94,7 +94,8 @@ void ProximalPolicyOptimizationAgent::train(
     const auto norm_advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
     const auto norm_returns = (returns - returns.mean()) / (returns.std() + 1e-8);
 
-    float min_proba = 1e-8, max_proba = 1e8;
+    constexpr float min_proba = 1e-8;
+    constexpr float max_proba = 1e8;
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
     const auto old_log_prob = torch::clamp(
