@@ -165,7 +165,7 @@ void ProximalPolicyOptimizationAgent::train(
         // actor
         const auto actor_loss =
             -torch::sum((torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy) * mask)
-            / mask.sum();
+            / (mask.sum() * log_prob.size(-1));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
