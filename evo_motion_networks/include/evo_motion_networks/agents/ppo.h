@@ -56,7 +56,7 @@ private:
     long global_curr_step;
 
     int batch_size;
-    ReplayBuffer replay_buffer;
+    TrajectoryReplayBuffer replay_buffer;
     int train_every;
 
     LossMeter actor_loss_meter;
@@ -68,8 +68,8 @@ private:
     void check_train();
     void train(
         const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
-        const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
-        const torch::Tensor &batched_next_state);
+        const torch::Tensor &batched_values, const torch::Tensor &batched_rewards,
+        const torch::Tensor &batched_done);
 };
 
 #endif//EVO_MOTION_PPO_H

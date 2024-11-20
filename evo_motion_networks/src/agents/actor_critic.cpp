@@ -56,8 +56,7 @@ void ActorCriticAgent::check_train() {
         for (const auto &[state, action, reward, done, next_state]: tmp_replay_buffer) {
             vec_states.push_back(state);
             vec_actions.push_back(action);
-            vec_rewards.push_back(
-                torch::tensor(reward, at::TensorOptions().device(curr_device)));
+            vec_rewards.push_back(torch::tensor(reward, at::TensorOptions().device(curr_device)));
             vec_done.push_back(
                 torch::tensor(done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
             vec_next_state.push_back(next_state);

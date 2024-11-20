@@ -20,7 +20,8 @@ ActorLiquidModule::ActorLiquidModule(
         torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
-        "sigma", torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
+        "sigma", torch::nn::Sequential(
+                     torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
     mu->apply(init_weights);
     sigma->apply(init_weights);
