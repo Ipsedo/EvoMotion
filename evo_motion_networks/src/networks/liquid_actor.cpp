@@ -20,7 +20,7 @@ ActorLiquidModule::ActorLiquidModule(
         torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
-        "sigma", torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0])));
+        "sigma", torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
     mu->apply(init_weights);
     sigma->apply(init_weights);
@@ -62,5 +62,5 @@ ActorLiquidModule::forward(const torch::Tensor &x_t, const torch::Tensor &state)
         out_sigma = out_sigma.squeeze(0);
     }
 
-    return {out_mu, out_sigma.exp(), new_x_t};
+    return {out_mu, out_sigma, new_x_t};
 }

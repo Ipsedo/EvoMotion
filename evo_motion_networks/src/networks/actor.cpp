@@ -34,7 +34,7 @@ ActorModule::ActorModule(
             torch::nn::LayerNorm(
                 torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
-            torch::nn::Linear(hidden_size, action_space[0])));
+            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
     head->apply(init_weights);
     mu->apply(init_weights);
@@ -58,5 +58,5 @@ actor_response ActorModule::forward(const torch::Tensor &state) {
         out_sigma = out_sigma.squeeze(0);
     }
 
-    return {out_mu, out_sigma.exp()};
+    return {out_mu, out_sigma};
 }
