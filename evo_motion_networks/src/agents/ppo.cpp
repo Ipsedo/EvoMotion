@@ -119,10 +119,12 @@ void ProximalPolicyOptimizationAgent::train(
     const auto curr_values = torch::slice(batched_values, 1, 0, batched_values.size(1) - 1);
     const auto next_values = torch::slice(batched_values, 1, 1);
 
-    const auto mask = torch::eq(torch::cat(
-        {torch::ones({batched_done.size(0), 1, 1}, at::TensorOptions().device(curr_device)),
-         torch::slice(1.f - batched_done, 1, 0, batched_done.size(1) - 1)},
-        1), 1.f);
+    const auto mask = torch::eq(
+        torch::cat(
+            {torch::ones({batched_done.size(0), 1, 1}, at::TensorOptions().device(curr_device)),
+             torch::slice(1.f - batched_done, 1, 0, batched_done.size(1) - 1)},
+            1),
+        1.f);
 
     const auto deltas = batched_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
     const auto gae_factor =
@@ -135,8 +137,10 @@ void ProximalPolicyOptimizationAgent::train(
     const auto advantages = (mask * deltas * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
     const auto returns = advantages + curr_values;
 
-    const auto norm_advantages = (advantages - torch::masked_select(advantages, mask).mean()) / (torch::masked_select(advantages, mask).std() + 1e-8f);
-    const auto norm_returns = (returns - torch::masked_select(returns, mask).mean()) / (torch::masked_select(returns, mask).std() + 1e-8f);
+    const auto norm_advantages = (advantages - torch::masked_select(advantages, mask).mean())
+                                 / (torch::masked_select(advantages, mask).std() + 1e-8f);
+    const auto norm_returns = (returns - torch::masked_select(returns, mask).mean())
+                              / (torch::masked_select(returns, mask).std() + 1e-8f);
 
     constexpr float min_prob = 1e-8;
     constexpr float max_prob = 1e8;
@@ -163,8 +167,8 @@ void ProximalPolicyOptimizationAgent::train(
             * norm_advantages.detach();
 
         // actor
-        const auto actor_loss =
-            -torch::mean(torch::masked_select(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, mask));
+        const auto actor_loss = -torch::mean(torch::masked_select(
+            torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, mask));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
@@ -173,8 +177,9 @@ void ProximalPolicyOptimizationAgent::train(
 
         // critic
         const auto critic_loss =
-                critic_loss_factor
-                * torch::mean(torch::masked_select(torch::mse_loss(value, norm_returns.detach(), torch::Reduction::None), mask));
+            critic_loss_factor
+            * torch::mean(torch::masked_select(
+                torch::mse_loss(value, norm_returns.detach(), torch::Reduction::None), mask));
 
         critic_optimizer->zero_grad();
         critic_loss.backward();
