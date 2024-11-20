@@ -40,6 +40,36 @@ torch::Tensor truncated_normal_pdf(
     return phi((x - mu) / sigma) / ((theta(beta) - theta(alpha)) * sigma);
 }
 
+torch::Tensor truncated_normal_log_pdf(
+    const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
+    float max_value) {
+    const auto alpha = (min_value - mu) / sigma;
+    const auto beta = (max_value - mu) / sigma;
+
+    const auto z = theta(beta) - theta(alpha);
+
+    return -0.5f * std::log(2 * static_cast<float>(M_PI)) - torch::log(sigma)
+           - 0.5 * torch::pow((x - mu) / sigma, 2.f) - torch::log(z);
+}
+
+torch::Tensor truncated_normal_cdf(
+    const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
+    float max_value) {
+    const auto xi = (x - mu) / sigma;
+    const auto alpha = (min_value - mu) / sigma;
+    const auto beta = (max_value - mu) / sigma;
+    const auto z = theta(beta) - theta(alpha);
+
+    return (theta(xi) - theta(alpha)) / z;
+}
+
+torch::Tensor truncated_normal_cdf_interval(
+    const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
+    float max_value, float epsilon) {
+    return truncated_normal_cdf(x + epsilon, mu, sigma, min_value, max_value)
+           - truncated_normal_cdf(x - epsilon, mu, sigma, min_value, max_value);
+}
+
 torch::Tensor truncated_normal_sample(
     const torch::Tensor &mu, const torch::Tensor &sigma, const float min_value,
     const float max_value) {

@@ -182,3 +182,8 @@ trajectory_step TrajectoryReplayBuffer::update_last_step(
 }
 
 bool TrajectoryReplayBuffer::is_finish(trajectory_step step) { return step.done; }
+
+template<typename EpisodeStep, class... UpdateArgs>
+void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::clear() {
+    memory.clear();
+}

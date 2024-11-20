@@ -94,6 +94,7 @@ public:
     virtual bool empty();
     virtual bool trajectory_empty();
     virtual bool enough_trajectory(int batch_size);
+    virtual void clear();
 
     virtual ~AbstractTrajectoryBuffer();
 

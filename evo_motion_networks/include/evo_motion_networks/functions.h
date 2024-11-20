@@ -26,6 +26,18 @@ torch::Tensor truncated_normal_pdf(
     const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
     float max_value);
 
+torch::Tensor truncated_normal_log_pdf(
+    const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
+    float max_value);
+
+torch::Tensor truncated_normal_cdf(
+    const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
+    float max_value);
+
+torch::Tensor truncated_normal_cdf_interval(
+    const torch::Tensor &x, const torch::Tensor &mu, const torch::Tensor &sigma, float min_value,
+    float max_value, float epsilon);
+
 torch::Tensor truncated_normal_entropy(
     const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value);
 
