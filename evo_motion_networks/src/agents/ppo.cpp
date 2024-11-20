@@ -121,11 +121,6 @@ void ProximalPolicyOptimizationAgent::train(
     const auto curr_values = torch::slice(batched_values, 1, 0, batched_values.size(1) - 1);
     const auto next_values = torch::slice(batched_values, 1, 1);
 
-    const auto mask = torch::cat(
-        {torch::ones({batched_done.size(0), 1, 1}, at::TensorOptions().device(curr_device)),
-         torch::slice(1.f - batched_done, 1, 0, batched_done.size(1) - 1)},
-        1);
-
     const auto deltas = batched_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
     const auto gae_factor =
         torch::pow(
