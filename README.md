@@ -104,5 +104,8 @@ An internet connexion is also required in order to download dependencies inside 
 
 [1] Reinforcement Learning: An Introduction - *Richard S. Sutton and Andrew G. Barto* - Second Edition 2018
 
-[2] Liquid Time-constant Networks - *Ramin Hasani, Mathias Lechner, Alexander Amini, Daniela Rus, Radu Grosu* - 8 Jun
-2020
+[2] Liquid Time-constant Networks - *Ramin Hasani, Mathias Lechner, Alexander Amini, Daniela Rus, Radu Grosu* - 8 Jun 2020
+
+[4] Soft Actor-Critic Algorithms and Applications - *Tuomas Haarnoja, Aurick Zhou, Kristian Hartikainen, George Tucker, Sehoon Ha, Jie Tan, Vikash Kumar, Henry Zhu, Abhishek Gupta, Pieter Abbeel, Sergey Levine* - 29 Jan 2019
+
+[3] Proximal Policy Optimization Algorithms - *John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov* - 28 Aug 2017
