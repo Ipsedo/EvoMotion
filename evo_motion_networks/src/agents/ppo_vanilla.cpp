@@ -96,20 +96,20 @@ void PpoVanillaAgent::train(
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
         const auto prob = truncated_normal_pdf(batched_actions, mu, sigma, -1.f, 1.f);
-        const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
+        const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f).sum(-1);
 
         const auto [value] = critic->forward(batched_states);
 
         const auto ratios = (prob + 1e-8) / (old_prob.detach() + 1e-8);
+        const auto clipped_ratio = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon);
 
-        const auto surrogate_1 = ratios * advantages.detach();
+        const auto surrogate_1 = torch::sum(ratios * advantages.detach(), -1) / ratios.sum(-1);
         const auto surrogate_2 =
-            torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach();
+            torch::sum(clipped_ratio * advantages.detach(), -1) / clipped_ratio.sum(-1);
 
         // actor
         const auto actor_loss =
-            -torch::mean(
-                torch::sum(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, -1));
+            -torch::mean(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy);
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
