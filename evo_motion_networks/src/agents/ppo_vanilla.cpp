@@ -102,14 +102,14 @@ void PpoVanillaAgent::train(
 
         const auto ratios = (prob + 1e-8) / (old_prob.detach() + 1e-8);
 
-        const auto surrogate_1 = ratios * advantages.detach() / ratios.sum(-1, true).detach();
+        const auto surrogate_1 = ratios * advantages.detach();
         const auto surrogate_2 =
-            torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach()
-            / torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon).sum(-1, true).detach();
+            torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach();
 
         // actor
         const auto actor_loss =
-            -torch::mean(torch::sum(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, -1));
+            -torch::mean(
+                torch::sum(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, -1));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
