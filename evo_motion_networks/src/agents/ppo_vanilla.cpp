@@ -109,7 +109,7 @@ void PpoVanillaAgent::train(
 
         // actor
         const auto actor_loss =
-            -torch::mean(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy);
+            -torch::mean(torch::sum(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, -1));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
