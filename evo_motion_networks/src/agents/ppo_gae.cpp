@@ -134,9 +134,8 @@ void PpoGaeAgent::train(
             .unsqueeze(0)
             .unsqueeze(-1);
 
-    const auto advantages = (mask * deltas * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
-    const auto returns =
-        (mask * (deltas + curr_values) * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
+    const auto advantages = (deltas * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
+    const auto returns = advantages + curr_values;
 
     const auto norm_advantages = (advantages - torch::masked_select(advantages, mask).mean())
                                  / (torch::masked_select(advantages, mask).std() + 1e-8f);
@@ -149,7 +148,7 @@ void PpoGaeAgent::train(
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
         const auto prob = truncated_normal_pdf(batched_actions, mu, sigma, -1.f, 1.f);
-        const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
+        const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f).sum(-1);
 
         const auto [value] = critic->forward(batched_states);
 
@@ -161,11 +160,11 @@ void PpoGaeAgent::train(
 
         // actor
         const auto actor_loss = -torch::mean(torch::masked_select(
-            torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, mask));
+            torch::sum(torch::min(surrogate_1, surrogate_2), -1) / ratios.sum(-1).detach() + entropy_factor * entropy, mask.squeeze(-1)));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
-        //torch::nn::utils::clip_grad_norm_(actor->parameters(), grad_norm_clip);
+        torch::nn::utils::clip_grad_norm_(actor->parameters(), grad_norm_clip);
         actor_optimizer->step();
 
         // critic
@@ -176,7 +175,7 @@ void PpoGaeAgent::train(
 
         critic_optimizer->zero_grad();
         critic_loss.backward();
-        //torch::nn::utils::clip_grad_norm_(critic->parameters(), grad_norm_clip);
+        torch::nn::utils::clip_grad_norm_(critic->parameters(), grad_norm_clip);
         critic_optimizer->step();
 
         actor_loss_meter.add(actor_loss.item().toFloat());
