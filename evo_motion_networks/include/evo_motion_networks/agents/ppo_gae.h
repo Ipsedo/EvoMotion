@@ -2,8 +2,8 @@
 // Created by samuel on 13/11/24.
 //
 
-#ifndef EVO_MOTION_PPO_H
-#define EVO_MOTION_PPO_H
+#ifndef EVO_MOTION_PPO_GAE_H
+#define EVO_MOTION_PPO_GAE_H
 
 #include <evo_motion_networks/agent.h>
 #include <evo_motion_networks/metrics.h>
@@ -11,9 +11,9 @@
 #include <evo_motion_networks/networks/critic.h>
 #include <evo_motion_networks/replay_buffer.h>
 
-class ProximalPolicyOptimizationAgent : public Agent {
+class PpoGaeAgent : public Agent {
 public:
-    ProximalPolicyOptimizationAgent(
+    PpoGaeAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, float gamma, float lam, float epsilon, float entropy_factor,
         float critic_loss_factor, int epoch, int batch_size, float learning_rate,
@@ -72,4 +72,4 @@ private:
         const torch::Tensor &batched_done);
 };
 
-#endif//EVO_MOTION_PPO_H
+#endif//EVO_MOTION_PPO_GAE_H

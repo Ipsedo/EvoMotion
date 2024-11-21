@@ -10,7 +10,8 @@
 #include <evo_motion_networks/agents/actor_critic.h>
 #include <evo_motion_networks/agents/actor_critic_liquid.h>
 #include <evo_motion_networks/agents/debug_agents.h>
-#include <evo_motion_networks/agents/ppo.h>
+#include <evo_motion_networks/agents/ppo_gae.h>
+#include <evo_motion_networks/agents/ppo_vanilla.h>
 #include <evo_motion_networks/agents/soft_actor_critic.h>
 #include <evo_motion_networks/agents/soft_actor_critic_liquid.h>
 
@@ -128,17 +129,30 @@ std::shared_ptr<Agent> SofActorCriticLiquidFactory::create_agent(
         get_value<int>("replay_buffer_size"), get_value<int>("train_every"));
 }
 
-ProximalPolicyOptimizationFactory::ProximalPolicyOptimizationFactory(
-    const std::map<std::string, std::string> &parameters)
+PpoGaeFactory::PpoGaeFactory(const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
 
-std::shared_ptr<Agent> ProximalPolicyOptimizationFactory::create_agent(
+std::shared_ptr<Agent> PpoGaeFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
-    return std::make_shared<ProximalPolicyOptimizationAgent>(
+    return std::make_shared<PpoGaeAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<float>("gamma"), get_value<float>("lambda"), get_value<float>("epsilon"),
         get_value<float>("entropy_factor"), get_value<float>("critic_loss_factor"),
         get_value<int>("epoch"), get_value<int>("batch_size"), get_value<float>("learning_rate"),
+        get_value<int>("replay_buffer_size"), get_value<int>("train_every"),
+        get_value<float>("grad_norm_clip"));
+}
+
+PpoVanillaFactory::PpoVanillaFactory(const std::map<std::string, std::string> &parameters)
+    : AgentFactory(parameters) {}
+
+std::shared_ptr<Agent> PpoVanillaFactory::create_agent(
+    const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
+    return std::make_shared<PpoVanillaAgent>(
+        get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
+        get_value<float>("gamma"), get_value<float>("epsilon"), get_value<float>("entropy_factor"),
+        get_value<float>("critic_loss_factor"), get_value<int>("epoch"),
+        get_value<int>("batch_size"), get_value<float>("learning_rate"),
         get_value<int>("replay_buffer_size"), get_value<int>("train_every"),
         get_value<float>("grad_norm_clip"));
 }
@@ -157,8 +171,8 @@ std::map<
          std::make_shared<SofActorCriticFactory, std::map<std::string, std::string>>},
         {"soft_actor_critic_liquid",
          std::make_shared<SofActorCriticLiquidFactory, std::map<std::string, std::string>>},
-        {"ppo",
-         std::make_shared<ProximalPolicyOptimizationFactory, std::map<std::string, std::string>>}};
+        {"ppo", std::make_shared<PpoGaeFactory, std::map<std::string, std::string>>},
+        {"ppo_vanilla", std::make_shared<PpoVanillaFactory, std::map<std::string, std::string>>}};
 
 std::shared_ptr<AgentFactory>
 get_agent_factory(const std::string &agent_name, std::map<std::string, std::string> parameters) {

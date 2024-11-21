@@ -2,11 +2,11 @@
 // Created by samuel on 13/11/24.
 //
 
-#include <evo_motion_networks/agents/ppo.h>
+#include <evo_motion_networks/agents/ppo_gae.h>
 #include <evo_motion_networks/functions.h>
 #include <evo_motion_networks/saver.h>
 
-ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
+PpoGaeAgent::PpoGaeAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const float gamma, const float lam,
     const float epsilon, const float entropy_factor, const float critic_loss_factor,
@@ -26,7 +26,7 @@ ProximalPolicyOptimizationAgent::ProximalPolicyOptimizationAgent(
     at::manual_seed(seed);
 }
 
-torch::Tensor ProximalPolicyOptimizationAgent::act(const torch::Tensor state, const float reward) {
+torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
     set_eval(true);
 
     const auto [mu, sigma] = actor->forward(state);
@@ -42,7 +42,7 @@ torch::Tensor ProximalPolicyOptimizationAgent::act(const torch::Tensor state, co
     return action;
 }
 
-void ProximalPolicyOptimizationAgent::done(const torch::Tensor state, const float reward) {
+void PpoGaeAgent::done(const torch::Tensor state, const float reward) {
     set_eval(true);
 
     const auto [value] = critic->forward(state);
@@ -57,7 +57,7 @@ void ProximalPolicyOptimizationAgent::done(const torch::Tensor state, const floa
     curr_episode_step = 0L;
 }
 
-void ProximalPolicyOptimizationAgent::check_train() {
+void PpoGaeAgent::check_train() {
     if ((global_curr_step % train_every == train_every - 1)
         && replay_buffer.enough_trajectory(batch_size)) {
 
@@ -108,7 +108,7 @@ void ProximalPolicyOptimizationAgent::check_train() {
     }
 }
 
-void ProximalPolicyOptimizationAgent::train(
+void PpoGaeAgent::train(
     const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
     const torch::Tensor &batched_values, const torch::Tensor &batched_rewards,
     const torch::Tensor &batched_done) {
@@ -135,36 +135,29 @@ void ProximalPolicyOptimizationAgent::train(
             .unsqueeze(-1);
 
     const auto advantages = (mask * deltas * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
-    const auto returns = advantages + curr_values;
+    const auto returns =
+        (mask * (deltas + curr_values) * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
 
     const auto norm_advantages = (advantages - torch::masked_select(advantages, mask).mean())
                                  / (torch::masked_select(advantages, mask).std() + 1e-8f);
     const auto norm_returns = (returns - torch::masked_select(returns, mask).mean())
                               / (torch::masked_select(returns, mask).std() + 1e-8f);
 
-    constexpr float min_prob = 1e-8;
-    constexpr float max_prob = 1e8;
-
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
-    const auto old_log_prob = torch::clamp(
-        truncated_normal_log_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f), std::log(min_prob),
-        std::log(max_prob));
+    const auto old_prob = truncated_normal_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f);
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
-        const auto log_prob = torch::clamp(
-            truncated_normal_log_pdf(batched_actions, mu, sigma, -1.f, 1.f), std::log(min_prob),
-            std::log(max_prob));
+        const auto prob = truncated_normal_pdf(batched_actions, mu, sigma, -1.f, 1.f);
         const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
 
         const auto [value] = critic->forward(batched_states);
 
-        const auto ratios = log_prob - old_log_prob.detach();
+        const auto ratios = (prob + 1e-8) / (old_prob.detach() + 1e-8);
 
         const auto surrogate_1 = ratios * norm_advantages.detach();
         const auto surrogate_2 =
-            torch::clamp(ratios, std::log(1.f - epsilon), std::log(1.f + epsilon))
-            * norm_advantages.detach();
+            torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * norm_advantages.detach();
 
         // actor
         const auto actor_loss = -torch::mean(torch::masked_select(
@@ -172,7 +165,7 @@ void ProximalPolicyOptimizationAgent::train(
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
-        torch::nn::utils::clip_grad_norm_(actor->parameters(), grad_norm_clip);
+        //torch::nn::utils::clip_grad_norm_(actor->parameters(), grad_norm_clip);
         actor_optimizer->step();
 
         // critic
@@ -183,7 +176,7 @@ void ProximalPolicyOptimizationAgent::train(
 
         critic_optimizer->zero_grad();
         critic_loss.backward();
-        torch::nn::utils::clip_grad_norm_(critic->parameters(), grad_norm_clip);
+        //torch::nn::utils::clip_grad_norm_(critic->parameters(), grad_norm_clip);
         critic_optimizer->step();
 
         actor_loss_meter.add(actor_loss.item().toFloat());
@@ -193,31 +186,31 @@ void ProximalPolicyOptimizationAgent::train(
     curr_train_step++;
 }
 
-void ProximalPolicyOptimizationAgent::save(const std::string &output_folder_path) {
+void PpoGaeAgent::save(const std::string &output_folder_path) {
     save_torch(output_folder_path, actor, "actor.th");
     save_torch(output_folder_path, actor_optimizer, "actor_optimizer.th");
     save_torch(output_folder_path, critic, "critic.th");
     save_torch(output_folder_path, critic_optimizer, "critic_optimizer");
 }
 
-void ProximalPolicyOptimizationAgent::load(const std::string &input_folder_path) {
+void PpoGaeAgent::load(const std::string &input_folder_path) {
     load_torch(input_folder_path, actor, "actor.th");
     load_torch(input_folder_path, actor_optimizer, "actor_optimizer.th");
     load_torch(input_folder_path, critic, "critic.th");
     load_torch(input_folder_path, critic_optimizer, "critic_optimizer");
 }
 
-std::vector<LossMeter> ProximalPolicyOptimizationAgent::get_metrics() {
+std::vector<LossMeter> PpoGaeAgent::get_metrics() {
     return {actor_loss_meter, critic_loss_meter, episode_steps_meter};
 }
 
-void ProximalPolicyOptimizationAgent::to(torch::DeviceType device) {
+void PpoGaeAgent::to(torch::DeviceType device) {
     curr_device = device;
     actor->to(device);
     critic->to(device);
 }
 
-void ProximalPolicyOptimizationAgent::set_eval(bool eval) {
+void PpoGaeAgent::set_eval(bool eval) {
     if (eval) {
         actor->eval();
         critic->eval();
@@ -227,7 +220,7 @@ void ProximalPolicyOptimizationAgent::set_eval(bool eval) {
     }
 }
 
-int ProximalPolicyOptimizationAgent::count_parameters() {
+int PpoGaeAgent::count_parameters() {
     int count = 0;
     for (const auto &p: actor->parameters()) {
         auto sizes = p.sizes();
