@@ -104,11 +104,14 @@ void PpoVanillaAgent::train(
         const auto clipped_ratio = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon);
 
         const auto surrogate_1 = ratios * advantages.detach();
-        const auto surrogate_2 = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach();
+        const auto surrogate_2 = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.
+                                 detach();
 
         // actor
         const auto actor_loss =
-            -torch::mean(torch::sum(torch::min(surrogate_1, surrogate_2), -1) / ratios.sum(-1).detach() + entropy_factor * entropy.sum(-1));
+            -torch::mean(
+                torch::sum(torch::min(surrogate_1, surrogate_2), -1) / ratios.sum(-1).detach() +
+                entropy_factor * entropy.sum(-1));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
