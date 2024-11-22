@@ -86,7 +86,7 @@ void PpoVanillaAgent::train(
 
     const auto norm_rewards =
         (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
-    auto advantages = (1.f - batched_done) * gamma * next_values - curr_values;
+    auto advantages = norm_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
     advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
     const auto target = advantages + curr_values;
 
