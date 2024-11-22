@@ -16,7 +16,8 @@ public:
     PpoGaeAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, float gamma, float lam, float epsilon, float entropy_factor,
-        float critic_loss_factor, int epoch, int batch_size, float learning_rate);
+        float critic_loss_factor, int epoch, int batch_size, float learning_rate,
+        float clip_grad_norm);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 
@@ -47,6 +48,7 @@ private:
 
     float entropy_factor;
     float critic_loss_factor;
+    float clip_grad_norm;
 
     long curr_train_step;
     long curr_episode_step;
