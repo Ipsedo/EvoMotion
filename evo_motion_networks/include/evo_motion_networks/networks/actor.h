@@ -49,13 +49,23 @@ class ExpModule final : public torch::nn::Module {
 public:
     explicit ExpModule(float epsilon = 0.f);
     torch::Tensor forward(const torch::Tensor &input);
+
+private:
+    float epsilon;
+};
+
+class SoftPlusEpsModule final : public torch::nn::Module {
+public:
+    explicit SoftPlusEpsModule(float epsilon = 0.f);
+    torch::Tensor forward(const torch::Tensor &input);
+
 private:
     float epsilon;
 };
 
 // liquid
 
-class ActorLiquidModule : public AbstractActor {
+class ActorLiquidModule final : public AbstractActor {
 public:
     ActorLiquidModule(
         const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,

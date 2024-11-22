@@ -34,7 +34,7 @@ ActorModule::ActorModule(
             torch::nn::LayerNorm(
                 torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
-            torch::nn::Linear(hidden_size, action_space[0]), ExpModule()));
+            torch::nn::Linear(hidden_size, action_space[0]), SoftPlusEpsModule(1e-8f)));
 
     head->apply(init_weights);
     mu->apply(init_weights);
@@ -63,8 +63,12 @@ actor_response ActorModule::forward(const torch::Tensor &state) {
 
 // Exp module
 
-ExpModule::ExpModule(float epsilon) : epsilon(epsilon) {}
+ExpModule::ExpModule(const float epsilon) : epsilon(epsilon) {}
 
-torch::Tensor ExpModule::forward(const torch::Tensor &input) {
-    return torch::exp(input + epsilon);
+torch::Tensor ExpModule::forward(const torch::Tensor &input) { return torch::exp(input) + epsilon; }
+
+SoftPlusEpsModule::SoftPlusEpsModule(const float epsilon) : epsilon(epsilon) {}
+
+torch::Tensor SoftPlusEpsModule::forward(const torch::Tensor &input) {
+    return torch::softplus(input) + epsilon;
 }
