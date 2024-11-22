@@ -91,27 +91,27 @@ void PpoVanillaAgent::train(
     const auto advantages = target - curr_values;
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
-    const auto old_prob = truncated_normal_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f);
+    const auto old_log_prob =
+        truncated_normal_log_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f);
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
-        const auto prob = truncated_normal_pdf(batched_actions, mu, sigma, -1.f, 1.f);
+        const auto log_prob = truncated_normal_log_pdf(batched_actions, mu, sigma, -1.f, 1.f);
         const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
 
         const auto [value] = critic->forward(batched_states);
 
-        const auto ratios = (prob + 1e-8) / (old_prob.detach() + 1e-8);
-        const auto clipped_ratio = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon);
-
-        const auto surrogate_1 = ratios * advantages.detach();
-        const auto surrogate_2 = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.
-                                 detach();
-
         // actor
-        const auto actor_loss =
-            -torch::mean(
-                torch::sum(torch::min(surrogate_1, surrogate_2), -1) / ratios.sum(-1).detach() +
-                entropy_factor * entropy.sum(-1));
+        const auto ratios = torch::exp(log_prob - old_log_prob.detach());
+        const auto surrogate_1 = ratios * advantages.detach();
+        const auto surrogate_2 =
+            torch::clamp(
+                torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon), 1.f - epsilon, 1.f + epsilon)
+            * advantages.detach();
+
+        const auto actor_loss = -torch::mean(
+            torch::sum(torch::min(surrogate_1, surrogate_2), -1) / ratios.sum(-1).detach()
+            + entropy_factor * entropy.sum(-1));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();

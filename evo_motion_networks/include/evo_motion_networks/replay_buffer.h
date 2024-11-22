@@ -40,14 +40,6 @@ struct liquid_episode_step {
 };
 
 // trajectory
-struct trajectory_step {
-    torch::Tensor state;
-    torch::Tensor action;
-    torch::Tensor value;
-    float reward;
-    bool done;
-    torch::Tensor next_value;
-};
 
 template<typename EpisodeStep>
 struct episode_trajectory {
@@ -132,15 +124,15 @@ protected:
 };
 
 class TrajectoryReplayBuffer
-    : public AbstractTrajectoryBuffer<trajectory_step, float, bool, torch::Tensor> {
+    : public AbstractTrajectoryBuffer<episode_step, float, bool, torch::Tensor> {
 public:
     TrajectoryReplayBuffer(int size, int seed);
 
 protected:
-    trajectory_step update_last_step(
-        trajectory_step last_step, float reward, bool done, torch::Tensor next_value) override;
+    episode_step update_last_step(
+        episode_step last_step, float reward, bool done, torch::Tensor next_state) override;
 
-    bool is_finish(trajectory_step step) override;
+    bool is_finish(episode_step step) override;
 };
 
 template class LiquidReplayBuffer<liquid_a2c_memory>;

@@ -16,8 +16,7 @@ public:
     PpoGaeAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
         int hidden_size, float gamma, float lam, float epsilon, float entropy_factor,
-        float critic_loss_factor, int epoch, int batch_size, float learning_rate,
-        int replay_buffer_size, int train_every, float grad_norm_clip);
+        float critic_loss_factor, int epoch, int batch_size, float learning_rate);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 
@@ -49,8 +48,6 @@ private:
     float entropy_factor;
     float critic_loss_factor;
 
-    float grad_norm_clip;
-
     long curr_train_step;
     long curr_episode_step;
     long global_curr_step;
@@ -68,8 +65,8 @@ private:
     void check_train();
     void train(
         const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
-        const torch::Tensor &batched_values, const torch::Tensor &batched_rewards,
-        const torch::Tensor &batched_done);
+        const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
+        const torch::Tensor &batched_next_state);
 };
 
 #endif//EVO_MOTION_PPO_GAE_H
