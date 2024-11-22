@@ -152,8 +152,7 @@ std::shared_ptr<Agent> PpoVanillaFactory::create_agent(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<float>("gamma"), get_value<float>("epsilon"), get_value<float>("entropy_factor"),
         get_value<float>("critic_loss_factor"), get_value<int>("epoch"),
-        get_value<int>("batch_size"), get_value<float>("learning_rate"),
-        get_value<int>("replay_buffer_size"), get_value<int>("train_every"));
+        get_value<int>("batch_size"), get_value<float>("learning_rate"));
 }
 
 // Build factory

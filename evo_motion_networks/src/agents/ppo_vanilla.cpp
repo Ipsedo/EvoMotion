@@ -11,16 +11,15 @@ PpoVanillaAgent::PpoVanillaAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const float gamma,
     const float epsilon, const float entropy_factor, const float critic_loss_factor,
-    const int epoch, const int batch_size, float learning_rate, const int replay_buffer_size,
-    const int train_every)
+    const int epoch, const int batch_size, float learning_rate)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
       gamma(gamma), epsilon(epsilon), epoch(epoch), entropy_factor(entropy_factor),
       critic_loss_factor(critic_loss_factor), curr_train_step(0L), curr_episode_step(0L),
-      global_curr_step(0L), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
-      train_every(train_every), actor_loss_meter("actor_loss", 64),
+      global_curr_step(0L), batch_size(batch_size), replay_buffer(batch_size, seed),
+      train_every(batch_size), actor_loss_meter("actor_loss", 64),
       critic_loss_meter("critic_loss", 64), episode_steps_meter("steps", 64),
       curr_device(torch::kCPU) {
 
@@ -85,33 +84,30 @@ void PpoVanillaAgent::train(
     const auto [curr_values] = critic->forward(batched_states);
     const auto [next_values] = critic->forward(batched_next_state);
 
-    const auto norm_rewards =
-        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
-    const auto target = norm_rewards + (1.f - batched_done) * gamma * next_values;
-    const auto advantages = target - curr_values;
+    const auto norm_rewards = (batched_rewards - batched_rewards.mean()) / (
+                                  batched_rewards.std() + 1e-8);
+    auto advantages = (1.f - batched_done) * gamma * next_values - curr_values;
+    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8);
+    const auto target = advantages + curr_values;
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
-    const auto old_prob = truncated_normal_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f);
+    const auto old_log_prob = truncated_normal_log_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f);
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
-        const auto prob = truncated_normal_pdf(batched_actions, mu, sigma, -1.f, 1.f);
+        const auto log_prob = truncated_normal_log_pdf(batched_actions, mu, sigma, -1.f, 1.f);
         const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
 
         const auto [value] = critic->forward(batched_states);
 
-        const auto ratios = (prob + 1e-8) / (old_prob.detach() + 1e-8);
-        const auto clipped_ratio = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon);
+        // actor
+        const auto ratios = torch::exp(log_prob - old_log_prob.detach());
 
         const auto surrogate_1 = ratios * advantages.detach();
-        const auto surrogate_2 = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.
-                                 detach();
+        const auto surrogate_2 = torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach();
 
-        // actor
         const auto actor_loss =
-            -torch::mean(
-                torch::sum(torch::min(surrogate_1, surrogate_2), -1) / ratios.sum(-1).detach() +
-                entropy_factor * entropy.sum(-1));
+            -torch::mean(torch::sum(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, -1));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
