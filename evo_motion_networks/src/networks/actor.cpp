@@ -70,5 +70,5 @@ torch::Tensor ExpModule::forward(const torch::Tensor &input) { return torch::exp
 SoftPlusEpsModule::SoftPlusEpsModule(const float epsilon) : epsilon(epsilon) {}
 
 torch::Tensor SoftPlusEpsModule::forward(const torch::Tensor &input) {
-    return torch::softplus(input) + epsilon;
+    return torch::clamp_min(torch::softplus(input), epsilon);
 }
