@@ -11,7 +11,7 @@
 
 // Agent
 
-class ActorCriticLiquidAgent : public Agent {
+class ActorCriticLiquidAgent final : public Agent {
 private:
     std::shared_ptr<ActorLiquidModule> actor;
     std::shared_ptr<torch::optim::Adam> actor_optimizer;

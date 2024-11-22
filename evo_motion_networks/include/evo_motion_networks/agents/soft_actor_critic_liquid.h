@@ -15,7 +15,7 @@
  * Agent
  */
 
-class SoftActorCriticLiquidAgent : public Agent {
+class SoftActorCriticLiquidAgent final : public Agent {
 private:
     std::shared_ptr<ActorLiquidModule> actor;
     std::shared_ptr<QNetworkLiquidModule> critic_1;

@@ -29,7 +29,7 @@ public:
 
 // Linear
 
-class CriticModule : public AbstractCritic {
+class CriticModule final : public AbstractCritic {
 public:
     CriticModule(std::vector<int64_t> state_space, int hidden_size);
 
@@ -41,7 +41,7 @@ private:
 
 // Liquid
 
-class CriticLiquidModule : public AbstractCritic {
+class CriticLiquidModule final : public AbstractCritic {
 public:
     CriticLiquidModule(
         const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);

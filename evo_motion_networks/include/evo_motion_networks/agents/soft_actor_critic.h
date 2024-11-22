@@ -15,7 +15,7 @@
 #include <evo_motion_networks/networks/q_net.h>
 #include <evo_motion_networks/replay_buffer.h>
 
-class SoftActorCriticAgent : public Agent {
+class SoftActorCriticAgent final : public Agent {
 private:
     std::shared_ptr<ActorModule> actor;
     std::shared_ptr<QNetworkModule> critic_1;

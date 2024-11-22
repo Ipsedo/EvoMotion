@@ -20,7 +20,7 @@
 
 // Agent
 
-class ActorCriticAgent : public Agent {
+class ActorCriticAgent final : public Agent {
 private:
     std::shared_ptr<ActorModule> actor;
     std::shared_ptr<torch::optim::Optimizer> actor_optimizer;

@@ -7,7 +7,7 @@
 
 #include <torch/torch.h>
 
-class EntropyParameter : public torch::nn::Module {
+class EntropyParameter final : public torch::nn::Module {
 public:
     EntropyParameter();
     torch::Tensor log_alpha();

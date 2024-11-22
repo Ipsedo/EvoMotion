@@ -18,7 +18,7 @@ public:
 
 // Linear
 
-class QNetworkModule : public AbstractQNetwork {
+class QNetworkModule final : public AbstractQNetwork {
 public:
     QNetworkModule(
         const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
@@ -32,7 +32,7 @@ private:
 
 // Liquid
 
-class QNetworkLiquidModule : public AbstractQNetwork {
+class QNetworkLiquidModule final : public AbstractQNetwork {
 public:
     QNetworkLiquidModule(
         const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,

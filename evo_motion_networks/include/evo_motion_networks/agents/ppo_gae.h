@@ -11,7 +11,7 @@
 #include <evo_motion_networks/networks/critic.h>
 #include <evo_motion_networks/replay_buffer.h>
 
-class PpoGaeAgent : public Agent {
+class PpoGaeAgent final : public Agent {
 public:
     PpoGaeAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
