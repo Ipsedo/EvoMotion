@@ -57,6 +57,7 @@ private:
 class SoftPlusEpsModule final : public torch::nn::Module {
 public:
     explicit SoftPlusEpsModule(float epsilon = 0.f);
+
     torch::Tensor forward(const torch::Tensor &input);
 
 private:
