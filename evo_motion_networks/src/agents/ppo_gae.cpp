@@ -122,7 +122,7 @@ void PpoGaeAgent::train(
             1),
         1.f);
 
-    const auto target = batched_rewards + (1.f - batched_done) * gamma * next_values;
+    /*const auto target = batched_rewards + (1.f - batched_done) * gamma * next_values;
 
     const auto gae_factor =
         torch::pow(
@@ -133,6 +133,19 @@ void PpoGaeAgent::train(
 
     auto advantages =
         (mask * (target - curr_values) * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
+    advantages = (advantages - torch::masked_select(advantages, mask).mean())
+                 / (torch::masked_select(advantages, mask).std() + 1e-8f);
+    const auto returns = advantages + curr_values;*/
+
+    std::vector<torch::Tensor> advantages_vec;
+    const auto deltas = batched_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
+    auto gae_step = torch::zeros({batched_states.size(0), 1}, at::TensorOptions().device(curr_device));
+    for (int t = static_cast<int>(batched_rewards.size(1)) - 1; t >= 0; t--) {
+        gae_step = torch::select(deltas, 1, t) + gamma * lambda * (1.f - torch::select(batched_done, 1, t)) * gae_step;
+        advantages_vec.push_back(gae_step);
+    }
+    auto advantages = torch::stack(advantages_vec, 1).flip({1});
+
     advantages = (advantages - torch::masked_select(advantages, mask).mean())
                  / (torch::masked_select(advantages, mask).std() + 1e-8f);
     const auto returns = advantages + curr_values;
