@@ -39,10 +39,10 @@ torch::Tensor ActorCriticAgent::act(const torch::Tensor state, const float rewar
     if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
     replay_buffer.add({state, action, 0.f, false, state});
 
+    check_train();
+
     curr_episode_step++;
     global_curr_step++;
-
-    check_train();
 
     return action;
 }

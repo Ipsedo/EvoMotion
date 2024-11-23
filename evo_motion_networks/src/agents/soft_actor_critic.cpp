@@ -45,10 +45,10 @@ torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float r
     if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
     replay_buffer.add({state, action, 0.f, false, state});
 
+    check_train();
+
     curr_episode_step++;
     global_curr_step++;
-
-    check_train();
 
     return action;
 }
@@ -87,21 +87,20 @@ void SoftActorCriticAgent::train(
     const auto [next_target_q_value_1] = target_critic_1->forward(batched_next_state, next_action);
     const auto [next_target_q_value_2] = target_critic_2->forward(batched_next_state, next_action);
 
-    /*const auto norm_rewards = (batched_rewards - batched_rewards.mean()) / (
-                                  batched_rewards.std() + 1e-8);*/
     auto target_q_values = (batched_rewards
                             + (1.f - batched_done) * gamma
-                                  * torch::mean(
+                                  * torch::sum(
                                       torch::min(next_target_q_value_1, next_target_q_value_2)
                                           - entropy_parameter->alpha() * next_log_prob,
                                       -1))
+                               .unsqueeze(-1)
                                .detach();
     target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
     // critic 1
     const auto [q_value_1] = critic_1->forward(batched_states, batched_actions.detach());
     const auto critic_1_loss =
-        torch::mse_loss(q_value_1.squeeze(1), target_q_values, at::Reduction::Mean);
+        torch::mse_loss(q_value_1, target_q_values, at::Reduction::Mean);
 
     critic_1_optimizer->zero_grad();
     critic_1_loss.backward();
@@ -110,7 +109,7 @@ void SoftActorCriticAgent::train(
     // critic 2
     const auto [q_value_2] = critic_2->forward(batched_states, batched_actions.detach());
     const auto critic_2_loss =
-        torch::mse_loss(q_value_2.squeeze(1), target_q_values, at::Reduction::Mean);
+        torch::mse_loss(q_value_2, target_q_values, at::Reduction::Mean);
 
     critic_2_optimizer->zero_grad();
     critic_2_loss.backward();
@@ -126,7 +125,7 @@ void SoftActorCriticAgent::train(
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
     const auto q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
-    const auto actor_loss = torch::mean(entropy_parameter->alpha() * curr_log_prob - q_value);
+    const auto actor_loss = torch::mean(torch::sum(entropy_parameter->alpha() * curr_log_prob - q_value, -1));
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
@@ -134,7 +133,7 @@ void SoftActorCriticAgent::train(
 
     // entropy
     const auto entropy_loss =
-        -torch::mean(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy));
+        -torch::mean(torch::sum(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy), -1));
 
     entropy_optimizer->zero_grad();
     entropy_loss.backward();
