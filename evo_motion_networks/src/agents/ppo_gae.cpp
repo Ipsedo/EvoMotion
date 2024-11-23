@@ -139,9 +139,11 @@ void PpoGaeAgent::train(
 
     std::vector<torch::Tensor> advantages_vec;
     const auto deltas = batched_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
-    auto gae_step = torch::zeros({batched_states.size(0), 1}, at::TensorOptions().device(curr_device));
+    auto gae_step =
+        torch::zeros({batched_states.size(0), 1}, at::TensorOptions().device(curr_device));
     for (int t = static_cast<int>(batched_rewards.size(1)) - 1; t >= 0; t--) {
-        gae_step = torch::select(deltas, 1, t) + gamma * lambda * (1.f - torch::select(batched_done, 1, t)) * gae_step;
+        gae_step = torch::select(deltas, 1, t)
+                   + gamma * lambda * (1.f - torch::select(batched_done, 1, t)) * gae_step;
         advantages_vec.push_back(gae_step);
     }
     auto advantages = torch::stack(advantages_vec, 1).flip({1});
