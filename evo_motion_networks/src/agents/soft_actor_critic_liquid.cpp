@@ -92,8 +92,8 @@ void SoftActorCriticLiquidAgent::check_train() {
             vec_actions.push_back(step.action);
             vec_rewards.push_back(
                 torch::tensor(step.reward, at::TensorOptions().device(curr_device)));
-            vec_done.push_back(torch::tensor(
-                step.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+            vec_done.push_back(
+                torch::tensor(step.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
             vec_next_state.push_back(step.next_state);
 
             actor_x_t.push_back(x_t.actor_x_t);
@@ -213,27 +213,20 @@ void SoftActorCriticLiquidAgent::save(const std::string &output_folder_path) {
 
     // actor
     save_torch(output_folder_path, actor, "actor.th");
-    save_torch(
-        output_folder_path, actor_optimizer, "actor.th");
+    save_torch(output_folder_path, actor_optimizer, "actor.th");
 
     // critic
     save_torch(output_folder_path, critic_1, "critic_1.th");
-    save_torch(
-        output_folder_path, target_critic_1, "target_critic_1.th");
-    save_torch(
-        output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
+    save_torch(output_folder_path, target_critic_1, "target_critic_1.th");
+    save_torch(output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
     save_torch(output_folder_path, critic_2, "critic_2.th");
-    save_torch(
-        output_folder_path, target_critic_2, "target_critic_2.th");
-    save_torch(
-        output_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
+    save_torch(output_folder_path, target_critic_2, "target_critic_2.th");
+    save_torch(output_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
     // Entropy
-    save_torch(
-        output_folder_path, entropy_parameter, "entropy.th");
-    save_torch(
-        output_folder_path, entropy_optimizer, "entropy_optimizer.th");
+    save_torch(output_folder_path, entropy_parameter, "entropy.th");
+    save_torch(output_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 void SoftActorCriticLiquidAgent::load(const std::string &input_folder_path) {
@@ -241,27 +234,20 @@ void SoftActorCriticLiquidAgent::load(const std::string &input_folder_path) {
 
     // actor
     load_torch(input_folder_path, actor, "actor.th");
-    load_torch(
-        input_folder_path, actor_optimizer, "actor.th");
+    load_torch(input_folder_path, actor_optimizer, "actor.th");
 
     // critic
     load_torch(input_folder_path, critic_1, "critic_1.th");
-    load_torch(
-        input_folder_path, target_critic_1, "target_critic_1.th");
-    load_torch(
-        input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
+    load_torch(input_folder_path, target_critic_1, "target_critic_1.th");
+    load_torch(input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
     load_torch(input_folder_path, critic_2, "critic_2.th");
-    load_torch(
-        input_folder_path, target_critic_2, "target_critic_2.th");
-    load_torch(
-        input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
+    load_torch(input_folder_path, target_critic_2, "target_critic_2.th");
+    load_torch(input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
     // Entropy
-    load_torch(
-        input_folder_path, entropy_parameter, "entropy.th");
-    load_torch(
-        input_folder_path, entropy_optimizer, "entropy_optimizer.th");
+    load_torch(input_folder_path, entropy_parameter, "entropy.th");
+    load_torch(input_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 std::vector<LossMeter> SoftActorCriticLiquidAgent::get_metrics() {

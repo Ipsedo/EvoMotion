@@ -6,10 +6,10 @@
 
 #include <evo_motion_networks/agents/actor_critic.h>
 #include <evo_motion_networks/agents/actor_critic_liquid.h>
+#include <evo_motion_networks/agents/ppo_gae.h>
+#include <evo_motion_networks/agents/ppo_vanilla.h>
 #include <evo_motion_networks/agents/soft_actor_critic.h>
 #include <evo_motion_networks/agents/soft_actor_critic_liquid.h>
-#include <evo_motion_networks/agents/ppo_vanilla.h>
-#include <evo_motion_networks/agents/ppo_gae.h>
 #include <evo_motion_networks_tests/test_agents.h>
 
 // Actor Critic
@@ -18,8 +18,8 @@ TEST_P(ParamActorCriticAgent, TestActorCritic) {
     const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = ActorCriticAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.99f, 0.01f, 0.001f, 128, 1024, train_every);
-
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.99f, 0.01f, 0.001f,
+        128, 1024, train_every);
 
     for (int j = 0; j < 5; j++) {
         for (int i = 0; i < batch_size * 2; i++) {
@@ -74,7 +74,7 @@ TEST_P(ParamActorCriticAgent, TestActorCriticLiquid) {
         1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 1.f, 0.1f, 16, 6,
         32, train_every);
 
-     for (int j = 0; j < 5; j++) {
+    for (int j = 0; j < 5; j++) {
         for (int i = 0; i < batch_size * 2; i++) {
             const auto state = torch::randn({state_space});
             const auto action = agent.act(state, torch::randn({1}).item().toFloat());
@@ -101,8 +101,8 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCriticLiquid) {
         1234, {state_space}, {action_space}, hidden_size, batch_size, 1e-3f, 0.9f, 0.005f, 6, 128,
         train_every);
 
-     for (int j = 0; j < 5; j++) {
-         for (int i = 0; i < batch_size * 2; i++){
+    for (int j = 0; j < 5; j++) {
+        for (int i = 0; i < batch_size * 2; i++) {
             const auto state = torch::randn({state_space});
             const auto action = agent.act(state, 1.f);
 
@@ -125,10 +125,11 @@ TEST_P(ParamActorCriticAgent, TestPpoVanilla) {
     const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = PpoVanillaAgent(
-        1234, {state_space}, {action_space}, hidden_size, 0.99f, 0.2f, 0.01f, 0.5f, 4, batch_size, 1e-3f);
+        1234, {state_space}, {action_space}, hidden_size, 0.99f, 0.2f, 0.01f, 0.5f, 4, batch_size,
+        1e-3f);
 
     for (int j = 0; j < 5; j++) {
-       for (int i = 0; i < batch_size * 2; i++)  {
+        for (int i = 0; i < batch_size * 2; i++) {
             const auto state = torch::randn({state_space});
             const auto action = agent.act(state, 1.f);
 
@@ -151,7 +152,8 @@ TEST_P(ParamActorCriticAgent, TestPpoGae) {
     const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = PpoGaeAgent(
-        1234, {state_space}, {action_space}, hidden_size, 0.99f, 0.95f, 0.2f, 0.01f, 0.5f, 1, batch_size, 1e-3f, 0.5f);
+        1234, {state_space}, {action_space}, hidden_size, 0.99f, 0.95f, 0.2f, 0.01f, 0.5f, 1,
+        batch_size, 1e-3f, 0.5f);
 
     for (int i = 0; i < batch_size; i++) {
         for (int j = 0; j < 2; j++) {
@@ -176,5 +178,5 @@ TEST_P(ParamActorCriticAgent, TestPpoGae) {
 INSTANTIATE_TEST_SUITE_P(
     TestAgent, ParamActorCriticAgent,
     testing::Combine(
-        testing::Values(2, 3), testing::Values(2, 3), testing::Values(2, 3),
-        testing::Values(2, 3), testing::Values(2, 3)));
+        testing::Values(2, 3), testing::Values(2, 3), testing::Values(2, 3), testing::Values(2, 3),
+        testing::Values(2, 3)));
