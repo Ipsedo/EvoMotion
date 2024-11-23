@@ -95,6 +95,10 @@ torch::Tensor truncated_normal_entropy(
            + 0.5 * (alpha * phi(alpha) - beta * phi(beta)) / z;
 }
 
+/*
+ * Entropy factor
+ */
+
 float exponential_decrease(const long t, const long max_t, const float start, const float end) {
     const auto k = -std::log(end / start) / static_cast<float>(max_t);
     return std::max(start * std::exp(-k * static_cast<float>(t)), end);

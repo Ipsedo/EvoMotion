@@ -88,15 +88,14 @@ void ActorCriticAgent::train(
     critic_optimizer->step();
 
     const auto [mu, sigma] = actor->forward(batched_states);
-    const auto log_prob =
-        torch::log(truncated_normal_pdf(batched_actions.detach(), mu, sigma, -1.f, 1.f));
+    const auto log_prob = truncated_normal_log_pdf(batched_actions.detach(), mu, sigma, -1.f, 1.f);
     const auto policy_entropy =
         truncated_normal_entropy(mu, sigma, -1.f, 1.f)
         * exponential_decrease(
             curr_train_step, entropy_steps, entropy_start_factor, entropy_end_factor);
     const auto policy_loss = log_prob * (target - value).detach().unsqueeze(-1);
 
-    const auto actor_loss = -torch::mean(policy_loss + policy_entropy);
+    const auto actor_loss = -torch::mean(torch::sum(policy_loss + policy_entropy, -1));
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
