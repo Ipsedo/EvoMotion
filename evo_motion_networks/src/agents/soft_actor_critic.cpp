@@ -81,7 +81,8 @@ void SoftActorCriticAgent::train(
 
     const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
     const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
-    const auto next_log_prob = truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f);
+    const auto next_log_prob =
+        truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f);
 
     const auto [next_target_q_value_1] = target_critic_1->forward(batched_next_state, next_action);
     const auto [next_target_q_value_2] = target_critic_2->forward(batched_next_state, next_action);
@@ -118,21 +119,23 @@ void SoftActorCriticAgent::train(
     // policy
     const auto [curr_mu, curr_sigma] = actor->forward(batched_states);
     const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
-    const auto curr_log_prob = truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f);
+    const auto curr_log_prob =
+        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f);
 
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
     const auto q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
-    const auto actor_loss = torch::mean(entropy_parameter->alpha() * curr_log_prob - q_value);
+    const auto actor_loss =
+        torch::mean(torch::sum(entropy_parameter->alpha() * curr_log_prob - q_value, -1));
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
     actor_optimizer->step();
 
     // entropy
-    const auto entropy_loss =
-        -torch::mean(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy));
+    const auto entropy_loss = -torch::mean(
+        torch::sum(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy), -1));
 
     entropy_optimizer->zero_grad();
     entropy_loss.backward();
