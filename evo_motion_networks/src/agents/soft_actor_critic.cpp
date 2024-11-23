@@ -126,16 +126,15 @@ void SoftActorCriticAgent::train(
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
     const auto q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
-    const auto actor_loss =
-        torch::mean(torch::sum(entropy_parameter->alpha() * curr_log_prob - q_value, -1));
+    const auto actor_loss = torch::mean(entropy_parameter->alpha() * curr_log_prob - q_value);
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
     actor_optimizer->step();
 
     // entropy
-    const auto entropy_loss = -torch::mean(
-        torch::sum(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy), -1));
+    const auto entropy_loss =
+        -torch::mean(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy));
 
     entropy_optimizer->zero_grad();
     entropy_loss.backward();
