@@ -34,7 +34,7 @@ ActorModule::ActorModule(
             torch::nn::LayerNorm(
                 torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
-            torch::nn::Linear(hidden_size, action_space[0]), SoftPlusEpsModule(1e-8f)));
+            torch::nn::Linear(hidden_size, action_space[0]), SoftPlusEpsModule()));
 
     head->apply(init_weights);
     mu->apply(init_weights);

@@ -23,17 +23,22 @@ PpoGaeAgent::PpoGaeAgent(
       curr_device(torch::kCPU) {
 
     at::manual_seed(seed);
+
+    actor->to(torch::kFloat64);
+    critic->to(torch::kFloat64);
 }
 
 torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
     set_eval(true);
 
-    const auto [mu, sigma] = actor->forward(state);
+    const auto state_double = state.to(torch::kFloat64);
+
+    const auto [mu, sigma] = actor->forward(state_double);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
     if (replay_buffer.empty()) replay_buffer.new_trajectory();
-    if (!replay_buffer.trajectory_empty()) replay_buffer.update_last(reward, false, state);
-    replay_buffer.add({state, action.detach(), 0.f, false, state});
+    if (!replay_buffer.trajectory_empty()) replay_buffer.update_last(reward, false, state_double);
+    replay_buffer.add({state_double, action.detach(), 0.f, false, state_double});
 
     curr_episode_step++;
 
@@ -41,7 +46,8 @@ torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
 }
 
 void PpoGaeAgent::done(const torch::Tensor state, const float reward) {
-    replay_buffer.update_last(reward, true, state);
+    const auto state_double = state.to(torch::kFloat64);
+    replay_buffer.update_last(reward, true, state_double);
 
     check_train();
 
@@ -62,8 +68,8 @@ void PpoGaeAgent::check_train() {
             batch_vec_done, batch_vec_next_states;
 
         int max_steps = 0;
-        for (const auto &e: episodes)
-            max_steps = std::max(max_steps, static_cast<int>(e.trajectory.size()));
+        for (const auto &[trajectory]: episodes)
+            max_steps = std::max(max_steps, static_cast<int>(trajectory.size()));
 
         for (const auto &[trajectory]: episodes) {
             std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done,
@@ -102,7 +108,7 @@ void PpoGaeAgent::train(
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_next_state) {
 
-    //torch::autograd::DetectAnomalyGuard guard;
+    torch::autograd::DetectAnomalyGuard guard;
 
     set_eval(false);
 
