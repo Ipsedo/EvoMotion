@@ -91,9 +91,9 @@ void SoftActorCriticLiquidAgent::check_train() {
             vec_states.push_back(step.state);
             vec_actions.push_back(step.action);
             vec_rewards.push_back(
-                torch::tensor(step.reward, at::TensorOptions().device(curr_device)));
+                torch::tensor({step.reward}, at::TensorOptions().device(curr_device)));
             vec_done.push_back(
-                torch::tensor(step.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+                torch::tensor({step.done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
             vec_next_state.push_back(step.next_state);
 
             actor_x_t.push_back(x_t.actor_x_t);
@@ -137,17 +137,15 @@ void SoftActorCriticLiquidAgent::train(
     const auto [next_target_q_value_2, target_2_next_x_t] =
         target_critic_2->forward(next_x_t.target_critic_2_x_t, batched_next_state, next_action);
 
-    /*const auto norm_rewards = (batched_rewards - batched_rewards.mean()) / (
-                                  batched_rewards.std() + 1e-8);*/
-    auto target_q_values = (batched_rewards
-                            + (1.f - batched_done) * gamma
-                                  * torch::mean(
-                                      torch::min(next_target_q_value_1, next_target_q_value_2)
-                                          - entropy_parameter->alpha() * next_log_prob,
-                                      -1))
-                               .detach()
-                               .unsqueeze(1);
-    target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
+    const auto norm_rewards =
+        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
+
+    const auto target_v_value = torch::mean(
+        torch::min(next_target_q_value_1, next_target_q_value_2)
+            - entropy_parameter->alpha() * next_log_prob,
+        -1, true);
+    const auto target_q_values =
+        (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
 
     // critic 1
     const auto [q_value_1, critic_1_next_x_t] =
