@@ -137,15 +137,13 @@ void SoftActorCriticLiquidAgent::train(
     const auto [next_target_q_value_2, target_2_next_x_t] =
         target_critic_2->forward(next_x_t.target_critic_2_x_t, batched_next_state, next_action);
 
-    const auto norm_rewards =
-        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
-
     const auto target_v_value = torch::mean(
         torch::min(next_target_q_value_1, next_target_q_value_2)
             - entropy_parameter->alpha() * next_log_prob,
         -1, true);
-    const auto target_q_values =
-        (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
+    auto target_q_values =
+        (batched_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
+    target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
 
     // critic 1
     const auto [q_value_1, critic_1_next_x_t] =
