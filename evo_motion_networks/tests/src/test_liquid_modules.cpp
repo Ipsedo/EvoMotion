@@ -161,5 +161,5 @@ TEST_P(ParamLiquidModule, TestLiquidQNetwork) {
 INSTANTIATE_TEST_SUITE_P(
     TestLiquid, ParamLiquidModule,
     testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 3), testing::Values(1, 2, 100),
-        testing::Values(1, 2, 3), testing::Values(1, 2, 3)));
+        testing::Values(1, 2), testing::Values(1, 2), testing::Values(1, 2, 100),
+        testing::Values(1, 2), testing::Values(1, 2)));

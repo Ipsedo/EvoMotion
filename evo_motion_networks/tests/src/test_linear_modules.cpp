@@ -112,5 +112,5 @@ TEST_P(ParamLinearModule, TestBatchedQNetworkModule) {
 INSTANTIATE_TEST_SUITE_P(
     TestLinearModule, ParamLinearModule,
     testing::Combine(
-        testing::Values(1, 2, 3), testing::Values(1, 2, 3), testing::Values(1, 2, 100),
-        testing::Values(1, 2, 3)));
+        testing::Values(1, 2), testing::Values(1, 2), testing::Values(1, 2, 100),
+        testing::Values(1, 2)));

@@ -45,10 +45,10 @@ torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float r
     if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
     replay_buffer.add({state, action, 0.f, false, state});
 
+    check_train();
+
     curr_episode_step++;
     global_curr_step++;
-
-    check_train();
 
     return action;
 }
@@ -62,9 +62,9 @@ void SoftActorCriticAgent::check_train() {
         for (const auto &[state, action, reward, done, next_state]: tmp_replay_buffer) {
             vec_states.push_back(state);
             vec_actions.push_back(action);
-            vec_rewards.push_back(torch::tensor(reward, at::TensorOptions().device(curr_device)));
+            vec_rewards.push_back(torch::tensor({reward}, at::TensorOptions().device(curr_device)));
             vec_done.push_back(
-                torch::tensor(done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+                torch::tensor({done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
             vec_next_state.push_back(next_state);
         }
 
@@ -81,26 +81,25 @@ void SoftActorCriticAgent::train(
 
     const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
     const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
-    const auto next_log_prob = truncated_normal_pdf(next_action, next_mu, next_sigma, -1.f, 1.f);
+    const auto next_log_prob =
+        truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f);
 
     const auto [next_target_q_value_1] = target_critic_1->forward(batched_next_state, next_action);
     const auto [next_target_q_value_2] = target_critic_2->forward(batched_next_state, next_action);
 
-    /*const auto norm_rewards = (batched_rewards - batched_rewards.mean()) / (
-                                  batched_rewards.std() + 1e-8);*/
-    auto target_q_values = (batched_rewards
-                            + (1.f - batched_done) * gamma
-                                  * torch::mean(
-                                      torch::min(next_target_q_value_1, next_target_q_value_2)
-                                          - entropy_parameter->alpha() * next_log_prob,
-                                      -1))
-                               .detach();
-    target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
+    const auto norm_rewards =
+        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
+
+    const auto target_v_value = torch::mean(
+        torch::min(next_target_q_value_1, next_target_q_value_2)
+            - entropy_parameter->alpha() * next_log_prob,
+        -1, true);
+    const auto target_q_values =
+        (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
 
     // critic 1
     const auto [q_value_1] = critic_1->forward(batched_states, batched_actions.detach());
-    const auto critic_1_loss =
-        torch::mse_loss(q_value_1.squeeze(1), target_q_values, at::Reduction::Mean);
+    const auto critic_1_loss = torch::mse_loss(q_value_1, target_q_values, at::Reduction::Mean);
 
     critic_1_optimizer->zero_grad();
     critic_1_loss.backward();
@@ -108,8 +107,7 @@ void SoftActorCriticAgent::train(
 
     // critic 2
     const auto [q_value_2] = critic_2->forward(batched_states, batched_actions.detach());
-    const auto critic_2_loss =
-        torch::mse_loss(q_value_2.squeeze(1), target_q_values, at::Reduction::Mean);
+    const auto critic_2_loss = torch::mse_loss(q_value_2, target_q_values, at::Reduction::Mean);
 
     critic_2_optimizer->zero_grad();
     critic_2_loss.backward();
@@ -118,7 +116,8 @@ void SoftActorCriticAgent::train(
     // policy
     const auto [curr_mu, curr_sigma] = actor->forward(batched_states);
     const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
-    const auto curr_log_prob = truncated_normal_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f);
+    const auto curr_log_prob =
+        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f);
 
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);

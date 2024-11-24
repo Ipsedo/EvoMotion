@@ -56,10 +56,10 @@ torch::Tensor SoftActorCriticLiquidAgent::act(const torch::Tensor state, const f
     if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
     replay_buffer.add({{state, action.detach(), 0.f, false, state}, x_t, next_x_t});
 
+    check_train();
+
     curr_episode_step++;
     global_curr_step++;
-
-    check_train();
 
     return action;
 }
@@ -87,14 +87,14 @@ void SoftActorCriticLiquidAgent::check_train() {
             actor_next_x_t, critic_1_next_x_t, critic_2_next_x_t, target_critic_1_next_x_t,
             target_critic_2_next_x_t;
 
-        for (const auto &[replay_buffer, x_t, next_x_t]: tmp_replay_buffer) {
-            vec_states.push_back(replay_buffer.state);
-            vec_actions.push_back(replay_buffer.action);
+        for (const auto &[step, x_t, next_x_t]: tmp_replay_buffer) {
+            vec_states.push_back(step.state);
+            vec_actions.push_back(step.action);
             vec_rewards.push_back(
-                torch::tensor(replay_buffer.reward, at::TensorOptions().device(curr_device)));
-            vec_done.push_back(torch::tensor(
-                replay_buffer.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
-            vec_next_state.push_back(replay_buffer.next_state);
+                torch::tensor({step.reward}, at::TensorOptions().device(curr_device)));
+            vec_done.push_back(
+                torch::tensor({step.done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
+            vec_next_state.push_back(step.next_state);
 
             actor_x_t.push_back(x_t.actor_x_t);
             critic_1_x_t.push_back(x_t.critic_1_x_t);
@@ -129,24 +129,23 @@ void SoftActorCriticLiquidAgent::train(
     const auto [next_mu, next_sigma, actor_next_next_x_t] =
         actor->forward(next_x_t.actor_x_t, batched_next_state);
     const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
-    const auto next_log_prob = truncated_normal_pdf(next_action, next_mu, next_sigma, -1.f, 1.f);
+    const auto next_log_prob =
+        truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f);
 
     const auto [next_target_q_value_1, target_1_next_x_t] =
         target_critic_1->forward(next_x_t.target_critic_1_x_t, batched_next_state, next_action);
     const auto [next_target_q_value_2, target_2_next_x_t] =
         target_critic_2->forward(next_x_t.target_critic_2_x_t, batched_next_state, next_action);
 
-    /*const auto norm_rewards = (batched_rewards - batched_rewards.mean()) / (
-                                  batched_rewards.std() + 1e-8);*/
-    auto target_q_values = (batched_rewards
-                            + (1.f - batched_done) * gamma
-                                  * torch::mean(
-                                      torch::min(next_target_q_value_1, next_target_q_value_2)
-                                          - entropy_parameter->alpha() * next_log_prob,
-                                      -1))
-                               .detach()
-                               .unsqueeze(1);
-    target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
+    const auto norm_rewards =
+        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
+
+    const auto target_v_value = torch::mean(
+        torch::min(next_target_q_value_1, next_target_q_value_2)
+            - entropy_parameter->alpha() * next_log_prob,
+        -1, true);
+    const auto target_q_values =
+        (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
 
     // critic 1
     const auto [q_value_1, critic_1_next_x_t] =
@@ -171,7 +170,8 @@ void SoftActorCriticLiquidAgent::train(
     const auto [curr_mu, curr_sigma, actor_next_x_t] =
         actor->forward(x_t.actor_x_t, batched_states);
     const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
-    const auto curr_log_prob = truncated_normal_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f);
+    const auto curr_log_prob =
+        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f);
 
     const auto [curr_q_value_1, _1] =
         critic_1->forward(x_t.critic_1_x_t, batched_states, curr_action);
@@ -210,56 +210,42 @@ void SoftActorCriticLiquidAgent::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
     // actor
-    save_torch<std::shared_ptr<ActorLiquidModule>>(output_folder_path, actor, "actor.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        output_folder_path, actor_optimizer, "actor.th");
+    save_torch(output_folder_path, actor, "actor.th");
+    save_torch(output_folder_path, actor_optimizer, "actor.th");
 
     // critic
-    save_torch<std::shared_ptr<QNetworkLiquidModule>>(output_folder_path, critic_1, "critic_1.th");
-    save_torch<std::shared_ptr<QNetworkLiquidModule>>(
-        output_folder_path, target_critic_1, "target_critic_1.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
+    save_torch(output_folder_path, critic_1, "critic_1.th");
+    save_torch(output_folder_path, target_critic_1, "target_critic_1.th");
+    save_torch(output_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
-    save_torch<std::shared_ptr<QNetworkLiquidModule>>(output_folder_path, critic_2, "critic_2.th");
-    save_torch<std::shared_ptr<QNetworkLiquidModule>>(
-        output_folder_path, target_critic_2, "target_critic_2.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        output_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
+    save_torch(output_folder_path, critic_2, "critic_2.th");
+    save_torch(output_folder_path, target_critic_2, "target_critic_2.th");
+    save_torch(output_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
     // Entropy
-    save_torch<std::shared_ptr<EntropyParameter>>(
-        output_folder_path, entropy_parameter, "entropy.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        output_folder_path, entropy_optimizer, "entropy_optimizer.th");
+    save_torch(output_folder_path, entropy_parameter, "entropy.th");
+    save_torch(output_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 void SoftActorCriticLiquidAgent::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
     // actor
-    load_torch<std::shared_ptr<ActorLiquidModule>>(input_folder_path, actor, "actor.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        input_folder_path, actor_optimizer, "actor.th");
+    load_torch(input_folder_path, actor, "actor.th");
+    load_torch(input_folder_path, actor_optimizer, "actor.th");
 
     // critic
-    load_torch<std::shared_ptr<QNetworkLiquidModule>>(input_folder_path, critic_1, "critic_1.th");
-    load_torch<std::shared_ptr<QNetworkLiquidModule>>(
-        input_folder_path, target_critic_1, "target_critic_1.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
+    load_torch(input_folder_path, critic_1, "critic_1.th");
+    load_torch(input_folder_path, target_critic_1, "target_critic_1.th");
+    load_torch(input_folder_path, critic_1_optimizer, "critic_1_optimizer.th");
 
-    load_torch<std::shared_ptr<QNetworkLiquidModule>>(input_folder_path, critic_2, "critic_2.th");
-    load_torch<std::shared_ptr<QNetworkLiquidModule>>(
-        input_folder_path, target_critic_2, "target_critic_2.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
+    load_torch(input_folder_path, critic_2, "critic_2.th");
+    load_torch(input_folder_path, target_critic_2, "target_critic_2.th");
+    load_torch(input_folder_path, critic_2_optimizer, "critic_2_optimizer.th");
 
     // Entropy
-    load_torch<std::shared_ptr<EntropyParameter>>(
-        input_folder_path, entropy_parameter, "entropy.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        input_folder_path, entropy_optimizer, "entropy_optimizer.th");
+    load_torch(input_folder_path, entropy_parameter, "entropy.th");
+    load_torch(input_folder_path, entropy_optimizer, "entropy_optimizer.th");
 }
 
 std::vector<LossMeter> SoftActorCriticLiquidAgent::get_metrics() {
