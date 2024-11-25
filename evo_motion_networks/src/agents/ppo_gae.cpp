@@ -143,7 +143,7 @@ void PpoGaeAgent::train(
         torch::zeros({batched_states.size(0), 1}, at::TensorOptions().device(curr_device));
     std::vector<torch::Tensor> advantages_vec;
 
-    for (int t = static_cast<int>(batched_rewards.size(1)) - 1; t >= 0; t--) {
+    for (auto t = batched_rewards.size(1) - 1; t >= 0; t--) {
         gae_step = torch::select(deltas, 1, t) * torch::select(mask, 1, t)
                    + gamma * lambda * (1.f - torch::select(batched_done, 1, t)) * gae_step;
         advantages_vec.push_back(gae_step);
@@ -173,8 +173,7 @@ void PpoGaeAgent::train(
             torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach();
 
         const auto actor_loss = -torch::mean(torch::masked_select(
-            torch::sum(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, -1, true),
-            mask));
+            torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, mask));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();

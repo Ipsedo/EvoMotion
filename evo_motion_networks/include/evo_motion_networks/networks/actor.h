@@ -56,12 +56,12 @@ private:
 
 class SoftPlusEpsModule final : public torch::nn::Module {
 public:
-    explicit SoftPlusEpsModule(float epsilon = 0.f);
+    explicit SoftPlusEpsModule(float threshold = 20.f);
 
     torch::Tensor forward(const torch::Tensor &input);
 
 private:
-    float epsilon;
+    float threshold;
 };
 
 // liquid
