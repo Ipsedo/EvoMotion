@@ -10,6 +10,7 @@
 class ExpModule final : public torch::nn::Module {
 public:
     explicit ExpModule(float epsilon = 0.f);
+
     torch::Tensor forward(const torch::Tensor &input);
 
 private:
@@ -19,7 +20,9 @@ private:
 class ClampModule final : public torch::nn::Module {
 public:
     ClampModule(float min_value, float max_value);
+
     torch::Tensor forward(const torch::Tensor &input);
+
 private:
     float min_value;
     float max_value;
