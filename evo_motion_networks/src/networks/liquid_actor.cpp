@@ -4,6 +4,7 @@
 
 #include <evo_motion_networks/init.h>
 #include <evo_motion_networks/networks/actor.h>
+#include <evo_motion_networks/networks/misc.h>
 
 ActorLiquidModule::ActorLiquidModule(
     const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
@@ -21,7 +22,9 @@ ActorLiquidModule::ActorLiquidModule(
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-                     torch::nn::Linear(hidden_size, action_space[0]), SoftPlusEpsModule()));
+                     torch::nn::Linear(hidden_size, action_space[0]),
+                     torch::nn::Softplus(torch::nn::SoftplusOptions().beta(1.f).threshold(20.f)),
+                     ClampModule(1e-8, 1e2)));
 
     mu->apply(init_weights);
     sigma->apply(init_weights);

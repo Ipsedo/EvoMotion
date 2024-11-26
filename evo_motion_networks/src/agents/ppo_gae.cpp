@@ -79,9 +79,9 @@ void PpoGaeAgent::check_train() {
                 vec_states.push_back(state);
                 vec_actions.push_back(action);
                 vec_rewards.push_back(
-                    torch::tensor({reward}, torch::TensorOptions().device(curr_device)));
+                    torch::tensor({reward}, torch::TensorOptions().device(curr_device).dtype(torch::kFloat64)));
                 vec_done.push_back(
-                    torch::tensor({done ? 1.f : 0.f}, torch::TensorOptions().device(curr_device)));
+                    torch::tensor({done ? 1.f : 0.f}, torch::TensorOptions().device(curr_device).dtype(torch::kFloat64)));
                 vec_next_states.push_back(next_state);
             }
 
@@ -121,21 +121,6 @@ void PpoGaeAgent::train(
              torch::slice(1.f - batched_done, 1, 0, batched_done.size(1) - 1)},
             1),
         1.f);
-
-    /*const auto target = batched_rewards + (1.f - batched_done) * gamma * next_values;
-
-    const auto gae_factor =
-        torch::pow(
-            gamma * lambda,
-            torch::arange(batched_rewards.size(1), torch::TensorOptions().device(curr_device)))
-            .unsqueeze(0)
-            .unsqueeze(-1);
-
-    auto advantages =
-        (mask * (target - curr_values) * gae_factor).flip({1}).cumsum(1).flip({1}) / gae_factor;
-    advantages = (advantages - torch::masked_select(advantages, mask).mean())
-                 / (torch::masked_select(advantages, mask).std() + 1e-8f);
-    const auto returns = advantages + curr_values;*/
 
     const auto deltas = batched_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
 
@@ -216,13 +201,13 @@ std::vector<LossMeter> PpoGaeAgent::get_metrics() {
     return {actor_loss_meter, critic_loss_meter, episode_steps_meter};
 }
 
-void PpoGaeAgent::to(torch::DeviceType device) {
+void PpoGaeAgent::to(const torch::DeviceType device) {
     curr_device = device;
     actor->to(device);
     critic->to(device);
 }
 
-void PpoGaeAgent::set_eval(bool eval) {
+void PpoGaeAgent::set_eval(const bool eval) {
     if (eval) {
         actor->eval();
         critic->eval();

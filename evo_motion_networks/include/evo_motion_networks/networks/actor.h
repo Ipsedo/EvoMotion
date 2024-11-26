@@ -45,25 +45,6 @@ private:
     torch::nn::Sequential sigma{nullptr};
 };
 
-class ExpModule final : public torch::nn::Module {
-public:
-    explicit ExpModule(float epsilon = 0.f);
-    torch::Tensor forward(const torch::Tensor &input);
-
-private:
-    float epsilon;
-};
-
-class SoftPlusEpsModule final : public torch::nn::Module {
-public:
-    explicit SoftPlusEpsModule(float threshold = 20.f);
-
-    torch::Tensor forward(const torch::Tensor &input);
-
-private:
-    float threshold;
-};
-
 // liquid
 
 class ActorLiquidModule final : public AbstractActor {
