@@ -137,10 +137,12 @@ void SoftActorCriticLiquidAgent::train(
     const auto [next_target_q_value_2, target_2_next_x_t] =
         target_critic_2->forward(next_x_t.target_critic_2_x_t, batched_next_state, next_action);
 
-    const auto target_v_value =
-        torch::min(next_target_q_value_1, next_target_q_value_2) - entropy_parameter->alpha() * next_log_prob;
-    const auto norm_rewards = (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
-    const auto target_q_values = (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
+    const auto target_v_value = torch::min(next_target_q_value_1, next_target_q_value_2)
+                                - entropy_parameter->alpha() * next_log_prob;
+    const auto norm_rewards =
+        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
+    const auto target_q_values =
+        (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
 
     // critic 1
     const auto [q_value_1, critic_1_next_x_t] =
@@ -174,7 +176,8 @@ void SoftActorCriticLiquidAgent::train(
         critic_2->forward(x_t.critic_2_x_t, batched_states, curr_action);
     const auto q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
-    const auto actor_loss = torch::mean(entropy_parameter->alpha().detach() * curr_log_prob - q_value);
+    const auto actor_loss =
+        torch::mean(entropy_parameter->alpha().detach() * curr_log_prob - q_value);
 
     actor_optimizer->zero_grad();
     actor_loss.backward();

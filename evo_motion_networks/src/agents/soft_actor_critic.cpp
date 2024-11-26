@@ -87,10 +87,12 @@ void SoftActorCriticAgent::train(
     const auto [next_target_q_value_1] = target_critic_1->forward(batched_next_state, next_action);
     const auto [next_target_q_value_2] = target_critic_2->forward(batched_next_state, next_action);
 
-    const auto target_v_value =
-        torch::min(next_target_q_value_1, next_target_q_value_2) - entropy_parameter->alpha() * next_log_prob;
-    const auto norm_rewards = (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
-    const auto target_q_values = (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
+    const auto target_v_value = torch::min(next_target_q_value_1, next_target_q_value_2)
+                                - entropy_parameter->alpha() * next_log_prob;
+    const auto norm_rewards =
+        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
+    const auto target_q_values =
+        (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
 
     // critic 1
     const auto [q_value_1] = critic_1->forward(batched_states, batched_actions);
@@ -112,13 +114,15 @@ void SoftActorCriticAgent::train(
     const auto [curr_mu, curr_sigma] = actor->forward(batched_states);
     const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
     const auto curr_log_prob =
-        truncated_normal_log_pdf(curr_action.detach(), curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
+        truncated_normal_log_pdf(curr_action.detach(), curr_mu, curr_sigma, -1.f, 1.f)
+            .sum(-1, true);
 
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
     const auto q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
-    const auto actor_loss = torch::mean(entropy_parameter->alpha().detach() * curr_log_prob - q_value);
+    const auto actor_loss =
+        torch::mean(entropy_parameter->alpha().detach() * curr_log_prob - q_value);
 
     actor_optimizer->zero_grad();
     actor_loss.backward();

@@ -63,4 +63,3 @@ actor_response ActorModule::forward(const torch::Tensor &state) {
 
     return {out_mu, out_sigma};
 }
-

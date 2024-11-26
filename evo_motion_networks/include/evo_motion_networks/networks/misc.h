@@ -28,4 +28,4 @@ private:
     float max_value;
 };
 
-#endif //MISC_H
+#endif//MISC_H

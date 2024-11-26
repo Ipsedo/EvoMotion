@@ -78,12 +78,11 @@ void PpoGaeAgent::check_train() {
             for (const auto &[state, action, reward, done, next_state]: trajectory) {
                 vec_states.push_back(state);
                 vec_actions.push_back(action);
-                vec_rewards.push_back(
-                    torch::tensor(
-                        {reward}, torch::TensorOptions().device(curr_device).dtype(
-                            torch::kFloat64)));
-                vec_done.push_back(
-                    torch::tensor({done ? 1.f : 0.f}, torch::TensorOptions().device(curr_device).dtype(torch::kFloat64)));
+                vec_rewards.push_back(torch::tensor(
+                    {reward}, torch::TensorOptions().device(curr_device).dtype(torch::kFloat64)));
+                vec_done.push_back(torch::tensor(
+                    {done ? 1.f : 0.f},
+                    torch::TensorOptions().device(curr_device).dtype(torch::kFloat64)));
                 vec_next_states.push_back(next_state);
             }
 
