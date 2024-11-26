@@ -110,7 +110,7 @@ void PpoGaeAgent::train(
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_next_state) {
 
-    torch::autograd::DetectAnomalyGuard guard;
+    //torch::autograd::DetectAnomalyGuard guard;
 
     set_eval(false);
 

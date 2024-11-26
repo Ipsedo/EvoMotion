@@ -11,4 +11,4 @@ EntropyParameter::EntropyParameter() {
 
 torch::Tensor EntropyParameter::log_alpha() { return log_alpha_t; }
 
-torch::Tensor EntropyParameter::alpha() { return log_alpha().exp().detach(); }
+torch::Tensor EntropyParameter::alpha() { return log_alpha().exp(); }
