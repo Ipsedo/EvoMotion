@@ -130,7 +130,7 @@ void SoftActorCriticLiquidAgent::train(
         actor->forward(next_x_t.actor_x_t, batched_next_state);
     const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
     const auto next_log_prob =
-        truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f);
+        truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
 
     const auto [next_target_q_value_1, target_1_next_x_t] =
         target_critic_1->forward(next_x_t.target_critic_1_x_t, batched_next_state, next_action);
@@ -168,7 +168,7 @@ void SoftActorCriticLiquidAgent::train(
         actor->forward(x_t.actor_x_t, batched_states);
     const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
     const auto curr_log_prob =
-        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f);
+        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
 
     const auto [curr_q_value_1, _1] =
         critic_1->forward(x_t.critic_1_x_t, batched_states, curr_action);
