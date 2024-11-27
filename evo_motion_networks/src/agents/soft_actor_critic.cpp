@@ -205,7 +205,7 @@ std::vector<LossMeter> SoftActorCriticAgent::get_metrics() {
         episode_steps_meter};
 }
 
-void SoftActorCriticAgent::to(torch::DeviceType device) {
+void SoftActorCriticAgent::to(const torch::DeviceType device) {
     curr_device = device;
     actor->to(device);
     critic_1->to(device);
@@ -215,45 +215,17 @@ void SoftActorCriticAgent::to(torch::DeviceType device) {
     entropy_parameter->to(device);
 }
 
-void SoftActorCriticAgent::set_eval(bool eval) {
-    if (eval) {
-        actor->eval();
-        critic_1->eval();
-        critic_2->eval();
-        target_critic_1->eval();
-        target_critic_2->eval();
-        entropy_parameter->eval();
-    } else {
-        actor->train();
-        critic_1->train();
-        critic_2->train();
-        target_critic_1->train();
-        target_critic_2->train();
-        entropy_parameter->train();
-    }
+void SoftActorCriticAgent::set_eval(const bool eval) {
+    actor->train(!eval);
+    critic_1->train(!eval);
+    critic_2->train(!eval);
+    target_critic_1->train(!eval);
+    target_critic_2->train(!eval);
+    entropy_parameter->train(!eval);
 }
 
 int SoftActorCriticAgent::count_parameters() {
-    int count = 0;
-    for (const auto &p: actor->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    for (const auto &p: target_critic_1->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    for (const auto &p: target_critic_2->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    for (const auto &p: critic_1->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    for (const auto &p: critic_2->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    return count;
+    return count_module_parameters(actor) + count_module_parameters(target_critic_1)
+           + count_module_parameters(target_critic_2) + count_module_parameters(critic_1)
+           + count_module_parameters(critic_2) + count_module_parameters(entropy_parameter);
 }

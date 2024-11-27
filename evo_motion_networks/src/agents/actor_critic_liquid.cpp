@@ -166,24 +166,10 @@ void ActorCriticLiquidAgent::to(const torch::DeviceType device) {
 }
 
 void ActorCriticLiquidAgent::set_eval(const bool eval) {
-    if (eval) {
-        actor->eval();
-        critic->eval();
-    } else {
-        actor->train();
-        critic->train();
-    }
+    actor->train(!eval);
+    critic->train(!eval);
 }
 
 int ActorCriticLiquidAgent::count_parameters() {
-    int count = 0;
-    for (const auto &p: actor->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    for (const auto &p: critic->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    return count;
+    return count_module_parameters(actor) + count_module_parameters(critic);
 }

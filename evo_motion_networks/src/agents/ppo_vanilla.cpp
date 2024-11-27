@@ -146,31 +146,17 @@ std::vector<LossMeter> PpoVanillaAgent::get_metrics() {
     return {actor_loss_meter, critic_loss_meter, episode_steps_meter};
 }
 
-void PpoVanillaAgent::to(torch::DeviceType device) {
+void PpoVanillaAgent::to(const torch::DeviceType device) {
     curr_device = device;
     actor->to(device);
     critic->to(device);
 }
 
-void PpoVanillaAgent::set_eval(bool eval) {
-    if (eval) {
-        actor->eval();
-        critic->eval();
-    } else {
-        actor->train();
-        critic->train();
-    }
+void PpoVanillaAgent::set_eval(const bool eval) {
+    actor->train(!eval);
+    critic->train(!eval);
 }
 
 int PpoVanillaAgent::count_parameters() {
-    int count = 0;
-    for (const auto &p: actor->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    for (const auto &p: critic->parameters()) {
-        auto sizes = p.sizes();
-        count += std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
-    }
-    return count;
+    return count_module_parameters(actor) + count_module_parameters(critic);
 }

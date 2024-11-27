@@ -128,3 +128,16 @@ void soft_update(
             tau * param.data() + (1.f - tau) * to->named_parameters()[name].data());
     }
 }
+
+/*
+ * Count parameters
+ */
+
+int count_module_parameters(const std::shared_ptr<torch::nn::Module> &module) {
+    const auto params = module->parameters();
+    return std::accumulate(
+        params.begin(), params.end(), 0, [](const int acc, const torch::Tensor &p) {
+            const auto sizes = p.sizes();
+            return acc + std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
+        });
+}

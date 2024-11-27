@@ -57,4 +57,10 @@ void soft_update(
     const std::shared_ptr<torch::nn::Module> &to, const std::shared_ptr<torch::nn::Module> &from,
     float tau);
 
+/*
+ * Count parameters
+ */
+
+int count_module_parameters(const std::shared_ptr<torch::nn::Module> &module);
+
 #endif//EVO_MOTION_FUNCTIONS_H
