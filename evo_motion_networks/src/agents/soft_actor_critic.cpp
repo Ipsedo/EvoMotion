@@ -87,8 +87,10 @@ void SoftActorCriticAgent::train(
     const auto [next_target_q_value_1] = target_critic_1->forward(batched_next_state, next_action);
     const auto [next_target_q_value_2] = target_critic_2->forward(batched_next_state, next_action);
 
-    const auto target_v_value = torch::mean(torch::min(next_target_q_value_1, next_target_q_value_2)
-                                - entropy_parameter->alpha() * next_log_prob, -1, true);
+    const auto target_v_value = torch::mean(
+        torch::min(next_target_q_value_1, next_target_q_value_2)
+            - entropy_parameter->alpha() * next_log_prob,
+        -1, true);
     const auto norm_rewards =
         (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
     const auto target_q_values =
