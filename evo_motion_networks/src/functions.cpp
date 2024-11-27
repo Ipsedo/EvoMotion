@@ -48,7 +48,7 @@ torch::Tensor truncated_normal_log_pdf(
 
     const auto z = theta(beta) - theta(alpha);
 
-    return -0.5 * std::log(2 * static_cast<float>(M_PI)) - torch::log(sigma)
+    return -0.5 * std::log(2.0 * static_cast<double>(M_PI)) - torch::log(sigma)
            - 0.5 * torch::pow((x - mu) / sigma, 2.0) - torch::log(z);
 }
 
