@@ -55,7 +55,7 @@ AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::~AbstractReplayBuffer() {
  */
 
 template<typename EpisodeStep, class... UpdateArgs>
-AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::AbstractTrajectoryBuffer(int size, int seed)
+AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::AbstractTrajectoryBuffer(const int size, const int seed)
     : size(size), memory(), rand_gen(seed) {}
 
 template<typename EpisodeStep, class... UpdateArgs>
@@ -65,7 +65,7 @@ episode_trajectory<EpisodeStep> AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs
 
 template<typename EpisodeStep, class... UpdateArgs>
 std::vector<episode_trajectory<EpisodeStep>>
-AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample(int batch_size) {
+AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample(const int batch_size) {
     std::vector<episode_trajectory<EpisodeStep>> filtered;
     std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t) {
         return t.trajectory.size() > 1;
@@ -169,11 +169,11 @@ liquid_episode_step<LiquidMemory> LiquidReplayBuffer<LiquidMemory>::update_last_
 
 // Trajectory
 
-TrajectoryReplayBuffer::TrajectoryReplayBuffer(int size, int seed)
+TrajectoryReplayBuffer::TrajectoryReplayBuffer(const int size, const int seed)
     : AbstractTrajectoryBuffer(size, seed) {}
 
 episode_step TrajectoryReplayBuffer::update_last_step(
-    episode_step last_step, const float reward, const bool done, torch::Tensor next_state) {
+    episode_step last_step, const float reward, const bool done, const torch::Tensor next_state) {
     last_step.reward = reward;
     last_step.done = done;
     last_step.next_state = next_state;
@@ -181,7 +181,7 @@ episode_step TrajectoryReplayBuffer::update_last_step(
     return last_step;
 }
 
-bool TrajectoryReplayBuffer::is_finish(episode_step step) { return step.done; }
+bool TrajectoryReplayBuffer::is_finish(const episode_step step) { return step.done; }
 
 template<typename EpisodeStep, class... UpdateArgs>
 void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::clear() {
