@@ -119,28 +119,24 @@ void ActorCriticAgent::save(const std::string &output_folder_path) {
     const std::filesystem::path path(output_folder_path);
 
     // actor
-    save_torch<std::shared_ptr<ActorModule>>(output_folder_path, actor, "actor.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        output_folder_path, actor_optimizer, "actor.th");
+    save_torch(output_folder_path, actor, "actor.th");
+    save_torch(output_folder_path, actor_optimizer, "actor.th");
 
     // critic
-    save_torch<std::shared_ptr<CriticModule>>(output_folder_path, critic, "critic.th");
-    save_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        output_folder_path, critic_optimizer, "critic_optimizer.th");
+    save_torch(output_folder_path, critic, "critic.th");
+    save_torch(output_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
 void ActorCriticAgent::load(const std::string &input_folder_path) {
     const std::filesystem::path path(input_folder_path);
 
     // actor
-    load_torch<std::shared_ptr<ActorModule>>(input_folder_path, actor, "actor.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        input_folder_path, actor_optimizer, "actor_optimizer.th");
+    load_torch(input_folder_path, actor, "actor.th");
+    load_torch(input_folder_path, actor_optimizer, "actor_optimizer.th");
 
     // critic
-    load_torch<std::shared_ptr<CriticModule>>(input_folder_path, critic, "critic.th");
-    load_torch<std::shared_ptr<torch::optim::Optimizer>>(
-        input_folder_path, critic_optimizer, "critic_optimizer.th");
+    load_torch(input_folder_path, critic, "critic.th");
+    load_torch(input_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
 std::vector<LossMeter> ActorCriticAgent::get_metrics() {
