@@ -23,22 +23,17 @@ PpoGaeAgent::PpoGaeAgent(
       curr_device(torch::kCPU) {
 
     at::manual_seed(seed);
-
-    actor->to(torch::kFloat64);
-    critic->to(torch::kFloat64);
 }
 
 torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
     set_eval(true);
 
-    const auto state_double = state.to(torch::kFloat64);
-
-    const auto [mu, sigma] = actor->forward(state_double);
-    const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
+    const auto [mu, sigma] = actor->forward(state);
+    const auto action = truncated_normal_sample(mu, sigma, -1.0, 1.0);
 
     if (replay_buffer.empty()) replay_buffer.new_trajectory();
-    if (!replay_buffer.trajectory_empty()) replay_buffer.update_last(reward, false, state_double);
-    replay_buffer.add({state_double, action.detach(), 0.f, false, state_double});
+    if (!replay_buffer.trajectory_empty()) replay_buffer.update_last(reward, false, state);
+    replay_buffer.add({state, action.detach(), 0.0, false, state});
 
     curr_episode_step++;
 
@@ -46,8 +41,7 @@ torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
 }
 
 void PpoGaeAgent::done(const torch::Tensor state, const float reward) {
-    const auto state_double = state.to(torch::kFloat64);
-    replay_buffer.update_last(reward, true, state_double);
+    replay_buffer.update_last(reward, true, state);
 
     check_train();
 
@@ -79,10 +73,10 @@ void PpoGaeAgent::check_train() {
                 vec_states.push_back(state);
                 vec_actions.push_back(action);
                 vec_rewards.push_back(torch::tensor(
-                    {reward}, torch::TensorOptions().device(curr_device).dtype(torch::kFloat64)));
+                    {reward}, torch::TensorOptions().device(curr_device)));
                 vec_done.push_back(torch::tensor(
-                    {done ? 1.f : 0.f},
-                    torch::TensorOptions().device(curr_device).dtype(torch::kFloat64)));
+                    {done ? 1.0 : 0.0},
+                    torch::TensorOptions().device(curr_device)));
                 vec_next_states.push_back(next_state);
             }
 
@@ -92,7 +86,7 @@ void PpoGaeAgent::check_train() {
             batch_vec_actions.push_back(torch::pad(torch::stack(vec_actions), {0, 0, 0, pad}));
             batch_vec_rewards.push_back(torch::pad(torch::stack(vec_rewards), {0, 0, 0, pad}));
             batch_vec_done.push_back(
-                torch::pad(torch::stack(vec_done), {0, 0, 0, pad}, "constant", 1.f));
+                torch::pad(torch::stack(vec_done), {0, 0, 0, pad}, "constant", 1.0));
             batch_vec_next_states.push_back(
                 torch::pad(torch::stack(vec_next_states), {0, 0, 0, pad}));
         }
@@ -119,11 +113,11 @@ void PpoGaeAgent::train(
     const auto mask = torch::eq(
         torch::cat(
             {torch::ones({batched_done.size(0), 1, 1}, at::TensorOptions().device(curr_device)),
-             torch::slice(1.f - batched_done, 1, 0, batched_done.size(1) - 1)},
+             torch::slice(1.0 - batched_done, 1, 0, batched_done.size(1) - 1)},
             1),
-        1.f);
+        1.0);
 
-    const auto deltas = batched_rewards + (1.f - batched_done) * gamma * next_values - curr_values;
+    const auto deltas = batched_rewards + (1.0 - batched_done) * gamma * next_values - curr_values;
 
     auto gae_step =
         torch::zeros({batched_states.size(0), 1}, at::TensorOptions().device(curr_device));
@@ -131,23 +125,23 @@ void PpoGaeAgent::train(
 
     for (auto t = batched_rewards.size(1) - 1; t >= 0; t--) {
         gae_step = torch::select(deltas, 1, t) * torch::select(mask, 1, t)
-                   + gamma * lambda * (1.f - torch::select(batched_done, 1, t)) * gae_step;
+                   + gamma * lambda * (1.0 - torch::select(batched_done, 1, t)) * gae_step;
         advantages_vec.push_back(gae_step);
     }
 
     auto advantages = torch::stack(advantages_vec, 1).flip({1});
     advantages = (advantages - torch::masked_select(advantages, mask).mean())
-                 / (torch::masked_select(advantages, mask).std() + 1e-8f);
+                 / (torch::masked_select(advantages, mask).std() + 1e-8);
     const auto returns = advantages + curr_values;
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
     const auto old_log_prob =
-        truncated_normal_log_pdf(batched_actions, old_mu, old_sigma, -1.f, 1.f);
+        truncated_normal_log_pdf(batched_actions, old_mu, old_sigma, -1.0, 1.0);
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
-        const auto log_prob = truncated_normal_log_pdf(batched_actions, mu, sigma, -1.f, 1.f);
-        const auto entropy = truncated_normal_entropy(mu, sigma, -1.f, 1.f);
+        const auto log_prob = truncated_normal_log_pdf(batched_actions, mu, sigma, -1.0, 1.0);
+        const auto entropy = truncated_normal_entropy(mu, sigma, -1.0, 1.0);
 
         const auto [value] = critic->forward(batched_states);
 
@@ -156,7 +150,7 @@ void PpoGaeAgent::train(
 
         const auto surrogate_1 = ratios * advantages.detach();
         const auto surrogate_2 =
-            torch::clamp(ratios, 1.f - epsilon, 1.f + epsilon) * advantages.detach();
+            torch::clamp(ratios, 1.0 - epsilon, 1.0 + epsilon) * advantages.detach();
 
         const auto actor_loss = -torch::mean(torch::masked_select(
             torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, mask));
