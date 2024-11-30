@@ -72,11 +72,10 @@ void PpoGaeAgent::check_train() {
             for (const auto &[state, action, reward, done, next_state]: trajectory) {
                 vec_states.push_back(state);
                 vec_actions.push_back(action);
-                vec_rewards.push_back(torch::tensor(
-                    {reward}, torch::TensorOptions().device(curr_device)));
-                vec_done.push_back(torch::tensor(
-                    {done ? 1.0 : 0.0},
-                    torch::TensorOptions().device(curr_device)));
+                vec_rewards.push_back(
+                    torch::tensor({reward}, torch::TensorOptions().device(curr_device)));
+                vec_done.push_back(
+                    torch::tensor({done ? 1.0 : 0.0}, torch::TensorOptions().device(curr_device)));
                 vec_next_states.push_back(next_state);
             }
 
@@ -164,7 +163,7 @@ void PpoGaeAgent::train(
         const auto critic_loss =
             critic_loss_factor
             * torch::mean(torch::masked_select(
-                torch::mse_loss(value, returns.detach(), torch::Reduction::None), mask));
+                torch::pow(torch::clamp(value - returns.detach(), -epsilon, epsilon), 2.0), mask));
 
         critic_optimizer->zero_grad();
         critic_loss.backward();
