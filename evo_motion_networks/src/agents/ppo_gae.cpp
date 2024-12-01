@@ -29,10 +29,6 @@ PpoGaeAgent::PpoGaeAgent(
       actor_loss_meter("actor_loss", 64), critic_loss_meter("critic_loss", 64),
       episode_steps_meter("steps", 64), curr_device(torch::kCPU) {
 
-    auto params = actor->parameters();
-    for (const auto &p: critic->parameters()) params.push_back(p);
-    critic_optimizer = std::make_shared<torch::optim::Adam>(params, learning_rate);
-
     at::manual_seed(seed);
 }
 
