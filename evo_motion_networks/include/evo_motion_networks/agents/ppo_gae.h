@@ -37,9 +37,8 @@ public:
 
 private:
     std::shared_ptr<ActorModule> actor;
-    std::shared_ptr<torch::optim::Optimizer> actor_optimizer;
     std::shared_ptr<CriticModule> critic;
-    std::shared_ptr<torch::optim::Optimizer> critic_optimizer;
+    std::shared_ptr<torch::optim::Optimizer> optimizer;
 
     float gamma;
     float lambda;
