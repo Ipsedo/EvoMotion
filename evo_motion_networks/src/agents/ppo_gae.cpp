@@ -131,6 +131,7 @@ void PpoGaeAgent::train(
     auto advantages = torch::stack(advantages_vec, 1).flip({1});
     advantages = (advantages - torch::masked_select(advantages, mask).mean())
                  / (torch::masked_select(advantages, mask).std() + 1e-8);
+
     const auto returns = advantages + curr_values;
 
     const auto [old_mu, old_sigma] = actor->forward(batched_states);
@@ -160,10 +161,14 @@ void PpoGaeAgent::train(
         actor_optimizer->step();
 
         // critic
-        const auto critic_loss =
-            critic_loss_factor
-            * torch::mean(torch::masked_select(
-                torch::pow(torch::clamp(value - returns.detach(), -epsilon, epsilon), 2.0), mask));
+        const auto critic_loss_unclipped = torch::pow(value - returns.detach(), 2.0);
+        const auto critic_loss_clipped = torch::pow(
+            curr_values.detach() + torch::clamp(value - curr_values.detach(), -epsilon, epsilon)
+                - returns.detach(),
+            2);
+        const auto critic_loss = critic_loss_factor
+                                 * torch::mean(torch::masked_select(
+                                     torch::max(critic_loss_clipped, critic_loss_unclipped), mask));
 
         critic_optimizer->zero_grad();
         critic_loss.backward();
