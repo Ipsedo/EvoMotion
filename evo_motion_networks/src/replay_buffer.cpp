@@ -173,8 +173,9 @@ liquid_episode_step<LiquidMemory> LiquidReplayBuffer<LiquidMemory>::update_last_
 TrajectoryReplayBuffer::TrajectoryReplayBuffer(const int size, const int seed)
     : AbstractTrajectoryBuffer(size, seed) {}
 
-episode_step TrajectoryReplayBuffer::update_last_step(
-    episode_step last_step, const float reward, const bool done, const torch::Tensor next_state) {
+ppo_episode_step TrajectoryReplayBuffer::update_last_step(
+    ppo_episode_step last_step, const float reward, const bool done,
+    const torch::Tensor next_state) {
     last_step.reward = reward;
     last_step.done = done;
     last_step.next_state = next_state;
@@ -182,7 +183,7 @@ episode_step TrajectoryReplayBuffer::update_last_step(
     return last_step;
 }
 
-bool TrajectoryReplayBuffer::is_finish(const episode_step step) { return step.done; }
+bool TrajectoryReplayBuffer::is_finish(const ppo_episode_step step) { return step.done; }
 
 template<typename EpisodeStep, class... UpdateArgs>
 void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::clear() {
