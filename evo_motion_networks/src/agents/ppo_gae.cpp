@@ -8,9 +8,8 @@
 
 std::vector<torch::Tensor>
 concat_vector(std::vector<torch::Tensor> v1, std::vector<torch::Tensor> v2) {
-    std::vector<torch::Tensor> result(v1);
-    result.insert(result.end(), v2.begin(), v2.end());
-    return result;
+    v1.insert(v1.end(), v2.begin(), v2.end());
+    return v1;
 }
 
 PpoGaeAgent::PpoGaeAgent(
