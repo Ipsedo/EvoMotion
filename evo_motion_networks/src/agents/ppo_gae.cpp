@@ -153,7 +153,7 @@ void PpoGaeAgent::train(
         const auto [value] = critic->forward(batched_states);
 
         // actor
-        const auto ratios = torch::exp(torch::clamp(log_prob - old_log_prob.detach(), -20.0, 20.));
+        const auto ratios = torch::exp(log_prob - old_log_prob.detach());
 
         const auto surrogate_1 = ratios * advantages.detach();
         const auto surrogate_2 =
