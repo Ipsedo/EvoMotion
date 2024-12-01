@@ -16,12 +16,12 @@ PpoGaeAgent::PpoGaeAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const float gamma, const float lam,
     const float epsilon, const float entropy_factor, const float critic_loss_factor,
-    const int epoch, const int batch_size, int train_every, int replay_buffer_size,
-    float learning_rate, float clip_grad_norm)
+    const int epoch, const int batch_size, const int train_every, const int replay_buffer_size,
+    float learning_rate, const float clip_grad_norm)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
+      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
-      optimizer(std::make_shared<torch::optim::Adam>(
-          concat_vector(actor->parameters(), critic->parameters()), learning_rate)),
+      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
       gamma(gamma), lambda(lam), epsilon(epsilon), epoch(epoch), entropy_factor(entropy_factor),
       critic_loss_factor(critic_loss_factor), clip_grad_norm(clip_grad_norm), curr_train_step(0L),
       curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
@@ -153,29 +153,31 @@ void PpoGaeAgent::train(
         const auto [value] = critic->forward(batched_states);
 
         // actor
-        const auto ratios = torch::exp(log_prob - old_log_prob.detach());
+        const auto ratios = torch::exp(torch::clamp(log_prob - old_log_prob.detach(), -20.0, 20.));
 
         const auto surrogate_1 = ratios * advantages.detach();
         const auto surrogate_2 =
             torch::clamp(ratios, 1.0 - epsilon, 1.0 + epsilon) * advantages.detach();
 
-        const auto actor_loss =
-            -torch::sum(torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, -1, true);
+        const auto actor_loss = -torch::mean(torch::masked_select(
+            torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, mask));
+
+        actor_optimizer->zero_grad();
+        actor_loss.backward();
+        torch::nn::utils::clip_grad_norm_(actor->parameters(), clip_grad_norm);
+        actor_optimizer->step();
 
         // critic
-        const auto critic_loss = critic_loss_factor * torch::pow(value - returns.detach(), 2.0);
+        const auto critic_loss =
+            critic_loss_factor * torch::mean(torch::pow(value - returns.detach(), 2.0));
 
-        // optimize
-        const auto loss = torch::mean(actor_loss + critic_loss);
-
-        optimizer->zero_grad();
-        loss.backward();
+        critic_optimizer->zero_grad();
+        critic_loss.backward();
         torch::nn::utils::clip_grad_norm_(critic->parameters(), clip_grad_norm);
-        torch::nn::utils::clip_grad_norm_(actor->parameters(), clip_grad_norm);
-        optimizer->step();
+        critic_optimizer->step();
 
-        actor_loss_meter.add(actor_loss.mean().item().toFloat());
-        critic_loss_meter.add(critic_loss.mean().item().toFloat());
+        actor_loss_meter.add(actor_loss.item().toFloat());
+        critic_loss_meter.add(critic_loss.item().toFloat());
     }
 
     curr_train_step++;
@@ -183,14 +185,16 @@ void PpoGaeAgent::train(
 
 void PpoGaeAgent::save(const std::string &output_folder_path) {
     save_torch(output_folder_path, actor, "actor.th");
+    save_torch(output_folder_path, actor_optimizer, "actor_optimizer.th");
     save_torch(output_folder_path, critic, "critic.th");
-    save_torch(output_folder_path, optimizer, "optimizer.th");
+    save_torch(output_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
 void PpoGaeAgent::load(const std::string &input_folder_path) {
     load_torch(input_folder_path, actor, "actor.th");
+    load_torch(input_folder_path, actor_optimizer, "actor_optimizer.th");
     load_torch(input_folder_path, critic, "critic.th");
-    load_torch(input_folder_path, optimizer, "optimizer.th");
+    load_torch(input_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
 std::vector<LossMeter> PpoGaeAgent::get_metrics() {
