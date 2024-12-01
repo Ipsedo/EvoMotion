@@ -42,6 +42,12 @@ torch::Tensor truncated_normal_entropy(
     const torch::Tensor &mu, const torch::Tensor &sigma, float min_value, float max_value);
 
 /*
+ * KL divergence
+ */
+
+torch::Tensor kl_divergence(const torch::Tensor &log_p, const torch::Tensor &log_q);
+
+/*
  * exponential decrease
  */
 

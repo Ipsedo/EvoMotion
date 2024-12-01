@@ -96,6 +96,14 @@ torch::Tensor truncated_normal_entropy(
 }
 
 /*
+ * KL divergence
+ */
+
+torch::Tensor kl_divergence(const torch::Tensor &log_p, const torch::Tensor &log_q) {
+    return torch::exp(log_p) * (log_p - log_q);
+}
+
+/*
  * Entropy factor
  */
 

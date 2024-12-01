@@ -55,7 +55,8 @@ AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::~AbstractReplayBuffer() {
  */
 
 template<typename EpisodeStep, class... UpdateArgs>
-AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::AbstractTrajectoryBuffer(const int size, const int seed)
+AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::AbstractTrajectoryBuffer(
+    const int size, const int seed)
     : size(size), memory(), rand_gen(seed) {}
 
 template<typename EpisodeStep, class... UpdateArgs>

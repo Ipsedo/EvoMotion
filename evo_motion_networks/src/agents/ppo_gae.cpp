@@ -10,7 +10,8 @@ PpoGaeAgent::PpoGaeAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const float gamma, const float lam,
     const float epsilon, const float entropy_factor, const float critic_loss_factor,
-    const int epoch, const int batch_size, float learning_rate, float clip_grad_norm)
+    const int epoch, const int batch_size, int train_every, int replay_buffer_size,
+    float learning_rate, float clip_grad_norm)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
@@ -18,9 +19,9 @@ PpoGaeAgent::PpoGaeAgent(
       gamma(gamma), lambda(lam), epsilon(epsilon), epoch(epoch), entropy_factor(entropy_factor),
       critic_loss_factor(critic_loss_factor), clip_grad_norm(clip_grad_norm), curr_train_step(0L),
       curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
-      replay_buffer(batch_size, seed), train_every(batch_size), actor_loss_meter("actor_loss", 64),
-      critic_loss_meter("critic_loss", 64), episode_steps_meter("steps", 64),
-      curr_device(torch::kCPU) {
+      replay_buffer(replay_buffer_size, seed), train_every(train_every),
+      actor_loss_meter("actor_loss", 64), critic_loss_meter("critic_loss", 64),
+      episode_steps_meter("steps", 64), curr_device(torch::kCPU) {
 
     at::manual_seed(seed);
 }
@@ -102,7 +103,7 @@ void PpoGaeAgent::train(
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_next_state) {
 
-    //torch::autograd::DetectAnomalyGuard guard;
+    torch::autograd::DetectAnomalyGuard guard;
 
     set_eval(false);
 
@@ -141,7 +142,7 @@ void PpoGaeAgent::train(
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);
         const auto log_prob = truncated_normal_log_pdf(batched_actions, mu, sigma, -1.0, 1.0);
-        const auto entropy = truncated_normal_entropy(mu, sigma, -1.0, 1.0);
+        //const auto entropy = truncated_normal_entropy(mu, sigma, -1.0, 1.0);
 
         const auto [value] = critic->forward(batched_states);
 
@@ -153,7 +154,9 @@ void PpoGaeAgent::train(
             torch::clamp(ratios, 1.0 - epsilon, 1.0 + epsilon) * advantages.detach();
 
         const auto actor_loss = -torch::mean(torch::masked_select(
-            torch::min(surrogate_1, surrogate_2) + entropy_factor * entropy, mask));
+            torch::min(surrogate_1, surrogate_2)
+                - entropy_factor * kl_divergence(old_log_prob.detach(), log_prob),
+            mask));
 
         actor_optimizer->zero_grad();
         actor_loss.backward();
@@ -161,14 +164,9 @@ void PpoGaeAgent::train(
         actor_optimizer->step();
 
         // critic
-        const auto critic_loss_unclipped = torch::pow(value - returns.detach(), 2.0);
-        const auto critic_loss_clipped = torch::pow(
-            curr_values.detach() + torch::clamp(value - curr_values.detach(), -epsilon, epsilon)
-                - returns.detach(),
-            2);
-        const auto critic_loss = critic_loss_factor
-                                 * torch::mean(torch::masked_select(
-                                     torch::max(critic_loss_clipped, critic_loss_unclipped), mask));
+        const auto critic_loss =
+            critic_loss_factor
+            * torch::mean(torch::masked_select(torch::pow(value - returns.detach(), 2.0), mask));
 
         critic_optimizer->zero_grad();
         critic_loss.backward();

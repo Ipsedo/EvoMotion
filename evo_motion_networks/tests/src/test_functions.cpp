@@ -83,7 +83,7 @@ TEST_P(ParamTestTruncNormal, TestSample) {
     const auto [sizes, min_value, max_value] = GetParam();
 
     const auto mu = torch::rand(sizes) * (max_value - min_value) + min_value;
-    const auto sigma = torch::randn(sizes).exp();
+    const auto sigma = torch::softplus(torch::rand(sizes) * 60.f - 30.f);
 
     const auto out = truncated_normal_sample(mu, sigma, min_value, max_value);
 
@@ -91,6 +91,7 @@ TEST_P(ParamTestTruncNormal, TestSample) {
 
     ASSERT_TRUE(torch::all(out >= min_value).item().toBool());
     ASSERT_TRUE(torch::all(out <= max_value).item().toBool());
+    ASSERT_TRUE(torch::all(torch::logical_not(torch::isnan(out))).item().toBool());
 }
 
 // PDF
@@ -98,15 +99,22 @@ TEST_P(ParamTestTruncNormal, TestSample) {
 TEST_P(ParamTestTruncNormal, TestPDF) {
     const auto [sizes, min_value, max_value] = GetParam();
 
-    const auto x = torch::rand(sizes) * (max_value - min_value) + min_value;
     const auto mu = torch::rand(sizes) * (max_value - min_value) + min_value;
-    const auto sigma = torch::randn(sizes).exp();
+    const auto sigma = torch::softplus(torch::rand(sizes) * 60.f - 30.f);
+    const auto x = truncated_normal_sample(mu, sigma, min_value, max_value);
 
     const auto out = truncated_normal_pdf(x, mu, sigma, min_value, max_value);
+    const auto out_log = truncated_normal_log_pdf(x, mu, sigma, min_value, max_value);
 
-    for (int i = 0; i < sizes.size(); i++) { ASSERT_EQ(sizes[i], out.size(i)); }
+    for (int i = 0; i < sizes.size(); i++) {
+        ASSERT_EQ(sizes[i], out.size(i));
+        ASSERT_EQ(sizes[i], out_log.size(i));
+    }
 
     ASSERT_TRUE(torch::all(out >= 0.f).item().toBool());
+
+    ASSERT_TRUE(torch::all(torch::logical_not(torch::isnan(out))).item().toBool());
+    ASSERT_TRUE(torch::all(torch::logical_not(torch::isnan(out_log))).item().toBool());
 }
 
 // Entropy
@@ -115,11 +123,13 @@ TEST_P(ParamTestTruncNormal, TestEntropy) {
     const auto [sizes, min_value, max_value] = GetParam();
 
     const auto mu = torch::rand(sizes) * (max_value - min_value) + min_value;
-    const auto sigma = torch::randn(sizes).exp();
+    const auto sigma = torch::softplus(torch::rand(sizes) * 60.f - 30.f);
 
     const auto out = truncated_normal_entropy(mu, sigma, min_value, max_value);
 
     for (int i = 0; i < sizes.size(); i++) { ASSERT_EQ(sizes[i], out.size(i)); }
+
+    ASSERT_TRUE(torch::all(torch::logical_not(torch::isnan(out))).item().toBool());
 }
 
 // Create parametrized tests
@@ -128,5 +138,6 @@ INSTANTIATE_TEST_SUITE_P(
     TestTruncNormal, ParamTestTruncNormal,
     testing::Combine(
         testing::Values(
-            std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{1000}, std::vector<int64_t>{2, 6}),
+            std::vector<int64_t>{1, 2, 3}, std::vector<int64_t>{1000, 1000},
+            std::vector<int64_t>{6}),
         testing::Values(-2.f, -1.f, -0.1f), testing::Values(0.1f, 1.f, 2.f)));

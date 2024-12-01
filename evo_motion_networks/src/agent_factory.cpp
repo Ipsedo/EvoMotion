@@ -138,7 +138,8 @@ std::shared_ptr<Agent> PpoGaeFactory::create_agent(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<float>("gamma"), get_value<float>("lambda"), get_value<float>("epsilon"),
         get_value<float>("entropy_factor"), get_value<float>("critic_loss_factor"),
-        get_value<int>("epoch"), get_value<int>("batch_size"), get_value<float>("learning_rate"),
+        get_value<int>("epoch"), get_value<int>("batch_size"), get_value<int>("train_every"),
+        get_value<int>("replay_buffer_size"), get_value<float>("learning_rate"),
         get_value<float>("clip_grad_norm"));
 }
 
@@ -168,7 +169,7 @@ std::map<
          std::make_shared<SofActorCriticFactory, std::map<std::string, std::string>>},
         {"soft_actor_critic_liquid",
          std::make_shared<SofActorCriticLiquidFactory, std::map<std::string, std::string>>},
-        {"ppo", std::make_shared<PpoGaeFactory, std::map<std::string, std::string>>},
+        {"ppo_gae", std::make_shared<PpoGaeFactory, std::map<std::string, std::string>>},
         {"ppo_vanilla", std::make_shared<PpoVanillaFactory, std::map<std::string, std::string>>}};
 
 std::shared_ptr<AgentFactory>
