@@ -38,10 +38,12 @@ torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.0, 1.0);
     const auto log_prob = truncated_normal_log_pdf(action, mu, sigma, -1.0, 1.0);
+    const auto [value] = critic->forward(state);
 
     if (replay_buffer.empty()) replay_buffer.new_trajectory();
-    if (!replay_buffer.trajectory_empty()) replay_buffer.update_last(reward, false, state);
-    replay_buffer.add({state, log_prob.detach(), action.detach(), 0.0, false, state});
+    if (!replay_buffer.trajectory_empty()) replay_buffer.update_last(reward, false, value.detach());
+    replay_buffer.add(
+        {state, action.detach(), 0.0, false, log_prob.detach(), value.detach(), value.detach()});
 
     curr_episode_step++;
 
@@ -49,7 +51,11 @@ torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
 }
 
 void PpoGaeAgent::done(const torch::Tensor state, const float reward) {
-    replay_buffer.update_last(reward, true, state);
+    set_eval(true);
+
+    const auto [value] = critic->forward(state);
+
+    replay_buffer.update_last(reward, true, value.detach());
 
     check_train();
 
@@ -66,58 +72,63 @@ void PpoGaeAgent::check_train() {
 
         const auto episodes = replay_buffer.sample(batch_size);
 
-        std::vector<torch::Tensor> batch_vec_states, batch_vec_log_prob, batch_vec_actions,
-            batch_vec_rewards, batch_vec_done, batch_vec_next_states;
+        std::vector<torch::Tensor> batch_vec_states, batch_vec_actions, batch_vec_rewards,
+            batch_vec_done, batch_vec_log_prob, batch_vec_curr_values, batch_vec_next_values;
 
         int max_steps = 0;
         for (const auto &[trajectory]: episodes)
             max_steps = std::max(max_steps, static_cast<int>(trajectory.size()));
 
         for (const auto &[trajectory]: episodes) {
-            std::vector<torch::Tensor> vec_states, vec_log_prob, vec_actions, vec_rewards, vec_done,
-                vec_next_states;
+            std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_log_prob,
+                vec_curr_values, vec_next_values;
 
-            for (const auto &[state, log_prob, action, reward, done, next_state]: trajectory) {
+            for (const auto &[state, action, reward, done, log_prob, curr_value, next_value]:
+                 trajectory) {
                 vec_states.push_back(state);
-                vec_log_prob.push_back(log_prob);
                 vec_actions.push_back(action);
                 vec_rewards.push_back(
                     torch::tensor({reward}, torch::TensorOptions().device(curr_device)));
                 vec_done.push_back(
                     torch::tensor({done ? 1.0 : 0.0}, torch::TensorOptions().device(curr_device)));
-                vec_next_states.push_back(next_state);
+
+                vec_log_prob.push_back(log_prob);
+                vec_curr_values.push_back(curr_value);
+                vec_next_values.push_back(next_value);
             }
 
             const int pad = max_steps - static_cast<int>(trajectory.size());
 
             batch_vec_states.push_back(torch::pad(torch::stack(vec_states), {0, 0, 0, pad}));
-            batch_vec_log_prob.push_back(torch::pad(torch::stack(vec_log_prob), {0, 0, 0, pad}));
             batch_vec_actions.push_back(torch::pad(torch::stack(vec_actions), {0, 0, 0, pad}));
             batch_vec_rewards.push_back(torch::pad(torch::stack(vec_rewards), {0, 0, 0, pad}));
             batch_vec_done.push_back(
                 torch::pad(torch::stack(vec_done), {0, 0, 0, pad}, "constant", 1.0));
-            batch_vec_next_states.push_back(
-                torch::pad(torch::stack(vec_next_states), {0, 0, 0, pad}));
+
+            batch_vec_log_prob.push_back(torch::pad(torch::stack(vec_log_prob), {0, 0, 0, pad}));
+            batch_vec_curr_values.push_back(
+                torch::pad(torch::stack(vec_curr_values), {0, 0, 0, pad}));
+            batch_vec_next_values.push_back(
+                torch::pad(torch::stack(vec_next_values), {0, 0, 0, pad}));
         }
 
         train(
-            torch::stack(batch_vec_states), torch::stack(batch_vec_log_prob),
-            torch::stack(batch_vec_actions), torch::stack(batch_vec_rewards),
-            torch::stack(batch_vec_done), torch::stack(batch_vec_next_states));
+            torch::stack(batch_vec_states), torch::stack(batch_vec_actions),
+            torch::stack(batch_vec_rewards), torch::stack(batch_vec_done),
+            torch::stack(batch_vec_log_prob), torch::stack(batch_vec_curr_values),
+            torch::stack(batch_vec_next_values));
     }
 }
 
 void PpoGaeAgent::train(
-    const torch::Tensor &batched_states, const torch::Tensor &batched_log_prob,
-    const torch::Tensor &batched_actions, const torch::Tensor &batched_rewards,
-    const torch::Tensor &batched_done, const torch::Tensor &batched_next_state) {
+    const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
+    const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
+    const torch::Tensor &batched_log_prob, const torch::Tensor &batched_curr_values,
+    const torch::Tensor &batched_next_values) {
 
     //torch::autograd::DetectAnomalyGuard guard;
 
     set_eval(false);
-
-    const auto [curr_values] = critic->forward(batched_states);
-    const auto [next_values] = critic->forward(batched_next_state);
 
     const auto mask = torch::eq(
         torch::cat(
@@ -126,7 +137,8 @@ void PpoGaeAgent::train(
             1),
         1.0);
 
-    const auto deltas = batched_rewards + (1.0 - batched_done) * gamma * next_values - curr_values;
+    const auto deltas =
+        batched_rewards + (1.0 - batched_done) * gamma * batched_next_values - batched_curr_values;
 
     auto gae_step =
         torch::zeros({batched_states.size(0), 1}, at::TensorOptions().device(curr_device));
@@ -138,11 +150,11 @@ void PpoGaeAgent::train(
         advantages_vec.push_back(gae_step);
     }
 
-    auto advantages = torch::stack(advantages_vec, 1).flip({1});
-    advantages = (advantages - torch::masked_select(advantages, mask).mean())
-                 / (torch::masked_select(advantages, mask).std() + 1e-8);
+    const auto advantages = torch::stack(advantages_vec, 1).flip({1});
+    /*advantages = (advantages - torch::masked_select(advantages, mask).mean())
+                 / (torch::masked_select(advantages, mask).std() + 1e-8);*/
 
-    const auto returns = advantages + curr_values;
+    const auto returns = advantages + batched_curr_values;
 
     for (int i = 0; i < epoch; i++) {
         const auto [mu, sigma] = actor->forward(batched_states);

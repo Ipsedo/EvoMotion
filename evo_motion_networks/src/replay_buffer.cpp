@@ -175,10 +175,10 @@ TrajectoryReplayBuffer::TrajectoryReplayBuffer(const int size, const int seed)
 
 ppo_episode_step TrajectoryReplayBuffer::update_last_step(
     ppo_episode_step last_step, const float reward, const bool done,
-    const torch::Tensor next_state) {
+    const torch::Tensor next_value) {
     last_step.reward = reward;
     last_step.done = done;
-    last_step.next_state = next_state;
+    last_step.next_value = next_value;
 
     return last_step;
 }

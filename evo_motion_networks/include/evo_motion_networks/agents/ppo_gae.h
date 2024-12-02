@@ -66,9 +66,10 @@ private:
 
     void check_train();
     void train(
-        const torch::Tensor &batched_states, const torch::Tensor &batched_log_prob,
-        const torch::Tensor &batched_actions, const torch::Tensor &batched_rewards,
-        const torch::Tensor &batched_done, const torch::Tensor &batched_next_state);
+        const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
+        const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
+        const torch::Tensor &batched_log_prob, const torch::Tensor &batched_curr_values,
+        const torch::Tensor &batched_next_values);
 };
 
 #endif//EVO_MOTION_PPO_GAE_H

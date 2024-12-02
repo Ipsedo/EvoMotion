@@ -21,11 +21,12 @@ struct episode_step {
 
 struct ppo_episode_step {
     torch::Tensor state;
-    torch::Tensor log_prob;
     torch::Tensor action;
     float reward;
     bool done;
-    torch::Tensor next_state;
+    torch::Tensor log_prob;
+    torch::Tensor curr_value;
+    torch::Tensor next_value;
 };
 
 struct liquid_a2c_memory {
@@ -139,7 +140,7 @@ public:
 
 protected:
     ppo_episode_step update_last_step(
-        ppo_episode_step last_step, float reward, bool done, torch::Tensor next_state) override;
+        ppo_episode_step last_step, float reward, bool done, torch::Tensor next_value) override;
 
     bool is_finish(ppo_episode_step step) override;
 };
