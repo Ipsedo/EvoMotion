@@ -25,7 +25,8 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
-      target_entropy(-1.f), entropy_parameter(std::make_shared<EntropyParameter>()),
+      target_entropy(-static_cast<float>(action_space[0])),
+      entropy_parameter(std::make_shared<EntropyParameter>()),
       entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)),
       curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size),
       replay_buffer(replay_buffer_size, seed), curr_episode_step(0), curr_train_step(0L),
@@ -82,7 +83,7 @@ void SoftActorCriticAgent::train(
     const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
     const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
     const auto next_log_prob =
-        truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).mean(-1, true);
+        truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
 
     const auto [next_target_q_value_1] = target_critic_1->forward(batched_next_state, next_action);
     const auto [next_target_q_value_2] = target_critic_2->forward(batched_next_state, next_action);
@@ -114,7 +115,7 @@ void SoftActorCriticAgent::train(
     const auto [curr_mu, curr_sigma] = actor->forward(batched_states);
     const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
     const auto curr_log_prob =
-        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).mean(-1, true);
+        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
 
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
@@ -129,7 +130,7 @@ void SoftActorCriticAgent::train(
 
     // entropy
     const auto entropy_loss =
-        -torch::mean(entropy_parameter->alpha() * (curr_log_prob.detach() + target_entropy));
+        -torch::mean(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy));
 
     entropy_optimizer->zero_grad();
     entropy_loss.backward();
