@@ -16,7 +16,7 @@ class State {
 public:
     virtual int get_size() = 0;
 
-    virtual torch::Tensor get_state() = 0;
+    virtual torch::Tensor get_state(torch::Device device) = 0;
 
     virtual ~State();
 };
@@ -27,7 +27,7 @@ public:
 
     int get_size() override;
 
-    torch::Tensor get_state() override;
+    torch::Tensor get_state(torch::Device device) override;
 
     btScalar addSingleResult(
         btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0Wrap, int partId0, int index0,
@@ -50,7 +50,7 @@ public:
 
     int get_size() override;
 
-    torch::Tensor get_state() override;
+    torch::Tensor get_state(torch::Device device) override;
 
 private:
     Item root_item;
@@ -62,7 +62,7 @@ public:
 
     int get_size() override;
 
-    torch::Tensor get_state() override;
+    torch::Tensor get_state(torch::Device device) override;
 };
 
 // Muscle
@@ -73,7 +73,7 @@ public:
 
     int get_size() override;
 
-    torch::Tensor get_state() override;
+    torch::Tensor get_state(torch::Device device) override;
 
 private:
     btSliderConstraint *slider_constraint;
