@@ -126,7 +126,7 @@ void PpoGaeAgent::train(
     const torch::Tensor &batched_log_prob, const torch::Tensor &batched_curr_values,
     const torch::Tensor &batched_next_values) {
 
-    //torch::autograd::DetectAnomalyGuard guard;
+    torch::autograd::DetectAnomalyGuard guard;
 
     set_eval(false);
 
@@ -179,14 +179,9 @@ void PpoGaeAgent::train(
         actor_optimizer->step();
 
         // critic
-        const auto raw_critic_loss = torch::pow(value - returns.detach(), 2.0);
-        const auto clipped_critic_loss = torch::pow(
-            batched_curr_values + torch::clamp(value - batched_curr_values, -epsilon, epsilon)
-                - returns.detach(),
-            2);
         const auto critic_loss =
             critic_loss_factor
-            * torch::mean(torch::masked_select(torch::max(raw_critic_loss, clipped_critic_loss), mask));
+            * torch::mean(torch::masked_select(torch::pow(value - returns.detach(), 2.0), mask));
 
         critic_optimizer->zero_grad();
         critic_loss.backward();
