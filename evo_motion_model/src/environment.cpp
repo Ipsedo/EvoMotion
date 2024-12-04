@@ -8,14 +8,14 @@
 
 #include "./constants.h"
 
-InitBtThread::InitBtThread(const int num_threads) : cci() {
+InitBtThread::InitBtThread(const int num_threads) {
     btSetTaskScheduler(btCreateDefaultTaskScheduler());
     btGetTaskScheduler()->setNumThreads(num_threads);
     cci.m_defaultMaxPersistentManifoldPoolSize = 80000;
     cci.m_defaultMaxCollisionAlgorithmPoolSize = 80000;
 }
 
-btDefaultCollisionConstructionInfo InitBtThread::get_cci() { return cci; }
+btDefaultCollisionConstructionInfo InitBtThread::get_cci() const { return cci; }
 
 Environment::Environment(const int num_threads)
     : num_threads(num_threads), init_thread(num_threads), curr_device(torch::kCPU),

@@ -25,7 +25,7 @@ struct step {
 class InitBtThread {
 public:
     explicit InitBtThread(int num_threads);
-    btDefaultCollisionConstructionInfo get_cci();
+    btDefaultCollisionConstructionInfo get_cci() const;
 
 private:
     btDefaultCollisionConstructionInfo cci;
