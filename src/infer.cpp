@@ -17,10 +17,10 @@
 #include "./run.h"
 
 void infer(
-    int seed, bool cuda, const run_params &params,
+    int env_num_threads, int seed, bool cuda, const run_params &params,
     const std::shared_ptr<AgentFactory> &agent_factory,
     const std::shared_ptr<EnvironmentFactory> &environment_factory) {
-    std::shared_ptr<Environment> env = environment_factory->get_env(seed);
+    std::shared_ptr<Environment> env = environment_factory->get_env(env_num_threads, seed);
 
     std::shared_ptr<Camera> camera = std::make_shared<StaticCamera>(
         glm::vec3(1.f, 1.f, -1.f), glm::normalize(glm::vec3(1.f, 0.f, 1.f)),

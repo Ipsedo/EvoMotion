@@ -15,7 +15,7 @@
 #include "./run.h"
 
 void train(
-    int seed, bool cuda, const train_params &params,
+    const int env_num_threads, const int seed, const bool cuda, const train_params &params,
     const std::shared_ptr<AgentFactory> &agent_factory,
     const std::shared_ptr<EnvironmentFactory> &environment_factory) {
 
@@ -26,9 +26,9 @@ void train(
         exit(1);
     }
 
-    std::shared_ptr<Environment> env = environment_factory->get_env(seed);
+    const std::shared_ptr<Environment> env = environment_factory->get_env(env_num_threads, seed);
 
-    std::shared_ptr<Agent> agent =
+    const std::shared_ptr<Agent> agent =
         agent_factory->create_agent(env->get_state_space(), env->get_action_space());
 
     if (cuda) {

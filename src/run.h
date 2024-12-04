@@ -25,12 +25,12 @@ struct train_params {
 };
 
 void infer(
-    int seed, bool cuda, const run_params &params,
+    int env_num_threads, int seed, bool cuda, const run_params &params,
     const std::shared_ptr<AgentFactory> &agent_factory,
     const std::shared_ptr<EnvironmentFactory> &environment_factory);
 
 void train(
-    int seed, bool cuda, const train_params &params,
+    int env_num_threads, int seed, bool cuda, const train_params &params,
     const std::shared_ptr<AgentFactory> &agent_factory,
     const std::shared_ptr<EnvironmentFactory> &environment_factory);
 

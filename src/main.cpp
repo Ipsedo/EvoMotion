@@ -43,6 +43,11 @@ int main(const int argc, char **argv) {
         .default_value(1234)
         .help("seed for environment RNG");
 
+    parser.add_argument("--env_num_threads")
+        .scan<'i', int>()
+        .default_value(8)
+        .help("seed for environment RNG");
+
     parser.add_argument("--cuda").default_value(false).implicit_value(true).help(
         "enable cuda for neural networks");
 
@@ -109,13 +114,15 @@ int main(const int argc, char **argv) {
 
     if (parser.is_subcommand_used(train_parser))
         train(
-            parser.get<int>("env_seed"), parser.get<bool>("cuda"),
+            parser.get<int>("env_num_threads"), parser.get<int>("env_seed"),
+            parser.get<bool>("cuda"),
             {train_parser.get<std::string>("output_path"), train_parser.get<int>("nb_saves"),
              train_parser.get<int>("episodes")},
             agent_factory, env_factory);
     else if (parser.is_subcommand_used(run_parser))
         infer(
-            parser.get<int>("env_seed"), parser.get<bool>("cuda"),
+            parser.get<int>("env_num_threads"), parser.get<int>("env_seed"),
+            parser.get<bool>("cuda"),
             {run_parser.get<std::string>("input_folder"), run_parser.get<int>("width"),
              run_parser.get<int>("height")},
             agent_factory, env_factory);

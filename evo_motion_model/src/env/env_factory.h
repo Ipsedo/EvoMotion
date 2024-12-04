@@ -11,21 +11,21 @@ class CartPoleFactory : public EnvironmentFactory {
 public:
     explicit CartPoleFactory(std::map<std::string, std::string> parameters);
 
-    std::shared_ptr<Environment> get_env(int seed) override;
+    std::shared_ptr<Environment> get_env(int num_threads, int seed) override;
 };
 
 class CartPole3dFactory : public EnvironmentFactory {
 public:
     explicit CartPole3dFactory(std::map<std::string, std::string> parameters);
 
-    std::shared_ptr<Environment> get_env(int seed) override;
+    std::shared_ptr<Environment> get_env(int num_threads, int seed) override;
 };
 
 class RobotWalkFactory : public EnvironmentFactory {
 public:
     explicit RobotWalkFactory(std::map<std::string, std::string> parameters);
 
-    std::shared_ptr<Environment> get_env(int seed) override;
+    std::shared_ptr<Environment> get_env(int num_threads, int seed) override;
 };
 
 #endif//EVO_MOTION_ENV_FACTORY_H

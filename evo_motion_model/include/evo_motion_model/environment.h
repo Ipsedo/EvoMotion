@@ -81,7 +81,7 @@ public:
     virtual ~EnvironmentFactory() = default;
 
     explicit EnvironmentFactory(std::map<std::string, std::string> parameters);
-    virtual std::shared_ptr<Environment> get_env(int seed) = 0;
+    virtual std::shared_ptr<Environment> get_env(int num_threads, int seed) = 0;
 
 private:
     std::map<std::string, std::string> parameters;
