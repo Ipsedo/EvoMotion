@@ -8,6 +8,9 @@
 #include <vector>
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
+#include <BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
 #include <torch/torch.h>
 
 #include "./controller.h"
@@ -19,15 +22,27 @@ struct step {
     bool done;
 };
 
+class InitBtThread {
+    public:
+    InitBtThread(int num_threads);
+    btDefaultCollisionConstructionInfo get_cci();
+private:
+    btDefaultCollisionConstructionInfo cci;
+};
+
 class Environment {
+private:
+    int num_threads;
+    InitBtThread init_thread;
 protected:
     torch::DeviceType curr_device;
 
     btDefaultCollisionConfiguration *m_collision_configuration;
-    btCollisionDispatcher *m_dispatcher;
+    btCollisionDispatcherMt *m_dispatcher;
     btBroadphaseInterface *m_broad_phase;
-    btSequentialImpulseConstraintSolver *m_constraint_solver;
-    btDynamicsWorld *m_world;
+    btConstraintSolverPoolMt *m_pool_solver;
+    btSequentialImpulseConstraintSolverMt *m_constraint_solver;
+    btDiscreteDynamicsWorldMt *m_world;
 
     virtual step compute_step() = 0;
 
@@ -35,8 +50,10 @@ protected:
 
     void add_item(const Item &item) const;
 
+    void step_world(float delta);
+
 public:
-    Environment();
+    Environment(int num_threads);
 
     virtual std::vector<Item> get_items() = 0;
 

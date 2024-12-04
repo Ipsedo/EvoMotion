@@ -7,21 +7,21 @@
 #include "../controller/slider.h"
 
 CartPole3d::CartPole3d(
-    int seed, float slider_speed, float slider_force_per_kg, float chariot_push_force,
+    int num_threads, int seed, float slider_speed, float slider_force_per_kg, float chariot_push_force,
     int reset_frame_nb, float limit_angle, float cart_x_mass, float cart_z_mass, float pole_mass,
     int max_steps)
-    : chariot_push_force(chariot_push_force), reset_frame_nb(reset_frame_nb),
-      limit_angle(limit_angle), base_scale(10.f, 1.f, 10.f), cart_x_scale(0.5f, 0.125f, 0.5f),
-      cart_z_scale(0.5f, 0.125f, 0.5f), pole_scale(0.1f, 0.5f, 0.1f), base_pos(0.f, -4.f, 10.f),
-      cart_x_pos(base_pos.x(), base_pos.y() + base_scale.y() + cart_x_scale.y(), base_pos.z()),
+    : Environment(num_threads), reset_frame_nb(reset_frame_nb), chariot_push_force(chariot_push_force),
+      cart_x_scale(0.5f, 0.125f, 0.5f), cart_z_scale(0.5f, 0.125f, 0.5f), pole_scale(0.1f, 0.5f, 0.1f),
+      base_scale(10.f, 1.f, 10.f), base_pos(0.f, -4.f, 10.f), cart_x_pos(base_pos.x(), base_pos.y() + base_scale.y() + cart_x_scale.y(), base_pos.z()),
       cart_z_pos(base_pos.x(), cart_x_pos.y() + cart_x_scale.y() + cart_z_scale.y(), base_pos.z()),
       pole_pos(
           base_pos.x(), cart_z_pos.y() + cart_z_scale.y() + pole_scale.y() - pole_scale.y() / 4.f,
           base_pos.z()),
-      base_mass(0.f), last_vel_x(0.f), last_vel_z(0.f), last_ang_vel_vec(0.f, 0.f, 0.f),
-      last_ang(0.f), last_ang_vel(0.f), last_vert_ang(0.f), last_vert_ang_vel(0.f),
-      last_plan_ang(0.f), last_plan_ang_vec(0.f), max_steps(max_steps), rng(seed), rd_uni(0.f, 1.f),
-      step_idx(0) {
+      base_mass(0.f),
+      rng(seed), rd_uni(0.f, 1.f), last_vel_x(0.f), last_vel_z(0.f),
+      last_ang(0.f), last_ang_vel(0.f), last_ang_vel_vec(0.f, 0.f, 0.f), last_vert_ang(0.f),
+      last_vert_ang_vel(0.f), last_plan_ang(0.f), last_plan_ang_vec(0.f), limit_angle(limit_angle), step_idx(0),
+      max_steps(max_steps) {
 
     Item base(
         "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
@@ -307,7 +307,7 @@ void CartPole3d::reset_engine() {
 
     cart_z_rg->applyCentralImpulse(btVector3(rand_force_x, 0.f, rand_force_z));
 
-    for (int i = 0; i < reset_frame_nb; i++) m_world->stepSimulation(1.f / 60.f);
+    for (int i = 0; i < reset_frame_nb; i++) step_world(1.f / 60.f);
 
     slider_z->setPoweredLinMotor(true);
     slider_x->setPoweredLinMotor(true);

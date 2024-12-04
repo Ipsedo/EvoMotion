@@ -10,6 +10,9 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/constants.h.in" "${CMAKE_CURRENT
 set(EVO_MOTION_MODEL_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE INTERNAL "")
 include_directories("${EVO_MOTION_MODEL_INCLUDE_DIRS}")
 
+# OpenMP
+find_package(OpenMP REQUIRED)
+
 # Bullet
 find_package(Bullet REQUIRED)
 
@@ -45,6 +48,7 @@ target_link_libraries(
         ${BULLET_LIBRARIES}
         ${GLM_LIBRARIES}
         nlohmann_json::nlohmann_json
+        OpenMP::OpenMP_CXX
 )
 
 set(EVO_MOTION_MODEL_LIBRARIES evo_motion_model PARENT_SCOPE)

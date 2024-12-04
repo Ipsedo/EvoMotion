@@ -12,7 +12,7 @@
 class CartPole3d final : public Environment {
 public:
     CartPole3d(
-        int seed, float slider_speed, float slider_force_per_kg, float chariot_push_force,
+        int num_threads, int seed, float slider_speed, float slider_force_per_kg, float chariot_push_force,
         int reset_frame_nb, float limit_angle, float cart_x_mass, float cart_z_mass,
         float pole_mass, int max_steps);
 

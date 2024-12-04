@@ -14,9 +14,9 @@
 #include <glm/gtx/euler_angles.hpp>
 
 RobotWalk::RobotWalk(
-    const int seed, const std::string &skeleton_json_path, float initial_remaining_seconds,
+    const int num_threads, const int seed, const std::string &skeleton_json_path, float initial_remaining_seconds,
     float max_episode_seconds, float target_velocity, float minimal_velocity, int reset_frames)
-    : rng(seed), rd_uni(0.f, 1.f),
+    : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
@@ -128,7 +128,7 @@ void RobotWalk::reset_engine() {
     curr_step = 0;
     remaining_steps = static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL);
 
-    for (int i = 0; i < reset_frames; i++) m_world->stepSimulation(DELTA_T_MODEL);
+    for (int i = 0; i < reset_frames; i++) step_world(DELTA_T_MODEL);
 }
 
 std::vector<int64_t> RobotWalk::get_state_space() {

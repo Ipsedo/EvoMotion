@@ -14,7 +14,7 @@
 class CartPole final : public Environment {
 public:
     CartPole(
-        int seed, float slider_speed, float slider_force, float chariot_push_force,
+        int num_threads, int seed, float slider_speed, float slider_force, float chariot_push_force,
         float limit_angle, int reset_frame_nb, float chariot_mass, float pendulum_mass,
         int max_steps);
 

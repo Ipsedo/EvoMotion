@@ -9,11 +9,11 @@
 #include "../controller/slider.h"
 
 CartPole::CartPole(
-    int seed, float slider_speed, float slider_force, float chariot_push_force, float limit_angle,
+    int num_threads, int seed, float slider_speed, float slider_force, float chariot_push_force, float limit_angle,
     int reset_frame_nb, float chariot_mass, float pendulum_mass, int max_steps)
-    : chariot_push_force(chariot_push_force), limit_angle(limit_angle),
+    : Environment(num_threads), chariot_push_force(chariot_push_force), limit_angle(limit_angle),
       reset_frame_nb(reset_frame_nb), rng(seed), rd_uni(0.f, 1.f), step_idx(0),
-      max_steps(max_steps), last_ang_vel(0.f), last_vel(0.f) {
+      max_steps(max_steps), last_vel(0.f), last_ang_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;
 
     float pendulum_height = 0.7f, pendulum_width = 0.1f, pendulum_offset = pendulum_height / 4.f;
@@ -167,7 +167,7 @@ void CartPole::reset_engine() {
     chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
     //chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 
-    for (int i = 0; i < reset_frame_nb; i++) m_world->stepSimulation(1.f / 60.f);
+    for (int i = 0; i < reset_frame_nb; i++) m_world->stepSimulation(1.f / 60.f, 8, 1.f/60.f);
 
     slider->setPoweredLinMotor(true);
 
