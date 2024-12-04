@@ -8,23 +8,25 @@
 
 #include "./constants.h"
 
-InitBtThread::InitBtThread(const int num_threads): cci() {
+InitBtThread::InitBtThread(const int num_threads) : cci() {
     btSetTaskScheduler(btCreateDefaultTaskScheduler());
     btGetTaskScheduler()->setNumThreads(num_threads);
     cci.m_defaultMaxPersistentManifoldPoolSize = 80000;
     cci.m_defaultMaxCollisionAlgorithmPoolSize = 80000;
 }
 
-btDefaultCollisionConstructionInfo InitBtThread::get_cci() {return cci;}
+btDefaultCollisionConstructionInfo InitBtThread::get_cci() { return cci; }
 
 Environment::Environment(const int num_threads)
-    : num_threads(num_threads), init_thread(num_threads), curr_device(torch::kCPU), m_collision_configuration(new btDefaultCollisionConfiguration(init_thread.get_cci())),
+    : num_threads(num_threads), init_thread(num_threads), curr_device(torch::kCPU),
+      m_collision_configuration(new btDefaultCollisionConfiguration(init_thread.get_cci())),
       m_dispatcher(new btCollisionDispatcherMt(m_collision_configuration, 40)),
       m_broad_phase(new btDbvtBroadphase()),
       m_pool_solver(new btConstraintSolverPoolMt(num_threads)),
       m_constraint_solver(new btSequentialImpulseConstraintSolverMt()),
       m_world(new btDiscreteDynamicsWorldMt(
-          m_dispatcher, m_broad_phase, m_pool_solver, m_constraint_solver, m_collision_configuration)) {
+          m_dispatcher, m_broad_phase, m_pool_solver, m_constraint_solver,
+          m_collision_configuration)) {
     m_world->setGravity(btVector3(0, -9.8f, 0));
 }
 
@@ -38,7 +40,7 @@ step Environment::do_step(const torch::Tensor &action) {
     return compute_step();
 }
 
-void Environment::step_world(const float delta) {
+void Environment::step_world(const float delta) const {
     m_world->stepSimulation(delta, num_threads, delta);
 }
 

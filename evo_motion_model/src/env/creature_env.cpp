@@ -14,8 +14,9 @@
 #include <glm/gtx/euler_angles.hpp>
 
 RobotWalk::RobotWalk(
-    const int num_threads, const int seed, const std::string &skeleton_json_path, float initial_remaining_seconds,
-    float max_episode_seconds, float target_velocity, float minimal_velocity, int reset_frames)
+    const int num_threads, const int seed, const std::string &skeleton_json_path,
+    float initial_remaining_seconds, float max_episode_seconds, float target_velocity,
+    float minimal_velocity, int reset_frames)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
@@ -132,9 +133,8 @@ void RobotWalk::reset_engine() {
 }
 
 std::vector<int64_t> RobotWalk::get_state_space() {
-    int nb_features = 0;
-    for (const auto &s: states) nb_features += s->get_size();
-    return {nb_features};
+    return {std::accumulate(
+        states.begin(), states.end(), 0, [](auto a, auto s) { return a + s->get_size(); })};
 }
 
 std::vector<int64_t> RobotWalk::get_action_space() {

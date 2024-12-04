@@ -45,11 +45,12 @@ torch::Tensor ItemProprioceptionState::get_state(torch::Device device) {
          roll / static_cast<float>(M_PI), center_lin_velocity.x(), center_lin_velocity.y(),
          center_lin_velocity.z(), center_ang_velocity.x() / static_cast<float>(M_PI),
          center_ang_velocity.y() / static_cast<float>(M_PI),
-         center_ang_velocity.z() / static_cast<float>(M_PI),
-         center_lin_acceleration.x(), center_lin_acceleration.y(), center_lin_acceleration.z(),
-         center_ang_acceleration.x() / static_cast<float>(M_PI), center_ang_acceleration.y() / static_cast<float>(M_PI),
-         center_ang_acceleration.z() / static_cast<float>(M_PI),
-         touched}, at::TensorOptions().device(device));
+         center_ang_velocity.z() / static_cast<float>(M_PI), center_lin_acceleration.x(),
+         center_lin_acceleration.y(), center_lin_acceleration.z(),
+         center_ang_acceleration.x() / static_cast<float>(M_PI),
+         center_ang_acceleration.y() / static_cast<float>(M_PI),
+         center_ang_acceleration.z() / static_cast<float>(M_PI), touched},
+        at::TensorOptions().device(device));
 
     /*return torch::cat(
     {main_state, get_point_state(glm::vec3(1, 0, 0)), get_point_state(glm::vec3(-1, 0, 0)),
@@ -88,7 +89,8 @@ torch::Tensor MemberState::get_state(torch::Device device) {
         state_item.model_matrix() * center_point - root_item.model_matrix() * center_point;
     return torch::cat(
         {ItemProprioceptionState::get_state(device),
-         torch::tensor({center_pos.x, center_pos.y, center_pos.z}, at::TensorOptions().device(device))});
+         torch::tensor(
+             {center_pos.x, center_pos.y, center_pos.z}, at::TensorOptions().device(device))});
 }
 
 // Root Member class
@@ -101,9 +103,10 @@ int RootMemberState::get_size() { return ItemProprioceptionState::get_size() + 3
 torch::Tensor RootMemberState::get_state(torch::Device device) {
     const auto center_pos = state_item.get_body()->getCenterOfMassPosition();
     return torch::cat(
-        {ItemProprioceptionState::get_state(device), torch::tensor(
-         {log(center_pos.norm() + 1.f), center_pos.y(),
-          atan2(center_pos.z(), center_pos.x())}, at::TensorOptions().device(device))});
+        {ItemProprioceptionState::get_state(device),
+         torch::tensor(
+             {log(center_pos.norm() + 1.f), center_pos.y(), atan2(center_pos.z(), center_pos.x())},
+             at::TensorOptions().device(device))});
 }
 
 // Muscle
@@ -118,5 +121,6 @@ int MuscleState::get_size() { return 4; }
 torch::Tensor MuscleState::get_state(torch::Device device) {
     return torch::tensor(
         {slider_constraint->getLinearPos(), slider_constraint->getAppliedImpulse(),
-         p2p_a->getAppliedImpulse(), p2p_b->getAppliedImpulse()}, at::TensorOptions().device(device));
+         p2p_a->getAppliedImpulse(), p2p_b->getAppliedImpulse()},
+        at::TensorOptions().device(device));
 }

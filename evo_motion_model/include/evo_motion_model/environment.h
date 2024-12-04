@@ -8,9 +8,9 @@
 #include <vector>
 
 #include <btBulletDynamicsCommon.h>
-#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
 #include <BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h>
 #include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
 #include <torch/torch.h>
 
 #include "./controller.h"
@@ -23,9 +23,10 @@ struct step {
 };
 
 class InitBtThread {
-    public:
-    InitBtThread(int num_threads);
+public:
+    explicit InitBtThread(int num_threads);
     btDefaultCollisionConstructionInfo get_cci();
+
 private:
     btDefaultCollisionConstructionInfo cci;
 };
@@ -34,6 +35,7 @@ class Environment {
 private:
     int num_threads;
     InitBtThread init_thread;
+
 protected:
     torch::DeviceType curr_device;
 
@@ -50,10 +52,10 @@ protected:
 
     void add_item(const Item &item) const;
 
-    void step_world(float delta);
+    void step_world(float delta) const;
 
 public:
-    Environment(int num_threads);
+    explicit Environment(int num_threads);
 
     virtual std::vector<Item> get_items() = 0;
 
@@ -76,6 +78,8 @@ public:
 
 class EnvironmentFactory {
 public:
+    virtual ~EnvironmentFactory() = default;
+
     explicit EnvironmentFactory(std::map<std::string, std::string> parameters);
     virtual std::shared_ptr<Environment> get_env(int seed) = 0;
 
