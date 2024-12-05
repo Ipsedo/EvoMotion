@@ -7,22 +7,22 @@
 #include <evo_motion_networks/networks/misc.h>
 
 ActorLiquidModule::ActorLiquidModule(
-    const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
+    const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int neuron_number,
     int unfolding_steps) {
 
     const auto input_space = state_space[0];
 
     liquid_network = register_module(
         "liquid_network",
-        std::make_shared<LiquidCellModule>(input_space, hidden_size, unfolding_steps));
+        std::make_shared<LiquidCellModule>(input_space, neuron_number, unfolding_steps));
 
     mu = register_module(
         "mu",
-        torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
+        torch::nn::Sequential(torch::nn::Linear(neuron_number, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-                     torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus(),
+                     torch::nn::Linear(neuron_number, action_space[0]), torch::nn::Softplus(),
                      ClampModule(1e-3, 1e2)));
 
     mu->apply(init_weights);

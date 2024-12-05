@@ -50,7 +50,7 @@ private:
 class ActorLiquidModule final : public AbstractActor {
 public:
     ActorLiquidModule(
-        const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
+        const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int neuron_number,
         int unfolding_steps);
 
     void reset_liquid() const;

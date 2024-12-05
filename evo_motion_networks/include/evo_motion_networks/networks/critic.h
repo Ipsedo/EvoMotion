@@ -44,7 +44,7 @@ private:
 class CriticLiquidModule final : public AbstractCritic {
 public:
     CriticLiquidModule(
-        const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps);
+        const std::vector<int64_t> &state_space, int neuron_number, int unfolding_steps);
 
     void reset_liquid() const;
     torch::Tensor get_x() const;
