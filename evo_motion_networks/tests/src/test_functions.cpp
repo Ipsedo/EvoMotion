@@ -91,7 +91,9 @@ TEST_P(ParamTestTruncNormal, TestSample) {
 
     ASSERT_TRUE(torch::all(out >= min_value).item().toBool());
     ASSERT_TRUE(torch::all(out <= max_value).item().toBool());
+
     ASSERT_TRUE(torch::all(torch::logical_not(torch::isnan(out))).item().toBool());
+    ASSERT_TRUE(torch::all(torch::logical_not(torch::isinf(out))).item().toBool());
 }
 
 // PDF
@@ -111,10 +113,13 @@ TEST_P(ParamTestTruncNormal, TestPDF) {
         ASSERT_EQ(sizes[i], out_log.size(i));
     }
 
-    ASSERT_TRUE(torch::all(out >= 0.f).item().toBool());
+    ASSERT_TRUE(torch::all(out > 0.f).item().toBool());
 
     ASSERT_TRUE(torch::all(torch::logical_not(torch::isnan(out))).item().toBool());
     ASSERT_TRUE(torch::all(torch::logical_not(torch::isnan(out_log))).item().toBool());
+
+    ASSERT_TRUE(torch::all(torch::logical_not(torch::isinf(out))).item().toBool());
+    ASSERT_TRUE(torch::all(torch::logical_not(torch::isinf(out_log))).item().toBool());
 }
 
 // Entropy
@@ -130,6 +135,7 @@ TEST_P(ParamTestTruncNormal, TestEntropy) {
     for (int i = 0; i < sizes.size(); i++) { ASSERT_EQ(sizes[i], out.size(i)); }
 
     ASSERT_TRUE(torch::all(torch::logical_not(torch::isnan(out))).item().toBool());
+    ASSERT_TRUE(torch::all(torch::logical_not(torch::isinf(out))).item().toBool());
 }
 
 // Create parametrized tests
