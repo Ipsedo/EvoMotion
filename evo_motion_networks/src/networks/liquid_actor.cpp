@@ -22,8 +22,7 @@ ActorLiquidModule::ActorLiquidModule(
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(
-                     torch::nn::Linear(hidden_size, action_space[0]),
-                     torch::nn::Softplus(torch::nn::SoftplusOptions().beta(1.f).threshold(20.f)),
+                     torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus(),
                      ClampModule(1e-3, 1e2)));
 
     mu->apply(init_weights);
