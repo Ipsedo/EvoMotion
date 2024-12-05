@@ -11,6 +11,7 @@
 #include <evo_motion_networks/agents/actor_critic_liquid.h>
 #include <evo_motion_networks/agents/debug_agents.h>
 #include <evo_motion_networks/agents/ppo_gae.h>
+#include <evo_motion_networks/agents/ppo_gae_liquid.h>
 #include <evo_motion_networks/agents/ppo_vanilla.h>
 #include <evo_motion_networks/agents/soft_actor_critic.h>
 #include <evo_motion_networks/agents/soft_actor_critic_liquid.h>
@@ -155,6 +156,21 @@ std::shared_ptr<Agent> PpoVanillaFactory::create_agent(
         get_value<int>("batch_size"), get_value<float>("learning_rate"));
 }
 
+PpoGaeLiquidFactory::PpoGaeLiquidFactory(const std::map<std::string, std::string> &parameters)
+    : AgentFactory(parameters) {}
+
+std::shared_ptr<Agent> PpoGaeLiquidFactory::create_agent(
+    const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
+    return std::make_shared<PpoGaeLiquidAgent>(
+        get_value<int>("seed"), state_space, action_space, get_value<int>("neuron_number"),
+        get_value<int>("unfolding_steps"), get_value<float>("gamma"), get_value<float>("lambda"),
+        get_value<float>("epsilon"), get_value<float>("entropy_factor"),
+        get_value<float>("critic_loss_factor"), get_value<int>("epoch"),
+        get_value<int>("batch_size"), get_value<int>("train_every"),
+        get_value<int>("replay_buffer_size"), get_value<float>("learning_rate"),
+        get_value<float>("clip_grad_norm"));
+}
+
 // Build factory
 
 std::map<
@@ -170,6 +186,8 @@ std::map<
         {"soft_actor_critic_liquid",
          std::make_shared<SofActorCriticLiquidFactory, std::map<std::string, std::string>>},
         {"ppo_gae", std::make_shared<PpoGaeFactory, std::map<std::string, std::string>>},
+        {"ppo_gae_liquid",
+         std::make_shared<PpoGaeLiquidFactory, std::map<std::string, std::string>>},
         {"ppo_vanilla", std::make_shared<PpoVanillaFactory, std::map<std::string, std::string>>}};
 
 std::shared_ptr<AgentFactory>

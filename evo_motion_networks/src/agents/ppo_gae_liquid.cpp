@@ -1,20 +1,21 @@
 //
-// Created by samuel on 13/11/24.
+// Created by samuel on 05/12/24.
 //
 
-#include <evo_motion_networks/agents/ppo_gae.h>
+#include <evo_motion_networks/agents/ppo_gae_liquid.h>
 #include <evo_motion_networks/functions.h>
 #include <evo_motion_networks/saver.h>
 
-PpoGaeAgent::PpoGaeAgent(
+PpoGaeLiquidAgent::PpoGaeLiquidAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const float gamma, const float lam,
-    const float epsilon, const float entropy_factor, const float critic_loss_factor,
-    const int epoch, const int batch_size, const int train_every, const int replay_buffer_size,
-    float learning_rate, const float clip_grad_norm)
-    : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
+    const std::vector<int64_t> &action_space, int neuron_number, int unfolding_steps,
+    const float gamma, const float lam, const float epsilon, const float entropy_factor,
+    const float critic_loss_factor, const int epoch, const int batch_size, const int train_every,
+    const int replay_buffer_size, float learning_rate, const float clip_grad_norm)
+    : actor(std::make_shared<ActorLiquidModule>(
+          state_space, action_space, neuron_number, unfolding_steps)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
-      critic(std::make_shared<CriticModule>(state_space, hidden_size)),
+      critic(std::make_shared<CriticLiquidModule>(state_space, neuron_number, unfolding_steps)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
       gamma(gamma), lambda(lam), epsilon(epsilon), epoch(epoch), entropy_factor(entropy_factor),
       critic_loss_factor(critic_loss_factor), clip_grad_norm(clip_grad_norm), curr_train_step(0L),
@@ -26,8 +27,11 @@ PpoGaeAgent::PpoGaeAgent(
     at::manual_seed(seed);
 }
 
-torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
+torch::Tensor PpoGaeLiquidAgent::act(const torch::Tensor state, const float reward) {
     set_eval(true);
+
+    const auto actor_x_t = actor->get_x().squeeze(0);
+    const auto critic_x_t = critic->get_x().squeeze(0);
 
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.0, 1.0);
@@ -37,14 +41,15 @@ torch::Tensor PpoGaeAgent::act(const torch::Tensor state, const float reward) {
     if (replay_buffer.empty()) replay_buffer.new_trajectory();
     if (!replay_buffer.trajectory_empty()) replay_buffer.update_last(reward, false, value.detach());
     replay_buffer.add(
-        {state, action.detach(), 0.0, false, log_prob.detach(), value.detach(), value.detach()});
+        {{state, action.detach(), 0.0, false, log_prob.detach(), value.detach(), value.detach()},
+         {actor_x_t.detach(), critic_x_t.detach()}});
 
     curr_episode_step++;
 
     return action;
 }
 
-void PpoGaeAgent::done(const torch::Tensor state, const float reward) {
+void PpoGaeLiquidAgent::done(const torch::Tensor state, const float reward) {
     set_eval(true);
 
     const auto [value] = critic->forward(state);
@@ -53,6 +58,9 @@ void PpoGaeAgent::done(const torch::Tensor state, const float reward) {
 
     check_train();
 
+    actor->reset_liquid();
+    critic->reset_liquid();
+
     replay_buffer.new_trajectory();
     global_curr_step++;
 
@@ -60,14 +68,15 @@ void PpoGaeAgent::done(const torch::Tensor state, const float reward) {
     curr_episode_step = 0L;
 }
 
-void PpoGaeAgent::check_train() {
+void PpoGaeLiquidAgent::check_train() {
     if ((global_curr_step % train_every == train_every - 1)
         && replay_buffer.enough_trajectory(batch_size)) {
 
         const auto episodes = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> batch_vec_states, batch_vec_actions, batch_vec_rewards,
-            batch_vec_done, batch_vec_log_prob, batch_vec_curr_values, batch_vec_next_values;
+            batch_vec_done, batch_vec_log_prob, batch_vec_curr_values, batch_vec_next_values,
+            batch_vec_actor_x_t, batch_vec_critic_x_t;
 
         int max_steps = 0;
         for (const auto &[trajectory]: episodes)
@@ -75,10 +84,13 @@ void PpoGaeAgent::check_train() {
 
         for (const auto &[trajectory]: episodes) {
             std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_log_prob,
-                vec_curr_values, vec_next_values;
+                vec_curr_values, vec_next_values, vec_actor_x_t, vec_critic_x_t;
 
-            for (const auto &[state, action, reward, done, log_prob, curr_value, next_value]:
-                 trajectory) {
+            for (const auto &[buffer, liquid_memory]: trajectory) {
+                const auto &[state, action, reward, done, log_prob, curr_value, next_value] =
+                    buffer;
+                const auto &[actor_x_t, critic_x_t] = liquid_memory;
+
                 vec_states.push_back(state);
                 vec_actions.push_back(action);
                 vec_rewards.push_back(
@@ -89,6 +101,9 @@ void PpoGaeAgent::check_train() {
                 vec_log_prob.push_back(log_prob);
                 vec_curr_values.push_back(curr_value);
                 vec_next_values.push_back(next_value);
+
+                vec_actor_x_t.push_back(actor_x_t);
+                vec_critic_x_t.push_back(critic_x_t);
             }
 
             const int pad = max_steps - static_cast<int>(trajectory.size());
@@ -104,22 +119,27 @@ void PpoGaeAgent::check_train() {
                 torch::pad(torch::stack(vec_curr_values), {0, 0, 0, pad}));
             batch_vec_next_values.push_back(
                 torch::pad(torch::stack(vec_next_values), {0, 0, 0, pad}));
+
+            batch_vec_actor_x_t.push_back(torch::pad(torch::stack(vec_actor_x_t), {0, 0, 0, pad}));
+            batch_vec_critic_x_t.push_back(
+                torch::pad(torch::stack(vec_critic_x_t), {0, 0, 0, pad}));
         }
 
         train(
             torch::stack(batch_vec_states), torch::stack(batch_vec_actions),
             torch::stack(batch_vec_rewards), torch::stack(batch_vec_done),
             torch::stack(batch_vec_log_prob), torch::stack(batch_vec_curr_values),
-            torch::stack(batch_vec_next_values));
+            torch::stack(batch_vec_next_values), torch::stack(batch_vec_actor_x_t),
+            torch::stack(batch_vec_critic_x_t));
     }
 }
 
-void PpoGaeAgent::train(
+void PpoGaeLiquidAgent::train(
     const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_log_prob, const torch::Tensor &batched_curr_values,
-    const torch::Tensor &batched_next_values) {
-
+    const torch::Tensor &batched_next_values, const torch::Tensor &batched_actor_x_t,
+    const torch::Tensor &batched_critic_x_t) {
     //torch::autograd::DetectAnomalyGuard guard;
 
     set_eval(false);
@@ -151,11 +171,11 @@ void PpoGaeAgent::train(
     const auto returns = advantages + batched_curr_values;
 
     for (int i = 0; i < epoch; i++) {
-        const auto [mu, sigma] = actor->forward(batched_states);
+        const auto [mu, sigma, next_actor_x_t] = actor->forward(batched_actor_x_t, batched_states);
         const auto log_prob = truncated_normal_log_pdf(batched_actions, mu, sigma, -1.0, 1.0);
         const auto entropy = truncated_normal_entropy(mu, sigma, -1.0, 1.0);
 
-        const auto [value] = critic->forward(batched_states);
+        const auto [value, next_critic_x] = critic->forward(batched_critic_x_t, batched_states);
 
         // actor
         const auto ratios = torch::exp(log_prob - batched_log_prob);
@@ -189,35 +209,35 @@ void PpoGaeAgent::train(
     curr_train_step++;
 }
 
-void PpoGaeAgent::save(const std::string &output_folder_path) {
+void PpoGaeLiquidAgent::save(const std::string &output_folder_path) {
     save_torch(output_folder_path, actor, "actor.th");
     save_torch(output_folder_path, actor_optimizer, "actor_optimizer.th");
     save_torch(output_folder_path, critic, "critic.th");
     save_torch(output_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
-void PpoGaeAgent::load(const std::string &input_folder_path) {
+void PpoGaeLiquidAgent::load(const std::string &input_folder_path) {
     load_torch(input_folder_path, actor, "actor.th");
     load_torch(input_folder_path, actor_optimizer, "actor_optimizer.th");
     load_torch(input_folder_path, critic, "critic.th");
     load_torch(input_folder_path, critic_optimizer, "critic_optimizer.th");
 }
 
-std::vector<LossMeter> PpoGaeAgent::get_metrics() {
+std::vector<LossMeter> PpoGaeLiquidAgent::get_metrics() {
     return {actor_loss_meter, critic_loss_meter, episode_steps_meter};
 }
 
-void PpoGaeAgent::to(const torch::DeviceType device) {
+void PpoGaeLiquidAgent::to(const torch::DeviceType device) {
     curr_device = device;
     actor->to(device);
     critic->to(device);
 }
 
-void PpoGaeAgent::set_eval(const bool eval) {
+void PpoGaeLiquidAgent::set_eval(const bool eval) {
     actor->train(!eval);
     critic->train(!eval);
 }
 
-int PpoGaeAgent::count_parameters() {
+int PpoGaeLiquidAgent::count_parameters() {
     return count_module_parameters(actor) + count_module_parameters(critic);
 }

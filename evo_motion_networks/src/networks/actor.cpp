@@ -35,7 +35,8 @@ ActorModule::ActorModule(
             torch::nn::LayerNorm(
                 torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
-            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
+            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus(),
+            ClampModule(1e-3, 1e2)));
 
     head->apply(init_weights);
     mu->apply(init_weights);

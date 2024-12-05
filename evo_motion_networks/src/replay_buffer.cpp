@@ -189,3 +189,25 @@ template<typename EpisodeStep, class... UpdateArgs>
 void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::clear() {
     memory.clear();
 }
+
+// Liquid trajectory
+template<typename LiquidMemory>
+LiquidTrajectoryReplayBuffer<LiquidMemory>::LiquidTrajectoryReplayBuffer(int size, int seed)
+    : AbstractTrajectoryBuffer<liquid_ppo_episode_step<LiquidMemory>, float, bool, torch::Tensor>(
+          size, seed) {}
+
+template<typename LiquidMemory>
+liquid_ppo_episode_step<LiquidMemory> LiquidTrajectoryReplayBuffer<LiquidMemory>::update_last_step(
+    liquid_ppo_episode_step<LiquidMemory> last_step, float reward, bool done,
+    torch::Tensor next_value) {
+    last_step.replay_buffer.reward = reward;
+    last_step.replay_buffer.done = done;
+    last_step.replay_buffer.next_value = next_value;
+    return last_step;
+}
+
+template<typename LiquidMemory>
+bool LiquidTrajectoryReplayBuffer<LiquidMemory>::is_finish(
+    liquid_ppo_episode_step<LiquidMemory> step) {
+    return step.replay_buffer.done;
+}

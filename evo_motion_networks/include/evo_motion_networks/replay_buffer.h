@@ -29,6 +29,8 @@ struct ppo_episode_step {
     torch::Tensor next_value;
 };
 
+// liquid memory
+
 struct liquid_a2c_memory {
     torch::Tensor actor_x_t;
     torch::Tensor critic_x_t;
@@ -47,6 +49,12 @@ struct liquid_episode_step {
     episode_step replay_buffer;
     LiquidMemory x_t;
     LiquidMemory next_x_t;
+};
+
+template<typename LiquidMemory>
+struct liquid_ppo_episode_step {
+    ppo_episode_step replay_buffer;
+    LiquidMemory x_t;
 };
 
 // trajectory
@@ -121,6 +129,8 @@ protected:
         episode_step last_item, float reward, torch::Tensor next_state, bool done) override;
 };
 
+// liquid replay buffer
+
 template<typename LiquidMemory>
 class LiquidReplayBuffer
     : public AbstractReplayBuffer<liquid_episode_step<LiquidMemory>, float, torch::Tensor, bool> {
@@ -132,6 +142,11 @@ protected:
         liquid_episode_step<LiquidMemory> last_item, float reward, torch::Tensor next_state,
         bool done) override;
 };
+
+template class LiquidReplayBuffer<liquid_a2c_memory>;
+template class LiquidReplayBuffer<liquid_sac_memory>;
+
+// trajectory
 
 class TrajectoryReplayBuffer
     : public AbstractTrajectoryBuffer<ppo_episode_step, float, bool, torch::Tensor> {
@@ -145,7 +160,21 @@ protected:
     bool is_finish(ppo_episode_step step) override;
 };
 
-template class LiquidReplayBuffer<liquid_a2c_memory>;
-template class LiquidReplayBuffer<liquid_sac_memory>;
+template<typename LiquidMemory>
+class LiquidTrajectoryReplayBuffer
+    : public AbstractTrajectoryBuffer<
+          liquid_ppo_episode_step<LiquidMemory>, float, bool, torch::Tensor> {
+public:
+    LiquidTrajectoryReplayBuffer(int size, int seed);
+
+protected:
+    liquid_ppo_episode_step<LiquidMemory> update_last_step(
+        liquid_ppo_episode_step<LiquidMemory> last_step, float reward, bool done,
+        torch::Tensor next_value) override;
+
+    bool is_finish(liquid_ppo_episode_step<LiquidMemory> step) override;
+};
+
+template class LiquidTrajectoryReplayBuffer<liquid_a2c_memory>;
 
 #endif//EVO_MOTION_REPLAY_BUFFER_H
