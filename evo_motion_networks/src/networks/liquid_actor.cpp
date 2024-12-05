@@ -17,8 +17,8 @@ ActorLiquidModule::ActorLiquidModule(
         std::make_shared<LiquidCellModule>(input_space, neuron_number, unfolding_steps));
 
     mu = register_module(
-        "mu",
-        torch::nn::Sequential(torch::nn::Linear(neuron_number, action_space[0]), torch::nn::Tanh()));
+        "mu", torch::nn::Sequential(
+                  torch::nn::Linear(neuron_number, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
         "sigma", torch::nn::Sequential(

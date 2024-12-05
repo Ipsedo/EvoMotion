@@ -75,12 +75,13 @@ torch::Tensor truncated_normal_sample(
     const float max_value) {
     const auto alpha = (min_value - mu) / sigma;
     const auto beta = (max_value - mu) / sigma;
-    return theta_inv(
-               theta(alpha)
-               + at::rand(mu.sizes(), at::TensorOptions(mu.device()))
-                     * (theta(beta) - theta(alpha)))
-               * sigma
-           + mu;
+    return torch::clamp(
+        theta_inv(
+            theta(alpha)
+            + at::rand(mu.sizes(), at::TensorOptions(mu.device())) * (theta(beta) - theta(alpha)))
+                * sigma
+            + mu,
+        min_value, max_value);
 }
 
 torch::Tensor truncated_normal_entropy(

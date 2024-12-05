@@ -153,7 +153,7 @@ TEST_P(ParamActorCriticAgent, TestPpoGae) {
 
     auto agent = PpoGaeAgent(
         1234, {state_space}, {action_space}, hidden_size, 0.99f, 0.95f, 0.2f, 0.01f, 0.5f, 1,
-        batch_size, 1e-3f, 0.5f);
+        batch_size, 1, batch_size * 2, 1e-3f, 0.5f);
 
     for (int i = 0; i < batch_size; i++) {
         for (int j = 0; j < 2; j++) {

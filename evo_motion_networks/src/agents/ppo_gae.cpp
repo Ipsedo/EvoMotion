@@ -8,10 +8,10 @@
 
 PpoGaeAgent::PpoGaeAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const float gamma, const float lambda,
-    const float epsilon, const float entropy_factor, const float critic_loss_factor,
-    const int epoch, const int batch_size, const int train_every, const int replay_buffer_size,
-    float learning_rate, const float clip_grad_norm)
+    const std::vector<int64_t> &action_space, int hidden_size, const float gamma,
+    const float lambda, const float epsilon, const float entropy_factor,
+    const float critic_loss_factor, const int epoch, const int batch_size, const int train_every,
+    const int replay_buffer_size, float learning_rate, const float clip_grad_norm)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticModule>(state_space, hidden_size)),
