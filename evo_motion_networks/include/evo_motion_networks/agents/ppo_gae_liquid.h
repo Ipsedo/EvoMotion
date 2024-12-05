@@ -14,7 +14,7 @@ class PpoGaeLiquidAgent final : public Agent {
 public:
     PpoGaeLiquidAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int neuron_number, int unfolding_steps, float gamma, float lam, float epsilon,
+        int neuron_number, int unfolding_steps, float gamma, float lambda, float epsilon,
         float entropy_factor, float critic_loss_factor, int epoch, int batch_size, int train_every,
         int replay_buffer_size, float learning_rate, float clip_grad_norm);
 

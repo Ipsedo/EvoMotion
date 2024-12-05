@@ -9,7 +9,7 @@
 PpoGaeLiquidAgent::PpoGaeLiquidAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int neuron_number, int unfolding_steps,
-    const float gamma, const float lam, const float epsilon, const float entropy_factor,
+    const float gamma, const float lambda, const float epsilon, const float entropy_factor,
     const float critic_loss_factor, const int epoch, const int batch_size, const int train_every,
     const int replay_buffer_size, float learning_rate, const float clip_grad_norm)
     : actor(std::make_shared<ActorLiquidModule>(
@@ -17,7 +17,7 @@ PpoGaeLiquidAgent::PpoGaeLiquidAgent(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), learning_rate)),
       critic(std::make_shared<CriticLiquidModule>(state_space, neuron_number, unfolding_steps)),
       critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), learning_rate)),
-      gamma(gamma), lambda(lam), epsilon(epsilon), epoch(epoch), entropy_factor(entropy_factor),
+      gamma(gamma), lambda(lambda), epsilon(epsilon), epoch(epoch), entropy_factor(entropy_factor),
       critic_loss_factor(critic_loss_factor), clip_grad_norm(clip_grad_norm), curr_train_step(0L),
       curr_episode_step(0L), global_curr_step(0L), batch_size(batch_size),
       replay_buffer(replay_buffer_size, seed), train_every(train_every),
