@@ -21,22 +21,11 @@ ActorModule::ActorModule(
 
     mu = register_module(
         "mu",
-        torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-
-            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
+        torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
 
     sigma = register_module(
-        "sigma",
-        torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-
-            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus(),
-            ClampModule(1e-3, 1e2)));
+        "sigma", torch::nn::Sequential(
+                     torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
 
     head->apply(init_weights);
     mu->apply(init_weights);
