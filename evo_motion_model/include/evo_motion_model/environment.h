@@ -69,8 +69,6 @@ public:
 
     virtual std::vector<int64_t> get_action_space() = 0;
 
-    [[nodiscard]] virtual bool is_continuous() const = 0;
-
     void to(torch::DeviceType device);
 
     virtual ~Environment();

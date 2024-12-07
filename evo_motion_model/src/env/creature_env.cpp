@@ -140,5 +140,3 @@ std::vector<int64_t> RobotWalk::get_state_space() {
 std::vector<int64_t> RobotWalk::get_action_space() {
     return {static_cast<long>(controllers.size())};
 }
-
-bool RobotWalk::is_continuous() const { return true; }

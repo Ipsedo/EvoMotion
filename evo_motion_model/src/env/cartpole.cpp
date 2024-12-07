@@ -177,5 +177,3 @@ void CartPole::reset_engine() {
 std::vector<int64_t> CartPole::get_state_space() { return {7}; }
 
 std::vector<int64_t> CartPole::get_action_space() { return {1}; }
-
-bool CartPole::is_continuous() const { return true; }
