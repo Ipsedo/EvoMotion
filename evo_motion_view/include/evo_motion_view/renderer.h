@@ -16,6 +16,10 @@
 #include "./camera.h"
 #include "./drawable.h"
 
+void GLAPIENTRY message_callback(
+    GLenum source, GLenum type, GLuint id, GLenum severity,
+    GLsizei length, GLchar *message, const void *userParam);
+
 class Renderer {
 public:
     Renderer(const std::string &title, int width, int height, std::shared_ptr<Camera> camera);
@@ -50,6 +54,20 @@ private:
 
     std::map<std::string, std::shared_ptr<Drawable>> drawables;
 
+    GLFWwindow *window;
+};
+
+class ImGuiRenderer {
+public:
+    ImGuiRenderer(const std::string &title, int width, int height);
+
+    void draw();
+
+    bool is_close();
+
+    virtual ~ImGuiRenderer();
+
+private:
     GLFWwindow *window;
 };
 

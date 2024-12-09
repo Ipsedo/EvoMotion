@@ -34,4 +34,6 @@ void train(
     const std::shared_ptr<AgentFactory> &agent_factory,
     const std::shared_ptr<EnvironmentFactory> &environment_factory);
 
+void gui();
+
 #endif//EVO_MOTION_RUN_H
