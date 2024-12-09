@@ -63,12 +63,14 @@ public:
 
     void draw();
 
-    bool is_close();
+    bool is_close() const;
 
     virtual ~ImGuiRenderer();
 
 private:
     GLFWwindow *window;
+    bool show_menu;
+    bool need_close;
 };
 
 #endif//EVO_MOTION_RENDERER_H
