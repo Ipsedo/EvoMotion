@@ -2,15 +2,16 @@
 // Created by samuel on 09/12/24.
 //
 
-#include <evo_motion_view/renderer.h>
-
 #include <iostream>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-ImGuiRenderer::ImGuiRenderer(const std::string &title, int width, int height) {
+#include <evo_motion_view/renderer.h>
+
+ImGuiRenderer::ImGuiRenderer(const std::string &title, const int width, const int height)
+    : show_menu(true), need_close(false) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -29,14 +30,14 @@ ImGuiRenderer::ImGuiRenderer(const std::string &title, int width, int height) {
     }
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
+    glfwSwapInterval(1);// Enable vsync
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     (void) io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;// Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
@@ -50,7 +51,7 @@ ImGuiRenderer::ImGuiRenderer(const std::string &title, int width, int height) {
 }
 
 void ImGuiRenderer::draw() {
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    constexpr auto clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     glfwPollEvents();
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
@@ -63,27 +64,69 @@ void ImGuiRenderer::draw() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    bool show_demo = true;
-    ImGui::ShowDemoWindow(&show_demo);
+    // Demo
+    if (show_menu) ImGui::ShowDemoWindow(&show_menu);
 
-    // End
+    // MenuBar
+    if (ImGui::BeginMainMenuBar()) {
+
+        if (ImGui::BeginMenu("File")) {
+
+            if (ImGui::MenuItem("Open")) { /* TODO open robot JSON */
+            }
+            if (ImGui::MenuItem(
+                    "Save")) { /* TODO save robot JSON on the same file name or create new one */
+            }
+            if (ImGui::MenuItem("Save As")) { /* TODO save robot JSON to a new file */
+            }
+            if (ImGui::MenuItem("Exit")) need_close = true;
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Tools")) {
+
+            if (ImGui::MenuItem("Open Menu")) show_menu = true;
+            if (ImGui::MenuItem(
+                    "Construct Menu")) { /* TODO display the panel like in GIMP to construct the robot */
+            };
+
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Model")) {
+
+            if (ImGui::BeginMenu("Train")) {
+                if (ImGui::MenuItem("on this robot")) {};
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Run")) {
+                if (ImGui::MenuItem("on this robot")) {};
+                ImGui::EndMenu();
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
+    }
+
+    // End - render
     ImGui::Render();
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
-                 clear_color.w);
+    glClearColor(
+        clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
+        clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
-
 }
 
-bool ImGuiRenderer::is_close() {
-    return glfwWindowShouldClose(window);
-}
-
+bool ImGuiRenderer::is_close() const { return need_close || glfwWindowShouldClose(window); }
 
 ImGuiRenderer::~ImGuiRenderer() {
     ImGui_ImplOpenGL3_Shutdown();
@@ -93,4 +136,3 @@ ImGuiRenderer::~ImGuiRenderer() {
     glfwDestroyWindow(window);
     glfwTerminate();
 }
-

@@ -17,8 +17,8 @@
 #include "./drawable.h"
 
 void GLAPIENTRY message_callback(
-    GLenum source, GLenum type, GLuint id, GLenum severity,
-    GLsizei length, GLchar *message, const void *userParam);
+    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar *message,
+    const void *userParam);
 
 class Renderer {
 public:
@@ -63,12 +63,14 @@ public:
 
     void draw();
 
-    bool is_close();
+    bool is_close() const;
 
     virtual ~ImGuiRenderer();
 
 private:
     GLFWwindow *window;
+    bool show_menu;
+    bool need_close;
 };
 
 #endif//EVO_MOTION_RENDERER_H
