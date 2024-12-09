@@ -112,33 +112,33 @@ int main(const int argc, char **argv) {
     }
     if (parser.is_subcommand_used(cli_parser)) {
         const auto agent_parameters =
-            parser.get<std::vector<std::pair<std::string, std::string>>>("agent_parameters");
+            cli_parser.get<std::vector<std::pair<std::string, std::string>>>("agent_parameters");
         const auto agent_factory = get_agent_factory(
-            parser.get<std::string>("agent"),
+            cli_parser.get<std::string>("agent"),
             std::map<std::string, std::string>(agent_parameters.begin(), agent_parameters.end()));
 
         const auto env_parameters =
-            parser.get<std::vector<std::pair<std::string, std::string>>>("env_parameters");
+            cli_parser.get<std::vector<std::pair<std::string, std::string>>>("env_parameters");
         const auto env_factory = get_environment_factory(
-            parser.get<std::string>("environment"),
+            cli_parser.get<std::string>("environment"),
             std::map<std::string, std::string>(env_parameters.begin(), env_parameters.end()));
 
-        if (parser.is_subcommand_used(train_parser))
+        if (cli_parser.is_subcommand_used(train_parser))
             train(
-                parser.get<int>("env_num_threads"), parser.get<int>("env_seed"),
-                parser.get<bool>("cuda"),
+                cli_parser.get<int>("env_num_threads"), cli_parser.get<int>("env_seed"),
+                cli_parser.get<bool>("cuda"),
                 {train_parser.get<std::string>("output_path"), train_parser.get<int>("nb_saves"),
                  train_parser.get<int>("episodes")},
                 agent_factory, env_factory);
-        else if (parser.is_subcommand_used(run_parser))
+        else if (cli_parser.is_subcommand_used(run_parser))
             infer(
-                parser.get<int>("env_num_threads"), parser.get<int>("env_seed"),
-                parser.get<bool>("cuda"),
+                cli_parser.get<int>("env_num_threads"), cli_parser.get<int>("env_seed"),
+                cli_parser.get<bool>("cuda"),
                 {run_parser.get<std::string>("input_folder"), run_parser.get<int>("width"),
                  run_parser.get<int>("height")},
                 agent_factory, env_factory);
         else {
-            std::cerr << "must enter a valid subcommand" << std::endl << parser.help().str() << std::endl;
+            std::cerr << "must enter a valid subcommand" << std::endl << cli_parser.help().str() << std::endl;
             exit(1);
         }
     } else if (parser.is_subcommand_used(gui_parser)) {
