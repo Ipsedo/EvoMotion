@@ -6,7 +6,7 @@
 
 #include "./constants.h"
 
-std::vector<float> OBjSpecular::to_vbo_date(
+std::vector<float> OBjSpecular::to_vbo_data(
     const std::vector<std::tuple<float, float, float>> &vertices,
     const std::vector<std::tuple<float, float, float>> &normals) {
     std::vector<float> vbo_data;
@@ -41,7 +41,7 @@ OBjSpecular::OBjSpecular(
               .add_uniform("u_light_coef")
               .add_uniform("u_shininess")
               .add_uniform("u_cam_pos")
-              .add_buffer("vertices_normals_buffer", OBjSpecular::to_vbo_date(vertices, normals))
+              .add_buffer("vertices_normals_buffer", OBjSpecular::to_vbo_data(vertices, normals))
               .add_attribute("a_position")
               .add_attribute("a_normal")
               .build()) {}

@@ -27,6 +27,39 @@ $ # as root
 $ pacman -Syu nvidia cuda cmake bullet glm glew glfw
 ```
 
+#### ImGUI
+
+To build ImGUI on ArchLinux, you need to add two flags to the PKGBUILD. Edit the PKGBUILD file as follows :
+```bash
+$ # edit PKGBUILD file (with sublime-text for example)
+$ paru -Sy imgui --fm subl
+```
+
+In the PKGBUILD add this two flags (`IMGUI_BUILD_OPENGL3_BINDING` and `IMGUI_BUILD_GLFW_BINDING`) at cmake command in the build section :
+```text
+...
+
+build() {
+  cd $pkgname-$pkgver
+  cmake \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_SHARED_LIBS=ON \
+    -DIMGUI_BUILD_OPENGL3_BINDING=ON \
+    -DIMGUI_BUILD_GLFW_BINDING=ON \
+    -S. \
+    -B cmake-build-shared
+  cmake --build cmake-build-shared
+}
+
+...
+```
+
+Then you can install the library, make sure you see glfw and opengl ImGUI stuff in the build.
+
+If you know a better way to add this two flags, contact me !
+
+#### LibTorch
+
 Download `libtorch` from torch official website and then copy the extracted folder in `/opt/` (here version 2.3.0 with
 CUDA 12.1) :
 

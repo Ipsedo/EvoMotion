@@ -27,7 +27,7 @@ class OBjSpecular final : public Drawable {
 
     Program program;
 
-    static std::vector<float> to_vbo_date(
+    static std::vector<float> to_vbo_data(
         const std::vector<std::tuple<float, float, float>> &vertices,
         const std::vector<std::tuple<float, float, float>> &normals);
 

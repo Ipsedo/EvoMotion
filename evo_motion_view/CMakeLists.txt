@@ -23,18 +23,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 # ImGUI
-set(IMGUI_BUILD_GLFW_BINDING)
-set(IMGUI_BUILD_OPENGL3_BINDING)
 find_package(imgui REQUIRED)
-
-#include(FetchContent)
-#set(IMGUI_BUILD_GLFW_BINDING ON)
-#set(IMGUI_BUILD_OPENGL3_BINDING ON)
-#FetchContent_Declare(
-#        imgui
-#        URL "https://github.com/ocornut/imgui/archive/refs/tags/v1.91.0.tar.gz"
-#)
-#FetchContent_MakeAvailable(imgui)
 
 # evo_motion part
 # Get all source files
