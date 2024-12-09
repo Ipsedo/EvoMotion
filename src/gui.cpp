@@ -2,9 +2,9 @@
 // Created by samuel on 09/12/24.
 //
 
-#include "./run.h"
-
 #include <evo_motion_view/renderer.h>
+
+#include "./run.h"
 
 void gui() {
     ImGuiRenderer renderer("evo_motion", 1920, 1080);

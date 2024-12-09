@@ -17,8 +17,8 @@
 #include "./drawable.h"
 
 void GLAPIENTRY message_callback(
-    GLenum source, GLenum type, GLuint id, GLenum severity,
-    GLsizei length, GLchar *message, const void *userParam);
+    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar *message,
+    const void *userParam);
 
 class Renderer {
 public:

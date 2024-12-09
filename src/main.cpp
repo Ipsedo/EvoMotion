@@ -138,13 +138,15 @@ int main(const int argc, char **argv) {
                  run_parser.get<int>("height")},
                 agent_factory, env_factory);
         else {
-            std::cerr << "must enter a valid subcommand" << std::endl << parser.help().str() << std::endl;
+            std::cerr << "must enter a valid subcommand" << std::endl
+                      << parser.help().str() << std::endl;
             exit(1);
         }
     } else if (parser.is_subcommand_used(gui_parser)) {
         gui();
     } else {
-        std::cerr << "must enter a valid subcommand" << std::endl << parser.help().str() << std::endl;
+        std::cerr << "must enter a valid subcommand" << std::endl
+                  << parser.help().str() << std::endl;
     }
 
     return 0;

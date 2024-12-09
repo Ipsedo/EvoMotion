@@ -2,16 +2,16 @@
 // Created by samuel on 09/12/24.
 //
 
-#include <evo_motion_view/renderer.h>
-
 #include <iostream>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-ImGuiRenderer::ImGuiRenderer(
-    const std::string &title, const int width, const int height) : show_menu(true), need_close(false) {
+#include <evo_motion_view/renderer.h>
+
+ImGuiRenderer::ImGuiRenderer(const std::string &title, const int width, const int height)
+    : show_menu(true), need_close(false) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -65,17 +65,20 @@ void ImGuiRenderer::draw() {
     ImGui::NewFrame();
 
     // Demo
-    if (show_menu)
-        ImGui::ShowDemoWindow(&show_menu);
+    if (show_menu) ImGui::ShowDemoWindow(&show_menu);
 
     // MenuBar
     if (ImGui::BeginMainMenuBar()) {
 
         if (ImGui::BeginMenu("File")) {
 
-            if (ImGui::MenuItem("Open")) { /* TODO open robot JSON */}
-            if (ImGui::MenuItem("Save")) { /* TODO save robot JSON on the same file name or create new one */ }
-            if (ImGui::MenuItem("Save As")) { /* TODO save robot JSON to a new file */ }
+            if (ImGui::MenuItem("Open")) { /* TODO open robot JSON */
+            }
+            if (ImGui::MenuItem(
+                    "Save")) { /* TODO save robot JSON on the same file name or create new one */
+            }
+            if (ImGui::MenuItem("Save As")) { /* TODO save robot JSON to a new file */
+            }
             if (ImGui::MenuItem("Exit")) need_close = true;
 
             ImGui::EndMenu();
@@ -84,7 +87,9 @@ void ImGuiRenderer::draw() {
         if (ImGui::BeginMenu("Tools")) {
 
             if (ImGui::MenuItem("Open Menu")) show_menu = true;
-            if (ImGui::MenuItem("Construct Menu")) { /* TODO display the panel like in GIMP to construct the robot */};
+            if (ImGui::MenuItem(
+                    "Construct Menu")) { /* TODO display the panel like in GIMP to construct the robot */
+            };
 
             ImGui::EndMenu();
         }
@@ -119,11 +124,9 @@ void ImGuiRenderer::draw() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
-
 }
 
 bool ImGuiRenderer::is_close() const { return need_close || glfwWindowShouldClose(window); }
-
 
 ImGuiRenderer::~ImGuiRenderer() {
     ImGui_ImplOpenGL3_Shutdown();
