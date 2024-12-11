@@ -5,6 +5,8 @@
 #ifndef EVO_MOTION_CAMERA_H
 #define EVO_MOTION_CAMERA_H
 
+#include <functional>
+
 #include <glm/glm.hpp>
 
 class Camera {
