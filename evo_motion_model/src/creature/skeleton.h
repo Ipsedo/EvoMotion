@@ -40,7 +40,7 @@ public:
 
     std::vector<Item> get_items();
 
-    Item get_item(const std::string& name);
+    Item get_item(const std::string &name);
 
     std::vector<btTypedConstraint *> get_constraints();
 

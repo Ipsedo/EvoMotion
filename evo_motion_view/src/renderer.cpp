@@ -122,6 +122,4 @@ void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix, f
 void Renderer::on_new_frame() {}
 void Renderer::on_end_frame() {}
 
-void Renderer::reset_camera() {
-    camera->reset();
-}
+void Renderer::reset_camera() { camera->reset(); }

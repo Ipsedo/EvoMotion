@@ -42,7 +42,8 @@ void FollowCamera::step(float delta) {
 
     pos_vec =
         object_smooth_pos
-        + glm::vec3(std::cos(side_angle) * distance, std::sin(up_angle), std::sin(side_angle) * distance);
+        + glm::vec3(
+            std::cos(side_angle) * distance, std::sin(up_angle), std::sin(side_angle) * distance);
     look_vec = object_smooth_pos;
     up_vec = glm::vec3(0, 1.f, 0);
 }

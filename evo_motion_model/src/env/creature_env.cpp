@@ -27,7 +27,8 @@ RobotWalk::RobotWalk(
       initial_remaining_seconds(initial_remaining_seconds), target_velocity(target_velocity),
       minimal_velocity(minimal_velocity), reset_frames(reset_frames), curr_step(0),
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
-      remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)), root_item(skeleton.get_item(skeleton.get_root_name())) {
+      remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)),
+      root_item(skeleton.get_item(skeleton.get_root_name())) {
     base.get_body()->setFriction(0.5f);
 
     add_item(base);
@@ -138,6 +139,4 @@ std::vector<int64_t> RobotWalk::get_action_space() {
     return {static_cast<long>(controllers.size())};
 }
 
-std::optional<Item> RobotWalk::get_camera_track_item() {
-    return root_item;
-}
+std::optional<Item> RobotWalk::get_camera_track_item() { return root_item; }
