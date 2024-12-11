@@ -10,6 +10,7 @@
 #include <utility>
 
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 /*
  * Abstract
@@ -23,8 +24,7 @@ AbstractMember::~AbstractMember() = default;
  * Skeleton
  */
 
-Skeleton::Skeleton(std::string root_name, const std::shared_ptr<AbstractMember> &root_member)
-    : root_name(std::move(root_name)) {
+Skeleton::Skeleton(const std::string &robot_name, const std::shared_ptr<AbstractMember> &root_member) : robot_name(robot_name), root_name(root_member->get_item().get_name()) {
 
     std::queue<std::shared_ptr<AbstractMember>> queue;
     queue.push(root_member);
@@ -52,9 +52,13 @@ std::vector<Item> Skeleton::get_items() {
 
 std::vector<btTypedConstraint *> Skeleton::get_constraints() { return constraints; }
 
-Item Skeleton::get_item(const std::string &name) { return items_map.find(name)->second; }
+Item Skeleton::get_item(const std::string& name) { return items_map.find(name)->second; }
 
 std::string Skeleton::get_root_name() { return root_name; }
+
+std::string Skeleton::get_robot_name() {
+    return robot_name;
+}
 
 /*
  * JSON stuff
@@ -73,7 +77,7 @@ JsonSkeleton::JsonSkeleton(
 
 JsonMember::JsonMember(
     const std::string &name, const glm::mat4 &parent_model_matrix, nlohmann::json json_member_input)
-    : json_member(std::move(json_member_input)), name(name), model_matrix(parent_model_matrix),
+    : json_member(std::move(json_member_input)), model_matrix(parent_model_matrix),
       shape_to_path(
           {{"sphere", "./resources/obj/sphere.obj"},
            {"cube", "./resources/obj/cube.obj"},

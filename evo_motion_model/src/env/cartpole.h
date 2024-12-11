@@ -26,6 +26,8 @@ public:
 
     std::vector<int64_t> get_action_space() override;
 
+    std::optional<Item> get_camera_track_item() override;
+
 protected:
     step compute_step() override;
 

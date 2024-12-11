@@ -30,7 +30,9 @@ public:
 
     void close();
 
-    void draw(const std::map<std::string, glm::mat4> &model_matrix);
+    void draw(const std::map<std::string, glm::mat4> &model_matrix, float delta_t);
+
+    void reset_camera();
 
     virtual ~Renderer();
 
@@ -39,7 +41,7 @@ protected:
 
     virtual void on_end_frame();
 
-    virtual void render_drawables(std::map<std::string, glm::mat4> model_matrix);
+    virtual void render_drawables(std::map<std::string, glm::mat4> model_matrix, float delta_t);
 
 private:
     std::string title;

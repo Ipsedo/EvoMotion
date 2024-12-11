@@ -69,6 +69,8 @@ public:
 
     virtual std::vector<int64_t> get_action_space() = 0;
 
+    virtual std::optional<Item> get_camera_track_item() = 0;
+
     void to(torch::DeviceType device);
 
     virtual ~Environment();

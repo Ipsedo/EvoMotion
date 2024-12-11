@@ -36,20 +36,22 @@ public:
 
 class Skeleton {
 public:
-    Skeleton(std::string root_name, const std::shared_ptr<AbstractMember> &root_member);
+    Skeleton(const std::string &robot_name, const std::shared_ptr<AbstractMember> &root_member);
 
     std::vector<Item> get_items();
 
-    Item get_item(const std::string &name);
+    Item get_item(const std::string& name);
 
     std::vector<btTypedConstraint *> get_constraints();
 
     std::string get_root_name();
+    std::string get_robot_name();
 
 private:
+    std::string robot_name;
     std::string root_name;
     std::vector<btTypedConstraint *> constraints;
-    std::map<std::string, Item> items_map;
+    std::unordered_map<std::string, Item> items_map;
 };
 
 /*
@@ -70,9 +72,8 @@ public:
 
 protected:
     nlohmann::json json_member;
-    std::string name;
     glm::mat4 model_matrix;
-    std::unordered_map<std::string, std::string> shape_to_path;
+    std::map<std::string, std::string> shape_to_path;
     std::shared_ptr<ObjShape> obj_shape;
     Item member;
 };

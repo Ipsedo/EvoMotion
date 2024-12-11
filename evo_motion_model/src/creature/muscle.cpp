@@ -106,13 +106,11 @@ JsonMuscularSystem::JsonMuscularSystem(Skeleton skeleton, const std::string &jso
     auto json_muscles = read_json(json_path)["muscles"];
 
     for (auto json_muscle: json_muscles) {
-        auto item_a_name = json_muscle["item_a"].get<std::string>();
-        auto item_b_name = json_muscle["item_b"].get<std::string>();
-        Item item_a = skeleton.get_item(skeleton.get_root_name() + "_" + item_a_name);
-        Item item_b = skeleton.get_item(skeleton.get_root_name() + "_" + item_b_name);
+        Item item_a = skeleton.get_item(skeleton.get_robot_name() + "_" + json_muscle["item_a"].get<std::string>());
+        Item item_b = skeleton.get_item(skeleton.get_robot_name() + "_" + json_muscle["item_b"].get<std::string>());
 
         muscles.emplace_back(
-            skeleton.get_root_name().append("_").append(json_muscle["name"].get<std::string>()),
+            skeleton.get_robot_name().append("_").append(json_muscle["name"].get<std::string>()),
             json_muscle["attach_mass"].get<float>(),
             json_vec3_to_glm_vec3(json_muscle["attach_scale"]), item_a,
             json_vec3_to_glm_vec3(json_muscle["pos_in_a"]), item_b,

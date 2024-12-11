@@ -22,9 +22,15 @@ void infer(
     const std::shared_ptr<EnvironmentFactory> &environment_factory) {
     std::shared_ptr<Environment> env = environment_factory->get_env(env_num_threads, seed);
 
-    std::shared_ptr<Camera> camera = std::make_shared<StaticCamera>(
-        glm::vec3(1.f, 1.f, -1.f), glm::normalize(glm::vec3(1.f, 0.f, 1.f)),
-        glm::vec3(0.f, 1.f, 0.f));
+    std::shared_ptr<Camera> camera;
+    if (env->get_camera_track_item().has_value()) {
+        const auto track_item = env->get_camera_track_item().value();
+        camera = std::make_shared<FollowCamera>([&track_item](){ return glm::vec3(track_item.model_matrix() * glm::vec4(glm::vec3(0), 1.f));});
+    } else {
+        camera = std::make_shared<StaticCamera>(
+            glm::vec3(1.f, 1.f, -1.f), glm::normalize(glm::vec3(1.f, 0.f, 1.f)),
+            glm::vec3(0.f, 1.f, 0.f));
+    }
 
     Renderer renderer("evo_motion", params.window_width, params.window_height, camera);
 
@@ -80,7 +86,7 @@ void infer(
 
         for (const auto &i: env->get_items()) model_matrix.insert({i.get_name(), i.model_matrix()});
 
-        renderer.draw(model_matrix);
+        renderer.draw(model_matrix, 1.f / 60.f);
 
         std::chrono::duration<double, std::milli> delta = std::chrono::system_clock::now() - before;
 
@@ -90,6 +96,7 @@ void infer(
         if (step.done) {
             agent->done(step.state, step.reward);
             step = env->reset();
+            renderer.reset_camera();
             std::cout << "reset" << std::endl;
         }
     }

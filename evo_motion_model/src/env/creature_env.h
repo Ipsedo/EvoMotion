@@ -28,6 +28,8 @@ public:
 
     std::vector<int64_t> get_action_space() override;
 
+    std::optional<Item> get_camera_track_item() override;
+
 protected:
     step compute_step() override;
 
@@ -57,6 +59,8 @@ private:
     int max_steps;
 
     int remaining_steps;
+
+    Item root_item;
 };
 
 #endif//EVO_MOTION_ENV_TEST_MUSCLE_H

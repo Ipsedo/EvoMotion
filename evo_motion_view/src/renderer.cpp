@@ -84,7 +84,7 @@ void Renderer::close() {
     is_open = false;
 }
 
-void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix) {
+void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix, float delta_t) {
     if (glfwWindowShouldClose(window)) {
         is_open = false;
         return;
@@ -99,14 +99,16 @@ void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix) {
     glViewport(0, 0, display_w, display_h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    render_drawables(model_matrix);
+    render_drawables(model_matrix, delta_t);
 
     on_end_frame();
 
     glfwSwapBuffers(window);
 }
 
-void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix) {
+void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix, float delta_t) {
+    camera->step(delta_t);
+
     const glm::mat4 view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
 
     const glm::mat4 proj_matrix = glm::frustum(
@@ -119,3 +121,7 @@ void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix) {
 
 void Renderer::on_new_frame() {}
 void Renderer::on_end_frame() {}
+
+void Renderer::reset_camera() {
+    camera->reset();
+}
