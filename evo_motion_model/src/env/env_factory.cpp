@@ -77,7 +77,7 @@ std::shared_ptr<Environment> RobotWalkFactory::get_env(int num_threads, int seed
             "skeleton_json_path",
             std::filesystem::path(RESOURCES_PATH) / "./resources/skeleton/spider_new.json"),
         get_value("initial_remaining_seconds", 1.f), get_value("max_episode_seconds", 30.f),
-        get_value("target_velocity", 2.5e-1f), get_value("minimal_velocity", 1e-1f),
+        get_value("target_velocity", 2e-1f), get_value("minimal_velocity", 1e-1f),
         get_value("reset_frames", 10));
 }
 
