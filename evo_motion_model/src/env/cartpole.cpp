@@ -27,17 +27,17 @@ CartPole::CartPole(
     // (init graphical and physical objects)
     Item base(
         "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
-        glm::vec3(0.f, base_pos, 10.f), glm::vec3(10.f, base_height, 10.f), 0.f);
+        glm::vec3(0.f, base_pos, 10.f), glm::vec3(10.f, base_height, 10.f), 0.f, TILE_SPECULAR);
 
     Item chariot(
         "chariot", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, chariot_pos, 10.f), glm::vec3(chariot_width, chariot_height, chariot_width),
-        chariot_mass);
+        chariot_mass, SPECULAR);
 
     Item pendulum(
         "pendulum", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, pendulum_pos, 10.f),
-        glm::vec3(pendulum_width, pendulum_height, pendulum_width), pendulum_mass);
+        glm::vec3(pendulum_width, pendulum_height, pendulum_width), pendulum_mass, SPECULAR);
 
     // Environment item vector
     items = {base, chariot, pendulum};

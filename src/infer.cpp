@@ -11,7 +11,7 @@
 #include <evo_motion_model/environment.h>
 #include <evo_motion_networks/agent.h>
 #include <evo_motion_view/camera.h>
-#include <evo_motion_view/drawable.h>
+#include <evo_motion_view/factory.h>
 #include <evo_motion_view/renderer.h>
 
 #include "./run.h"
@@ -33,13 +33,29 @@ void infer(
     std::uniform_real_distribution dist(0.f, 1.f);
 
     for (const auto &i: env->get_items()) {
-        auto specular = Drawable::Builder::make_specular_obj(
-            i.get_shape()->get_vertices(), i.get_shape()->get_normals(),
-            glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
-            glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
-            glm::vec4(dist(rng), dist(rng), dist(rng), 1.f), 300.f);
+        std::shared_ptr<DrawableFactory> factory;
 
-        renderer.add_drawable(i.get_name(), specular);
+        switch (i.get_drawable_kind()) {
+            case SPECULAR:
+                factory = std::make_shared<ObjSpecularFactory>(
+                    i.get_shape()->get_vertices(), i.get_shape()->get_normals(),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f), 300.f);
+                break;
+            case TILE_SPECULAR:
+                factory = std::make_shared<TileGroundFactory>(
+                    i.get_shape()->get_vertices(), i.get_shape()->get_normals(),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f),
+                    glm::vec4(dist(rng), dist(rng), dist(rng), 1.f), 300.f, 1.f);
+                break;
+        }
+
+        renderer.add_drawable(i.get_name(), factory->get_drawable());
     }
 
     std::shared_ptr<Agent> agent =

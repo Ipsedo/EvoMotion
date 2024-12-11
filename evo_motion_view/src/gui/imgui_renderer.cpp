@@ -74,8 +74,8 @@ void ImGuiRenderer::draw() {
 
             if (ImGui::MenuItem("Open")) { /* TODO open robot JSON */
             }
-            if (ImGui::MenuItem(
-                    "Save")) { /* TODO save robot JSON on the same file name or create new one */
+            if (ImGui::MenuItem("Save")) {
+                /* TODO save robot JSON on the same file name or create new one */
             }
             if (ImGui::MenuItem("Save As")) { /* TODO save robot JSON to a new file */
             }
@@ -87,23 +87,29 @@ void ImGuiRenderer::draw() {
         if (ImGui::BeginMenu("Tools")) {
 
             if (ImGui::MenuItem("Open Menu")) show_menu = true;
-            if (ImGui::MenuItem(
-                    "Construct Menu")) { /* TODO display the panel like in GIMP to construct the robot */
-            };
+            if (ImGui::MenuItem("Construct Menu")) {
+                /* TODO display the panel like in GIMP to construct the robot */
+            }
 
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Model")) {
+        if (ImGui::BeginMenu("Algorithm")) {
 
             if (ImGui::BeginMenu("Train")) {
-                if (ImGui::MenuItem("on this robot")) {};
+                if (ImGui::MenuItem("on this robot")) { /* TODO run training in new thread */
+                }
                 ImGui::EndMenu();
             }
 
             if (ImGui::BeginMenu("Run")) {
-                if (ImGui::MenuItem("on this robot")) {};
+                if (ImGui::MenuItem("on this robot")) {
+                    /* TODO run trained agent on main display */
+                }
                 ImGui::EndMenu();
+            }
+
+            if (ImGui::MenuItem("Test / Debug")) { /* TODO run debug agent on robot */
             }
 
             ImGui::EndMenu();

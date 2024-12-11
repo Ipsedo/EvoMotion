@@ -21,7 +21,7 @@ RobotWalk::RobotWalk(
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
-          0.f),
+          0.f, TILE_SPECULAR),
       skeleton_json_path(skeleton_json_path), skeleton(skeleton_json_path, "robot", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path),
       initial_remaining_seconds(initial_remaining_seconds), target_velocity(target_velocity),

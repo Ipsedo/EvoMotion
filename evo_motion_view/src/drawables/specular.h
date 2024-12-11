@@ -11,7 +11,7 @@
 
 #include <evo_motion_view/drawable.h>
 
-#include "./program.h"
+#include "../program.h"
 
 class OBjSpecular final : public Drawable {
     const int position_size;
@@ -38,8 +38,8 @@ public:
         glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess);
 
     void draw(
-        glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 light_pos_from_camera,
-        glm::vec3 camera_pos) override;
+        glm::mat4 projection_matrix, glm::mat4 view_matrix, glm::mat4 model_matrix,
+        glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) override;
 
     ~OBjSpecular() override;
 };

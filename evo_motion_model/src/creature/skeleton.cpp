@@ -83,7 +83,7 @@ JsonMember::JsonMember(
           name + "_" + json_member["name"].get<std::string>(),
           std::make_shared<ObjShape>(shape_to_path[json_member["shape"].get<std::string>()]),
           model_matrix * json_transformation_to_model_matrix(json_member["transformation"]),
-          json_vec3_to_glm_vec3(json_member["scale"]), json_member["mass"].get<float>()) {
+          json_vec3_to_glm_vec3(json_member["scale"]), json_member["mass"].get<float>(), SPECULAR) {
 
     auto option = json_member["option"];
 

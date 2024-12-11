@@ -25,11 +25,11 @@ Muscle::Muscle(
       attach_a(
           name + "_attach_a", std::make_shared<ObjShape>("./resources/obj/sphere.obj"),
           item_a.model_matrix_without_scale() * glm::translate(glm::mat4(1), pos_in_a),
-          attach_scale, attach_mass),
+          attach_scale, attach_mass, SPECULAR),
       attach_b(
           name + "_attach_b", std::make_shared<ObjShape>("./resources/obj/sphere.obj"),
           item_b.model_matrix_without_scale() * glm::translate(glm::mat4(1), pos_in_b),
-          attach_scale, attach_mass) {
+          attach_scale, attach_mass, SPECULAR) {
 
     btTransform frame_in_attach_a;
     frame_in_attach_a.setIdentity();

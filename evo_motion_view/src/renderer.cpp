@@ -113,14 +113,8 @@ void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix) {
         -1.f, 1.f, -static_cast<float>(height) / static_cast<float>(width),
         static_cast<float>(height) / static_cast<float>(width), 1.f, 200.f);
 
-    for (const auto &[name, drawable]: drawables) {
-        glm::mat4 m_matrix = model_matrix[name];
-
-        auto mv_matrix = view_matrix * m_matrix;
-        const auto mvp_matrix = proj_matrix * mv_matrix;
-
-        drawable->draw(mvp_matrix, mv_matrix, light_pos, camera->pos());
-    }
+    for (const auto &[name, drawable]: drawables)
+        drawable->draw(proj_matrix, view_matrix, model_matrix[name], light_pos, camera->pos());
 }
 
 void Renderer::on_new_frame() {}

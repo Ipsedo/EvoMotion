@@ -47,8 +47,11 @@ OBjSpecular::OBjSpecular(
               .build()) {}
 
 void OBjSpecular::draw(
-    const glm::mat4 mvp_matrix, const glm::mat4 mv_matrix, const glm::vec3 light_pos_from_camera,
-    const glm::vec3 camera_pos) {
+    const glm::mat4 projection_matrix, const glm::mat4 view_matrix, const glm::mat4 model_matrix,
+    const glm::vec3 light_pos_from_camera, const glm::vec3 camera_pos) {
+    const auto mv_matrix = view_matrix * model_matrix;
+    const auto mvp_matrix = projection_matrix * mv_matrix;
+
     program.use();
 
     program.attrib("a_position", "vertices_normals_buffer", position_size, stride, 0);
