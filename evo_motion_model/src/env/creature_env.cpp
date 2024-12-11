@@ -34,13 +34,17 @@ RobotWalk::RobotWalk(
     add_item(base);
 
     auto items = skeleton.get_items();
+    std::vector<Item> non_root_items;
+    std::copy_if(items.begin(), items.end(), std::back_inserter(non_root_items), [this](auto i) {
+        return i.get_name() != skeleton.get_root_name();
+    });
 
     add_item(root_item);
     root_item.get_body()->setActivationState(DISABLE_DEACTIVATION);
 
     states.push_back(std::make_shared<RootMemberState>(root_item, base, m_world));
 
-    for (const auto &item: std::vector<Item>(items.begin() + 1, items.end())) {
+    for (const auto &item: non_root_items) {
         states.push_back(std::make_shared<MemberState>(item, root_item, base, m_world));
         add_item(item);
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
