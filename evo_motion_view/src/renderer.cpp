@@ -106,7 +106,7 @@ void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix, float 
     glfwSwapBuffers(window);
 }
 
-void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix, float delta_t) {
+void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix, const float delta_t) {
     camera->step(delta_t);
 
     const glm::mat4 view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
@@ -122,4 +122,4 @@ void Renderer::render_drawables(std::map<std::string, glm::mat4> model_matrix, f
 void Renderer::on_new_frame() {}
 void Renderer::on_end_frame() {}
 
-void Renderer::reset_camera() { camera->reset(); }
+void Renderer::reset_camera() const { camera->reset(); }

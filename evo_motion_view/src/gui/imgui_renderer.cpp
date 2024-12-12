@@ -54,6 +54,7 @@ void ImGuiRenderer::draw() {
     constexpr auto clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     glfwPollEvents();
+
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
         ImGui_ImplGlfw_Sleep(10);
         return;

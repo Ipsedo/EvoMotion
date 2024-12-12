@@ -32,7 +32,7 @@ public:
 
     void draw(const std::map<std::string, glm::mat4> &model_matrix, float delta_t);
 
-    void reset_camera();
+    void reset_camera() const;
 
     virtual ~Renderer();
 
