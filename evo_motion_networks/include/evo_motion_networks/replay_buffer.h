@@ -79,9 +79,7 @@ public:
     virtual void update_last(UpdateArgs... args);
     virtual bool empty();
 
-    virtual ~AbstractReplayBuffer() {
-        memory.clear();
-    }
+    virtual ~AbstractReplayBuffer() { memory.clear(); }
 
 protected:
     virtual ReplayBufferType update_last_item(ReplayBufferType last_item, UpdateArgs... args) = 0;
@@ -108,9 +106,7 @@ public:
     virtual bool enough_trajectory(int batch_size);
     virtual void clear();
 
-    virtual ~AbstractTrajectoryBuffer() {
-        memory.clear();
-    }
+    virtual ~AbstractTrajectoryBuffer() { memory.clear(); }
 
 protected:
     virtual EpisodeStep update_last_step(EpisodeStep last_step, UpdateArgs... args) = 0;
