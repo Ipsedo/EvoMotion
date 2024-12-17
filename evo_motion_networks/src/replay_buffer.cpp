@@ -45,10 +45,10 @@ bool AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::empty() {
     return memory.empty();
 }
 
-template<class ReplayBufferType, class... UpdateArgs>
+/*template<class ReplayBufferType, class... UpdateArgs>
 AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::~AbstractReplayBuffer() {
     memory.clear();
-}
+}*/
 
 /*
  * Abstract trajectory replay buffer
@@ -120,10 +120,10 @@ bool AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::trajectory_empty() {
     return empty() || memory.back().trajectory.empty();
 }
 
-template<typename EpisodeStep, class... UpdateArgs>
+/*template<typename EpisodeStep, class... UpdateArgs>
 AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::~AbstractTrajectoryBuffer() {
     memory.clear();
-}
+}*/
 
 template<typename EpisodeStep, class... UpdateArgs>
 bool AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::enough_trajectory(int batch_size) {
