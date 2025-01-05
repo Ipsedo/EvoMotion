@@ -9,7 +9,7 @@
 
 class EntropyParameter final : public torch::nn::Module {
 public:
-    EntropyParameter();
+    explicit EntropyParameter(float initial_alpha);
     torch::Tensor log_alpha();
     torch::Tensor alpha();
 

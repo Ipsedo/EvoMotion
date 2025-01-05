@@ -36,6 +36,7 @@ private:
     float gamma;
     float tau;
     int batch_size;
+    int epoch;
     ReplayBuffer replay_buffer;
 
     int curr_episode_step;
@@ -60,8 +61,8 @@ private:
 public:
     SoftActorCriticAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, float lr, float gamma, float tau, int replay_buffer_size,
-        int train_every);
+        int hidden_size, int batch_size, int epoch, float lr, float gamma, float tau,
+        int replay_buffer_size, int train_every);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 

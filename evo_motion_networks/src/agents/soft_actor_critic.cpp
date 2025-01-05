@@ -15,8 +15,9 @@
 
 SoftActorCriticAgent::SoftActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
-    const float gamma, const float tau, const int replay_buffer_size, const int train_every)
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size,
+    const int epoch, float lr, const float gamma, const float tau, const int replay_buffer_size,
+    const int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
       critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
@@ -26,17 +27,19 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
       target_entropy(-static_cast<float>(action_space[0])),
-      entropy_parameter(std::make_shared<EntropyParameter>()),
+      entropy_parameter(std::make_shared<EntropyParameter>(1.f)),
       entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)),
-      curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size),
+      curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size), epoch(epoch),
       replay_buffer(replay_buffer_size, seed), curr_episode_step(0), curr_train_step(0L),
-      global_curr_step(0L), actor_loss_meter("actor", 16), critic_1_loss_meter("critic_1", 16),
-      critic_2_loss_meter("critic_2", 16), entropy_loss_meter("entropy", 16),
-      episode_steps_meter("steps", 16), train_every(train_every) {
+      global_curr_step(0L), actor_loss_meter("actor", 64), critic_1_loss_meter("critic_1", 64),
+      critic_2_loss_meter("critic_2", 64), entropy_loss_meter("entropy", 64),
+      episode_steps_meter("steps", 64), train_every(train_every) {
     at::manual_seed(seed);
 
     hard_update(target_critic_1, critic_1);
     hard_update(target_critic_2, critic_2);
+
+    set_eval(true);
 }
 
 torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float reward) {
@@ -56,22 +59,28 @@ torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float r
 
 void SoftActorCriticAgent::check_train() {
     if (global_curr_step % train_every == train_every - 1) {
-        std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
-        std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
+        set_eval(false);
 
-        for (const auto &[state, action, reward, done, next_state]: tmp_replay_buffer) {
-            vec_states.push_back(state);
-            vec_actions.push_back(action);
-            vec_rewards.push_back(torch::tensor({reward}, at::TensorOptions().device(curr_device)));
-            vec_done.push_back(
-                torch::tensor({done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
-            vec_next_state.push_back(next_state);
+        for (int e = 0; e < epoch; e++) {
+            std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
+
+            std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
+
+            for (const auto &[state, action, reward, done, next_state]: tmp_replay_buffer) {
+                vec_states.push_back(state);
+                vec_actions.push_back(action);
+                vec_rewards.push_back(torch::tensor({reward}, at::TensorOptions().device(curr_device)));
+                vec_done.push_back(
+                    torch::tensor({done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
+                vec_next_state.push_back(next_state);
+            }
+            train(
+                torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards),
+                torch::stack(vec_done), torch::stack(vec_next_state));
         }
 
-        train(
-            torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards),
-            torch::stack(vec_done), torch::stack(vec_next_state));
+        set_eval(true);
     }
 }
 
@@ -80,20 +89,24 @@ void SoftActorCriticAgent::train(
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_next_state) {
 
-    const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
-    const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
-    const auto next_log_prob =
-        truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
+    torch::Tensor target_q_values;
+    {
+        torch::NoGradGuard no_grad;
 
-    const auto [next_target_q_value_1] = target_critic_1->forward(batched_next_state, next_action);
-    const auto [next_target_q_value_2] = target_critic_2->forward(batched_next_state, next_action);
+        const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
+        const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
+        const auto next_log_proba = truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
 
-    const auto target_v_value = torch::min(next_target_q_value_1, next_target_q_value_2)
-                                - entropy_parameter->alpha() * next_log_prob;
-    const auto norm_rewards =
-        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
-    const auto target_q_values =
-        (norm_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
+        const auto [next_target_q_value_1] =
+            target_critic_1->forward(batched_next_state, next_action);
+        const auto [next_target_q_value_2] =
+            target_critic_2->forward(batched_next_state, next_action);
+
+        const auto target_v_value = torch::min(next_target_q_value_1, next_target_q_value_2)
+                                    - entropy_parameter->alpha() * next_log_proba;
+
+        target_q_values = batched_rewards + (1.f - batched_done) * gamma * target_v_value;
+    }
 
     // critic 1
     const auto [q_value_1] = critic_1->forward(batched_states, batched_actions);
@@ -114,15 +127,14 @@ void SoftActorCriticAgent::train(
     // policy
     const auto [curr_mu, curr_sigma] = actor->forward(batched_states);
     const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
-    const auto curr_log_prob =
-        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
+    const auto curr_log_proba = truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
 
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
     const auto q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
     const auto actor_loss =
-        torch::mean(entropy_parameter->alpha().detach() * curr_log_prob - q_value);
+        torch::mean(entropy_parameter->alpha().detach() * curr_log_proba - q_value);
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
@@ -130,7 +142,7 @@ void SoftActorCriticAgent::train(
 
     // entropy
     const auto entropy_loss =
-        -torch::mean(entropy_parameter->log_alpha() * (curr_log_prob.detach() + target_entropy));
+        -torch::mean(entropy_parameter->log_alpha() * (curr_log_proba.detach() + target_entropy));
 
     entropy_optimizer->zero_grad();
     entropy_loss.backward();

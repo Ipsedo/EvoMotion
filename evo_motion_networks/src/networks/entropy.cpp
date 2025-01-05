@@ -4,9 +4,11 @@
 
 #include <evo_motion_networks/networks/entropy.h>
 
-EntropyParameter::EntropyParameter() {
-    log_alpha_t =
-        register_parameter("log_alpha", torch::zeros({1}, at::TensorOptions().requires_grad(true)));
+EntropyParameter::EntropyParameter(const float initial_alpha) {
+    log_alpha_t = register_parameter(
+        "log_alpha", torch::tensor(
+                        {std::log(initial_alpha)},
+                         at::TensorOptions().requires_grad(true)));
 }
 
 torch::Tensor EntropyParameter::log_alpha() { return log_alpha_t; }

@@ -16,12 +16,16 @@ AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::AbstractReplayBuffer(
 template<class ReplayBufferType, class... UpdateArgs>
 std::vector<ReplayBufferType>
 AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::sample(const int batch_size) {
-    std::vector<ReplayBufferType> tmp_replay_buffer(memory);
-    std::shuffle(tmp_replay_buffer.begin(), tmp_replay_buffer.end(), rand_gen);
+    std::vector<int> index(memory.size() - 1);
+    std::iota(index.begin(), index.end(), 0);
+    std::shuffle(index.begin(), index.end(), rand_gen);
 
     std::vector<ReplayBufferType> result;
-    for (int i = 0; i < batch_size && i < tmp_replay_buffer.size(); i++)
-        result.push_back(tmp_replay_buffer[i]);
+
+    for (int i = 0; i < batch_size && i < index.size(); i++) {
+        const auto trajectory = memory[index[i]];
+        result.push_back(trajectory);
+    }
 
     return result;
 }
