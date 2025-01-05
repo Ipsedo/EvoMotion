@@ -65,12 +65,14 @@ void SoftActorCriticAgent::check_train() {
         for (int e = 0; e < epoch; e++) {
             std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
-            std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
+            std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done,
+                vec_next_state;
 
             for (const auto &[state, action, reward, done, next_state]: tmp_replay_buffer) {
                 vec_states.push_back(state);
                 vec_actions.push_back(action);
-                vec_rewards.push_back(torch::tensor({reward}, at::TensorOptions().device(curr_device)));
+                vec_rewards.push_back(
+                    torch::tensor({reward}, at::TensorOptions().device(curr_device)));
                 vec_done.push_back(
                     torch::tensor({done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
                 vec_next_state.push_back(next_state);
@@ -95,7 +97,8 @@ void SoftActorCriticAgent::train(
 
         const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
         const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
-        const auto next_log_proba = truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
+        const auto next_log_proba =
+            truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
 
         const auto [next_target_q_value_1] =
             target_critic_1->forward(batched_next_state, next_action);
@@ -127,7 +130,8 @@ void SoftActorCriticAgent::train(
     // policy
     const auto [curr_mu, curr_sigma] = actor->forward(batched_states);
     const auto curr_action = truncated_normal_sample(curr_mu, curr_sigma, -1.f, 1.f);
-    const auto curr_log_proba = truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
+    const auto curr_log_proba =
+        truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
 
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);

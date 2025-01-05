@@ -6,9 +6,8 @@
 
 EntropyParameter::EntropyParameter(const float initial_alpha) {
     log_alpha_t = register_parameter(
-        "log_alpha", torch::tensor(
-                        {std::log(initial_alpha)},
-                         at::TensorOptions().requires_grad(true)));
+        "log_alpha",
+        torch::tensor({std::log(initial_alpha)}, at::TensorOptions().requires_grad(true)));
 }
 
 torch::Tensor EntropyParameter::log_alpha() { return log_alpha_t; }
