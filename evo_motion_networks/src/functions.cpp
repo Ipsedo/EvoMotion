@@ -140,7 +140,7 @@ void soft_update(
 }
 
 /*
- * Count parameters
+ * Parameters functions
  */
 
 int count_module_parameters(const std::shared_ptr<torch::nn::Module> &module) {
@@ -150,4 +150,14 @@ int count_module_parameters(const std::shared_ptr<torch::nn::Module> &module) {
             const auto sizes = p.sizes();
             return acc + std::reduce(sizes.begin(), sizes.end(), 1, std::multiplies<>());
         });
+}
+
+float grad_norm_mean(const std::shared_ptr<torch::nn::Module> &module) {
+    const auto params = module->parameters();
+    return std::accumulate(
+               params.begin(), params.end(), 0.f,
+               [](const float acc, const torch::Tensor &p) {
+                   return acc + p.grad().norm().item().toFloat();
+               })
+           / static_cast<float>(params.size());
 }

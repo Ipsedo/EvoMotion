@@ -64,9 +64,10 @@ void soft_update(
     float tau);
 
 /*
- * Count parameters
+ * Parameters functions
  */
 
 int count_module_parameters(const std::shared_ptr<torch::nn::Module> &module);
+float grad_norm_mean(const std::shared_ptr<torch::nn::Module> &module);
 
 #endif//EVO_MOTION_FUNCTIONS_H
