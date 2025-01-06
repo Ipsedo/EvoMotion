@@ -26,11 +26,11 @@ Value EnvironmentFactory::generic_get_value(
     return converter(parameters[key]);
 }
 
-int EnvironmentFactory::get_value(const std::string &key, int default_value) {
+int EnvironmentFactory::get_value(const std::string &key, const int default_value) {
     return generic_get_value<int>([](const auto &e) { return std::stoi(e); }, key, default_value);
 }
 
-float EnvironmentFactory::get_value(const std::string &key, float default_value) {
+float EnvironmentFactory::get_value(const std::string &key, const float default_value) {
     return generic_get_value<float>([](const auto &e) { return std::stof(e); }, key, default_value);
 }
 
