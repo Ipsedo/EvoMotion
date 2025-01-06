@@ -113,8 +113,8 @@ std::shared_ptr<Agent> SofActorCriticFactory::create_agent(
     return std::make_shared<SoftActorCriticAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
         get_value<int>("batch_size"), get_value<int>("epoch"), get_value<float>("learning_rate"),
-        get_value<float>("gamma"), get_value<float>("tau"), get_value<int>("replay_buffer_size"),
-        get_value<int>("train_every"));
+        get_value<float>("gamma"), get_value<float>("tau"), get_value<float>("grad_norm_clip"),
+        get_value<int>("replay_buffer_size"), get_value<int>("train_every"));
 }
 
 SofActorCriticLiquidFactory::SofActorCriticLiquidFactory(
