@@ -177,7 +177,7 @@ void SoftActorCriticAgent::save(const std::string &output_folder_path) {
 
     // actor
     save_torch(output_folder_path, actor, "actor.th");
-    save_torch(output_folder_path, actor_optimizer, "actor.th");
+    save_torch(output_folder_path, actor_optimizer, "actor_optimizer.th");
 
     // critic
     save_torch(output_folder_path, critic_1, "critic_1.th");
@@ -198,7 +198,7 @@ void SoftActorCriticAgent::load(const std::string &input_folder_path) {
 
     // actor
     load_torch(input_folder_path, actor, "actor.th");
-    load_torch(input_folder_path, actor_optimizer, "actor.th");
+    load_torch(input_folder_path, actor_optimizer, "actor_optimizer.th");
 
     // critic
     load_torch(input_folder_path, critic_1, "critic_1.th");
