@@ -6,15 +6,11 @@
 #include <evo_motion_networks/networks/critic.h>
 
 CriticLiquidModule::CriticLiquidModule(
-    const std::vector<int64_t> &state_space, int neuron_number, int unfolding_steps) {
-
-    const auto input_space = state_space[0];
-
-    liquid_network = register_module(
-        "liquid_network",
-        std::make_shared<LiquidCellModule>(input_space, neuron_number, unfolding_steps));
-
-    critic = register_module("critic", torch::nn::Linear(neuron_number, 1));
+    const std::vector<int64_t> &state_space, int neuron_number, int unfolding_steps)
+    : liquid_network(register_module(
+          "liquid_network",
+          std::make_shared<LiquidCellModule>(state_space[0], neuron_number, unfolding_steps))),
+      critic(register_module("critic", torch::nn::Linear(neuron_number, 1))) {
 
     critic->apply(init_weights);
 }

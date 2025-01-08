@@ -7,14 +7,11 @@
 
 QNetworkLiquidModule::QNetworkLiquidModule(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, int unfolding_steps) {
-    const auto input_space = state_space[0] + action_space[0];
-
-    liquid_network = register_module(
-        "liquid_network",
-        std::make_shared<LiquidCellModule>(input_space, hidden_size, unfolding_steps));
-
-    q_network = register_module("critic", torch::nn::Linear(hidden_size, 1));
+    int hidden_size, int unfolding_steps)
+    : liquid_network(register_module(
+          "liquid_network", std::make_shared<LiquidCellModule>(
+                                state_space[0] + action_space[0], hidden_size, unfolding_steps))),
+      q_network(register_module("critic", torch::nn::Linear(hidden_size, 1))) {
 
     q_network->apply(init_weights);
 }

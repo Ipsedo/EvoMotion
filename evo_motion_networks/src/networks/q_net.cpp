@@ -7,22 +7,24 @@
 
 QNetworkModule::QNetworkModule(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size) {
-    q_network = register_module(
-        "q_network",
-        torch::nn::Sequential(
-            torch::nn::Linear(state_space[0] + action_space[0], hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+    int hidden_size)
+    : q_network(register_module(
+          "q_network",
+          torch::nn::Sequential(
+              torch::nn::Linear(state_space[0] + action_space[0], hidden_size), torch::nn::Mish(),
+              torch::nn::LayerNorm(
+                  torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
-            torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
-            torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-            torch::nn::LayerNorm(
-                torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+              torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
+              torch::nn::LayerNorm(
+                  torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
+              torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
+              torch::nn::LayerNorm(
+                  torch::nn::LayerNormOptions({hidden_size}).elementwise_affine(true).eps(1e-5)),
 
-            torch::nn::Linear(hidden_size, 1)));
+              torch::nn::Linear(hidden_size, 1)))) {
+
+    apply(init_weights);
 }
 
 critic_response QNetworkModule::forward(const torch::Tensor &state, const torch::Tensor &action) {

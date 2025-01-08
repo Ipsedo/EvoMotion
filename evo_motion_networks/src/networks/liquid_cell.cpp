@@ -9,32 +9,25 @@
  */
 
 LiquidCellModule::LiquidCellModule(
-    const int &input_space, int neuron_number, const int unfolding_steps) {
-    this->neuron_number = neuron_number;
-    steps = unfolding_steps;
+    const int &input_space, int neuron_number, const int unfolding_steps)
+    : steps(unfolding_steps), neuron_number(neuron_number),
+      weight(register_module(
+          "weight",
+          torch::nn::Linear(torch::nn::LinearOptions(input_space, neuron_number).bias(false)))),
+      recurrent_weight(register_module(
+          "recurrent_weight",
+          torch::nn::Linear(torch::nn::LinearOptions(neuron_number, neuron_number).bias(false)))),
+      bias(register_parameter("bias", torch::randn({1, neuron_number}))),
+      a(register_parameter("a", torch::ones({1, neuron_number}))),
+      tau(register_parameter("tau", torch::ones({1, neuron_number}))), x_t(gen_first_x_t(1)) {
 
     constexpr float std_w = 1e-1f;
     constexpr float std_b = 1e-1f;
-
-    weight = register_module(
-        "weight",
-        torch::nn::Linear(torch::nn::LinearOptions(input_space, neuron_number).bias(false)));
-
-    recurrent_weight = register_module(
-        "recurrent_weight",
-        torch::nn::Linear(torch::nn::LinearOptions(neuron_number, neuron_number).bias(false)));
-
-    bias = register_parameter("bias", torch::randn({1, neuron_number}));
-
-    a = register_parameter("a", torch::ones({1, neuron_number}));
-    tau = register_parameter("tau", torch::ones({1, neuron_number}));
 
     torch::nn::init::normal_(weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
     torch::nn::init::normal_(
         recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
     torch::nn::init::normal_(bias, 0, std_b);
-
-    reset_x_t();
 }
 
 void LiquidCellModule::reset_x_t() { x_t = gen_first_x_t(1); }
