@@ -16,8 +16,8 @@
 SoftActorCriticAgent::SoftActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, int hidden_size, const int batch_size,
-    const int epoch, float lr, const float gamma, const float tau, const float grad_norm_clip,
-    const int replay_buffer_size, const int train_every)
+    const int epoch, float lr, const float gamma, const float tau, const int replay_buffer_size,
+    const int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
       critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
       critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
@@ -26,15 +26,14 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
-      target_entropy(-static_cast<float>(action_space[0])),
-      entropy_parameter(std::make_shared<EntropyParameter>(0.5f, 1, 1e-8f, 1.f)),
+      target_entropy(-static_cast<float>(action_space[0]) * 1e-1f),
+      entropy_parameter(std::make_shared<EntropyParameter>(1.f, 1)),
       entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)),
       curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size), epoch(epoch),
-      grad_norm_clip(grad_norm_clip), replay_buffer(replay_buffer_size, seed), curr_episode_step(0),
-      curr_train_step(0L), global_curr_step(0L), actor_loss_meter("actor", 64),
-      critic_1_loss_meter("critic_1", 64), critic_2_loss_meter("critic_2", 64),
-      entropy_loss_meter("entropy", 64), episode_steps_meter("steps", 64),
-      train_every(train_every) {
+      replay_buffer(replay_buffer_size, seed), curr_episode_step(0), curr_train_step(0L),
+      global_curr_step(0L), actor_loss_meter("actor", 64), critic_1_loss_meter("critic_1", 64),
+      critic_2_loss_meter("critic_2", 64), entropy_loss_meter("entropy", 64),
+      episode_steps_meter("steps", 64), train_every(train_every) {
     at::manual_seed(seed);
 
     hard_update(target_critic_1, critic_1);
@@ -59,7 +58,7 @@ torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float r
 }
 
 void SoftActorCriticAgent::check_train() {
-    if (global_curr_step % train_every == train_every - 1) {
+    if (global_curr_step % train_every == train_every - 1 && replay_buffer.has_enough(batch_size)) {
 
         set_eval(false);
 
@@ -118,7 +117,6 @@ void SoftActorCriticAgent::train(
 
     critic_1_optimizer->zero_grad();
     critic_1_loss.backward();
-    torch::nn::utils::clip_grad_norm_(critic_1->parameters(), grad_norm_clip);
     critic_1_optimizer->step();
 
     // critic 2
@@ -127,7 +125,6 @@ void SoftActorCriticAgent::train(
 
     critic_2_optimizer->zero_grad();
     critic_2_loss.backward();
-    torch::nn::utils::clip_grad_norm_(critic_2->parameters(), grad_norm_clip);
     critic_2_optimizer->step();
 
     // policy
@@ -145,7 +142,6 @@ void SoftActorCriticAgent::train(
 
     actor_optimizer->zero_grad();
     actor_loss.backward();
-    torch::nn::utils::clip_grad_norm_(actor->parameters(), grad_norm_clip);
     actor_optimizer->step();
 
     // entropy
@@ -154,7 +150,6 @@ void SoftActorCriticAgent::train(
 
     entropy_optimizer->zero_grad();
     entropy_loss.backward();
-    torch::nn::utils::clip_grad_norm_(entropy_parameter->parameters(), grad_norm_clip);
     entropy_optimizer->step();
 
     // target value soft update

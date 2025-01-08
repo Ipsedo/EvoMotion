@@ -29,6 +29,8 @@ ActorCriticAgent::ActorCriticAgent(
       critic_loss_meter("critic", 64), episode_steps_meter("steps", 64), curr_episode_step(0),
       curr_train_step(0L), global_curr_step(0L), train_every(train_every) {
     at::manual_seed(seed);
+
+    set_eval(true);
 }
 
 torch::Tensor ActorCriticAgent::act(const torch::Tensor state, const float reward) {
@@ -48,7 +50,7 @@ torch::Tensor ActorCriticAgent::act(const torch::Tensor state, const float rewar
 }
 
 void ActorCriticAgent::check_train() {
-    if (global_curr_step % train_every == train_every - 1) {
+    if (global_curr_step % train_every == train_every - 1 && replay_buffer.has_enough(batch_size)) {
         std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
@@ -56,16 +58,15 @@ void ActorCriticAgent::check_train() {
         for (const auto &[state, action, reward, done, next_state]: tmp_replay_buffer) {
             vec_states.push_back(state);
             vec_actions.push_back(action);
-            vec_rewards.push_back(torch::tensor(reward, at::TensorOptions().device(curr_device)));
+            vec_rewards.push_back(torch::tensor({reward}, at::TensorOptions().device(curr_device)));
             vec_done.push_back(
-                torch::tensor(done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+                torch::tensor({done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
             vec_next_state.push_back(next_state);
         }
 
         train(
-            torch::stack(vec_states), torch::stack(vec_actions),
-            torch::stack(vec_rewards).unsqueeze(1), torch::stack(vec_done).unsqueeze(1),
-            torch::stack(vec_next_state));
+            torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards),
+            torch::stack(vec_done), torch::stack(vec_next_state));
     }
 }
 
@@ -73,6 +74,8 @@ void ActorCriticAgent::train(
     const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_next_state) {
+
+    set_eval(false);
 
     const auto [next_value] = critic->forward(batched_next_state);
     const auto [value] = critic->forward(batched_states);
@@ -104,6 +107,8 @@ void ActorCriticAgent::train(
     policy_loss_meter.add(-policy_loss.sum(-1).mean().cpu().item().toFloat());
     entropy_meter.add(-policy_entropy.sum(-1).mean().cpu().item().toFloat());
     critic_loss_meter.add(critic_loss.cpu().item().toFloat());
+
+    set_eval(true);
 
     curr_train_step++;
 }

@@ -22,24 +22,28 @@ ActorCriticLiquidAgent::ActorCriticLiquidAgent(
       curr_device(torch::kCPU), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
       policy_loss_meter("policy", 64), entropy_meter("entropy", 64),
       critic_loss_meter("critic", 64), episode_steps_meter("steps", 64), curr_episode_step(0),
-      curr_train_step(0L), global_curr_step(0L), train_every(train_every) {}
+      curr_train_step(0L), global_curr_step(0L), train_every(train_every) {
+    at::manual_seed(seed);
+
+    set_eval(true);
+}
 
 void ActorCriticLiquidAgent::check_train() {
-    if (global_curr_step % train_every == train_every - 1) {
+    if (global_curr_step % train_every == train_every - 1 && replay_buffer.has_enough(batch_size)) {
         std::vector<liquid_episode_step<liquid_a2c_memory>> tmp_replay_buffer =
             replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state,
             input_actor_x, input_critic_x, output_actor_x, output_critic_x;
 
-        for (const auto &[replay_buffer, x_t, next_x_t]: tmp_replay_buffer) {
-            vec_states.push_back(replay_buffer.state);
-            vec_actions.push_back(replay_buffer.action);
-            vec_rewards.push_back(
-                torch::tensor(replay_buffer.reward, at::TensorOptions().device(curr_device)));
+        for (const auto &[episode_replay_buffer, x_t, next_x_t]: tmp_replay_buffer) {
+            vec_states.push_back(episode_replay_buffer.state);
+            vec_actions.push_back(episode_replay_buffer.action);
+            vec_rewards.push_back(torch::tensor(
+                episode_replay_buffer.reward, at::TensorOptions().device(curr_device)));
             vec_done.push_back(torch::tensor(
-                replay_buffer.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
-            vec_next_state.push_back(replay_buffer.next_state);
+                episode_replay_buffer.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+            vec_next_state.push_back(episode_replay_buffer.next_state);
 
             input_actor_x.push_back(x_t.actor_x_t);
             input_critic_x.push_back(x_t.critic_x_t);
@@ -61,6 +65,8 @@ void ActorCriticLiquidAgent::train(
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_next_state, const liquid_a2c_memory &curr_memory,
     const liquid_a2c_memory &next_memory) {
+
+    set_eval(false);
 
     const auto [next_value, next_next_critic_x] =
         critic->forward(next_memory.critic_x_t.detach(), batched_next_state);
@@ -96,6 +102,8 @@ void ActorCriticLiquidAgent::train(
     policy_loss_meter.add(-policy_loss.sum(-1).mean().cpu().item().toFloat());
     entropy_meter.add(-policy_entropy.sum(-1).mean().cpu().item().toFloat());
     critic_loss_meter.add(critic_loss.cpu().item().toFloat());
+
+    set_eval(true);
 
     curr_train_step++;
 }

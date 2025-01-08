@@ -8,9 +8,9 @@
 
 SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
-    const float gamma, const float tau, int unfolding_steps, const int replay_buffer_size,
-    const int train_every)
+    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size,
+    const int epoch, float lr, const float gamma, const float tau, int unfolding_steps,
+    const int replay_buffer_size, const int train_every)
     : actor(std::make_shared<ActorLiquidModule>(
           state_space, action_space, hidden_size, unfolding_steps)),
       critic_1(std::make_shared<QNetworkLiquidModule>(
@@ -27,7 +27,7 @@ SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
       target_entropy(-static_cast<float>(action_space[0])),
       entropy_parameter(std::make_shared<EntropyParameter>(1.f, 1)),
       entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)),
-      curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size),
+      curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size), epoch(epoch),
       replay_buffer(replay_buffer_size, seed), curr_episode_step(0), curr_train_step(0L),
       global_curr_step(0L), actor_loss_meter("actor", 64), critic_1_loss_meter("critic_1", 64),
       critic_2_loss_meter("critic_2", 64), entropy_loss_meter("entropy", 64),
@@ -35,6 +35,8 @@ SoftActorCriticLiquidAgent::SoftActorCriticLiquidAgent(
 
     hard_update(target_critic_1, critic_1);
     hard_update(target_critic_2, critic_2);
+
+    set_eval(true);
 }
 
 torch::Tensor SoftActorCriticLiquidAgent::act(const torch::Tensor state, const float reward) {
@@ -79,45 +81,52 @@ void SoftActorCriticLiquidAgent::done(const torch::Tensor state, const float rew
 }
 
 void SoftActorCriticLiquidAgent::check_train() {
-    if (global_curr_step % train_every == train_every - 1) {
-        std::vector<liquid_episode_step<liquid_sac_memory>> tmp_replay_buffer =
-            replay_buffer.sample(batch_size);
+    if (global_curr_step % train_every == train_every - 1 && replay_buffer.has_enough(batch_size)) {
 
-        std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state,
-            actor_x_t, critic_1_x_t, critic_2_x_t, target_critic_1_x_t, target_critic_2_x_t,
-            actor_next_x_t, critic_1_next_x_t, critic_2_next_x_t, target_critic_1_next_x_t,
-            target_critic_2_next_x_t;
+        set_eval(false);
 
-        for (const auto &[step, x_t, next_x_t]: tmp_replay_buffer) {
-            vec_states.push_back(step.state);
-            vec_actions.push_back(step.action);
-            vec_rewards.push_back(
-                torch::tensor({step.reward}, at::TensorOptions().device(curr_device)));
-            vec_done.push_back(
-                torch::tensor({step.done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
-            vec_next_state.push_back(step.next_state);
+        for (int e = 0; e < epoch; e++) {
+            std::vector<liquid_episode_step<liquid_sac_memory>> tmp_replay_buffer =
+                replay_buffer.sample(batch_size);
 
-            actor_x_t.push_back(x_t.actor_x_t);
-            critic_1_x_t.push_back(x_t.critic_1_x_t);
-            critic_2_x_t.push_back(x_t.critic_2_x_t);
-            target_critic_1_x_t.push_back(x_t.target_critic_1_x_t);
-            target_critic_2_x_t.push_back(x_t.target_critic_2_x_t);
+            std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done,
+                vec_next_state, actor_x_t, critic_1_x_t, critic_2_x_t, target_critic_1_x_t,
+                target_critic_2_x_t, actor_next_x_t, critic_1_next_x_t, critic_2_next_x_t,
+                target_critic_1_next_x_t, target_critic_2_next_x_t;
 
-            actor_next_x_t.push_back(next_x_t.actor_x_t);
-            critic_1_next_x_t.push_back(next_x_t.critic_1_x_t);
-            critic_2_next_x_t.push_back(next_x_t.critic_2_x_t);
-            target_critic_1_next_x_t.push_back(next_x_t.target_critic_1_x_t);
-            target_critic_2_next_x_t.push_back(next_x_t.target_critic_2_x_t);
+            for (const auto &[step, x_t, next_x_t]: tmp_replay_buffer) {
+                vec_states.push_back(step.state);
+                vec_actions.push_back(step.action);
+                vec_rewards.push_back(
+                    torch::tensor({step.reward}, at::TensorOptions().device(curr_device)));
+                vec_done.push_back(torch::tensor(
+                    {step.done ? 1.f : 0.f}, at::TensorOptions().device(curr_device)));
+                vec_next_state.push_back(step.next_state);
+
+                actor_x_t.push_back(x_t.actor_x_t);
+                critic_1_x_t.push_back(x_t.critic_1_x_t);
+                critic_2_x_t.push_back(x_t.critic_2_x_t);
+                target_critic_1_x_t.push_back(x_t.target_critic_1_x_t);
+                target_critic_2_x_t.push_back(x_t.target_critic_2_x_t);
+
+                actor_next_x_t.push_back(next_x_t.actor_x_t);
+                critic_1_next_x_t.push_back(next_x_t.critic_1_x_t);
+                critic_2_next_x_t.push_back(next_x_t.critic_2_x_t);
+                target_critic_1_next_x_t.push_back(next_x_t.target_critic_1_x_t);
+                target_critic_2_next_x_t.push_back(next_x_t.target_critic_2_x_t);
+            }
+
+            train(
+                torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards),
+                torch::stack(vec_done), torch::stack(vec_next_state),
+                {torch::cat(actor_x_t), torch::cat(critic_1_x_t), torch::cat(critic_2_x_t),
+                 torch::cat(target_critic_1_x_t), torch::cat(target_critic_2_x_t)},
+                {torch::cat(actor_next_x_t), torch::cat(critic_1_next_x_t),
+                 torch::cat(critic_2_next_x_t), torch::cat(target_critic_1_next_x_t),
+                 torch::cat(target_critic_2_next_x_t)});
         }
 
-        train(
-            torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards),
-            torch::stack(vec_done), torch::stack(vec_next_state),
-            {torch::cat(actor_x_t), torch::cat(critic_1_x_t), torch::cat(critic_2_x_t),
-             torch::cat(target_critic_1_x_t), torch::cat(target_critic_2_x_t)},
-            {torch::cat(actor_next_x_t), torch::cat(critic_1_next_x_t),
-             torch::cat(critic_2_next_x_t), torch::cat(target_critic_1_next_x_t),
-             torch::cat(target_critic_2_next_x_t)});
+        set_eval(true);
     }
 }
 
@@ -146,7 +155,6 @@ void SoftActorCriticLiquidAgent::train(
                                     - entropy_parameter->alpha() * next_log_prob;
 
         target_q_values = (batched_rewards + (1.f - batched_done) * gamma * target_v_value);
-        //target_q_values = (target_q_values - target_q_values.mean()) / (target_q_values.std() + 1e-8);
     }
 
     // critic 1

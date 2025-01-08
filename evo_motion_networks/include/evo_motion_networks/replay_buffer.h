@@ -78,6 +78,7 @@ public:
     virtual void add(ReplayBufferType buffer);
     virtual void update_last(UpdateArgs... args);
     virtual bool empty();
+    virtual bool has_enough(int batch_size);
 
     virtual ~AbstractReplayBuffer() { memory.clear(); }
 

@@ -24,11 +24,11 @@ PpoVanillaAgent::PpoVanillaAgent(
       curr_device(torch::kCPU) {
 
     at::manual_seed(seed);
+
+    set_eval(true);
 }
 
 torch::Tensor PpoVanillaAgent::act(const torch::Tensor state, const float reward) {
-    set_eval(true);
-
     const auto [mu, sigma] = actor->forward(state);
     auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
@@ -44,8 +44,6 @@ torch::Tensor PpoVanillaAgent::act(const torch::Tensor state, const float reward
 }
 
 void PpoVanillaAgent::done(const torch::Tensor state, const float reward) {
-    set_eval(true);
-
     replay_buffer.update_last(reward, state, true);
 
     episode_steps_meter.add(static_cast<float>(curr_episode_step));
@@ -53,7 +51,7 @@ void PpoVanillaAgent::done(const torch::Tensor state, const float reward) {
 }
 
 void PpoVanillaAgent::check_train() {
-    if (global_curr_step % train_every == train_every - 1) {
+    if (global_curr_step % train_every == train_every - 1 && replay_buffer.has_enough(batch_size)) {
         std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
 
         std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state;
@@ -78,7 +76,6 @@ void PpoVanillaAgent::train(
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_next_state) {
 
-    //torch::autograd::DetectAnomalyGuard guard;
     set_eval(false);
 
     const auto [curr_values] = critic->forward(batched_states);
@@ -124,6 +121,8 @@ void PpoVanillaAgent::train(
         actor_loss_meter.add(actor_loss.item().toFloat());
         critic_loss_meter.add(critic_loss.item().toFloat());
     }
+
+    set_eval(true);
 
     curr_train_step++;
 }

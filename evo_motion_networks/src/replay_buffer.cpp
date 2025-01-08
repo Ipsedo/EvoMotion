@@ -49,6 +49,11 @@ bool AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::empty() {
     return memory.empty();
 }
 
+template<class ReplayBufferType, class... UpdateArgs>
+bool AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::has_enough(const int batch_size) {
+    return memory.size() - 1 >= batch_size;
+}
+
 /*template<class ReplayBufferType, class... UpdateArgs>
 AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::~AbstractReplayBuffer() {
     memory.clear();
