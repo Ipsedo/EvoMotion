@@ -26,7 +26,7 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
-      target_entropy(-static_cast<float>(action_space[0]) * 1e-1f),
+      target_entropy(-static_cast<float>(action_space[0])),
       entropy_parameter(std::make_shared<EntropyParameter>(1.f, 1)),
       entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)),
       curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size), epoch(epoch),
