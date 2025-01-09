@@ -30,6 +30,20 @@ private:
     torch::nn::Sequential q_network{nullptr};
 };
 
+// BatchNorm -> CrossQ
+
+class BatchNormQNetworkModule : public AbstractQNetwork {
+public:
+    BatchNormQNetworkModule(
+        const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int hidden_size);
+
+    critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
+
+private:
+    torch::nn::Sequential q_network{nullptr};
+};
+
 // Liquid
 
 class QNetworkLiquidModule final : public AbstractQNetwork {

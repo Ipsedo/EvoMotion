@@ -9,6 +9,7 @@
 #include <evo_motion_networks/agent_factory.h>
 #include <evo_motion_networks/agents/actor_critic.h>
 #include <evo_motion_networks/agents/actor_critic_liquid.h>
+#include <evo_motion_networks/agents/cross_q.h>
 #include <evo_motion_networks/agents/debug_agents.h>
 #include <evo_motion_networks/agents/ppo_gae.h>
 #include <evo_motion_networks/agents/ppo_gae_liquid.h>
@@ -171,6 +172,18 @@ std::shared_ptr<Agent> PpoGaeLiquidFactory::create_agent(
         get_value<float>("clip_grad_norm"));
 }
 
+CrossQFactory::CrossQFactory(const std::map<std::string, std::string> &parameters)
+    : AgentFactory(parameters) {}
+
+std::shared_ptr<Agent> CrossQFactory::create_agent(
+    const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
+    return std::make_shared<CrossQAgent>(
+        get_value<int>("seed"), state_space, action_space, get_value<int>("hidden_size"),
+        get_value<int>("batch_size"), get_value<int>("epoch"), get_value<float>("learning_rate"),
+        get_value<float>("gamma"), get_value<float>("tau"), get_value<int>("replay_buffer_size"),
+        get_value<int>("train_every"));
+}
+
 // Build factory
 
 std::map<
@@ -188,7 +201,9 @@ std::map<
         {"ppo_gae", std::make_shared<PpoGaeFactory, std::map<std::string, std::string>>},
         {"ppo_gae_liquid",
          std::make_shared<PpoGaeLiquidFactory, std::map<std::string, std::string>>},
-        {"ppo_vanilla", std::make_shared<PpoVanillaFactory, std::map<std::string, std::string>>}};
+        {"ppo_vanilla", std::make_shared<PpoVanillaFactory, std::map<std::string, std::string>>},
+        {"cross_q", std::make_shared<CrossQFactory, std::map<std::string, std::string>>},
+};
 
 std::shared_ptr<AgentFactory>
 get_agent_factory(const std::string &agent_name, std::map<std::string, std::string> parameters) {

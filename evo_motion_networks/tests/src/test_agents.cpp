@@ -6,6 +6,7 @@
 
 #include <evo_motion_networks/agents/actor_critic.h>
 #include <evo_motion_networks/agents/actor_critic_liquid.h>
+#include <evo_motion_networks/agents/cross_q.h>
 #include <evo_motion_networks/agents/ppo_gae.h>
 #include <evo_motion_networks/agents/ppo_gae_liquid.h>
 #include <evo_motion_networks/agents/ppo_vanilla.h>
@@ -194,6 +195,33 @@ TEST_P(ParamActorCriticAgent, TestPpoLiquidGae) {
         }
 
         agent.done(torch::randn({state_space}), 1.f);
+    }
+
+    //for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
+}
+
+// CrossQ
+
+TEST_P(ParamActorCriticAgent, TestCrossQAgent) {
+    const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
+
+    auto agent = CrossQAgent(
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 2, 1e-3f, 0.9f, 0.005f, 128,
+        train_every);
+
+    for (int j = 0; j < 5; j++) {
+        for (int i = 0; i < batch_size * 2; i++) {
+            const auto state = torch::randn({state_space});
+            const auto action = agent.act(state, torch::randn({1}).item().toFloat());
+
+            ASSERT_EQ(action.sizes().size(), 1);
+            ASSERT_EQ(action.size(0), action_space);
+            ASSERT_TRUE(torch::all(~torch::isnan(action)).item().toBool());
+            ASSERT_TRUE(torch::all(action >= -1.f).item().toBool());
+            ASSERT_TRUE(torch::all(action <= 1.f).item().toBool());
+        }
+
+        agent.done(torch::randn({state_space}), torch::randn({1}).item().toFloat());
     }
 
     //for (auto m: agent.get_metrics()) ASSERT_TRUE(m.loss() != 0.f);
