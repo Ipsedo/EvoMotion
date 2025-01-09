@@ -78,9 +78,10 @@ void CrossQAgent::train(
 
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
+    const auto curr_q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
-    const auto actor_loss = torch::mean(
-        entropy_parameter->alpha() * curr_log_proba - torch::min(curr_q_value_1, curr_q_value_2));
+    const auto actor_loss =
+        torch::mean(entropy_parameter->alpha().detach() * curr_log_proba - curr_q_value);
     actor_optimizer->zero_grad();
     actor_loss.backward();
     actor_optimizer->step();
