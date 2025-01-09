@@ -10,7 +10,7 @@ CrossQAgent::CrossQAgent(
     int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
     int hidden_size, int batch_size, int epoch, float lr, float gamma, float tau,
     int replay_buffer_size, int train_every)
-    : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
+    : actor(std::make_shared<BatchNormActorModule>(state_space, action_space, hidden_size)),
       critic_1(std::make_shared<BatchNormQNetworkModule>(state_space, action_space, hidden_size)),
       critic_2(std::make_shared<BatchNormQNetworkModule>(state_space, action_space, hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
@@ -23,12 +23,17 @@ CrossQAgent::CrossQAgent(
       train_every(train_every), replay_buffer(replay_buffer_size, seed), curr_episode_step(0),
       curr_train_step(0L), global_curr_step(0L), actor_loss_meter("actor", 64),
       critic_1_loss_meter("critic_1", 64), critic_2_loss_meter("critic_2", 64),
-      entropy_loss_meter("entropy", 64), episode_steps_meter("steps", 64) {}
+      entropy_loss_meter("entropy", 64), episode_steps_meter("steps", 64) {
+    at::manual_seed(seed);
+    set_eval(true);
+}
 
 void CrossQAgent::train(
     const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
     const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
     const torch::Tensor &batched_next_state) {
+
+    set_eval(false);
 
     // prepared concatenated states and actions
     const auto cat_states = torch::cat({batched_states, batched_next_state}, 0);
@@ -93,6 +98,9 @@ void CrossQAgent::train(
     entropy_loss.backward();
     entropy_optimizer->step();
 
+    // eval
+    set_eval(true);
+
     // metrics
     actor_loss_meter.add(actor_loss.cpu().item().toFloat());
     critic_1_loss_meter.add(critic_1_loss.cpu().item().toFloat());
@@ -104,8 +112,6 @@ void CrossQAgent::train(
 
 void CrossQAgent::check_train() {
     if (global_curr_step % train_every == train_every - 1 && replay_buffer.has_enough(batch_size)) {
-
-        set_eval(false);
 
         for (int e = 0; e < epoch; e++) {
             std::vector<episode_step> tmp_replay_buffer = replay_buffer.sample(batch_size);
@@ -126,12 +132,11 @@ void CrossQAgent::check_train() {
                 torch::stack(vec_states), torch::stack(vec_actions), torch::stack(vec_rewards),
                 torch::stack(vec_done), torch::stack(vec_next_state));
         }
-
-        set_eval(true);
     }
 }
 
 torch::Tensor CrossQAgent::act(torch::Tensor state, float reward) {
+    set_eval(true);
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 

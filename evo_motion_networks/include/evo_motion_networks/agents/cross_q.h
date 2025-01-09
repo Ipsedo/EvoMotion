@@ -11,9 +11,9 @@
 #include <evo_motion_networks/networks/q_net.h>
 #include <evo_motion_networks/replay_buffer.h>
 
-class CrossQAgent : public Agent {
+class CrossQAgent final : public Agent {
 private:
-    std::shared_ptr<ActorModule> actor;
+    std::shared_ptr<BatchNormActorModule> actor;
     std::shared_ptr<BatchNormQNetworkModule> critic_1;
     std::shared_ptr<BatchNormQNetworkModule> critic_2;
 
