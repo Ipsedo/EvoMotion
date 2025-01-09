@@ -33,7 +33,7 @@ void CrossQAgent::train(
     // prepared concatenated states and actions
     const auto cat_states = torch::cat({batched_states, batched_next_state}, 0);
 
-    const auto [next_mu, next_sigma] = actor->forward(batched_states);
+    const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
     const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
     const auto next_log_proba =
         truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
