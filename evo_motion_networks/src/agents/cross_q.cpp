@@ -8,18 +8,22 @@
 
 CrossQAgent::CrossQAgent(
     int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, int batch_size, int epoch, float lr, float gamma, float tau,
-    int replay_buffer_size, int train_every)
+    int hidden_size, int batch_size, int epoch, float lr, float gamma, int replay_buffer_size,
+    int train_every)
     : actor(std::make_shared<BatchNormActorModule>(state_space, action_space, hidden_size)),
       critic_1(std::make_shared<BatchNormQNetworkModule>(state_space, action_space, hidden_size)),
       critic_2(std::make_shared<BatchNormQNetworkModule>(state_space, action_space, hidden_size)),
-      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
-      critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
-      critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
+      actor_optimizer(std::make_shared<torch::optim::Adam>(
+          actor->parameters(), torch::optim::AdamOptions(lr).betas({0.5, 0.999}))),
+      critic_1_optimizer(std::make_shared<torch::optim::Adam>(
+          critic_1->parameters(), torch::optim::AdamOptions(lr).betas({0.5, 0.999}))),
+      critic_2_optimizer(std::make_shared<torch::optim::Adam>(
+          critic_2->parameters(), torch::optim::AdamOptions(lr).betas({0.5, 0.999}))),
       target_entropy(-static_cast<float>(action_space[0])),
       entropy_parameter(std::make_shared<EntropyParameter>(1.f, 1)),
-      entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)),
-      curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size), epoch(epoch),
+      entropy_optimizer(std::make_shared<torch::optim::Adam>(
+          entropy_parameter->parameters(), torch::optim::AdamOptions(lr).betas({0.5, 0.999}))),
+      curr_device(torch::kCPU), gamma(gamma), batch_size(batch_size), epoch(epoch),
       train_every(train_every), replay_buffer(replay_buffer_size, seed), curr_episode_step(0),
       curr_train_step(0L), global_curr_step(0L), actor_loss_meter("actor", 64),
       critic_1_loss_meter("critic_1", 64), critic_2_loss_meter("critic_2", 64),

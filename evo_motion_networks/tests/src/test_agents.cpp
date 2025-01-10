@@ -206,7 +206,7 @@ TEST_P(ParamActorCriticAgent, TestCrossQAgent) {
     const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = CrossQAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 2, 1e-3f, 0.9f, 0.005f, 128,
+        1234, {state_space}, {action_space}, hidden_size, batch_size, 2, 1e-3f, 0.9f, 128,
         train_every);
 
     for (int j = 0; j < 5; j++) {
