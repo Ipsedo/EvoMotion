@@ -84,10 +84,11 @@ void CrossQAgent::train(
         truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
 
     critic_1->train(false);
-    critic_2->train(false);
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
-    const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
     critic_1->train(true);
+
+    critic_2->train(false);
+    const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
     critic_2->train(true);
 
     const auto curr_q_value = torch::min(curr_q_value_1, curr_q_value_2);

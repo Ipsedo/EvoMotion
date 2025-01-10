@@ -4,19 +4,19 @@
 
 #include <evo_motion_networks/init.h>
 #include <evo_motion_networks/networks/actor.h>
+#include <evo_motion_networks/networks/norm.h>
 
 BatchNormActorModule::BatchNormActorModule(
     std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size)
     : head(register_module(
-          "head",
-          torch::nn::Sequential(
-              torch::nn::BatchNorm1d(torch::nn::BatchNorm1dOptions(state_space[0]).momentum(1e-2)),
+          "head", torch::nn::Sequential(
+                      BatchRenormalization(state_space[0]),
 
-              torch::nn::Linear(state_space[0], hidden_size), torch::nn::Mish(),
-              torch::nn::BatchNorm1d(torch::nn::BatchNorm1dOptions(hidden_size).momentum(1e-2)),
+                      torch::nn::Linear(state_space[0], hidden_size), torch::nn::Mish(),
+                      BatchRenormalization(hidden_size),
 
-              torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-              torch::nn::BatchNorm1d(torch::nn::BatchNorm1dOptions(hidden_size).momentum(1e-2))))),
+                      torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
+                      BatchRenormalization(hidden_size)))),
       mu(register_module(
           "mu", torch::nn::Sequential(
                     torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()))),

@@ -3,27 +3,26 @@
 //
 
 #include <evo_motion_networks/init.h>
+#include <evo_motion_networks/networks/norm.h>
 #include <evo_motion_networks/networks/q_net.h>
 
 BatchNormQNetworkModule::BatchNormQNetworkModule(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
     int hidden_size)
     : q_network(register_module(
-          "q_network",
-          torch::nn::Sequential(
-              torch::nn::BatchNorm1d(
-                  torch::nn::BatchNorm1dOptions(state_space[0] + action_space[0]).momentum(1e-2)),
+          "q_network", torch::nn::Sequential(
+                           BatchRenormalization(state_space[0] + action_space[0]),
 
-              torch::nn::Linear(state_space[0] + action_space[0], hidden_size), torch::nn::Mish(),
-              torch::nn::BatchNorm1d(torch::nn::BatchNorm1dOptions(hidden_size).momentum(1e-2)),
+                           torch::nn::Linear(state_space[0] + action_space[0], hidden_size),
+                           torch::nn::Mish(), BatchRenormalization(hidden_size),
 
-              torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-              torch::nn::BatchNorm1d(torch::nn::BatchNorm1dOptions(hidden_size).momentum(1e-2)),
+                           torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
+                           BatchRenormalization(hidden_size),
 
-              torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
-              torch::nn::BatchNorm1d(torch::nn::BatchNorm1dOptions(hidden_size).momentum(1e-2)),
+                           torch::nn::Linear(hidden_size, hidden_size), torch::nn::Mish(),
+                           BatchRenormalization(hidden_size),
 
-              torch::nn::Linear(hidden_size, 1)))) {
+                           torch::nn::Linear(hidden_size, 1)))) {
 
     apply(init_weights);
 }
