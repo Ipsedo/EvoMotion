@@ -22,10 +22,7 @@ AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::sample(const int batch_si
 
     std::vector<ReplayBufferType> result;
 
-    for (int i = 0; i < batch_size && i < index.size(); i++) {
-        const auto trajectory = memory[index[i]];
-        result.push_back(trajectory);
-    }
+    for (int i = 0; i < batch_size && i < index.size(); i++) result.push_back(memory[index[i]]);
 
     return result;
 }
@@ -87,10 +84,7 @@ AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample(const int batch_siz
 
     std::vector<episode_trajectory<EpisodeStep>> result;
 
-    for (int i = 0; i < batch_size && i < index.size(); i++) {
-        const auto trajectory = filtered[index[i]];
-        result.push_back(trajectory);
-    }
+    for (int i = 0; i < batch_size && i < index.size(); i++) result.push_back(filtered[index[i]]);
 
     return result;
 }

@@ -107,6 +107,77 @@ TEST_P(ParamLinearModule, TestBatchedQNetworkModule) {
     ASSERT_EQ(out.size(1), 1);
 }
 
+// BN Q-Network
+
+TEST_P(ParamLinearModule, TestBNQNetworkModule) {
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
+
+    const auto state = torch::randn({state_space});
+    const auto action = torch::rand({action_space}) * 2.f - 1.f;
+
+    auto q_net = BatchNormQNetworkModule({state_space}, {action_space}, hidden_size);
+
+    const auto [out] = q_net.forward(state, action);
+
+    ASSERT_EQ(out.sizes().size(), 1);
+    ASSERT_EQ(out.size(0), 1);
+}
+
+TEST_P(ParamLinearModule, TestBatchedBNQNetworkModule) {
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
+
+    const auto state = torch::randn({batch_size, state_space});
+    const auto action = torch::rand({batch_size, action_space}) * 2.f - 1.f;
+
+    auto q_net = BatchNormQNetworkModule({state_space}, {action_space}, hidden_size);
+
+    const auto [out] = q_net.forward(state, action);
+
+    ASSERT_EQ(out.sizes().size(), 2);
+    ASSERT_EQ(out.size(0), batch_size);
+    ASSERT_EQ(out.size(1), 1);
+}
+
+// BN Actor
+
+TEST_P(ParamLinearModule, TestBNActorModule) {
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
+
+    const auto state = torch::randn({state_space});
+    auto actor = BatchNormActorModule({state_space}, {action_space}, hidden_size);
+
+    const auto [mu, sigma] = actor.forward(state);
+
+    ASSERT_EQ(mu.sizes().size(), 1);
+    ASSERT_EQ(mu.size(0), action_space);
+    ASSERT_TRUE(torch::all(mu >= -1.f).item().toBool());
+    ASSERT_TRUE(torch::all(mu <= 1.f).item().toBool());
+
+    ASSERT_EQ(sigma.sizes().size(), 1);
+    ASSERT_EQ(sigma.size(0), action_space);
+    ASSERT_TRUE(torch::all(sigma > 0).item().toBool());
+}
+
+TEST_P(ParamLinearModule, TestBatchedBNActorModule) {
+    const auto [state_space, hidden_size, action_space, batch_size] = GetParam();
+
+    const auto state = torch::randn({batch_size, state_space});
+    auto actor = BatchNormActorModule({state_space}, {action_space}, hidden_size);
+
+    const auto [mu, sigma] = actor.forward(state);
+
+    ASSERT_EQ(mu.sizes().size(), 2);
+    ASSERT_EQ(mu.size(0), batch_size);
+    ASSERT_EQ(mu.size(1), action_space);
+    ASSERT_TRUE(torch::all(mu >= -1.f).item().toBool());
+    ASSERT_TRUE(torch::all(mu <= 1.f).item().toBool());
+
+    ASSERT_EQ(sigma.sizes().size(), 2);
+    ASSERT_EQ(sigma.size(0), batch_size);
+    ASSERT_EQ(sigma.size(1), action_space);
+    ASSERT_TRUE(torch::all(sigma > 0).item().toBool());
+}
+
 // Create parametrized tests
 
 INSTANTIATE_TEST_SUITE_P(
