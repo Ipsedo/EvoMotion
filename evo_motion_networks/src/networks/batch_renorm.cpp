@@ -10,8 +10,8 @@ BatchRenormalization::BatchRenormalization(
       running_std(register_buffer("running_std", torch::ones({num_features}))),
       weight(register_parameter("weight", torch::ones({num_features}))),
       bias(register_parameter("bias", torch::zeros({num_features}))), epsilon(epsilon),
-      momentum(momentum), affine(affine), curr_step(0L), warmup_steps(warmup_steps), r_max_init(1.0), r_max_end(3.0), d_max_init(0.0),
-      d_max_end(5.0) {}
+      momentum(momentum), affine(affine), curr_step(0L), warmup_steps(warmup_steps),
+      r_max_init(1.0), r_max_end(3.0), d_max_init(0.0), d_max_end(5.0) {}
 
 torch::Tensor BatchRenormalization::forward(const torch::Tensor &x) {
     torch::Tensor out;
@@ -39,10 +39,6 @@ torch::Tensor BatchRenormalization::forward(const torch::Tensor &x) {
     return out;
 }
 
-float BatchRenormalization::r_max() {
-    return r_max_init + curr_step * (r_max_end - r_max_init);
-}
+float BatchRenormalization::r_max() { return r_max_init + curr_step * (r_max_end - r_max_init); }
 
-float BatchRenormalization::d_max() {
-    return d_max_init + curr_step * (d_max_end - d_max_init);
-}
+float BatchRenormalization::d_max() { return d_max_init + curr_step * (d_max_end - d_max_init); }

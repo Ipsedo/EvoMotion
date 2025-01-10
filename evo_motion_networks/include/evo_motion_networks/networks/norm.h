@@ -32,7 +32,8 @@ private:
 
 public:
     BatchRenormalization(
-        int num_features, float epsilon = 1e-5, float momentum = 0.01, bool affine = true, int warmup_steps = 1e5);
+        int num_features, float epsilon = 1e-5, float momentum = 0.01, bool affine = true,
+        int warmup_steps = 1e5);
     torch::Tensor forward(const torch::Tensor &x);
 };
 
