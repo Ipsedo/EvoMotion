@@ -36,14 +36,16 @@ void CrossQAgent::train(
     set_eval(false);
 
     // prepared concatenated states and actions
-    const auto cat_states = torch::cat({batched_states, batched_next_state}, 0);
-
+    actor->train(false);
     const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
+    actor->train(true);
+
     const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
     const auto next_log_proba =
         truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
 
-    const auto cat_actions = torch::cat({batched_actions, next_action}, 0).detach();
+    const auto cat_states = torch::cat({batched_states, batched_next_state}, 0);
+    const auto cat_actions = torch::cat({batched_actions, next_action.detach()}, 0);
 
     // compute q-value and next q-value
     const auto [cat_q_value_1] = critic_1->forward(cat_states, cat_actions);
@@ -61,7 +63,7 @@ void CrossQAgent::train(
     const auto target_v_value =
         torch::min(next_q_value_1, next_q_value_2) - entropy_parameter->alpha() * next_log_proba;
     const auto target_q_values =
-        (batched_rewards + (1.f - batched_done) * gamma * target_v_value).detach();
+        batched_rewards + (1.f - batched_done) * gamma * target_v_value.detach();
 
     // optimize critic 1
     const auto critic_1_loss = torch::mse_loss(q_value_1, target_q_values);
@@ -81,8 +83,13 @@ void CrossQAgent::train(
     const auto curr_log_proba =
         truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
 
+    critic_1->train(false);
+    critic_2->train(false);
     const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
     const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
+    critic_1->train(true);
+    critic_2->train(true);
+
     const auto curr_q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
     const auto actor_loss =
