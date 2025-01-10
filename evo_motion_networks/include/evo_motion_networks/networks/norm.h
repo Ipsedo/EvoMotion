@@ -27,8 +27,8 @@ private:
     float d_max_init;
     float d_max_end;
 
-    float r_max();
-    float d_max();
+    float r_max() const;
+    float d_max() const;
 
 public:
     BatchRenormalization(

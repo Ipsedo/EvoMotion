@@ -39,6 +39,14 @@ torch::Tensor BatchRenormalization::forward(const torch::Tensor &x) {
     return out;
 }
 
-float BatchRenormalization::r_max() { return r_max_init + curr_step * (r_max_end - r_max_init); }
+float BatchRenormalization::r_max() const {
+    return r_max_init
+           + static_cast<float>(curr_step) * (r_max_end - r_max_init)
+                 / static_cast<float>(warmup_steps);
+}
 
-float BatchRenormalization::d_max() { return d_max_init + curr_step * (d_max_end - d_max_init); }
+float BatchRenormalization::d_max() const {
+    return d_max_init
+           + static_cast<float>(curr_step) * (d_max_end - d_max_init)
+                 / static_cast<float>(warmup_steps);
+}
