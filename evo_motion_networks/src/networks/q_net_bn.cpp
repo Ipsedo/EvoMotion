@@ -11,7 +11,7 @@ BatchNormQNetworkModule::BatchNormQNetworkModule(
     int hidden_size)
     : q_network(register_module(
           "q_network", torch::nn::Sequential(
-                           BatchRenormalization(state_space[0] + action_space[0]),
+                           BatchRenormalization(static_cast<int>(state_space[0] + action_space[0])),
 
                            torch::nn::Linear(state_space[0] + action_space[0], hidden_size),
                            torch::nn::Mish(), BatchRenormalization(hidden_size),

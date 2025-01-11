@@ -10,7 +10,7 @@ BatchNormActorModule::BatchNormActorModule(
     std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size)
     : head(register_module(
           "head", torch::nn::Sequential(
-                      BatchRenormalization(state_space[0]),
+                      BatchRenormalization(static_cast<int>(state_space[0])),
 
                       torch::nn::Linear(state_space[0], hidden_size), torch::nn::Mish(),
                       BatchRenormalization(hidden_size),
