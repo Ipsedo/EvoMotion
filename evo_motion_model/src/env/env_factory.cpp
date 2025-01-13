@@ -94,9 +94,9 @@ std::shared_ptr<Environment> RobotJumpFactory::get_env(int num_threads, int seed
         get_value(
             "skeleton_json_path",
             std::filesystem::path(RESOURCES_PATH) / "./resources/skeleton/spider_new.json"),
-        get_value("minimal_height", 0.1f), get_value("target_height", 0.5f),
-        get_value("max_seconds", 15.f), get_value("initial_seconds", 2.f),
-        get_value("reset_seconds", 3.f));
+        get_value("minimal_velocity", 1e-1f), get_value("target_velocity", 0.5f),
+        get_value("max_seconds", 15.f), get_value("initial_seconds", 1.f),
+        get_value("reset_seconds", 1.f / 6.f));
 }
 
 /*

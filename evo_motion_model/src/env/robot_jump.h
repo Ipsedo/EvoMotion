@@ -16,8 +16,8 @@
 class RobotJump final : public Environment {
 public:
     RobotJump(
-        int num_threads, int seed, const std::string &skeleton_json_path, float minimal_height,
-        float target_height, float max_seconds, float initial_seconds, float reset_seconds);
+        int num_threads, int seed, const std::string &skeleton_json_path, float minimal_velocity,
+        float target_velocity, float max_seconds, float initial_seconds, float reset_seconds);
 
     std::vector<Item> get_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
@@ -46,13 +46,12 @@ private:
 
     int max_steps;
     int curr_steps;
-    int remaining_steps;
     int initial_steps;
+    int remaining_steps;
     int reset_frames;
 
-    float initial_height;
-    float minimal_height;
-    float target_height;
+    float minimal_velocity;
+    float target_velocity;
 };
 
 #endif//EVO_MOTION_ROBOT_JUMP_H

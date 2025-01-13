@@ -14,10 +14,9 @@
 #include "./constants.h"
 
 RobotJump::RobotJump(
-    int num_threads, int seed, const std::string &skeleton_json_path, float minimal_height,
-    float target_height, float max_seconds, float initial_seconds, float reset_seconds)
+    int num_threads, int seed, const std::string &skeleton_json_path, float minimal_velocity,
+    float target_velocity, float max_seconds, float initial_seconds, float reset_seconds)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f),
-
       skeleton_json_path(skeleton_json_path), skeleton(skeleton_json_path, "robot", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path),
       base(
@@ -26,9 +25,9 @@ RobotJump::RobotJump(
           0.f, TILE_SPECULAR),
       root_item(skeleton.get_item(skeleton.get_root_name())), controllers(), states(),
       max_steps(static_cast<int>(max_seconds / DELTA_T_MODEL)), curr_steps(0),
-      remaining_steps(max_steps), initial_steps(static_cast<int>(initial_seconds / DELTA_T_MODEL)),
-      reset_frames(static_cast<int>(reset_seconds / DELTA_T_MODEL)), initial_height(0.f),
-      minimal_height(minimal_height), target_height(target_height) {
+      initial_steps(static_cast<int>(initial_seconds / DELTA_T_MODEL)),
+      remaining_steps(initial_steps), reset_frames(static_cast<int>(reset_seconds / DELTA_T_MODEL)),
+      minimal_velocity(minimal_velocity), target_velocity(target_velocity) {
     base.get_body()->setFriction(0.5f);
 
     add_item(base);
@@ -92,12 +91,11 @@ step RobotJump::compute_step() {
 
     for (const auto &state: states) current_states.push_back(state->get_state(curr_device));
 
-    const auto height =
-        std::max(root_item.get_body()->getCenterOfMassPosition().y() - initial_height, 0.f);
-    const float reward = height;
+    const auto velocity = std::max(root_item.get_body()->getLinearVelocity().y(), 0.f);
+    const float reward = velocity;
 
-    if (height < minimal_height) remaining_steps -= 1;
-    else if (height >= target_height) remaining_steps += 1;
+    if (velocity < minimal_velocity) remaining_steps -= 1;
+    else if (velocity >= target_velocity) remaining_steps += 1;
 
     const auto win = curr_steps >= max_steps;
     const auto fail = remaining_steps < 0;
@@ -143,5 +141,4 @@ void RobotJump::reset_engine() {
 
     remaining_steps = initial_steps;
     curr_steps = 0;
-    initial_height = root_item.get_body()->getCenterOfMassPosition().y();
 }
