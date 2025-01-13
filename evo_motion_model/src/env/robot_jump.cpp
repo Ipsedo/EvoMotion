@@ -16,8 +16,8 @@
 RobotJump::RobotJump(
     int num_threads, int seed, const std::string &skeleton_json_path, float minimal_velocity,
     float target_velocity, float max_seconds, float initial_seconds, float reset_seconds)
-    : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f),
-      skeleton_json_path(skeleton_json_path), skeleton(skeleton_json_path, "robot", glm::mat4(1.f)),
+    : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f), skeleton_json_path(skeleton_json_path),
+      skeleton(skeleton_json_path, "robot", glm::mat4(1.f)),
       muscular_system(skeleton, skeleton_json_path),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
