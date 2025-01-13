@@ -2,7 +2,7 @@
 // Created by samuel on 28/01/24.
 //
 
-#include "./creature_env.h"
+#include "./robot_walk.h"
 
 #include "../controller/muscle_controller.h"
 #include "./constants.h"
@@ -35,9 +35,9 @@ RobotWalk::RobotWalk(
 
     auto items = skeleton.get_items();
     std::vector<Item> non_root_items;
-    std::copy_if(items.begin(), items.end(), std::back_inserter(non_root_items), [this](auto i) {
-        return i.get_name() != skeleton.get_root_name();
-    });
+    std::copy_if(
+        items.begin(), items.end(), std::back_inserter(non_root_items),
+        [this](const auto &i) { return i.get_name() != skeleton.get_root_name(); });
 
     add_item(root_item);
     root_item.get_body()->setActivationState(DISABLE_DEACTIVATION);
@@ -136,7 +136,7 @@ void RobotWalk::reset_engine() {
 
 std::vector<int64_t> RobotWalk::get_state_space() {
     return {std::accumulate(
-        states.begin(), states.end(), 0, [](auto a, auto s) { return a + s->get_size(); })};
+        states.begin(), states.end(), 0, [](auto a, const auto &s) { return a + s->get_size(); })};
 }
 
 std::vector<int64_t> RobotWalk::get_action_space() {

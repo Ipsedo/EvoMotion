@@ -13,7 +13,7 @@
 
 class CrossQAgent final : public Agent {
 private:
-    std::shared_ptr<BatchNormActorModule> actor;
+    std::shared_ptr<ActorModule> actor;
     std::shared_ptr<BatchNormQNetworkModule> critic_1;
     std::shared_ptr<BatchNormQNetworkModule> critic_2;
 
@@ -53,8 +53,8 @@ private:
 public:
     CrossQAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int batch_size, int epoch, float lr, float gamma, int replay_buffer_size,
-        int train_every);
+        int actor_hidden_size, int critic_hidden_size, int batch_size, int epoch, float lr,
+        float gamma, int replay_buffer_size, int train_every);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
 

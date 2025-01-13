@@ -28,4 +28,11 @@ public:
     std::shared_ptr<Environment> get_env(int num_threads, int seed) override;
 };
 
+class RobotJumpFactory : public EnvironmentFactory {
+public:
+    explicit RobotJumpFactory(std::map<std::string, std::string> parameters);
+
+    std::shared_ptr<Environment> get_env(int num_threads, int seed) override;
+};
+
 #endif//EVO_MOTION_ENV_FACTORY_H

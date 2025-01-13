@@ -33,7 +33,7 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       replay_buffer(replay_buffer_size, seed), curr_episode_step(0), curr_train_step(0L),
       global_curr_step(0L), actor_loss_meter("actor", 64), critic_1_loss_meter("critic_1", 64),
       critic_2_loss_meter("critic_2", 64), entropy_loss_meter("entropy", 64),
-      episode_steps_meter("steps", 64), train_every(train_every) {
+      episode_steps_meter("steps", 64), rewards_meter("rewards", 256), train_every(train_every) {
     at::manual_seed(seed);
 
     hard_update(target_critic_1, critic_1);
@@ -48,6 +48,8 @@ torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float r
 
     if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
     replay_buffer.add({state, action.detach(), 0.f, false, state});
+
+    rewards_meter.add(reward);
 
     check_train();
 
@@ -168,6 +170,8 @@ void SoftActorCriticAgent::train(
 void SoftActorCriticAgent::done(const torch::Tensor state, const float reward) {
     replay_buffer.update_last(reward, state, true);
 
+    rewards_meter.add(reward);
+
     episode_steps_meter.add(static_cast<float>(curr_episode_step));
     curr_episode_step = 0;
 }
@@ -215,9 +219,8 @@ void SoftActorCriticAgent::load(const std::string &input_folder_path) {
 }
 
 std::vector<LossMeter> SoftActorCriticAgent::get_metrics() {
-    return {
-        actor_loss_meter, critic_1_loss_meter, critic_2_loss_meter, entropy_loss_meter,
-        episode_steps_meter};
+    return {actor_loss_meter,   critic_1_loss_meter, critic_2_loss_meter,
+            entropy_loss_meter, episode_steps_meter, rewards_meter};
 }
 
 void SoftActorCriticAgent::to(const torch::DeviceType device) {

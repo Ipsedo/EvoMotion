@@ -9,7 +9,8 @@
 #include "./cartpole.h"
 #include "./cartpole3d.h"
 #include "./constants.h"
-#include "./creature_env.h"
+#include "./robot_jump.h"
+#include "./robot_walk.h"
 
 /*
  * Env factory
@@ -82,6 +83,23 @@ std::shared_ptr<Environment> RobotWalkFactory::get_env(int num_threads, int seed
 }
 
 /*
+ * Robot Jump
+ */
+
+RobotJumpFactory::RobotJumpFactory(std::map<std::string, std::string> parameters)
+    : EnvironmentFactory(std::move(parameters)) {}
+std::shared_ptr<Environment> RobotJumpFactory::get_env(int num_threads, int seed) {
+    return std::make_shared<RobotJump>(
+        num_threads, seed,
+        get_value(
+            "skeleton_json_path",
+            std::filesystem::path(RESOURCES_PATH) / "./resources/skeleton/spider_new.json"),
+        get_value("minimal_height", 0.1f), get_value("target_height", 0.5f),
+        get_value("max_seconds", 15.f), get_value("initial_seconds", 2.f),
+        get_value("reset_seconds", 3.f));
+}
+
+/*
  * Env list
  */
 
@@ -92,6 +110,7 @@ std::map<
         {"cartpole", std::make_shared<CartPoleFactory, std::map<std::string, std::string>>},
         {"cartpole3d", std::make_shared<CartPole3dFactory, std::map<std::string, std::string>>},
         {"robot_walk", std::make_shared<RobotWalkFactory, std::map<std::string, std::string>>},
+        {"robot_jump", std::make_shared<RobotJumpFactory, std::map<std::string, std::string>>},
 };
 
 std::shared_ptr<EnvironmentFactory> get_environment_factory(
