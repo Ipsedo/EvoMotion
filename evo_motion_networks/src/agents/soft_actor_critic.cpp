@@ -43,6 +43,8 @@ SoftActorCriticAgent::SoftActorCriticAgent(
 }
 
 torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float reward) {
+    set_eval(true);
+
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 

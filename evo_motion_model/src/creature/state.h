@@ -9,8 +9,7 @@
 #include <torch/torch.h>
 
 #include <evo_motion_model/item.h>
-
-#include "./muscle.h"
+#include <evo_motion_model/muscle.h>
 
 class State {
 public:

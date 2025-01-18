@@ -8,9 +8,11 @@
 #include <random>
 
 #include <evo_motion_model/environment.h>
+#include <evo_motion_model/json/json_muscle.h>
+#include <evo_motion_model/json/json_skeleton.h>
+#include <evo_motion_model/muscle.h>
+#include <evo_motion_model/skeleton.h>
 
-#include "../creature/muscle.h"
-#include "../creature/skeleton.h"
 #include "../creature/state.h"
 
 class RobotJump final : public Environment {

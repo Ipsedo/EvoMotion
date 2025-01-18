@@ -6,8 +6,7 @@
 #define EVO_MOTION_MUSCLE_CONTROLLER_H
 
 #include <evo_motion_model/controller.h>
-
-#include "../creature/muscle.h"
+#include <evo_motion_model/muscle.h>
 
 class MuscleController final : public Controller {
 public:

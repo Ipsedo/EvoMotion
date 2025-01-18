@@ -49,14 +49,4 @@ public:
     virtual ~AbstractMuscularSystem();
 };
 
-class JsonMuscularSystem final : public AbstractMuscularSystem {
-public:
-    JsonMuscularSystem(Skeleton skeleton, const std::string &json_path);
-
-    std::vector<Muscle> get_muscles() override;
-
-private:
-    std::vector<Muscle> muscles;
-};
-
 #endif//EVO_MOTION_MUSCLE_H

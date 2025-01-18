@@ -91,7 +91,8 @@ step RobotJump::compute_step() {
 
     for (const auto &state: states) current_states.push_back(state->get_state(curr_device));
 
-    const auto velocity = std::max(root_item.get_body()->getLinearVelocity().y(), 0.f);
+    const auto velocity = std::max(root_item.get_body()->getLinearVelocity().y(), 0.f)
+                          + root_item.get_body()->getLinearVelocity().z();
     const float reward = velocity;
 
     if (velocity < minimal_velocity) remaining_steps -= 1;

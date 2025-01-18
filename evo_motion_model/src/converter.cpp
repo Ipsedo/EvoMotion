@@ -9,6 +9,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_decompose.hpp>
+
 /*
  * JSON stuff
  */
@@ -16,7 +19,6 @@
 glm::mat4 json_transformation_to_model_matrix(nlohmann::json transformation) {
 
     nlohmann::json rotation = transformation["rotation"];
-    nlohmann::json translation = transformation["translation"];
 
     const glm::vec3 position = json_vec3_to_glm_vec3(transformation["translation"]);
     const glm::vec3 rotation_point = json_vec3_to_glm_vec3(rotation["point"]);
@@ -47,6 +49,39 @@ nlohmann::json read_json(const std::string &json_path) {
 
     return json;
 }
+
+/*
+ * GLM stuff
+ */
+
+std::tuple<glm::vec3, glm::quat, glm::vec3> decompose_model_matrix(glm::mat4 model_matrix) {
+    glm::vec3 curr_scale;
+    glm::quat curr_rotation;
+    glm::vec3 curr_translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+
+    glm::decompose(model_matrix, curr_scale, curr_rotation, curr_translation, skew, perspective);
+    return {curr_translation, curr_rotation, curr_scale};
+}
+
+/*
+ * GLM to JSON
+ */
+
+nlohmann::json model_matrix_to_json_transformation(glm::mat4 model_matrix) {
+
+    const auto [curr_translation, curr_rotation, curr_scale] = decompose_model_matrix(model_matrix);
+
+    return {
+        {"translation", vec3_to_json(curr_translation)},
+        {"rotation",
+         {{"point", vec3_to_json(glm::vec3(0.f))},
+          {"axis", vec3_to_json(glm::eulerAngles(curr_rotation))},
+          {"angle_degree", glm::angle(curr_rotation)}}}};
+}
+
+nlohmann::json vec3_to_json(glm::vec3 vec) { return {{"x", vec.x}, {"y", vec.y}, {"z", vec.z}}; }
 
 /*
  * GLM <-> Bullet3 conversions
