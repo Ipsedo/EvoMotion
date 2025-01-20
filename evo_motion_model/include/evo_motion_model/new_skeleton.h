@@ -20,6 +20,7 @@
 #include "./muscle.h"
 #include "./serializer.h"
 #include "./shapes.h"
+#include "./state.h"
 
 /*
  * Skeleton
@@ -33,14 +34,16 @@ public:
         const std::vector<std::shared_ptr<NewConstraint>> &constraints,
         const std::vector<std::shared_ptr<Muscle>> &muscles);
 
-    NewSkeleton(const std::shared_ptr<AbstractDeserializer> &deserializer);
+    explicit NewSkeleton(const std::shared_ptr<AbstractDeserializer> &deserializer);
 
     std::shared_ptr<NewMember> get_member(const std::string &name);
 
     std::vector<Item> get_items();
     std::vector<btTypedConstraint *> get_constraints();
 
-    std::vector<std::shared_ptr<Muscle>> get_muscles();
+    std::vector<std::shared_ptr<Controller>> get_controllers();
+
+    std::vector<std::shared_ptr<State>> get_states(const Item &floor, btDynamicsWorld *world);
 
     std::string get_root_name();
     std::string get_robot_name();

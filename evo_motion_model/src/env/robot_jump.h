@@ -11,7 +11,7 @@
 #include <evo_motion_model/environment.h>
 #include <evo_motion_model/new_skeleton.h>
 
-#include "../creature/state.h"
+#include "../creature/proprioception_state.h"
 
 class RobotJump final : public Environment {
 public:

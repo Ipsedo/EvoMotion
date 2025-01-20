@@ -2,15 +2,12 @@
 // Created by samuel on 05/04/24.
 //
 
-#include "./state.h"
-
 #include <utility>
 
 #include <glm/gtc/quaternion.hpp>
 
 #include "../converter.h"
-
-State::~State() = default;
+#include "./proprioception_state.h"
 
 // Base class for proprioception
 ItemProprioceptionState::ItemProprioceptionState(

@@ -34,28 +34,15 @@ RobotWalk::RobotWalk(
 
     add_item(base);
 
-    auto items = skeleton.get_items();
-    std::vector<Item> non_root_items;
-    std::copy_if(
-        items.begin(), items.end(), std::back_inserter(non_root_items),
-        [this](const auto &i) { return i.get_name() != skeleton.get_root_name(); });
-
-    add_item(root_item);
-    root_item.get_body()->setActivationState(DISABLE_DEACTIVATION);
-
-    states.push_back(std::make_shared<RootMemberState>(root_item, base, m_world));
-
-    for (const auto &item: non_root_items) {
-        states.push_back(std::make_shared<MemberState>(item, root_item, base, m_world));
+    for (const auto &item: skeleton.get_items()) {
         add_item(item);
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
 
-    int i = 0;
-    for (const auto &m: skeleton.get_muscles()) {
-        states.push_back(std::make_shared<MuscleState>(m));
-        controllers.push_back(std::make_shared<MuscleController>(m, i++));
-    }
+    for (const auto &c: skeleton.get_constraints()) m_world->addConstraint(c);
+
+    states = skeleton.get_states(base, m_world);
+    controllers = skeleton.get_controllers();
 }
 
 std::vector<Item> RobotWalk::get_items() {

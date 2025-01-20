@@ -3,22 +3,14 @@
 // You need to cite the author by referencing : https://github.com/Ipsedo
 //
 
-#ifndef EVO_MOTION_STATE_H
-#define EVO_MOTION_STATE_H
+#ifndef EVO_MOTION_PROPRIOCEPTION_STATE_H
+#define EVO_MOTION_PROPRIOCEPTION_STATE_H
 
 #include <torch/torch.h>
 
 #include <evo_motion_model/item.h>
 #include <evo_motion_model/muscle.h>
-
-class State {
-public:
-    virtual int get_size() = 0;
-
-    virtual torch::Tensor get_state(torch::Device device) = 0;
-
-    virtual ~State();
-};
+#include <evo_motion_model/state.h>
 
 class ItemProprioceptionState : public State, public btCollisionWorld::ContactResultCallback {
 public:
@@ -80,4 +72,4 @@ private:
     btPoint2PointConstraint *p2p_b;
 };
 
-#endif//EVO_MOTION_STATE_H
+#endif//EVO_MOTION_PROPRIOCEPTION_STATE_H
