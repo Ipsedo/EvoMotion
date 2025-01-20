@@ -11,8 +11,8 @@
 
 #include <evo_motion_model/item.h>
 
+#include "../serializer.h"
 #include "./member.h"
-#include "./serializer.h"
 
 class Muscle {
 public:

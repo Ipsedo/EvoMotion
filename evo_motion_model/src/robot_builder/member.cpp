@@ -4,6 +4,6 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-#include <evo_motion_model/robot_builder.h>
+#include <evo_motion_model/robot/builder.h>
 
 #include "../converter.h"

@@ -4,9 +4,9 @@
 
 #include <utility>
 
-#include <evo_motion_model/constraint.h>
-#include <evo_motion_model/member.h>
-#include <evo_motion_model/skeleton.h>
+#include <evo_motion_model/robot/constraint.h>
+#include <evo_motion_model/robot/member.h>
+#include <evo_motion_model/robot/skeleton.h>
 
 #include "../controller/muscle_controller.h"
 #include "../utils.h"

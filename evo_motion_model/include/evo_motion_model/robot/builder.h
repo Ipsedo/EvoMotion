@@ -2,8 +2,8 @@
 // Created by samuel on 15/01/25.
 //
 
-#ifndef EVO_MOTION_ROBOT_BUILDER_H
-#define EVO_MOTION_ROBOT_BUILDER_H
+#ifndef EVO_MOTION_BUILDER_H
+#define EVO_MOTION_BUILDER_H
 
 #include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
@@ -11,8 +11,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include "../environment.h"
 #include "./constraint.h"
-#include "./environment.h"
 #include "./member.h"
 
 /*
@@ -58,4 +58,4 @@ private:
     bool member_exists(const std::string &member_name);
 };
 
-#endif//EVO_MOTION_ROBOT_BUILDER_H
+#endif//EVO_MOTION_BUILDER_H

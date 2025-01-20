@@ -11,9 +11,9 @@
 
 #include <glm/glm.hpp>
 
-#include "./item.h"
-#include "./serializer.h"
-#include "./shapes.h"
+#include "../item.h"
+#include "../serializer.h"
+#include "../shapes.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 

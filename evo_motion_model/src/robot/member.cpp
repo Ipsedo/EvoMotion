@@ -2,7 +2,7 @@
 // Created by samuel on 20/01/25.
 //
 
-#include <evo_motion_model/member.h>
+#include <evo_motion_model/robot/member.h>
 
 #include "../converter.h"
 

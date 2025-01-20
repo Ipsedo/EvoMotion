@@ -8,7 +8,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <evo_motion_model/muscle.h>
+#include <evo_motion_model/robot/muscle.h>
 
 #include "../converter.h"
 

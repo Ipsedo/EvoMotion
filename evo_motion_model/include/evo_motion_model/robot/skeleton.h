@@ -13,14 +13,14 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include "../controller.h"
+#include "../item.h"
+#include "../serializer.h"
+#include "../shapes.h"
+#include "../state.h"
 #include "./constraint.h"
-#include "./controller.h"
-#include "./item.h"
 #include "./member.h"
 #include "./muscle.h"
-#include "./serializer.h"
-#include "./shapes.h"
-#include "./state.h"
 
 /*
  * Skeleton

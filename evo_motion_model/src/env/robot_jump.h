@@ -9,9 +9,8 @@
 
 #include <evo_motion_model/controller.h>
 #include <evo_motion_model/environment.h>
-#include <evo_motion_model/skeleton.h>
-
-#include "../creature/proprioception_state.h"
+#include <evo_motion_model/robot/skeleton.h>
+#include <evo_motion_model/state.h>
 
 class RobotJump final : public Environment {
 public:
