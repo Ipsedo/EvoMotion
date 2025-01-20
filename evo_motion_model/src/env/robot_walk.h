@@ -8,10 +8,7 @@
 #include <random>
 
 #include <evo_motion_model/environment.h>
-#include <evo_motion_model/json/json_muscle.h>
-#include <evo_motion_model/json/json_skeleton.h>
-#include <evo_motion_model/muscle.h>
-#include <evo_motion_model/skeleton.h>
+#include <evo_motion_model/new_skeleton.h>
 
 #include "../creature/state.h"
 
@@ -44,8 +41,7 @@ private:
     Item base;
 
     std::string skeleton_json_path;
-    JsonSkeleton skeleton;
-    JsonMuscularSystem muscular_system;
+    NewSkeleton skeleton;
 
     std::vector<std::shared_ptr<Controller>> controllers;
 

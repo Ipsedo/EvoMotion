@@ -40,9 +40,12 @@ public:
 
 class ConstantAgent final : public DebugAgent {
 public:
-    explicit ConstantAgent(const std::vector<int64_t> &action_space);
+    explicit ConstantAgent(const std::vector<int64_t> &action_space, const float &action_value);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
+
+private:
+    float action_value;
 };
 
 #endif//EVO_MOTION_DEBUG_AGENTS_H

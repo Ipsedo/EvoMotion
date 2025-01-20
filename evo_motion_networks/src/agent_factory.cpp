@@ -73,7 +73,7 @@ RandomAgentFactory::RandomAgentFactory(const std::map<std::string, std::string> 
 
 std::shared_ptr<Agent> ConstantAgentFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
-    return std::make_shared<ConstantAgent>(action_space);
+    return std::make_shared<ConstantAgent>(action_space, get_value<float>("action_value"));
 }
 
 ConstantAgentFactory::ConstantAgentFactory(const std::map<std::string, std::string> &parameters)

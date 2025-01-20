@@ -95,6 +95,8 @@ void infer(
         std::this_thread::sleep_for(std::chrono::milliseconds(
             static_cast<long>(std::max(0., 1000. / 60. - delta.count()))));
 
+        std::this_thread::sleep_for(std::chrono::milliseconds(10L * 1000L));
+
         if (step.done) {
             agent->done(step.state, step.reward);
             step = env->reset();

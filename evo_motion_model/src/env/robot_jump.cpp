@@ -11,19 +11,19 @@
 #include <glm/gtx/euler_angles.hpp>
 
 #include "../controller/muscle_controller.h"
+#include "../json_serializer.h"
 #include "./constants.h"
 
 RobotJump::RobotJump(
     int num_threads, int seed, const std::string &skeleton_json_path, float minimal_velocity,
     float target_velocity, float max_seconds, float initial_seconds, float reset_seconds)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f), skeleton_json_path(skeleton_json_path),
-      skeleton(skeleton_json_path, "robot", glm::mat4(1.f)),
-      muscular_system(skeleton, skeleton_json_path),
+      skeleton(std::make_shared<JsonDeserializer>(std::filesystem::path(skeleton_json_path))),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
           0.f, TILE_SPECULAR),
-      root_item(skeleton.get_item(skeleton.get_root_name())), controllers(), states(),
+      root_item(skeleton.get_member(skeleton.get_root_name())->get_item()), controllers(), states(),
       max_steps(static_cast<int>(max_seconds / DELTA_T_MODEL)), curr_steps(0),
       initial_steps(static_cast<int>(initial_seconds / DELTA_T_MODEL)),
       remaining_steps(initial_steps), reset_frames(static_cast<int>(reset_seconds / DELTA_T_MODEL)),
@@ -49,26 +49,15 @@ RobotJump::RobotJump(
         item.get_body()->setActivationState(DISABLE_DEACTIVATION);
     }
 
-    for (auto m: muscular_system.get_muscles()) {
-        for (const auto &item: m.get_items()) {
-            add_item(item);
-            item.get_body()->setActivationState(DISABLE_DEACTIVATION);
-        }
-        for (const auto c: m.get_constraints()) m_world->addConstraint(c);
+    int i = 0;
+    for (const auto &m: skeleton.get_muscles()) {
         states.push_back(std::make_shared<MuscleState>(m));
+        controllers.push_back(std::make_shared<MuscleController>(m, i++));
     }
-
-    for (const auto constraint: skeleton.get_constraints()) m_world->addConstraint(constraint);
-
-    for (int i = 0; i < muscular_system.get_muscles().size(); i++)
-        controllers.push_back(
-            std::make_shared<MuscleController>(muscular_system.get_muscles()[i], i));
 }
 
 std::vector<Item> RobotJump::get_items() {
     auto items = skeleton.get_items();
-    for (auto m: muscular_system.get_muscles())
-        for (const auto &i: m.get_items()) items.push_back(i);
     items.push_back(base);
     return items;
 }
@@ -122,21 +111,11 @@ void RobotJump::reset_engine() {
         m_world->removeRigidBody(item.get_body());
         item.reset(model_matrix);
     }
-
-    for (auto muscle: muscular_system.get_muscles()) {
-        for (const auto &item: muscle.get_items()) {
-            m_world->removeRigidBody(item.get_body());
-            item.reset(model_matrix);
-        }
-        for (auto c: muscle.get_constraints()) m_world->removeConstraint(c);
-    }
+    for (const auto &c: skeleton.get_constraints()) m_world->removeConstraint(c);
 
     // re-add
     for (const auto &item: skeleton.get_items()) m_world->addRigidBody(item.get_body());
-    for (auto m: muscular_system.get_muscles()) {
-        for (const auto &item: m.get_items()) m_world->addRigidBody(item.get_body());
-        for (auto c: m.get_constraints()) m_world->addConstraint(c);
-    }
+    for (const auto &c: skeleton.get_constraints()) m_world->addConstraint(c);
 
     for (int i = 0; i < reset_frames; i++) step_world(DELTA_T_MODEL);
 

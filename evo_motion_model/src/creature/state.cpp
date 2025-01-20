@@ -110,8 +110,9 @@ torch::Tensor RootMemberState::get_state(torch::Device device) {
 }
 
 // Muscle
-MuscleState::MuscleState(Muscle muscle) : slider_constraint(muscle.get_slider_constraint()) {
-    auto [a, b] = muscle.get_p2p_constraints();
+MuscleState::MuscleState(std::shared_ptr<Muscle> muscle)
+    : slider_constraint(muscle->get_slider_constraint()) {
+    auto [a, b] = muscle->get_p2p_constraints();
     p2p_a = a;
     p2p_b = b;
 }

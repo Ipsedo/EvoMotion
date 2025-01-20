@@ -9,6 +9,8 @@
 
 #include <evo_motion_model/skeleton.h>
 
+#include "../new_skeleton.h"
+
 class JsonMember final : public AbstractMember {
 public:
     JsonMember(const Item &parent, const nlohmann::json &json_member);
@@ -64,5 +66,9 @@ public:
     JsonSkeleton(
         const std::string &json_path, const std::string &root_name, glm::mat4 model_matrix);
 };
+
+/*
+ * New Skeleton
+ */
 
 #endif//EVO_MOTION_JSON_SKELETON_H

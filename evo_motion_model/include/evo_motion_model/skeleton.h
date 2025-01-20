@@ -16,8 +16,6 @@
  * Enum
  */
 
-enum ShapeKind { CUBE, SPHERE, CYLINDER, FEET };
-
 enum ConstraintKind { FIXED, HINGE, CONE };
 
 /*
@@ -43,6 +41,10 @@ public:
 
     virtual ~AbstractMember();
 };
+
+/*
+ * Skeleton
+ */
 
 class Skeleton {
 public:

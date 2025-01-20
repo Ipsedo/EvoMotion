@@ -1,0 +1,1221 @@
+{
+    "robot_name": "spider_new",
+    "root_name": "body",
+    "members": [
+        {
+            "name": "body",
+            "mass": 2.0,
+            "shape": "cube",
+            "scale": {
+                "x": 0.4,
+                "y": 0.2,
+                "z": 0.5
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0,
+                "w": 1.0
+            },
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legA",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.15,
+                "y": 0.15,
+                "z": 0.15
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.3826834559440613,
+                "z": 0.0,
+                "w": 0.9238795638084412
+            },
+            "translation": {
+                "x": 0.4000000059604645,
+                "y": 0.0,
+                "z": -0.5
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legB",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.15,
+                "y": 0.15,
+                "z": 0.15
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9238795638084412,
+                "z": 0.0,
+                "w": 0.3826834559440613
+            },
+            "translation": {
+                "x": -0.4000000059604645,
+                "y": 0.0,
+                "z": -0.5
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legC",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.15,
+                "y": 0.15,
+                "z": 0.15
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.9238795638084412,
+                "z": 0.0,
+                "w": -0.3826833963394165
+            },
+            "translation": {
+                "x": -0.4000000059604645,
+                "y": 0.0,
+                "z": 0.5
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legD",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.15,
+                "y": 0.15,
+                "z": 0.15
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": -0.38268348574638367,
+                "z": 0.0,
+                "w": 0.9238795042037964
+            },
+            "translation": {
+                "x": 0.4000000059604645,
+                "y": 0.0,
+                "z": 0.5
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legA_leg1",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.3,
+                "y": 0.08,
+                "z": 0.08
+            },
+            "rotation": {
+                "x": 0.37686964869499207,
+                "y": -0.06645228713750839,
+                "z": 0.9098437428474426,
+                "w": -0.16043002903461456
+            },
+            "translation": {
+                "x": 0.7054049372673035,
+                "y": -0.047393955290317535,
+                "z": -0.8054049015045166
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legB_leg1",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.3,
+                "y": 0.08,
+                "z": 0.08
+            },
+            "rotation": {
+                "x": 0.9098437428474426,
+                "y": -0.16043002903461456,
+                "z": 0.37686964869499207,
+                "w": -0.06645228713750839
+            },
+            "translation": {
+                "x": -0.7054049372673035,
+                "y": -0.047393955290317535,
+                "z": -0.8054049015045166
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legC_leg1",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.3,
+                "y": 0.08,
+                "z": 0.08
+            },
+            "rotation": {
+                "x": 0.9098437428474426,
+                "y": -0.16042999923229218,
+                "z": -0.3768695592880249,
+                "w": 0.0664522796869278
+            },
+            "translation": {
+                "x": -0.7054049968719482,
+                "y": -0.047393955290317535,
+                "z": 0.8054049015045166
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legD_leg1",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.3,
+                "y": 0.08,
+                "z": 0.08
+            },
+            "rotation": {
+                "x": -0.37686967849731445,
+                "y": 0.06645229458808899,
+                "z": 0.9098436832427979,
+                "w": -0.16042999923229218
+            },
+            "translation": {
+                "x": 0.7054048776626587,
+                "y": -0.047393955290317535,
+                "z": 0.8054050207138062
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legA_leg1_leg2",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.4,
+                "y": 0.08,
+                "z": 0.08
+            },
+            "rotation": {
+                "x": 0.31347593665122986,
+                "y": 0.21949821710586548,
+                "z": 0.7567978501319885,
+                "w": 0.5299155116081238
+            },
+            "translation": {
+                "x": 0.8600879907608032,
+                "y": -0.18060925602912903,
+                "z": -0.9600879549980164
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legB_leg1_leg2",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.4,
+                "y": 0.08,
+                "z": 0.08
+            },
+            "rotation": {
+                "x": 0.7567977905273438,
+                "y": 0.5299155116081238,
+                "z": 0.31347590684890747,
+                "w": 0.21949820220470428
+            },
+            "translation": {
+                "x": -0.8600879907608032,
+                "y": -0.18060925602912903,
+                "z": -0.9600879549980164
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legC_leg1_leg2",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.4,
+                "y": 0.08,
+                "z": 0.08
+            },
+            "rotation": {
+                "x": 0.7567977905273438,
+                "y": 0.5299155712127686,
+                "z": -0.3134758770465851,
+                "w": -0.21949820220470428
+            },
+            "translation": {
+                "x": -0.860088050365448,
+                "y": -0.18060925602912903,
+                "z": 0.9600878953933716
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legD_leg1_leg2",
+            "mass": 0.25,
+            "shape": "cube",
+            "scale": {
+                "x": 0.4,
+                "y": 0.08,
+                "z": 0.08
+            },
+            "rotation": {
+                "x": -0.31347599625587463,
+                "y": -0.21949826180934906,
+                "z": 0.7567978501319885,
+                "w": 0.5299155116081238
+            },
+            "translation": {
+                "x": 0.8600878715515137,
+                "y": -0.18060925602912903,
+                "z": 0.9600880742073059
+            },
+            "friction": 0.5,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legA_leg1_leg2_leg3",
+            "mass": 0.1,
+            "shape": "feet",
+            "scale": {
+                "x": 0.15,
+                "y": 0.15,
+                "z": 0.15
+            },
+            "rotation": {
+                "x": 0.31347593665122986,
+                "y": 0.21949821710586548,
+                "z": 0.7567978501319885,
+                "w": 0.5299155116081238
+            },
+            "translation": {
+                "x": 0.9084569215774536,
+                "y": -0.36854779720306396,
+                "z": -1.0084569454193115
+            },
+            "friction": 0.8,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legB_leg1_leg2_leg3",
+            "mass": 0.1,
+            "shape": "feet",
+            "scale": {
+                "x": 0.15,
+                "y": 0.15,
+                "z": 0.15
+            },
+            "rotation": {
+                "x": 0.7567977905273438,
+                "y": 0.5299155116081238,
+                "z": 0.31347590684890747,
+                "w": 0.21949820220470428
+            },
+            "translation": {
+                "x": -0.9084569215774536,
+                "y": -0.36854779720306396,
+                "z": -1.0084569454193115
+            },
+            "friction": 0.8,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legC_leg1_leg2_leg3",
+            "mass": 0.1,
+            "shape": "feet",
+            "scale": {
+                "x": 0.15,
+                "y": 0.15,
+                "z": 0.15
+            },
+            "rotation": {
+                "x": 0.7567977905273438,
+                "y": 0.5299155712127686,
+                "z": -0.3134758770465851,
+                "w": -0.21949820220470428
+            },
+            "translation": {
+                "x": -0.9084569811820984,
+                "y": -0.36854779720306396,
+                "z": 1.008456826210022
+            },
+            "friction": 0.8,
+            "ignore_collision": false
+        },
+        {
+            "name": "body_legD_leg1_leg2_leg3",
+            "mass": 0.1,
+            "shape": "feet",
+            "scale": {
+                "x": 0.15,
+                "y": 0.15,
+                "z": 0.15
+            },
+            "rotation": {
+                "x": -0.31347599625587463,
+                "y": -0.21949826180934906,
+                "z": 0.7567978501319885,
+                "w": 0.5299155116081238
+            },
+            "translation": {
+                "x": 0.9084568023681641,
+                "y": -0.36854779720306396,
+                "z": 1.008457064628601
+            },
+            "friction": 0.8,
+            "ignore_collision": false
+        }
+    ],
+    "constraints": [
+        {
+            "parent_name": "body",
+            "child_name": "body_legA",
+            "frame_in_parent": {
+                "translation": {
+                    "x": 0.4000000059604645,
+                    "y": 0.0,
+                    "z": -0.5
+                },
+                "rotation": {
+                    "x": 0.7071067690849304,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 0.7071067690849304
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.7071067690849304,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 0.7071067690849304
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": 0.0,
+                "max": 90.0
+            }
+        },
+        {
+            "parent_name": "body",
+            "child_name": "body_legB",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.4000000059604645,
+                    "y": 0.0,
+                    "z": -0.5
+                },
+                "rotation": {
+                    "x": 0.7071067690849304,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 0.7071067690849304
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.7071067690849304,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 0.7071067690849304
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": 90.0,
+                "max": 180.0
+            }
+        },
+        {
+            "parent_name": "body",
+            "child_name": "body_legC",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.4000000059604645,
+                    "y": 0.0,
+                    "z": 0.5
+                },
+                "rotation": {
+                    "x": 0.7071067690849304,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 0.7071067690849304
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.7071067690849304,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 0.7071067690849304
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": 180.0,
+                "max": 270.0
+            }
+        },
+        {
+            "parent_name": "body",
+            "child_name": "body_legD",
+            "frame_in_parent": {
+                "translation": {
+                    "x": 0.4000000059604645,
+                    "y": 0.0,
+                    "z": 0.5
+                },
+                "rotation": {
+                    "x": 0.7071067690849304,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 0.7071067690849304
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.7071067690849304,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 0.7071067690849304
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": 270.0,
+                "max": 360.0
+            }
+        },
+        {
+            "parent_name": "body_legA",
+            "child_name": "body_legA_leg1",
+            "frame_in_parent": {
+                "translation": {
+                    "x": 0.15000000596046448,
+                    "y": -0.15000000596046448,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.30000001192092896,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": -270.0,
+                "max": -150.0
+            }
+        },
+        {
+            "parent_name": "body_legB",
+            "child_name": "body_legB_leg1",
+            "frame_in_parent": {
+                "translation": {
+                    "x": 0.15000000596046448,
+                    "y": -0.15000000596046448,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.30000001192092896,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": -270.0,
+                "max": -150.0
+            }
+        },
+        {
+            "parent_name": "body_legC",
+            "child_name": "body_legC_leg1",
+            "frame_in_parent": {
+                "translation": {
+                    "x": 0.15000000596046448,
+                    "y": -0.15000000596046448,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.30000001192092896,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": -270.0,
+                "max": -150.0
+            }
+        },
+        {
+            "parent_name": "body_legD",
+            "child_name": "body_legD_leg1",
+            "frame_in_parent": {
+                "translation": {
+                    "x": 0.15000000596046448,
+                    "y": -0.15000000596046448,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.30000001192092896,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": -270.0,
+                "max": -150.0
+            }
+        },
+        {
+            "parent_name": "body_legA_leg1",
+            "child_name": "body_legA_leg1_leg2",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.30000001192092896,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.20000000298023224,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": -320.0,
+                "max": -220.0
+            }
+        },
+        {
+            "parent_name": "body_legB_leg1",
+            "child_name": "body_legB_leg1_leg2",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.30000001192092896,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.20000000298023224,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": -320.0,
+                "max": -220.0
+            }
+        },
+        {
+            "parent_name": "body_legC_leg1",
+            "child_name": "body_legC_leg1_leg2",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.30000001192092896,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.20000000298023224,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": -320.0,
+                "max": -220.0
+            }
+        },
+        {
+            "parent_name": "body_legD_leg1",
+            "child_name": "body_legD_leg1_leg2",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.30000001192092896,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.20000000298023224,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "hinge",
+            "limit_degree": {
+                "min": -320.0,
+                "max": -220.0
+            }
+        },
+        {
+            "parent_name": "body_legA_leg1_leg2",
+            "child_name": "body_legA_leg1_leg2_leg3",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.4000000059604645,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "fixed"
+        },
+        {
+            "parent_name": "body_legB_leg1_leg2",
+            "child_name": "body_legB_leg1_leg2_leg3",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.4000000059604645,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "fixed"
+        },
+        {
+            "parent_name": "body_legC_leg1_leg2",
+            "child_name": "body_legC_leg1_leg2_leg3",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.4000000059604645,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "fixed"
+        },
+        {
+            "parent_name": "body_legD_leg1_leg2",
+            "child_name": "body_legD_leg1_leg2_leg3",
+            "frame_in_parent": {
+                "translation": {
+                    "x": -0.4000000059604645,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "frame_in_child": {
+                "translation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0,
+                    "w": 1.0
+                }
+            },
+            "type": "fixed"
+        }
+    ],
+    "muscles": [
+        {
+            "name": "muscle_A1",
+            "item_a": "body",
+            "item_b": "body_legA",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": 0.5,
+                "y": 0.0,
+                "z": -0.2
+            },
+            "pos_in_b": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.15
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_A2",
+            "item_a": "body_legA",
+            "item_b": "body_legA_leg1",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": -0.15,
+                "y": 0.15,
+                "z": 0.0
+            },
+            "pos_in_b": {
+                "x": -0.2,
+                "y": -0.08,
+                "z": 0.0
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_A3",
+            "item_a": "body_legA_leg1",
+            "item_b": "body_legA_leg1_leg2",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": 0.3,
+                "y": -0.08,
+                "z": 0.0
+            },
+            "pos_in_b": {
+                "x": 0.4,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_B1",
+            "item_a": "body",
+            "item_b": "body_legB",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": -0.2,
+                "y": 0.0,
+                "z": -0.5
+            },
+            "pos_in_b": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.15
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_B2",
+            "item_a": "body_legB",
+            "item_b": "body_legB_leg1",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": -0.15,
+                "y": 0.15,
+                "z": 0.0
+            },
+            "pos_in_b": {
+                "x": -0.2,
+                "y": -0.08,
+                "z": 0.0
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_B3",
+            "item_a": "body_legB_leg1",
+            "item_b": "body_legB_leg1_leg2",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": 0.3,
+                "y": -0.08,
+                "z": 0.0
+            },
+            "pos_in_b": {
+                "x": 0.4,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_C1",
+            "item_a": "body",
+            "item_b": "body_legC",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": -0.5,
+                "y": 0.0,
+                "z": 0.2
+            },
+            "pos_in_b": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.15
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_C2",
+            "item_a": "body_legC",
+            "item_b": "body_legC_leg1",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": -0.15,
+                "y": 0.15,
+                "z": 0.0
+            },
+            "pos_in_b": {
+                "x": -0.2,
+                "y": -0.08,
+                "z": 0.0
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_C3",
+            "item_a": "body_legC_leg1",
+            "item_b": "body_legC_leg1_leg2",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": 0.3,
+                "y": -0.08,
+                "z": 0.0
+            },
+            "pos_in_b": {
+                "x": 0.4,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_D1",
+            "item_a": "body",
+            "item_b": "body_legD",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": 0.2,
+                "y": 0.0,
+                "z": 0.5
+            },
+            "pos_in_b": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.15
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_D2",
+            "item_a": "body_legD",
+            "item_b": "body_legD_leg1",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": -0.15,
+                "y": 0.15,
+                "z": 0.0
+            },
+            "pos_in_b": {
+                "x": -0.2,
+                "y": -0.08,
+                "z": 0.0
+            },
+            "force": 64.0,
+            "speed": 8.0
+        },
+        {
+            "name": "muscle_D3",
+            "item_a": "body_legD_leg1",
+            "item_b": "body_legD_leg1_leg2",
+            "attach_mass": 0.2,
+            "attach_scale": {
+                "x": 0.05,
+                "y": 0.05,
+                "z": 0.05
+            },
+            "pos_in_a": {
+                "x": 0.3,
+                "y": -0.08,
+                "z": 0.0
+            },
+            "pos_in_b": {
+                "x": 0.4,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "force": 64.0,
+            "speed": 8.0
+        }
+    ]
+}

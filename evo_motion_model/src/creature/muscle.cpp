@@ -19,9 +19,10 @@ glm::mat4 get_rotation(const glm::vec3 a, const glm::vec3 b) {
 }
 
 Muscle::Muscle(
-    const std::string &name, float attach_mass, glm::vec3 attach_scale, Item &item_a,
-    glm::vec3 pos_in_a, Item &item_b, glm::vec3 pos_in_b, float force, float max_speed)
-    : max_speed(max_speed),
+    const std::string &name, float attach_mass, glm::vec3 attach_scale, Item item_a,
+    glm::vec3 pos_in_a, Item item_b, glm::vec3 pos_in_b, float force, float max_speed)
+    : name(name), item_a_name(item_a.get_name()), item_b_name(item_b.get_name()),
+      max_speed(max_speed),
       attach_a(
           name + "_attach_a", std::make_shared<ObjShape>("./resources/obj/sphere.obj"),
           item_a.model_matrix_without_scale() * glm::translate(glm::mat4(1), pos_in_a),
@@ -71,6 +72,18 @@ Muscle::Muscle(
         muscle_slider_constraint->getOverrideNumSolverIterations() * 4);
 }
 
+Muscle::Muscle(
+    const std::shared_ptr<AbstractDeserializer> &deserializer,
+    std::function<std::shared_ptr<NewMember>(std::string)> get_member_function)
+    : Muscle(
+          deserializer->read_str("name"), deserializer->read_float("attach_mass"),
+          deserializer->read_vec3("attach_scale"),
+          get_member_function(deserializer->read_str("item_a"))->get_item(),
+          deserializer->read_vec3("pos_in_a"),
+          get_member_function(deserializer->read_str("item_b"))->get_item(),
+          deserializer->read_vec3("pos_in_b"), deserializer->read_float("force"),
+          deserializer->read_float("speed")) {}
+
 void Muscle::contract(const float speed_factor) const {
     muscle_slider_constraint->setPoweredLinMotor(true);
     muscle_slider_constraint->setTargetLinMotorVelocity(speed_factor * max_speed);
@@ -88,6 +101,27 @@ btSliderConstraint *Muscle::get_slider_constraint() { return muscle_slider_const
 
 std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> Muscle::get_p2p_constraints() {
     return {attach_a_constraint, attach_b_constraint};
+}
+
+std::shared_ptr<AbstractSerializer<std::any>>
+Muscle::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer) {
+    auto muscle_serializer = serializer->new_object();
+
+    muscle_serializer->write_str("name", name);
+
+    muscle_serializer->write_float("attach_mass", attach_a.get_body()->getMass());
+    muscle_serializer->write_vec3(
+        "attach_scale", bullet_to_glm(attach_a.get_body()->getCollisionShape()->getLocalScaling()));
+    muscle_serializer->write_str("item_a", item_a_name);
+    muscle_serializer->write_str("item_b", item_b_name);
+
+    muscle_serializer->write_vec3("pos_in_a", bullet_to_glm(attach_a_constraint->getPivotInA()));
+    muscle_serializer->write_vec3("pos_in_b", bullet_to_glm(attach_b_constraint->getPivotInA()));
+
+    muscle_serializer->write_float("force", muscle_slider_constraint->getMaxLinMotorForce());
+    muscle_serializer->write_float("speed", max_speed);
+
+    return muscle_serializer;
 }
 
 Muscle::~Muscle() = default;

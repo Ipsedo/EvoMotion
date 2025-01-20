@@ -9,6 +9,8 @@
 #include <tuple>
 #include <vector>
 
+enum ShapeKind { CUBE, SPHERE, CYLINDER, FEET };
+
 class Shape {
 public:
     virtual std::vector<std::tuple<float, float, float>> get_vertices() = 0;

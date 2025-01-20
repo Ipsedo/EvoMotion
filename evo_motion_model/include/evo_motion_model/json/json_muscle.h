@@ -6,6 +6,7 @@
 #define EVO_MOTION_JSON_MUSCLE_H
 
 #include <evo_motion_model/muscle.h>
+#include <evo_motion_model/skeleton.h>
 
 class JsonMuscularSystem final : public AbstractMuscularSystem {
 public:

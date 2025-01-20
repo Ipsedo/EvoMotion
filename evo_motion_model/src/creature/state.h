@@ -68,7 +68,7 @@ public:
 
 class MuscleState : public State {
 public:
-    explicit MuscleState(Muscle muscle);
+    explicit MuscleState(std::shared_ptr<Muscle> muscle);
 
     int get_size() override;
 
