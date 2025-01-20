@@ -10,16 +10,15 @@
 
 #include "./member.h"
 
-class NewConstraint {
+class Constraint {
 public:
-    NewConstraint(
-        const std::shared_ptr<NewMember> &parent, const std::shared_ptr<NewMember> &child);
-    NewConstraint(
+    Constraint(const std::shared_ptr<NewMember> &parent, const std::shared_ptr<NewMember> &child);
+    Constraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<NewMember>(std::string)> &get_member_function);
 
     virtual btTypedConstraint *get_constraint() = 0;
-    virtual ~NewConstraint();
+    virtual ~Constraint();
 
     std::shared_ptr<NewMember> get_parent();
     std::shared_ptr<NewMember> get_child();
@@ -36,13 +35,13 @@ private:
  * Constraints
  */
 
-class NewHingeConstraint : public NewConstraint {
+class HingeConstraint : public Constraint {
 public:
-    NewHingeConstraint(
+    HingeConstraint(
         const std::shared_ptr<NewMember> &parent, const std::shared_ptr<NewMember> &child,
         glm::mat4 frame_in_parent, glm::mat4 frame_in_child, float limit_degree_min,
         float limit_degree_max);
-    NewHingeConstraint(
+    HingeConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<NewMember>(std::string)> &get_member_function);
 
@@ -59,12 +58,12 @@ protected:
  * Fixed Constraint
  */
 
-class NewFixedConstraint : public NewConstraint {
+class FixedConstraint : public Constraint {
 public:
-    NewFixedConstraint(
+    FixedConstraint(
         const std::shared_ptr<NewMember> &parent, const std::shared_ptr<NewMember> &child,
         glm::mat4 attach_in_parent, glm::mat4 attach_in_child);
-    NewFixedConstraint(
+    FixedConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserialized,
         const std::function<std::shared_ptr<NewMember>(const std::string &)> &get_member_function);
 

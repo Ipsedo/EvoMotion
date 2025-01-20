@@ -8,7 +8,7 @@
 #include <random>
 
 #include <evo_motion_model/environment.h>
-#include <evo_motion_model/new_skeleton.h>
+#include <evo_motion_model/skeleton.h>
 
 #include "../creature/proprioception_state.h"
 
@@ -41,7 +41,7 @@ private:
     Item base;
 
     std::string skeleton_json_path;
-    NewSkeleton skeleton;
+    Skeleton skeleton;
 
     std::vector<std::shared_ptr<Controller>> controllers;
 

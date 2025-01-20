@@ -1,46 +1,26 @@
 //
-// Created by samuel on 01/04/24.
+// Created by samuel on 19/01/25.
 //
 
 #ifndef EVO_MOTION_SKELETON_H
 #define EVO_MOTION_SKELETON_H
 
+#include <any>
+#include <filesystem>
 #include <map>
-#include <vector>
+#include <memory>
 
-#include <btBulletDynamicsCommon.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
-#include <evo_motion_model/item.h>
-
-/*
- * Enum
- */
-
-enum ConstraintKind { FIXED, HINGE, CONE };
-
-/*
- * Abstract
- */
-
-class AbstractMember;
-
-class AbstractConstraint {
-public:
-    virtual btTypedConstraint *get_constraint() = 0;
-
-    virtual std::shared_ptr<AbstractMember> get_child() = 0;
-
-    virtual ~AbstractConstraint();
-};
-
-class AbstractMember {
-public:
-    virtual Item get_item() = 0;
-
-    virtual std::vector<std::shared_ptr<AbstractConstraint>> get_children() = 0;
-
-    virtual ~AbstractMember();
-};
+#include "./constraint.h"
+#include "./controller.h"
+#include "./item.h"
+#include "./member.h"
+#include "./muscle.h"
+#include "./serializer.h"
+#include "./shapes.h"
+#include "./state.h"
 
 /*
  * Skeleton
@@ -48,22 +28,35 @@ public:
 
 class Skeleton {
 public:
-    Skeleton(std::string robot_name, const std::shared_ptr<AbstractMember> &root_member);
+    Skeleton(
+        std::string robot_name, std::string root_name,
+        const std::vector<std::shared_ptr<NewMember>> &members,
+        const std::vector<std::shared_ptr<Constraint>> &constraints,
+        const std::vector<std::shared_ptr<Muscle>> &muscles);
+
+    explicit Skeleton(const std::shared_ptr<AbstractDeserializer> &deserializer);
+
+    std::shared_ptr<NewMember> get_member(const std::string &name);
 
     std::vector<Item> get_items();
-
-    Item get_item(const std::string &name);
-
     std::vector<btTypedConstraint *> get_constraints();
+
+    std::vector<std::shared_ptr<Controller>> get_controllers();
+
+    std::vector<std::shared_ptr<State>> get_states(const Item &floor, btDynamicsWorld *world);
 
     std::string get_root_name();
     std::string get_robot_name();
 
-private:
+    virtual std::shared_ptr<AbstractSerializer<std::any>>
+    serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer);
+
+protected:
     std::string robot_name;
     std::string root_name;
-    std::vector<btTypedConstraint *> constraints;
-    std::unordered_map<std::string, Item> items_map;
+    std::vector<std::shared_ptr<NewMember>> members;
+    std::vector<std::shared_ptr<Constraint>> constraints;
+    std::vector<std::shared_ptr<Muscle>> muscles;
 };
 
 #endif//EVO_MOTION_SKELETON_H
