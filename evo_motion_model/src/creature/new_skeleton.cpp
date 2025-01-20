@@ -118,10 +118,12 @@ NewSkeleton::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &seri
 
 std::vector<std::shared_ptr<Controller>> NewSkeleton::get_controllers() {
     int i = 0;
-    return transform_vector<std::shared_ptr<Muscle>, std::shared_ptr<Controller>>(muscles, [&i](const auto &m) { return std::make_shared<MuscleController>(m, i++); });
+    return transform_vector<std::shared_ptr<Muscle>, std::shared_ptr<Controller>>(
+        muscles, [&i](const auto &m) { return std::make_shared<MuscleController>(m, i++); });
 }
 
-std::vector<std::shared_ptr<State>> NewSkeleton::get_states(const Item &floor, btDynamicsWorld *world) {
+std::vector<std::shared_ptr<State>>
+NewSkeleton::get_states(const Item &floor, btDynamicsWorld *world) {
     std::vector<std::shared_ptr<State>> states;
 
     std::vector<std::shared_ptr<NewMember>> non_root_items;
@@ -133,7 +135,9 @@ std::vector<std::shared_ptr<State>> NewSkeleton::get_states(const Item &floor, b
 
     states.push_back(std::make_shared<RootMemberState>(root_member->get_item(), floor, world));
 
-    for (const auto &member: non_root_items) states.push_back(std::make_shared<MemberState>(member->get_item(), root_member->get_item(), floor, world));
+    for (const auto &member: non_root_items)
+        states.push_back(std::make_shared<MemberState>(
+            member->get_item(), root_member->get_item(), floor, world));
 
     for (const auto &muscle: muscles) states.push_back(std::make_shared<MuscleState>(muscle));
 

@@ -30,7 +30,8 @@ torch::Tensor RandomAgent::act(torch::Tensor state, float reward) {
 }
 
 // Constant Agent
-ConstantAgent::ConstantAgent(const std::vector<int64_t> &action_space, const float &action_value) : DebugAgent(action_space), action_value(action_value) {}
+ConstantAgent::ConstantAgent(const std::vector<int64_t> &action_space, const float &action_value)
+    : DebugAgent(action_space), action_value(action_value) {}
 
 torch::Tensor ConstantAgent::act(torch::Tensor state, float reward) {
     return torch::ones({action_space}, torch::TensorOptions(curr_device)) * action_value;

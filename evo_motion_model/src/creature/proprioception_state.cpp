@@ -2,12 +2,13 @@
 // Created by samuel on 05/04/24.
 //
 
+#include "./proprioception_state.h"
+
 #include <utility>
 
 #include <glm/gtc/quaternion.hpp>
 
 #include "../converter.h"
-#include "./proprioception_state.h"
 
 // Base class for proprioception
 ItemProprioceptionState::ItemProprioceptionState(
