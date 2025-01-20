@@ -25,8 +25,8 @@ JsonSerializer::JsonSerializer(nlohmann::json content)
       shape_kind_to_str(
           {{SPHERE, "sphere"}, {CYLINDER, "cylinder"}, {CUBE, "cube"}, {FEET, "feet"}}) {}
 
-void JsonSerializer::write_vec3(const std::string &key, glm::vec3 vec) {
-    auto vec_json = new_object();
+void JsonSerializer::write_vec3(const std::string &key, const glm::vec3 vec) {
+    const auto vec_json = new_object();
 
     vec_json->write_float("x", vec.x);
     vec_json->write_float("y", vec.y);
@@ -35,8 +35,8 @@ void JsonSerializer::write_vec3(const std::string &key, glm::vec3 vec) {
     write_object(key, vec_json);
 }
 
-void JsonSerializer::write_quat(const std::string &key, glm::quat quat) {
-    auto quat_json = new_object();
+void JsonSerializer::write_quat(const std::string &key, const glm::quat quat) {
+    const auto quat_json = new_object();
 
     new_object()->write_float("x", quat.x);
     new_object()->write_float("y", quat.y);
@@ -46,21 +46,21 @@ void JsonSerializer::write_quat(const std::string &key, glm::quat quat) {
     write_object(key, quat_json);
 }
 
-void JsonSerializer::write_bool(const std::string &key, bool value) { write_impl(key, value); }
+void JsonSerializer::write_bool(const std::string &key, const bool value) { write_impl(key, value); }
 
 void JsonSerializer::write_mat4(const std::string &key, glm::mat4 mat) {
     std::vector<float> mat_array;
-    float *mat_ptr = glm::value_ptr(mat);
+    const float *mat_ptr = glm::value_ptr(mat);
     for (int i = 0; i < 16; i++) mat_array.push_back(mat_ptr[i]);
 
     write_impl(key, mat_array);
 }
 
-void JsonSerializer::write_float(const std::string &key, float f) { write_impl(key, f); }
+void JsonSerializer::write_float(const std::string &key, const float f) { write_impl(key, f); }
 
-void JsonSerializer::write_str(const std::string &key, std::string str) { write_impl(key, str); }
+void JsonSerializer::write_str(const std::string &key, const std::string str) { write_impl(key, str); }
 
-void JsonSerializer::write_shape_kind(const std::string &key, ShapeKind shape_kind) {
+void JsonSerializer::write_shape_kind(const std::string &key, const ShapeKind shape_kind) {
     write_str(key, shape_kind_to_str[shape_kind]);
 }
 
@@ -89,7 +89,7 @@ void JsonSerializer::write_impl(const std::string &key, T value) {
     content[key] = value;
 }
 
-void JsonSerializer::to_file(std::filesystem::path output_file) {
+void JsonSerializer::to_file(const std::filesystem::path output_file) {
     std::ofstream os(output_file, std::ios::out);
     os << content.dump();
     os.close();
@@ -110,12 +110,12 @@ JsonDeserializer::JsonDeserializer(const std::filesystem::path &object_json_path
     : JsonDeserializer(nlohmann::json::parse(std::ifstream(object_json_path))) {}
 
 glm::vec3 JsonDeserializer::read_vec3(const std::string &key) {
-    auto vec3_json = read_object(key);
+    const auto vec3_json = read_object(key);
     return {vec3_json->read_float("x"), vec3_json->read_float("y"), vec3_json->read_float("z")};
 }
 
 glm::quat JsonDeserializer::read_quat(const std::string &key) {
-    auto quat_json = read_object(key);
+    const auto quat_json = read_object(key);
     return {
         quat_json->read_float("w"), quat_json->read_float("x"), quat_json->read_float("y"),
         quat_json->read_float("z")};

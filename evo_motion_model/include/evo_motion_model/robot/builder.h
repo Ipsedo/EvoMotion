@@ -62,7 +62,7 @@ public:
 
     bool update_member(
         const std::string &member_name, std::optional<glm::vec3> new_pos,
-        std::optional<glm::quat> new_rot, std::optional<glm::vec3> new_scale,
+        const std::optional<glm::quat> &new_rot, std::optional<glm::vec3> new_scale,
         std::optional<float> new_friction, std::optional<bool> new_ignore_collision);
 
     void save_robot(const std::filesystem::path &output_json_path, const std::string &robot_name);

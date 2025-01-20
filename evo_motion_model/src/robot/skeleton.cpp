@@ -116,7 +116,7 @@ Skeleton::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     return serializer;
 }
 
-std::vector<std::shared_ptr<Controller>> Skeleton::get_controllers() {
+std::vector<std::shared_ptr<Controller>> Skeleton::get_controllers() const {
     int i = 0;
     return transform_vector<std::shared_ptr<Muscle>, std::shared_ptr<Controller>>(
         muscles, [&i](const auto &m) { return std::make_shared<MuscleController>(m, i++); });

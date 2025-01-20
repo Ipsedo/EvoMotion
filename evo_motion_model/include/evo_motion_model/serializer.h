@@ -5,6 +5,7 @@
 #ifndef EVO_MOTION_SERIALIZER_H
 #define EVO_MOTION_SERIALIZER_H
 
+#include <any>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -15,6 +16,8 @@
 
 class AbstractSerializer {
 public:
+    virtual ~AbstractSerializer() = default;
+
     virtual void write_vec3(const std::string &key, glm::vec3 vec) = 0;
     virtual void write_quat(const std::string &key, glm::quat quat) = 0;
     virtual void write_bool(const std::string &key, bool value) = 0;
@@ -27,9 +30,9 @@ public:
 
     virtual void write_array(
         const std::string &key,
-        const std::vector<std::shared_ptr<AbstractSerializer>> data_vector_serializer) = 0;
+        std::vector<std::shared_ptr<AbstractSerializer>> data_vector_serializer) = 0;
     virtual void write_object(
-        const std::string &key, const std::shared_ptr<AbstractSerializer> data_serializer) = 0;
+        const std::string &key, std::shared_ptr<AbstractSerializer> data_serializer) = 0;
 
     virtual void to_file(std::filesystem::path output_file) = 0;
 
@@ -38,6 +41,8 @@ public:
 
 class AbstractDeserializer {
 public:
+    virtual ~AbstractDeserializer() = default;
+
     virtual glm::vec3 read_vec3(const std::string &key) = 0;
     virtual glm::quat read_quat(const std::string &key) = 0;
     virtual bool read_bool(const std::string &key) = 0;

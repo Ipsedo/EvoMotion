@@ -12,8 +12,8 @@
 
 // Base class for proprioception
 ItemProprioceptionState::ItemProprioceptionState(
-    const Item &item, const Item &floor, btDynamicsWorld *world)
-    : state_item(item), floor_touched(false), last_ang_vel(0, 0, 0), last_lin_vel(0, 0, 0) {
+    Item item, const Item &floor, btDynamicsWorld *world)
+    : state_item(std::move(item)), last_ang_vel(0, 0, 0), last_lin_vel(0, 0, 0), floor_touched(false) {
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
@@ -76,13 +76,13 @@ btScalar ItemProprioceptionState::addSingleResult(
 // Member class
 
 MemberState::MemberState(
-    const Item &item, const Item &root_item, const Item &floor, btDynamicsWorld *world)
-    : ItemProprioceptionState(item, floor, world), root_item(root_item) {}
+    const Item &item, Item root_item, const Item &floor, btDynamicsWorld *world)
+    : ItemProprioceptionState(item, floor, world), root_item(std::move(root_item)) {}
 
 int MemberState::get_size() { return ItemProprioceptionState::get_size() + 3; }
 
 torch::Tensor MemberState::get_state(torch::Device device) {
-    glm::vec4 center_point(0.f, 0.f, 0.f, 1.f);
+    constexpr glm::vec4 center_point(0.f, 0.f, 0.f, 1.f);
     glm::vec3 center_pos =
         state_item.model_matrix() * center_point - root_item.model_matrix() * center_point;
     return torch::cat(
@@ -108,7 +108,7 @@ torch::Tensor RootMemberState::get_state(torch::Device device) {
 }
 
 // Muscle
-MuscleState::MuscleState(std::shared_ptr<Muscle> muscle)
+MuscleState::MuscleState(const std::shared_ptr<Muscle>& muscle)
     : slider_constraint(muscle->get_slider_constraint()) {
     auto [a, b] = muscle->get_p2p_constraints();
     p2p_a = a;

@@ -41,7 +41,7 @@ public:
     std::vector<Item> get_items();
     std::vector<btTypedConstraint *> get_constraints();
 
-    std::vector<std::shared_ptr<Controller>> get_controllers();
+    std::vector<std::shared_ptr<Controller>> get_controllers() const;
 
     std::vector<std::shared_ptr<State>> get_states(const Item &floor, btDynamicsWorld *world);
 

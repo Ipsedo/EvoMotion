@@ -16,8 +16,8 @@
 
 RobotWalk::RobotWalk(
     const int num_threads, const int seed, const std::string &skeleton_json_path,
-    float initial_remaining_seconds, float max_episode_seconds, float target_velocity,
-    float minimal_velocity, int reset_frames)
+    const float initial_remaining_seconds, const float max_episode_seconds, const float target_velocity,
+    const float minimal_velocity, const int reset_frames)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f),
       base(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
@@ -75,15 +75,15 @@ step RobotWalk::compute_step() {
 
 void RobotWalk::reset_engine() {
     // reset model transform
-    glm::vec3 root_pos(1.f, 0.25f, 2.f);
+    constexpr glm::vec3 root_pos(1.f, 0.25f, 2.f);
 
-    float angle_limit = static_cast<float>(M_PI) / 3.f;
+    constexpr float angle_limit = static_cast<float>(M_PI) / 3.f;
 
-    float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
-    float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
-    float angle_pitch = rd_uni(rng) * angle_limit - angle_limit / 2.f;
-    glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
-                             * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
+    const float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
+    const float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
+    const float angle_pitch = rd_uni(rng) * angle_limit - angle_limit / 2.f;
+    const glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
+                                   * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
 
     for (const auto &item: skeleton.get_items()) {
         m_world->removeRigidBody(item.get_body());

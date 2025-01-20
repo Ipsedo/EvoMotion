@@ -13,7 +13,7 @@
  * Serializer
  */
 
-class JsonSerializer : public AbstractSerializer {
+class JsonSerializer final : public AbstractSerializer {
 public:
     explicit JsonSerializer();
     explicit JsonSerializer(nlohmann::json content);
@@ -49,7 +49,7 @@ private:
  * Deserializer
  */
 
-class JsonDeserializer : public AbstractDeserializer {
+class JsonDeserializer final : public AbstractDeserializer {
 public:
     explicit JsonDeserializer(nlohmann::json object_json);
     explicit JsonDeserializer(const std::filesystem::path &object_json_path);

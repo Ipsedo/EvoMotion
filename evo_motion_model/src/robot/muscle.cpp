@@ -19,8 +19,8 @@ glm::mat4 get_rotation(const glm::vec3 a, const glm::vec3 b) {
 }
 
 Muscle::Muscle(
-    const std::string &name, float attach_mass, glm::vec3 attach_scale, Item item_a,
-    glm::vec3 pos_in_a, Item item_b, glm::vec3 pos_in_b, float force, float max_speed)
+    const std::string &name, const float attach_mass, const glm::vec3 attach_scale, const Item& item_a,
+    const glm::vec3 pos_in_a, const Item& item_b, const glm::vec3 pos_in_b, const float force, const float max_speed)
     : name(name), item_a_name(item_a.get_name()), item_b_name(item_b.get_name()),
       max_speed(max_speed),
       attach_a(
@@ -46,7 +46,7 @@ Muscle::Muscle(
     muscle_slider_constraint->setUpperAngLimit(0);
 
     muscle_slider_constraint->setLowerLinLimit(0);
-    float max_extension_muscle =
+    const float max_extension_muscle =
         2.f
         * glm::length(glm::vec3(
             attach_a.model_matrix_without_scale() * glm::vec4(glm::vec3(0), 1)
@@ -74,7 +74,7 @@ Muscle::Muscle(
 
 Muscle::Muscle(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
-    std::function<std::shared_ptr<Member>(std::string)> get_member_function)
+    const std::function<std::shared_ptr<Member>(std::string)>& get_member_function)
     : Muscle(
           deserializer->read_str("name"), deserializer->read_float("attach_mass"),
           deserializer->read_vec3("attach_scale"),
@@ -97,7 +97,7 @@ std::vector<btTypedConstraint *> Muscle::get_constraints() {
     return {muscle_slider_constraint, attach_a_constraint, attach_b_constraint};
 }
 
-btSliderConstraint *Muscle::get_slider_constraint() { return muscle_slider_constraint; }
+btSliderConstraint *Muscle::get_slider_constraint() const { return muscle_slider_constraint; }
 
 std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> Muscle::get_p2p_constraints() {
     return {attach_a_constraint, attach_b_constraint};

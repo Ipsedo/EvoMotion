@@ -14,7 +14,7 @@
 
 Item::Item(
     std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,
-    const glm::vec3 scale, const float mass, DrawableKind drawable_kind)
+    const glm::vec3 scale, const float mass, const DrawableKind drawable_kind)
     : name(std::move(name)), shape(shape), scale(scale), first_model_matrix(model_matrix),
       kind(drawable_kind) {
     auto *convex_hull_shape = new btConvexHullShape();

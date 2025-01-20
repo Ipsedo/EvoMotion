@@ -5,7 +5,7 @@
 #ifndef EVO_MOTION_MUSCLE_H
 #define EVO_MOTION_MUSCLE_H
 
-#include <any>
+#include <functional>
 
 #include <btBulletDynamicsCommon.h>
 
@@ -17,12 +17,12 @@
 class Muscle {
 public:
     Muscle(
-        const std::string &name, float attach_mass, glm::vec3 attach_scale, Item item_a,
-        glm::vec3 pos_in_a, Item item_b, glm::vec3 pos_in_b, float force, float max_speed);
+        const std::string &name, float attach_mass, glm::vec3 attach_scale, const Item& item_a,
+        glm::vec3 pos_in_a, const Item& item_b, glm::vec3 pos_in_b, float force, float max_speed);
 
     Muscle(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
-        std::function<std::shared_ptr<Member>(std::string)> get_member_function);
+        const std::function<std::shared_ptr<Member>(std::string)>& get_member_function);
 
     void contract(float speed_factor) const;
 
@@ -32,14 +32,14 @@ public:
 
     std::vector<btTypedConstraint *> get_constraints();
 
-    btSliderConstraint *get_slider_constraint();
+    btSliderConstraint *get_slider_constraint() const;
 
     std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> get_p2p_constraints();
 
     virtual std::shared_ptr<AbstractSerializer>
     serialize(const std::shared_ptr<AbstractSerializer> &serializer);
 
-    ~Muscle();
+    virtual ~Muscle();
 
 private:
     std::string name;

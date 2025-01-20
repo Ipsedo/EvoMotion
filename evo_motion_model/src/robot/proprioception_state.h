@@ -14,7 +14,7 @@
 
 class ItemProprioceptionState : public State, public btCollisionWorld::ContactResultCallback {
 public:
-    ItemProprioceptionState(const Item &item, const Item &floor, btDynamicsWorld *world);
+    ItemProprioceptionState(Item item, const Item &floor, btDynamicsWorld *world);
 
     int get_size() override;
 
@@ -37,7 +37,7 @@ private:
 
 class MemberState : public ItemProprioceptionState {
 public:
-    MemberState(const Item &item, const Item &root_item, const Item &floor, btDynamicsWorld *world);
+    MemberState(const Item &item, Item root_item, const Item &floor, btDynamicsWorld *world);
 
     int get_size() override;
 
@@ -60,7 +60,7 @@ public:
 
 class MuscleState : public State {
 public:
-    explicit MuscleState(std::shared_ptr<Muscle> muscle);
+    explicit MuscleState(const std::shared_ptr<Muscle>& muscle);
 
     int get_size() override;
 

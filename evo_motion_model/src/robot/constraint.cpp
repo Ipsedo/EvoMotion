@@ -4,6 +4,8 @@
 
 #include <evo_motion_model/robot/constraint.h>
 
+#include <utility>
+
 #include "../converter.h"
 #include "../utils.h"
 
@@ -12,9 +14,9 @@
  */
 
 Constraint::Constraint(
-    const std::string &name, const std::shared_ptr<Member> &parent,
+    std::string name, const std::shared_ptr<Member> &parent,
     const std::shared_ptr<Member> &child)
-    : name(name), parent(parent), child(child) {}
+    : name(std::move(name)), parent(parent), child(child) {}
 
 Constraint::Constraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
@@ -48,8 +50,8 @@ Constraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
 
 HingeConstraint::HingeConstraint(
     const std::string &name, const std::shared_ptr<Member> &parent,
-    const std::shared_ptr<Member> &child, const glm::mat4 frame_in_parent,
-    const glm::mat4 frame_in_child, float limit_degree_min, float limit_degree_max)
+    const std::shared_ptr<Member> &child, const glm::mat4 &frame_in_parent,
+    const glm::mat4 &frame_in_child, const float limit_degree_min, const float limit_degree_max)
     : Constraint(name, parent, child),
       constraint(new btHingeConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
@@ -84,12 +86,12 @@ std::shared_ptr<AbstractSerializer>
 HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto serializer_constraint = Constraint::serialize(serializer);
 
-    auto frame_in_parent = serializer->new_object();
+    const auto frame_in_parent = serializer->new_object();
     frame_in_parent->write_vec3("translation", bullet_to_glm(constraint->getAFrame().getOrigin()));
     frame_in_parent->write_quat("rotation", bullet_to_glm(constraint->getAFrame().getRotation()));
     serializer_constraint->write_object("frame_in_parent", frame_in_parent);
 
-    auto frame_in_child = serializer->new_object();
+    const auto frame_in_child = serializer->new_object();
     frame_in_child->write_vec3("translation", bullet_to_glm(constraint->getBFrame().getOrigin()));
     frame_in_child->write_quat("rotation", bullet_to_glm(constraint->getBFrame().getRotation()));
     serializer_constraint->write_object("frame_in_child", frame_in_parent);
@@ -110,7 +112,7 @@ HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer
 
 FixedConstraint::FixedConstraint(
     const std::string &name, const std::shared_ptr<Member> &parent,
-    const std::shared_ptr<Member> &child, glm::mat4 attach_in_parent, glm::mat4 attach_in_child)
+    const std::shared_ptr<Member> &child, const glm::mat4 &attach_in_parent, const glm::mat4 &attach_in_child)
     : Constraint(name, parent, child),
       constraint(new btFixedConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
@@ -142,14 +144,14 @@ std::shared_ptr<AbstractSerializer>
 FixedConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto constraint_serializer = Constraint::serialize(serializer);
 
-    auto frame_in_parent = serializer->new_object();
+    const auto frame_in_parent = serializer->new_object();
     frame_in_parent->write_vec3(
         "translation", bullet_to_glm(constraint->getFrameOffsetA().getOrigin()));
     frame_in_parent->write_quat(
         "rotation", bullet_to_glm(constraint->getFrameOffsetA().getRotation()));
     constraint_serializer->write_object("frame_in_parent", frame_in_parent);
 
-    auto frame_in_child = serializer->new_object();
+    const auto frame_in_child = serializer->new_object();
     frame_in_child->write_vec3(
         "translation", bullet_to_glm(constraint->getFrameOffsetB().getOrigin()));
     frame_in_child->write_quat(

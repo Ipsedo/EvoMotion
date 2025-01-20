@@ -15,8 +15,8 @@
 #include "./constants.h"
 
 RobotJump::RobotJump(
-    int num_threads, int seed, const std::string &skeleton_json_path, float minimal_velocity,
-    float target_velocity, float max_seconds, float initial_seconds, float reset_seconds)
+    const int num_threads, const int seed, const std::string &skeleton_json_path, const float minimal_velocity,
+    const float target_velocity, const float max_seconds, const float initial_seconds, const float reset_seconds)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f), skeleton_json_path(skeleton_json_path),
       skeleton(std::make_shared<JsonDeserializer>(std::filesystem::path(skeleton_json_path))),
       base(
@@ -84,15 +84,15 @@ step RobotJump::compute_step() {
 }
 
 void RobotJump::reset_engine() {
-    glm::vec3 root_pos(1.f, 0.25f, 2.f);
+    constexpr glm::vec3 root_pos(1.f, 0.25f, 2.f);
 
-    float angle_limit = static_cast<float>(M_PI) / 3.f;
+    constexpr float angle_limit = static_cast<float>(M_PI) / 3.f;
 
-    float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
-    float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
-    float angle_pitch = rd_uni(rng) * angle_limit - angle_limit / 2.f;
-    glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
-                             * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
+    const float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
+    const float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
+    const float angle_pitch = rd_uni(rng) * angle_limit - angle_limit / 2.f;
+    const glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
+                                   * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
 
     for (const auto &item: skeleton.get_items()) {
         m_world->removeRigidBody(item.get_body());

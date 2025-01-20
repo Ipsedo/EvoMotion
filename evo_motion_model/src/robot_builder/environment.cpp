@@ -32,9 +32,9 @@ bool RobotBuilderEnvironment::add_member(
 }
 
 bool RobotBuilderEnvironment::update_member(
-    const std::string &member_name, std::optional<glm::vec3> new_pos,
-    std::optional<glm::quat> new_rot, std::optional<glm::vec3> new_scale,
-    std::optional<float> new_friction, std::optional<bool> new_ignore_collision) {
+    const std::string &member_name, const std::optional<glm::vec3> new_pos,
+    const std::optional<glm::quat> &new_rot, const std::optional<glm::vec3> new_scale,
+    const std::optional<float> new_friction, const std::optional<bool> new_ignore_collision) {
 
     if (member_exists(member_name)) {
         std::set<std::string> updated_members;

@@ -13,7 +13,7 @@
 
 class RobotWalk final : public Environment {
 public:
-    explicit RobotWalk(
+    RobotWalk(
         int num_threads, int seed, const std::string &skeleton_json_path,
         float initial_remaining_seconds, float max_episode_seconds, float target_velocity,
         float minimal_velocity, int reset_frames);

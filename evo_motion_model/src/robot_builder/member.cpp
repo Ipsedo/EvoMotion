@@ -9,9 +9,9 @@
 #include "../converter.h"
 
 BuilderMember::BuilderMember(
-    const std::string &name, ShapeKind shapeKind, const glm::vec3 &centerPos,
-    const glm::quat &rotation, const glm::vec3 &scale, float mass, float friction,
-    bool ignore_collision)
+    const std::string &name, const ShapeKind shapeKind, const glm::vec3 &centerPos,
+    const glm::quat &rotation, const glm::vec3 &scale, const float mass, const float friction,
+    const bool ignore_collision)
     : Member(name, shapeKind, centerPos, rotation, scale, mass, friction, ignore_collision) {}
 
 BuilderMember::BuilderMember(const std::shared_ptr<AbstractDeserializer> &deserializer)
