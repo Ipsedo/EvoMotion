@@ -17,17 +17,17 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-class NewMember {
+class Member {
 public:
-    NewMember(
+    Member(
         const std::string &name, ShapeKind shape_kind, glm::vec3 center_pos, glm::quat rotation,
         glm::vec3 scale, float mass, float friction, bool ignore_collision);
-    NewMember(const std::shared_ptr<AbstractDeserializer> &deserializer);
+    explicit Member(const std::shared_ptr<AbstractDeserializer> &deserializer);
     virtual Item get_item();
-    virtual ~NewMember();
+    virtual ~Member();
 
-    virtual std::shared_ptr<AbstractSerializer<std::any>>
-    serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer);
+    virtual std::shared_ptr<AbstractSerializer>
+    serialize(const std::shared_ptr<AbstractSerializer> &serializer);
 
 private:
     std::map<ShapeKind, std::string> shape_kind_to_path;

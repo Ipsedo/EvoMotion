@@ -4,6 +4,8 @@
 
 #include <evo_motion_view/renderer.h>
 
+#include <evo_motion_model/robot/builder.h>
+
 #include "./run.h"
 
 void gui() {

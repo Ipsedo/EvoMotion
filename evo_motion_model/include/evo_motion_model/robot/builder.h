@@ -14,14 +14,34 @@
 #include "../environment.h"
 #include "./constraint.h"
 #include "./member.h"
+#include "./skeleton.h"
 
 /*
  * Parameter Member
  */
 
-class BuilderMember : public NewMember {};
+class BuilderMember : public Member {
+public:
+    BuilderMember(
+        const std::string &name, ShapeKind shapeKind, const glm::vec3 &centerPos,
+        const glm::quat &rotation, const glm::vec3 &scale, float mass, float friction,
+        bool ignore_collision);
 
-class BuilderConstraint : public virtual Constraint {};
+    explicit BuilderMember(const std::shared_ptr<AbstractDeserializer> &deserializer);
+
+    void update_item(
+        std::optional<glm::vec3> new_pos, std::optional<glm::quat> new_rot,
+        std::optional<glm::vec3> new_scale, std::optional<float> new_friction,
+        std::optional<bool> new_ignore_collision);
+
+    void transform_item(std::optional<glm::vec3> new_pos, std::optional<glm::quat> new_rot);
+};
+
+/*
+ * Builder Constraints
+ */
+
+class BuilderConstraint : public Constraint {};
 
 class BuilderHingeConstraint : public virtual BuilderConstraint, public virtual HingeConstraint {};
 
@@ -41,19 +61,20 @@ public:
         float mass, float friction);
 
     bool update_member(
-        const std::string &member_name, glm::vec3 center_pos, glm::quat rotation, glm::vec3 scale,
-        float mass, float friction);
+        const std::string &member_name, std::optional<glm::vec3> new_pos,
+        std::optional<glm::quat> new_rot, std::optional<glm::vec3> new_scale,
+        std::optional<float> new_friction, std::optional<bool> new_ignore_collision);
 
-    void save_robot(const std::filesystem::path &output_json_path);
+    void save_robot(const std::filesystem::path &output_json_path, const std::string &robot_name);
     void load_robot(const std::filesystem::path &input_json_path);
 
 private:
     std::string root_name;
 
-    std::map<std::string, std::string> skeleton_graph;
+    std::map<std::string, std::vector<std::string>> skeleton_graph;
 
-    std::vector<std::shared_ptr<BuilderMember>> members;
-    std::vector<std::shared_ptr<BuilderConstraint>> constraints;
+    std::map<std::string, std::shared_ptr<BuilderMember>> members;
+    std::map<std::string, std::shared_ptr<BuilderConstraint>> constraints;
 
     bool member_exists(const std::string &member_name);
 };

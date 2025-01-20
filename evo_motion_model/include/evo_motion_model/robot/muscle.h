@@ -22,7 +22,7 @@ public:
 
     Muscle(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
-        std::function<std::shared_ptr<NewMember>(std::string)> get_member_function);
+        std::function<std::shared_ptr<Member>(std::string)> get_member_function);
 
     void contract(float speed_factor) const;
 
@@ -36,8 +36,8 @@ public:
 
     std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> get_p2p_constraints();
 
-    virtual std::shared_ptr<AbstractSerializer<std::any>>
-    serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer);
+    virtual std::shared_ptr<AbstractSerializer>
+    serialize(const std::shared_ptr<AbstractSerializer> &serializer);
 
     ~Muscle();
 

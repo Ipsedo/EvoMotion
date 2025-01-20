@@ -30,13 +30,13 @@ class Skeleton {
 public:
     Skeleton(
         std::string robot_name, std::string root_name,
-        const std::vector<std::shared_ptr<NewMember>> &members,
+        const std::vector<std::shared_ptr<Member>> &members,
         const std::vector<std::shared_ptr<Constraint>> &constraints,
         const std::vector<std::shared_ptr<Muscle>> &muscles);
 
     explicit Skeleton(const std::shared_ptr<AbstractDeserializer> &deserializer);
 
-    std::shared_ptr<NewMember> get_member(const std::string &name);
+    std::shared_ptr<Member> get_member(const std::string &name);
 
     std::vector<Item> get_items();
     std::vector<btTypedConstraint *> get_constraints();
@@ -48,13 +48,13 @@ public:
     std::string get_root_name();
     std::string get_robot_name();
 
-    virtual std::shared_ptr<AbstractSerializer<std::any>>
-    serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer);
+    virtual std::shared_ptr<AbstractSerializer>
+    serialize(const std::shared_ptr<AbstractSerializer> &serializer);
 
 protected:
     std::string robot_name;
     std::string root_name;
-    std::vector<std::shared_ptr<NewMember>> members;
+    std::vector<std::shared_ptr<Member>> members;
     std::vector<std::shared_ptr<Constraint>> constraints;
     std::vector<std::shared_ptr<Muscle>> muscles;
 };

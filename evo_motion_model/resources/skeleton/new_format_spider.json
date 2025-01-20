@@ -396,6 +396,7 @@
     ],
     "constraints": [
         {
+            "name": "constraint_0",
             "parent_name": "body",
             "child_name": "body_legA",
             "frame_in_parent": {
@@ -431,6 +432,7 @@
             }
         },
         {
+            "name": "constraint_1",
             "parent_name": "body",
             "child_name": "body_legB",
             "frame_in_parent": {
@@ -466,6 +468,7 @@
             }
         },
         {
+            "name": "constraint_2",
             "parent_name": "body",
             "child_name": "body_legC",
             "frame_in_parent": {
@@ -501,6 +504,7 @@
             }
         },
         {
+            "name": "constraint_3",
             "parent_name": "body",
             "child_name": "body_legD",
             "frame_in_parent": {
@@ -536,6 +540,7 @@
             }
         },
         {
+            "name": "constraint_4",
             "parent_name": "body_legA",
             "child_name": "body_legA_leg1",
             "frame_in_parent": {
@@ -571,6 +576,7 @@
             }
         },
         {
+            "name": "constraint_5",
             "parent_name": "body_legB",
             "child_name": "body_legB_leg1",
             "frame_in_parent": {
@@ -606,6 +612,7 @@
             }
         },
         {
+            "name": "constraint_6",
             "parent_name": "body_legC",
             "child_name": "body_legC_leg1",
             "frame_in_parent": {
@@ -641,6 +648,7 @@
             }
         },
         {
+            "name": "constraint_7",
             "parent_name": "body_legD",
             "child_name": "body_legD_leg1",
             "frame_in_parent": {
@@ -676,6 +684,7 @@
             }
         },
         {
+            "name": "constraint_8",
             "parent_name": "body_legA_leg1",
             "child_name": "body_legA_leg1_leg2",
             "frame_in_parent": {
@@ -711,6 +720,7 @@
             }
         },
         {
+            "name": "constraint_9",
             "parent_name": "body_legB_leg1",
             "child_name": "body_legB_leg1_leg2",
             "frame_in_parent": {
@@ -746,6 +756,7 @@
             }
         },
         {
+            "name": "constraint_10",
             "parent_name": "body_legC_leg1",
             "child_name": "body_legC_leg1_leg2",
             "frame_in_parent": {
@@ -781,6 +792,7 @@
             }
         },
         {
+            "name": "constraint_11",
             "parent_name": "body_legD_leg1",
             "child_name": "body_legD_leg1_leg2",
             "frame_in_parent": {
@@ -816,6 +828,7 @@
             }
         },
         {
+            "name": "constraint_12",
             "parent_name": "body_legA_leg1_leg2",
             "child_name": "body_legA_leg1_leg2_leg3",
             "frame_in_parent": {
@@ -847,6 +860,7 @@
             "type": "fixed"
         },
         {
+            "name": "constraint_13",
             "parent_name": "body_legB_leg1_leg2",
             "child_name": "body_legB_leg1_leg2_leg3",
             "frame_in_parent": {
@@ -878,6 +892,7 @@
             "type": "fixed"
         },
         {
+            "name": "constraint_14",
             "parent_name": "body_legC_leg1_leg2",
             "child_name": "body_legC_leg1_leg2_leg3",
             "frame_in_parent": {
@@ -909,6 +924,7 @@
             "type": "fixed"
         },
         {
+            "name": "constraint_15",
             "parent_name": "body_legD_leg1_leg2",
             "child_name": "body_legD_leg1_leg2_leg3",
             "frame_in_parent": {

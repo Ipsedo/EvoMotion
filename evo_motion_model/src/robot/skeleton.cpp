@@ -18,7 +18,7 @@
 
 Skeleton::Skeleton(
     std::string robot_name, std::string root_name,
-    const std::vector<std::shared_ptr<NewMember>> &members,
+    const std::vector<std::shared_ptr<Member>> &members,
     const std::vector<std::shared_ptr<Constraint>> &constraints,
     const std::vector<std::shared_ptr<Muscle>> &muscles)
     : robot_name(std::move(robot_name)), root_name(std::move(root_name)), members(members),
@@ -27,10 +27,10 @@ Skeleton::Skeleton(
 Skeleton::Skeleton(const std::shared_ptr<AbstractDeserializer> &deserializer)
     : robot_name(deserializer->read_str("robot_name")),
       root_name(deserializer->read_str("root_name")),
-      members(transform_vector<std::shared_ptr<AbstractDeserializer>, std::shared_ptr<NewMember>>(
+      members(transform_vector<std::shared_ptr<AbstractDeserializer>, std::shared_ptr<Member>>(
           deserializer->read_array("members"),
           [](const std::shared_ptr<AbstractDeserializer> &d) {
-              return std::make_shared<NewMember>(d);
+              return std::make_shared<Member>(d);
           })),
       constraints(
           transform_vector<std::shared_ptr<AbstractDeserializer>, std::shared_ptr<Constraint>>(
@@ -52,7 +52,7 @@ Skeleton::Skeleton(const std::shared_ptr<AbstractDeserializer> &deserializer)
                   d, [this](const std::string &n) { return get_member(n); });
           })) {}
 
-std::shared_ptr<NewMember> Skeleton::get_member(const std::string &name) {
+std::shared_ptr<Member> Skeleton::get_member(const std::string &name) {
     for (const auto &m: members)
         if (m->get_item().get_name() == name) return m;
     throw std::runtime_error("Member \"" + name + "\"not found");
@@ -90,24 +90,24 @@ std::vector<btTypedConstraint *> Skeleton::get_constraints() {
 std::string Skeleton::get_root_name() { return root_name; }
 std::string Skeleton::get_robot_name() { return robot_name; }
 
-std::shared_ptr<AbstractSerializer<std::any>>
-Skeleton::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer) {
+std::shared_ptr<AbstractSerializer>
+Skeleton::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     serializer->write_str("robot_name", robot_name);
     serializer->write_str("root_name", root_name);
 
-    std::vector<std::shared_ptr<AbstractSerializer<std::any>>> serializer_members;
+    std::vector<std::shared_ptr<AbstractSerializer>> serializer_members;
     std::transform(
         members.begin(), members.end(), std::back_inserter(serializer_members),
         [serializer](const auto &m) { return m->serialize(serializer); });
     serializer->write_array("members", serializer_members);
 
-    std::vector<std::shared_ptr<AbstractSerializer<std::any>>> serializer_constraints;
+    std::vector<std::shared_ptr<AbstractSerializer>> serializer_constraints;
     std::transform(
         constraints.begin(), constraints.end(), std::back_inserter(serializer_constraints),
         [serializer](const auto &c) { return c->serialize(serializer); });
     serializer->write_array("constraints", serializer_constraints);
 
-    std::vector<std::shared_ptr<AbstractSerializer<std::any>>> serializer_muscles;
+    std::vector<std::shared_ptr<AbstractSerializer>> serializer_muscles;
     std::transform(
         muscles.begin(), muscles.end(), std::back_inserter(serializer_muscles),
         [serializer](const auto &m) { return m->serialize(serializer); });
@@ -126,7 +126,7 @@ std::vector<std::shared_ptr<State>>
 Skeleton::get_states(const Item &floor, btDynamicsWorld *world) {
     std::vector<std::shared_ptr<State>> states;
 
-    std::vector<std::shared_ptr<NewMember>> non_root_items;
+    std::vector<std::shared_ptr<Member>> non_root_items;
     std::copy_if(
         members.begin(), members.end(), std::back_inserter(non_root_items),
         [this](const auto &i) { return i->get_item().get_name() != get_root_name(); });

@@ -10,9 +10,9 @@
  * Member
  */
 
-NewMember::~NewMember() = default;
+Member::~Member() = default;
 
-NewMember::NewMember(
+Member::Member(
     const std::string &name, ShapeKind shape_kind, glm::vec3 center_pos, glm::quat rotation,
     glm::vec3 scale, float mass, float friction, bool ignore_collision)
     : shape_kind_to_path(
@@ -32,17 +32,17 @@ NewMember::NewMember(
         member.get_body()->setCollisionFlags(
             member.get_body()->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 }
-NewMember::NewMember(const std::shared_ptr<AbstractDeserializer> &deserializer)
-    : NewMember(
+Member::Member(const std::shared_ptr<AbstractDeserializer> &deserializer)
+    : Member(
           deserializer->read_str("name"), deserializer->read_shape_kind("shape"),
           deserializer->read_vec3("translation"), deserializer->read_quat("rotation"),
           deserializer->read_vec3("scale"), deserializer->read_float("mass"),
           deserializer->read_float("friction"), deserializer->read_bool("ignore_collision")) {}
 
-Item NewMember::get_item() { return member; }
+Item Member::get_item() { return member; }
 
-std::shared_ptr<AbstractSerializer<std::any>>
-NewMember::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer) {
+std::shared_ptr<AbstractSerializer>
+Member::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto serializer_member = serializer->new_object();
 
     serializer_member->write_str("name", get_item().get_name());

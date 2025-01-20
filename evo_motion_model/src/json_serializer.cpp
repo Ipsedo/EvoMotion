@@ -10,6 +10,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <utility>
 
 #include "./utils.h"
 
@@ -19,7 +20,7 @@
 
 JsonSerializer::JsonSerializer() : JsonSerializer({}) {}
 JsonSerializer::JsonSerializer(nlohmann::json content)
-    : content(content),
+    : content(std::move(content)),
       shape_kind_to_str(
           {{SPHERE, "sphere"}, {CYLINDER, "cylinder"}, {CUBE, "cube"}, {FEET, "feet"}}) {}
 
@@ -62,25 +63,25 @@ void JsonSerializer::write_shape_kind(const std::string &key, ShapeKind shape_ki
     write_str(key, shape_kind_to_str[shape_kind]);
 }
 
-std::shared_ptr<AbstractSerializer<nlohmann::json>> JsonSerializer::new_object() {
+std::shared_ptr<AbstractSerializer> JsonSerializer::new_object() {
     return std::make_shared<JsonSerializer>(nlohmann::json::object());
 }
 void JsonSerializer::write_array(
     const std::string &key,
-    const std::vector<std::shared_ptr<AbstractSerializer<nlohmann::json>>> data_vector_serializer) {
+    const std::vector<std::shared_ptr<AbstractSerializer>> data_vector_serializer) {
 
     auto json_array = nlohmann::json::array();
 
     for (const auto &data_serializer: data_vector_serializer)
-        json_array.push_back(data_serializer->get_data());
+        json_array.push_back(std::any_cast<nlohmann::json>(data_serializer->get_data()));
 
     write_impl(key, json_array);
 }
 
 void JsonSerializer::write_object(
     const std::string &key,
-    const std::shared_ptr<AbstractSerializer<nlohmann::json>> data_serializer) {
-    write_impl(key, data_serializer->get_data());
+    const std::shared_ptr<AbstractSerializer> data_serializer) {
+    write_impl(key, std::any_cast<nlohmann::json>(data_serializer->get_data()));
 }
 
 template<typename T>
@@ -94,7 +95,7 @@ void JsonSerializer::to_file(std::filesystem::path output_file) {
     os.close();
 }
 
-nlohmann::json JsonSerializer::get_data() { return content; }
+std::any JsonSerializer::get_data() { return content; }
 
 /*
  * Deserializer

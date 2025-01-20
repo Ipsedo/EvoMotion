@@ -74,7 +74,7 @@ Muscle::Muscle(
 
 Muscle::Muscle(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
-    std::function<std::shared_ptr<NewMember>(std::string)> get_member_function)
+    std::function<std::shared_ptr<Member>(std::string)> get_member_function)
     : Muscle(
           deserializer->read_str("name"), deserializer->read_float("attach_mass"),
           deserializer->read_vec3("attach_scale"),
@@ -103,8 +103,8 @@ std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> Muscle::get_p2p
     return {attach_a_constraint, attach_b_constraint};
 }
 
-std::shared_ptr<AbstractSerializer<std::any>>
-Muscle::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer) {
+std::shared_ptr<AbstractSerializer>
+Muscle::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto muscle_serializer = serializer->new_object();
 
     muscle_serializer->write_str("name", name);
@@ -125,9 +125,3 @@ Muscle::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serialize
 }
 
 Muscle::~Muscle() = default;
-
-/*
- * Abstract muscular system
- */
-
-AbstractMuscularSystem::~AbstractMuscularSystem() = default;

@@ -12,23 +12,29 @@
  */
 
 Constraint::Constraint(
-    const std::shared_ptr<NewMember> &parent, const std::shared_ptr<NewMember> &child)
-    : parent(parent), child(child) {}
+    const std::string &name, const std::shared_ptr<Member> &parent,
+    const std::shared_ptr<Member> &child)
+    : name(name), parent(parent), child(child) {}
 
 Constraint::Constraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
-    const std::function<std::shared_ptr<NewMember>(std::string)> &get_member_function)
-    : parent(get_member_function(deserializer->read_str("parent_name"))),
-      child(get_member_function(deserializer->read_str("child_name"))) {}
+    const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
+    : Constraint(
+          deserializer->read_str("name"),
+          get_member_function(deserializer->read_str("parent_name")),
+          get_member_function(deserializer->read_str("child_name"))) {}
 
 Constraint::~Constraint() = default;
 
-std::shared_ptr<NewMember> Constraint::get_parent() { return parent; }
+std::string Constraint::get_name() { return name; }
 
-std::shared_ptr<NewMember> Constraint::get_child() { return child; }
+std::shared_ptr<Member> Constraint::get_parent() { return parent; }
 
-std::shared_ptr<AbstractSerializer<std::any>>
-Constraint::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer) {
+
+std::shared_ptr<Member> Constraint::get_child() { return child; }
+
+std::shared_ptr<AbstractSerializer>
+Constraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto serializer_constraint = serializer->new_object();
 
     serializer_constraint->write_str("parent_name", get_parent()->get_item().get_name());
@@ -42,10 +48,10 @@ Constraint::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &seria
  */
 
 HingeConstraint::HingeConstraint(
-    const std::shared_ptr<NewMember> &parent, const std::shared_ptr<NewMember> &child,
-    const glm::mat4 frame_in_parent, const glm::mat4 frame_in_child, float limit_degree_min,
-    float limit_degree_max)
-    : Constraint(parent, child),
+    const std::string &name, const std::shared_ptr<Member> &parent,
+    const std::shared_ptr<Member> &child, const glm::mat4 frame_in_parent,
+    const glm::mat4 frame_in_child, float limit_degree_min, float limit_degree_max)
+    : Constraint(name, parent, child),
       constraint(new btHingeConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
           glm_to_bullet(frame_in_parent), glm_to_bullet(frame_in_child))) {
@@ -58,8 +64,9 @@ HingeConstraint::HingeConstraint(
 
 HingeConstraint::HingeConstraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
-    const std::function<std::shared_ptr<NewMember>(std::string)> &get_member_function)
+    const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
     : HingeConstraint(
+          deserializer->read_str("name"),
           get_member_function(deserializer->read_str("parent_name")),
           get_member_function(deserializer->read_str("child_name")),
           glm::translate(
@@ -74,8 +81,8 @@ HingeConstraint::HingeConstraint(
 
 btTypedConstraint *HingeConstraint::get_constraint() { return constraint; }
 
-std::shared_ptr<AbstractSerializer<std::any>>
-HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer) {
+std::shared_ptr<AbstractSerializer>
+HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto serializer_constraint = Constraint::serialize(serializer);
 
     auto frame_in_parent = serializer->new_object();
@@ -103,9 +110,9 @@ HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &
  */
 
 FixedConstraint::FixedConstraint(
-    const std::shared_ptr<NewMember> &parent, const std::shared_ptr<NewMember> &child,
-    glm::mat4 attach_in_parent, glm::mat4 attach_in_child)
-    : Constraint(parent, child),
+    const std::string &name, const std::shared_ptr<Member> &parent,
+    const std::shared_ptr<Member> &child, glm::mat4 attach_in_parent, glm::mat4 attach_in_child)
+    : Constraint(name, parent, child),
       constraint(new btFixedConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
           glm_to_bullet(attach_in_parent), glm_to_bullet(attach_in_child))) {
@@ -117,8 +124,9 @@ FixedConstraint::FixedConstraint(
 
 FixedConstraint::FixedConstraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
-    const std::function<std::shared_ptr<NewMember>(const std::string &)> &get_member_function)
+    const std::function<std::shared_ptr<Member>(const std::string &)> &get_member_function)
     : FixedConstraint(
+          deserializer->read_str("name"),
           get_member_function(deserializer->read_str("parent_name")),
           get_member_function(deserializer->read_str("child_name")),
           glm::translate(
@@ -131,8 +139,8 @@ FixedConstraint::FixedConstraint(
 
 btTypedConstraint *FixedConstraint::get_constraint() { return constraint; }
 
-std::shared_ptr<AbstractSerializer<std::any>>
-FixedConstraint::serialize(const std::shared_ptr<AbstractSerializer<std::any>> &serializer) {
+std::shared_ptr<AbstractSerializer>
+FixedConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto constraint_serializer = Constraint::serialize(serializer);
 
     auto frame_in_parent = serializer->new_object();

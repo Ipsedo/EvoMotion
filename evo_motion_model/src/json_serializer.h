@@ -13,7 +13,7 @@
  * Serializer
  */
 
-class JsonSerializer : public AbstractSerializer<nlohmann::json> {
+class JsonSerializer : public AbstractSerializer {
 public:
     explicit JsonSerializer();
     explicit JsonSerializer(nlohmann::json content);
@@ -26,18 +26,18 @@ public:
     void write_str(const std::string &key, std::string str) override;
     void write_shape_kind(const std::string &key, ShapeKind shape_kind) override;
 
-    std::shared_ptr<AbstractSerializer<nlohmann::json>> new_object() override;
+    std::shared_ptr<AbstractSerializer> new_object() override;
     void write_array(
         const std::string &key,
-        const std::vector<std::shared_ptr<AbstractSerializer<nlohmann::json>>>
+        std::vector<std::shared_ptr<AbstractSerializer>>
             data_vector_serializer) override;
     void write_object(
         const std::string &key,
-        const std::shared_ptr<AbstractSerializer<nlohmann::json>> data_serializer) override;
+        std::shared_ptr<AbstractSerializer> data_serializer) override;
 
     void to_file(std::filesystem::path output_file) override;
 
-    nlohmann::json get_data() override;
+    std::any get_data() override;
 
 private:
     nlohmann::json content;
@@ -53,8 +53,8 @@ private:
 
 class JsonDeserializer : public AbstractDeserializer {
 public:
-    JsonDeserializer(nlohmann::json object_json);
-    JsonDeserializer(const std::filesystem::path &object_json_path);
+    explicit JsonDeserializer(nlohmann::json object_json);
+    explicit JsonDeserializer(const std::filesystem::path &object_json_path);
 
     glm::vec3 read_vec3(const std::string &key) override;
     glm::quat read_quat(const std::string &key) override;

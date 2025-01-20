@@ -13,7 +13,6 @@
 
 #include "./shapes.h"
 
-template<typename DataType>
 class AbstractSerializer {
 public:
     virtual void write_vec3(const std::string &key, glm::vec3 vec) = 0;
@@ -24,18 +23,18 @@ public:
     virtual void write_str(const std::string &key, std::string str) = 0;
     virtual void write_shape_kind(const std::string &key, ShapeKind shape_kind) = 0;
 
-    virtual std::shared_ptr<AbstractSerializer<DataType>> new_object() = 0;
+    virtual std::shared_ptr<AbstractSerializer> new_object() = 0;
 
     virtual void write_array(
-        const std::string &key, const std::vector<std::shared_ptr<AbstractSerializer<DataType>>>
+        const std::string &key, const std::vector<std::shared_ptr<AbstractSerializer>>
                                     data_vector_serializer) = 0;
     virtual void write_object(
         const std::string &key,
-        const std::shared_ptr<AbstractSerializer<DataType>> data_serializer) = 0;
+        const std::shared_ptr<AbstractSerializer> data_serializer) = 0;
 
     virtual void to_file(std::filesystem::path output_file) = 0;
 
-    virtual DataType get_data() = 0;
+    virtual std::any get_data() = 0;
 };
 
 class AbstractDeserializer {
