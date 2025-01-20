@@ -8,9 +8,10 @@
 #include <ostream>
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include <utility>
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <utility>
 
 #include "./utils.h"
 
@@ -79,8 +80,7 @@ void JsonSerializer::write_array(
 }
 
 void JsonSerializer::write_object(
-    const std::string &key,
-    const std::shared_ptr<AbstractSerializer> data_serializer) {
+    const std::string &key, const std::shared_ptr<AbstractSerializer> data_serializer) {
     write_impl(key, std::any_cast<nlohmann::json>(data_serializer->get_data()));
 }
 

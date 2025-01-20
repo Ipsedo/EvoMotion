@@ -30,7 +30,6 @@ std::string Constraint::get_name() { return name; }
 
 std::shared_ptr<Member> Constraint::get_parent() { return parent; }
 
-
 std::shared_ptr<Member> Constraint::get_child() { return child; }
 
 std::shared_ptr<AbstractSerializer>

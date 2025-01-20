@@ -29,11 +29,9 @@ public:
     std::shared_ptr<AbstractSerializer> new_object() override;
     void write_array(
         const std::string &key,
-        std::vector<std::shared_ptr<AbstractSerializer>>
-            data_vector_serializer) override;
+        std::vector<std::shared_ptr<AbstractSerializer>> data_vector_serializer) override;
     void write_object(
-        const std::string &key,
-        std::shared_ptr<AbstractSerializer> data_serializer) override;
+        const std::string &key, std::shared_ptr<AbstractSerializer> data_serializer) override;
 
     void to_file(std::filesystem::path output_file) override;
 

@@ -7,8 +7,8 @@
 #include <evo_motion_model/robot/builder.h>
 #include <evo_motion_model/robot/skeleton.h>
 
-#include "../json_serializer.h"
 #include "../converter.h"
+#include "../json_serializer.h"
 
 RobotBuilderEnvironment::RobotBuilderEnvironment()
     : Environment(1), root_name(), skeleton_graph(), members(), constraints() {}

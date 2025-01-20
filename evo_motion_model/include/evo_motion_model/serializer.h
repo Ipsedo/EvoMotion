@@ -26,11 +26,10 @@ public:
     virtual std::shared_ptr<AbstractSerializer> new_object() = 0;
 
     virtual void write_array(
-        const std::string &key, const std::vector<std::shared_ptr<AbstractSerializer>>
-                                    data_vector_serializer) = 0;
-    virtual void write_object(
         const std::string &key,
-        const std::shared_ptr<AbstractSerializer> data_serializer) = 0;
+        const std::vector<std::shared_ptr<AbstractSerializer>> data_vector_serializer) = 0;
+    virtual void write_object(
+        const std::string &key, const std::shared_ptr<AbstractSerializer> data_serializer) = 0;
 
     virtual void to_file(std::filesystem::path output_file) = 0;
 
