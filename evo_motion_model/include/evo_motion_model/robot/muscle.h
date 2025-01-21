@@ -17,23 +17,21 @@
 class Muscle {
 public:
     Muscle(
-        const std::string &name, float attach_mass, glm::vec3 attach_scale, const Item& item_a,
-        glm::vec3 pos_in_a, const Item& item_b, glm::vec3 pos_in_b, float force, float max_speed);
+        const std::string &name, float attach_mass, glm::vec3 attach_scale, const Item &item_a,
+        glm::vec3 pos_in_a, const Item &item_b, glm::vec3 pos_in_b, float force, float max_speed);
 
     Muscle(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
-        const std::function<std::shared_ptr<Member>(std::string)>& get_member_function);
+        const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
     void contract(float speed_factor) const;
 
     void release() const;
 
+    std::string get_name();
     std::vector<Item> get_items();
-
     std::vector<btTypedConstraint *> get_constraints();
-
     btSliderConstraint *get_slider_constraint() const;
-
     std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> get_p2p_constraints();
 
     virtual std::shared_ptr<AbstractSerializer>
@@ -55,13 +53,6 @@ private:
     btSliderConstraint *muscle_slider_constraint;
     btPoint2PointConstraint *attach_a_constraint;
     btPoint2PointConstraint *attach_b_constraint;
-};
-
-class AbstractMuscularSystem {
-public:
-    virtual std::vector<Muscle> get_muscles() = 0;
-
-    virtual ~AbstractMuscularSystem();
 };
 
 #endif//EVO_MOTION_MUSCLE_H

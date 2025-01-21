@@ -19,8 +19,9 @@ glm::mat4 get_rotation(const glm::vec3 a, const glm::vec3 b) {
 }
 
 Muscle::Muscle(
-    const std::string &name, const float attach_mass, const glm::vec3 attach_scale, const Item& item_a,
-    const glm::vec3 pos_in_a, const Item& item_b, const glm::vec3 pos_in_b, const float force, const float max_speed)
+    const std::string &name, const float attach_mass, const glm::vec3 attach_scale,
+    const Item &item_a, const glm::vec3 pos_in_a, const Item &item_b, const glm::vec3 pos_in_b,
+    const float force, const float max_speed)
     : name(name), item_a_name(item_a.get_name()), item_b_name(item_b.get_name()),
       max_speed(max_speed),
       attach_a(
@@ -74,7 +75,7 @@ Muscle::Muscle(
 
 Muscle::Muscle(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
-    const std::function<std::shared_ptr<Member>(std::string)>& get_member_function)
+    const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
     : Muscle(
           deserializer->read_str("name"), deserializer->read_float("attach_mass"),
           deserializer->read_vec3("attach_scale"),
@@ -90,6 +91,8 @@ void Muscle::contract(const float speed_factor) const {
 }
 
 void Muscle::release() const { muscle_slider_constraint->setPoweredLinMotor(false); }
+
+std::string Muscle::get_name() { return name; }
 
 std::vector<Item> Muscle::get_items() { return {attach_a, attach_b}; }
 

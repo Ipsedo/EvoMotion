@@ -31,8 +31,8 @@ public:
     virtual void write_array(
         const std::string &key,
         std::vector<std::shared_ptr<AbstractSerializer>> data_vector_serializer) = 0;
-    virtual void write_object(
-        const std::string &key, std::shared_ptr<AbstractSerializer> data_serializer) = 0;
+    virtual void
+    write_object(const std::string &key, std::shared_ptr<AbstractSerializer> data_serializer) = 0;
 
     virtual void to_file(std::filesystem::path output_file) = 0;
 

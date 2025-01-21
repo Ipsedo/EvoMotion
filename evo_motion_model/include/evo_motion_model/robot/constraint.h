@@ -40,12 +40,12 @@ private:
  * Constraints
  */
 
-class HingeConstraint : public Constraint {
+class HingeConstraint : public virtual Constraint {
 public:
     HingeConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,
-        const std::shared_ptr<Member> &child, const glm::mat4 &frame_in_parent, const glm::mat4 &frame_in_child,
-        float limit_degree_min, float limit_degree_max);
+        const std::shared_ptr<Member> &child, const glm::mat4 &frame_in_parent,
+        const glm::mat4 &frame_in_child, float limit_degree_min, float limit_degree_max);
     HingeConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
@@ -63,7 +63,7 @@ protected:
  * Fixed Constraint
  */
 
-class FixedConstraint : public Constraint {
+class FixedConstraint : public virtual Constraint {
 public:
     FixedConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,

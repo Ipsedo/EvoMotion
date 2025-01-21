@@ -13,7 +13,8 @@
 // Base class for proprioception
 ItemProprioceptionState::ItemProprioceptionState(
     Item item, const Item &floor, btDynamicsWorld *world)
-    : state_item(std::move(item)), last_ang_vel(0, 0, 0), last_lin_vel(0, 0, 0), floor_touched(false) {
+    : state_item(std::move(item)), last_ang_vel(0, 0, 0), last_lin_vel(0, 0, 0),
+      floor_touched(false) {
     world->contactPairTest(state_item.get_body(), floor.get_body(), *this);
 }
 
@@ -108,7 +109,7 @@ torch::Tensor RootMemberState::get_state(torch::Device device) {
 }
 
 // Muscle
-MuscleState::MuscleState(const std::shared_ptr<Muscle>& muscle)
+MuscleState::MuscleState(const std::shared_ptr<Muscle> &muscle)
     : slider_constraint(muscle->get_slider_constraint()) {
     auto [a, b] = muscle->get_p2p_constraints();
     p2p_a = a;

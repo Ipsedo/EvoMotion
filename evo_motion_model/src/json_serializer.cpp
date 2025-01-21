@@ -38,15 +38,17 @@ void JsonSerializer::write_vec3(const std::string &key, const glm::vec3 vec) {
 void JsonSerializer::write_quat(const std::string &key, const glm::quat quat) {
     const auto quat_json = new_object();
 
-    new_object()->write_float("x", quat.x);
-    new_object()->write_float("y", quat.y);
-    new_object()->write_float("z", quat.z);
-    new_object()->write_float("w", quat.w);
+    quat_json->write_float("x", quat.x);
+    quat_json->write_float("y", quat.y);
+    quat_json->write_float("z", quat.z);
+    quat_json->write_float("w", quat.w);
 
     write_object(key, quat_json);
 }
 
-void JsonSerializer::write_bool(const std::string &key, const bool value) { write_impl(key, value); }
+void JsonSerializer::write_bool(const std::string &key, const bool value) {
+    write_impl(key, value);
+}
 
 void JsonSerializer::write_mat4(const std::string &key, glm::mat4 mat) {
     std::vector<float> mat_array;
@@ -58,7 +60,9 @@ void JsonSerializer::write_mat4(const std::string &key, glm::mat4 mat) {
 
 void JsonSerializer::write_float(const std::string &key, const float f) { write_impl(key, f); }
 
-void JsonSerializer::write_str(const std::string &key, const std::string str) { write_impl(key, str); }
+void JsonSerializer::write_str(const std::string &key, const std::string str) {
+    write_impl(key, str);
+}
 
 void JsonSerializer::write_shape_kind(const std::string &key, const ShapeKind shape_kind) {
     write_str(key, shape_kind_to_str[shape_kind]);
@@ -91,7 +95,7 @@ void JsonSerializer::write_impl(const std::string &key, T value) {
 
 void JsonSerializer::to_file(const std::filesystem::path output_file) {
     std::ofstream os(output_file, std::ios::out);
-    os << content.dump();
+    os << content.dump(4, ' ');
     os.close();
 }
 
@@ -145,7 +149,7 @@ std::vector<std::shared_ptr<AbstractDeserializer>>
 JsonDeserializer::read_array(const std::string &key) {
     return transform_vector<nlohmann::json, std::shared_ptr<AbstractDeserializer>>(
         read_impl<nlohmann::json::array_t>(key),
-        [](auto t) { return std::make_shared<JsonDeserializer>(t); });
+        [](const auto &t) { return std::make_shared<JsonDeserializer>(t); });
 }
 
 template<typename T>

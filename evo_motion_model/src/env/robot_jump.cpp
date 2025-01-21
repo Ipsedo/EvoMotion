@@ -15,8 +15,9 @@
 #include "./constants.h"
 
 RobotJump::RobotJump(
-    const int num_threads, const int seed, const std::string &skeleton_json_path, const float minimal_velocity,
-    const float target_velocity, const float max_seconds, const float initial_seconds, const float reset_seconds)
+    const int num_threads, const int seed, const std::string &skeleton_json_path,
+    const float minimal_velocity, const float target_velocity, const float max_seconds,
+    const float initial_seconds, const float reset_seconds)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f), skeleton_json_path(skeleton_json_path),
       skeleton(std::make_shared<JsonDeserializer>(std::filesystem::path(skeleton_json_path))),
       base(

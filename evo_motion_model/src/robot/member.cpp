@@ -13,8 +13,9 @@
 Member::~Member() = default;
 
 Member::Member(
-    const std::string &name, const ShapeKind shape_kind, const glm::vec3 center_pos, const glm::quat rotation,
-    const glm::vec3 scale, const float mass, const float friction, const bool ignore_collision)
+    const std::string &name, const ShapeKind shape_kind, const glm::vec3 center_pos,
+    const glm::quat rotation, const glm::vec3 scale, const float mass, const float friction,
+    const bool ignore_collision)
     : shape_kind_to_path(
           {{SPHERE, "./resources/obj/sphere.obj"},
            {CUBE, "./resources/obj/cube.obj"},
