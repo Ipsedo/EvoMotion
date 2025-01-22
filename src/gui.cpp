@@ -11,7 +11,7 @@
 void gui() {
     RobotBuilderEnvironment env;
     env.load_robot("/home/samuel/CLionProjects/EvoMotion/evo_motion_model/resources/skeleton/new_format_spider.json");
-    env.save_robot("/home/samuel/PycharmProjects/EvoMotion_json_conversion/new_format_spider_2.json", "spider");
+    env.save_robot("/home/samuel/PycharmProjects/EvoMotion_json_conversion/new_format_spider_binary-float.json", "spider");
     return;
 
     ImGuiRenderer renderer("evo_motion", 1920, 1080);

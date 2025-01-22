@@ -8,6 +8,7 @@
 #include <ostream>
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include <bitset>
 #include <utility>
 
 #include <glm/gtc/type_ptr.hpp>
@@ -58,7 +59,15 @@ void JsonSerializer::write_mat4(const std::string &key, glm::mat4 mat) {
     write_impl(key, mat_array);
 }
 
-void JsonSerializer::write_float(const std::string &key, const float f) { write_impl(key, f); }
+void JsonSerializer::write_float(const std::string &key, const float f) {
+    union {
+        float v_f;
+        uint32_t bits;
+    } data{};
+    data.v_f = f;
+
+    write_impl(key, std::bitset<32>(data.bits).to_string());
+}
 
 void JsonSerializer::write_str(const std::string &key, const std::string str) {
     write_impl(key, str);
@@ -131,7 +140,18 @@ glm::mat4 JsonDeserializer::read_mat4(const std::string &key) {
     return glm::make_mat4(read_impl<std::vector<float>>(key).data());
 }
 
-float JsonDeserializer::read_float(const std::string &key) { return read_impl<float>(key); }
+float JsonDeserializer::read_float(const std::string &key) {
+    //return read_impl<float>(key);
+
+    union {
+        uint32_t bits;
+        float output;
+    } data{};
+
+    data.bits = std::bitset<32>(read_impl<std::string>(key)).to_ulong();
+
+    return data.output;
+}
 
 std::string JsonDeserializer::read_str(const std::string &key) {
     return read_impl<std::string>(key);
