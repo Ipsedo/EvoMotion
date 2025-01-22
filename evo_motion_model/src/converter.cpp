@@ -10,6 +10,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include <bitset>
+
 #include <glm/gtx/matrix_decompose.hpp>
 
 /*
@@ -110,3 +112,28 @@ glm::mat4 bullet_to_glm(const btTransform &m) {
 }
 
 glm::quat bullet_to_glm(const btQuaternion q) { return {q.w(), q.x(), q.y(), q.z()}; }
+
+/*
+ * Binary conversion
+ */
+
+std::string float_to_binary_string(float f) {
+    union {
+        float v_f;
+        uint32_t bits;
+    } data{};
+    data.v_f = f;
+
+    return std::bitset<32>(data.bits).to_string();
+}
+
+float binary_string_to_float(std::string s) {
+    union {
+        uint32_t bits;
+        float output;
+    } data{};
+
+    data.bits = std::bitset<32>(s).to_ulong();
+
+    return data.output;
+}
