@@ -24,6 +24,7 @@ public:
         glm::vec3 scale, float mass, float friction, bool ignore_collision);
     explicit Member(const std::shared_ptr<AbstractDeserializer> &deserializer);
     virtual Item get_item();
+    virtual std::string get_name();
     virtual ~Member();
 
     virtual std::shared_ptr<AbstractSerializer>

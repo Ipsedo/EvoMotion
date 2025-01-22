@@ -15,14 +15,16 @@
 
 SoftActorCriticAgent::SoftActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size,
-    const int epoch, float lr, const float gamma, const float tau, const int replay_buffer_size,
-    const int train_every)
-    : actor(std::make_shared<ActorModule>(state_space, action_space, hidden_size)),
-      critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
-      critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
-      target_critic_1(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
-      target_critic_2(std::make_shared<QNetworkModule>(state_space, action_space, hidden_size)),
+    const std::vector<int64_t> &action_space, int actor_hidden_size, int critic_hidden_size,
+    const int batch_size, const int epoch, float lr, const float gamma, const float tau,
+    const int replay_buffer_size, const int train_every)
+    : actor(std::make_shared<ActorModule>(state_space, action_space, actor_hidden_size)),
+      critic_1(std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size)),
+      critic_2(std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size)),
+      target_critic_1(
+          std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size)),
+      target_critic_2(
+          std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size)),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),

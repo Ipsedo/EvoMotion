@@ -62,21 +62,22 @@ bool RobotBuilderEnvironment::update_member(
 }
 
 bool RobotBuilderEnvironment::member_exists(const std::string &member_name) {
-    return std::any_of(members.begin(), members.end(), [member_name](const auto &t) {
-        return std::get<0>(t) == member_name;
-    });
+    return exists_part(member_name, members);
 }
 
 bool RobotBuilderEnvironment::constraint_exists(const std::string &constraint_name) {
-    return std::any_of(constraints.begin(), constraints.end(), [constraint_name](const auto &t) {
-        return std::get<0>(t) == constraint_name;
-    });
+    return exists_part(constraint_name, constraints);
 }
 
 bool RobotBuilderEnvironment::muscle_exists(const std::string &muscle_name) {
-    return std::any_of(muscles.begin(), muscles.end(), [muscle_name](const auto &t) {
-        return std::get<0>(t) == muscle_name;
-    });
+    return exists_part(muscle_name, muscles);
+}
+
+template<typename Part>
+bool RobotBuilderEnvironment::exists_part(
+    const std::string &name, std::vector<std::shared_ptr<Part>> vec) {
+    return std::any_of(
+        vec.begin(), vec.end(), [name](const auto &p) { return p->get_name() == name; });
 }
 
 std::shared_ptr<BuilderMember> RobotBuilderEnvironment::get_member(const std::string &member_name) {
@@ -93,29 +94,20 @@ std::shared_ptr<BuilderMuscle> RobotBuilderEnvironment::get_muscle(const std::st
 }
 
 template<typename Part>
-std::shared_ptr<Part> RobotBuilderEnvironment::get_part(
-    const std::string &name, std::vector<std::tuple<std::string, std::shared_ptr<Part>>> vec) {
-    for (const auto &[n, o]: vec)
-        if (n == name) return o;
+std::shared_ptr<Part>
+RobotBuilderEnvironment::get_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec) {
+    for (const auto &o: vec)
+        if (o->get_name() == name) return o;
     throw std::runtime_error("\"" + name + "\" not found");
 }
 
 void RobotBuilderEnvironment::save_robot(
     const std::filesystem::path &output_json_path, const std::string &robot_name) {
-    std::vector<std::shared_ptr<Member>> members_vector;
-    std::transform(
-        members.begin(), members.end(), std::back_inserter(members_vector),
-        [](const auto &pair) { return std::get<1>(pair); });
 
-    std::vector<std::shared_ptr<Constraint>> constraints_vector;
-    std::transform(
-        constraints.begin(), constraints.end(), std::back_inserter(constraints_vector),
-        [](const auto &pair) { return std::get<1>(pair); });
-
-    std::vector<std::shared_ptr<Muscle>> muscles_vector;
-    std::transform(
-        muscles.begin(), muscles.end(), std::back_inserter(muscles_vector),
-        [](const auto &pair) { return std::get<1>(pair); });
+    std::vector<std::shared_ptr<Member>> members_vector(members.begin(), members.end());
+    std::vector<std::shared_ptr<Constraint>> constraints_vector(
+        constraints.begin(), constraints.end());
+    std::vector<std::shared_ptr<Muscle>> muscles_vector(muscles.begin(), muscles.end());
 
     Skeleton skeleton(robot_name, root_name, members_vector, constraints_vector, muscles_vector);
 
@@ -135,16 +127,14 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
 
     std::transform(
         json_members_deserializer.begin(), json_members_deserializer.end(),
-        std::back_inserter(members),
-        [](const auto &s) -> std::pair<std::string, std::shared_ptr<BuilderMember>> {
-            const auto m = std::make_shared<BuilderMember>(s);
-            return {m->get_item().get_name(), m};
+        std::back_inserter(members), [](const auto &s) -> std::shared_ptr<BuilderMember> {
+            return std::make_shared<BuilderMember>(s);
         });
 
     std::transform(
         json_constraints_deserializer.begin(), json_constraints_deserializer.end(),
         std::back_inserter(constraints),
-        [this](const auto &s) -> std::pair<std::string, std::shared_ptr<BuilderConstraint>> {
+        [this](const auto &s) -> std::shared_ptr<BuilderConstraint> {
             std::shared_ptr<BuilderConstraint> c;
             if (s->read_str("type") == "hinge")
                 c = std::make_shared<BuilderHingeConstraint>(
@@ -155,16 +145,14 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
             else
                 throw std::runtime_error("Unknown constraint type \"" + s->read_str("type") + "\"");
 
-            return {c->get_name(), c};
+            return c;
         });
 
     std::transform(
         json_muscles_deserializer.begin(), json_muscles_deserializer.end(),
-        std::back_inserter(muscles),
-        [this](const auto &s) -> std::pair<std::string, std::shared_ptr<BuilderMuscle>> {
-            const auto m =
-                std::make_shared<BuilderMuscle>(s, [this](const auto &n) { return get_member(n); });
-            return {m->get_name(), m};
+        std::back_inserter(muscles), [this](const auto &s) -> std::shared_ptr<BuilderMuscle> {
+            return std::make_shared<BuilderMuscle>(
+                s, [this](const auto &n) { return get_member(n); });
         });
 }
 

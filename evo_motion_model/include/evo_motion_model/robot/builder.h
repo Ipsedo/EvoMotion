@@ -132,9 +132,9 @@ private:
 
     std::map<std::string, std::vector<std::string>> skeleton_graph;
 
-    std::vector<std::tuple<std::string, std::shared_ptr<BuilderMember>>> members;
-    std::vector<std::tuple<std::string, std::shared_ptr<BuilderConstraint>>> constraints;
-    std::vector<std::tuple<std::string, std::shared_ptr<BuilderMuscle>>> muscles;
+    std::vector<std::shared_ptr<BuilderMember>> members;
+    std::vector<std::shared_ptr<BuilderConstraint>> constraints;
+    std::vector<std::shared_ptr<BuilderMuscle>> muscles;
 
     bool member_exists(const std::string &member_name);
     bool constraint_exists(const std::string &constraint_name);
@@ -145,8 +145,11 @@ private:
     std::shared_ptr<BuilderMuscle> get_muscle(const std::string &muscle_name);
 
     template<typename Part>
-    static std::shared_ptr<Part> get_part(
-        const std::string &name, std::vector<std::tuple<std::string, std::shared_ptr<Part>>> vec);
+    static std::shared_ptr<Part>
+    get_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec);
+
+    template<typename Part>
+    static bool exists_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec);
 };
 
 #endif//EVO_MOTION_BUILDER_H

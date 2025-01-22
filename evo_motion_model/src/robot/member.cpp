@@ -42,6 +42,8 @@ Member::Member(const std::shared_ptr<AbstractDeserializer> &deserializer)
 
 Item Member::get_item() { return member; }
 
+std::string Member::get_name() { return get_item().get_name(); }
+
 std::shared_ptr<AbstractSerializer>
 Member::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto serializer_member = serializer->new_object();
