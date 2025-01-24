@@ -125,6 +125,9 @@ std::string float_to_binary_string(float f) {
     data.v_f = f;
 
     return std::bitset<32>(data.bits).to_string();
+    std::string s;
+    memcpy(&s, &f, sizeof(float));
+    return s;
 }
 
 float binary_string_to_float(std::string s) {
@@ -136,4 +139,8 @@ float binary_string_to_float(std::string s) {
     data.bits = std::bitset<32>(s).to_ulong();
 
     return data.output;
+
+    float f = 0.f;
+    memcpy(&f, s.c_str(), sizeof(float));
+    return f;
 }

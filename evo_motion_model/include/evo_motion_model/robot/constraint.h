@@ -44,8 +44,9 @@ class HingeConstraint : public virtual Constraint {
 public:
     HingeConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,
-        const std::shared_ptr<Member> &child, const glm::mat4 &frame_in_parent,
-        const glm::mat4 &frame_in_child, float limit_degree_min, float limit_degree_max);
+        const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
+        const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
+        float limit_degree_min, float limit_degree_max);
     HingeConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
@@ -57,6 +58,9 @@ public:
 
 protected:
     btHingeConstraint *constraint;
+
+    float min_limit_degree;
+    float max_limit_degree;
 };
 
 /*

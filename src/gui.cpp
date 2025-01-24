@@ -2,16 +2,23 @@
 // Created by samuel on 09/12/24.
 //
 
+#include <evo_motion_model/robot/builder.h>
 #include <evo_motion_view/renderer.h>
 
-#include <evo_motion_model/robot/builder.h>
-
+#include "./_convert.h"
 #include "./run.h"
 
 void gui() {
+
+    convert_tree_skeleton_to_graph_skeleton();
+
     RobotBuilderEnvironment env;
-    env.load_robot("/home/samuel/CLionProjects/EvoMotion/evo_motion_model/resources/skeleton/new_format_spider.json");
-    env.save_robot("/home/samuel/PycharmProjects/EvoMotion_json_conversion/new_format_spider_binary-float.json", "spider");
+    env.load_robot("/home/samuel/CLionProjects/EvoMotion/evo_motion_model/resources/skeleton/_test/"
+                   "new_format_spider_c++-binary-float.json");
+    env.save_robot(
+        "/home/samuel/CLionProjects/EvoMotion/evo_motion_model/resources/skeleton/_test/"
+        "new_format_spider_c++-binary-float_cpy.json",
+        "spider");
     return;
 
     ImGuiRenderer renderer("evo_motion", 1920, 1080);

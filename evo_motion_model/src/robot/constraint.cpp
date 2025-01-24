@@ -51,17 +51,22 @@ Constraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
 
 HingeConstraint::HingeConstraint(
     const std::string &name, const std::shared_ptr<Member> &parent,
-    const std::shared_ptr<Member> &child, const glm::mat4 &frame_in_parent,
-    const glm::mat4 &frame_in_child, const float limit_degree_min, const float limit_degree_max)
+    const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
+    const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
+    const float limit_degree_min, const float limit_degree_max)
     : Constraint(name, parent, child),
       constraint(new btHingeConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
-          glm_to_bullet(frame_in_parent), glm_to_bullet(frame_in_child))) {
-
-    constraint->setLimit(M_PI * limit_degree_min / 180.f, M_PI * limit_degree_max / 180.f);
-    constraint->setOverrideNumSolverIterations(constraint->getOverrideNumSolverIterations() * 8);
+          glm_to_bullet(pivot_in_parent), glm_to_bullet(pivot_in_child),
+          glm_to_bullet(axis_in_parent), glm_to_bullet(axis_in_child))),
+      min_limit_degree(limit_degree_min), max_limit_degree(limit_degree_max) {
 
     parent->get_item().get_body()->setIgnoreCollisionCheck(child->get_item().get_body(), true);
+
+    constraint->setLimit(
+        static_cast<float>(M_PI) * min_limit_degree / 180.f,
+        static_cast<float>(M_PI) * max_limit_degree / 180.f);
+    constraint->setOverrideNumSolverIterations(constraint->getOverrideNumSolverIterations() * 8);
 }
 
 HingeConstraint::HingeConstraint(
@@ -71,13 +76,8 @@ HingeConstraint::HingeConstraint(
           deserializer->read_str("name"),
           get_member_function(deserializer->read_str("parent_name")),
           get_member_function(deserializer->read_str("child_name")),
-          glm::translate(
-              glm::mat4(1.f),
-              deserializer->read_object("frame_in_parent")->read_vec3("translation"))
-              * glm::toMat4(deserializer->read_object("frame_in_parent")->read_quat("rotation")),
-          glm::translate(
-              glm::mat4(1.f), deserializer->read_object("frame_in_child")->read_vec3("translation"))
-              * glm::toMat4(deserializer->read_object("frame_in_child")->read_quat("rotation")),
+          deserializer->read_vec3("pivot_in_parent"), deserializer->read_vec3("pivot_in_child"),
+          deserializer->read_vec3("axis_in_parent"), deserializer->read_vec3("axis_in_child"),
           deserializer->read_object("limit_degree")->read_float("min"),
           deserializer->read_object("limit_degree")->read_float("max")) {}
 
@@ -87,22 +87,30 @@ std::shared_ptr<AbstractSerializer>
 HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto constraint_serializer = Constraint::serialize(serializer);
 
-    const auto frame_in_parent = serializer->new_object();
-    frame_in_parent->write_vec3("translation", bullet_to_glm(constraint->getAFrame().getOrigin()));
-    frame_in_parent->write_quat("rotation", bullet_to_glm(constraint->getAFrame().getRotation()));
+    /*const auto frame_in_parent = serializer->new_object();
+    frame_in_parent->write_vec3("translation", bullet_to_glm(constraint->getFrameOffsetA().getOrigin()));
+    frame_in_parent->write_quat("rotation", bullet_to_glm(constraint->getFrameOffsetA().getRotation()));
     constraint_serializer->write_object("frame_in_parent", frame_in_parent);
 
     const auto frame_in_child = serializer->new_object();
-    frame_in_child->write_vec3("translation", bullet_to_glm(constraint->getBFrame().getOrigin()));
-    frame_in_child->write_quat("rotation", bullet_to_glm(constraint->getBFrame().getRotation()));
-    constraint_serializer->write_object("frame_in_child", frame_in_child);
+    frame_in_child->write_vec3("translation", bullet_to_glm(constraint->getFrameOffsetB().getOrigin()));
+    frame_in_child->write_quat("rotation", bullet_to_glm(constraint->getFrameOffsetB().getRotation()));
+    constraint_serializer->write_object("frame_in_child", frame_in_child);*/
 
     const auto limit_degree_serializer = constraint_serializer->new_object();
-    limit_degree_serializer->write_float(
-        "min", constraint->getLowerLimit() * 180.f / static_cast<float>(M_PI));
-    limit_degree_serializer->write_float(
-        "max", constraint->getUpperLimit() * 180.f / static_cast<float>(M_PI));
+    limit_degree_serializer->write_float("min", min_limit_degree);
+    limit_degree_serializer->write_float("max", max_limit_degree);
     constraint_serializer->write_object("limit_degree", limit_degree_serializer);
+
+    constraint_serializer->write_vec3(
+        "pivot_in_parent", bullet_to_glm(constraint->getFrameOffsetA().getOrigin()));
+    constraint_serializer->write_vec3(
+        "pivot_in_child", bullet_to_glm(constraint->getFrameOffsetB().getOrigin()));
+
+    constraint_serializer->write_vec3(
+        "axis_in_parent", bullet_to_glm(constraint->getFrameOffsetA().getBasis().getColumn(2)));
+    constraint_serializer->write_vec3(
+        "axis_in_child", bullet_to_glm(constraint->getFrameOffsetB().getBasis().getColumn(2)));
 
     constraint_serializer->write_str("type", "hinge");
 
