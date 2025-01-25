@@ -53,19 +53,16 @@ HingeConstraint::HingeConstraint(
     const std::string &name, const std::shared_ptr<Member> &parent,
     const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
     const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
-    const float limit_degree_min, const float limit_degree_max)
+    const float limit_radian_min, const float limit_radian_max)
     : Constraint(name, parent, child),
       constraint(new btHingeConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
           glm_to_bullet(pivot_in_parent), glm_to_bullet(pivot_in_child),
-          glm_to_bullet(axis_in_parent), glm_to_bullet(axis_in_child))),
-      min_limit_degree(limit_degree_min), max_limit_degree(limit_degree_max) {
+          glm_to_bullet(axis_in_parent), glm_to_bullet(axis_in_child))), min_limit_radian(limit_radian_min), max_limit_radian(limit_radian_max) {
 
     parent->get_item().get_body()->setIgnoreCollisionCheck(child->get_item().get_body(), true);
 
-    constraint->setLimit(
-        static_cast<float>(M_PI) * min_limit_degree / 180.f,
-        static_cast<float>(M_PI) * max_limit_degree / 180.f);
+    constraint->setLimit(min_limit_radian, max_limit_radian);
     constraint->setOverrideNumSolverIterations(constraint->getOverrideNumSolverIterations() * 8);
 }
 
@@ -78,8 +75,8 @@ HingeConstraint::HingeConstraint(
           get_member_function(deserializer->read_str("child_name")),
           deserializer->read_vec3("pivot_in_parent"), deserializer->read_vec3("pivot_in_child"),
           deserializer->read_vec3("axis_in_parent"), deserializer->read_vec3("axis_in_child"),
-          deserializer->read_object("limit_degree")->read_float("min"),
-          deserializer->read_object("limit_degree")->read_float("max")) {}
+          deserializer->read_object("limit_radian")->read_float("min"),
+          deserializer->read_object("limit_radian")->read_float("max")) {}
 
 btTypedConstraint *HingeConstraint::get_constraint() { return constraint; }
 
@@ -87,20 +84,10 @@ std::shared_ptr<AbstractSerializer>
 HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     auto constraint_serializer = Constraint::serialize(serializer);
 
-    /*const auto frame_in_parent = serializer->new_object();
-    frame_in_parent->write_vec3("translation", bullet_to_glm(constraint->getFrameOffsetA().getOrigin()));
-    frame_in_parent->write_quat("rotation", bullet_to_glm(constraint->getFrameOffsetA().getRotation()));
-    constraint_serializer->write_object("frame_in_parent", frame_in_parent);
-
-    const auto frame_in_child = serializer->new_object();
-    frame_in_child->write_vec3("translation", bullet_to_glm(constraint->getFrameOffsetB().getOrigin()));
-    frame_in_child->write_quat("rotation", bullet_to_glm(constraint->getFrameOffsetB().getRotation()));
-    constraint_serializer->write_object("frame_in_child", frame_in_child);*/
-
-    const auto limit_degree_serializer = constraint_serializer->new_object();
-    limit_degree_serializer->write_float("min", min_limit_degree);
-    limit_degree_serializer->write_float("max", max_limit_degree);
-    constraint_serializer->write_object("limit_degree", limit_degree_serializer);
+    const auto limit_radian_serializer = constraint_serializer->new_object();
+    limit_radian_serializer->write_float("min", min_limit_radian);
+    limit_radian_serializer->write_float("max", max_limit_radian);
+    constraint_serializer->write_object("limit_radian", limit_radian_serializer);
 
     constraint_serializer->write_vec3(
         "pivot_in_parent", bullet_to_glm(constraint->getFrameOffsetA().getOrigin()));
