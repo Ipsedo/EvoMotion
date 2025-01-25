@@ -58,7 +58,8 @@ HingeConstraint::HingeConstraint(
       constraint(new btHingeConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
           glm_to_bullet(pivot_in_parent), glm_to_bullet(pivot_in_child),
-          glm_to_bullet(axis_in_parent), glm_to_bullet(axis_in_child))), min_limit_radian(limit_radian_min), max_limit_radian(limit_radian_max) {
+          glm_to_bullet(axis_in_parent), glm_to_bullet(axis_in_child))),
+      min_limit_radian(limit_radian_min), max_limit_radian(limit_radian_max) {
 
     parent->get_item().get_body()->setIgnoreCollisionCheck(child->get_item().get_body(), true);
 
