@@ -58,7 +58,7 @@ public:
         const std::string &name, const std::shared_ptr<Member> &parent,
         const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
         const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
-        float limit_degree_min, float limit_degree_max);
+        float limit_radian_min, float limit_radian_max);
 
     BuilderHingeConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
@@ -103,13 +103,19 @@ public:
 
     bool set_root(const std::string &member_name);
     bool add_member(
-        const std::string &member_name, glm::vec3 center_pos, glm::quat rotation, glm::vec3 scale,
-        float mass, float friction);
+        const std::string &member_name, ShapeKind shape_kind, glm::vec3 center_pos,
+        glm::quat rotation, glm::vec3 scale, float mass, float friction);
 
     bool update_member(
         const std::string &member_name, std::optional<glm::vec3> new_pos,
         const std::optional<glm::quat> &new_rot, std::optional<glm::vec3> new_scale,
         std::optional<float> new_friction, std::optional<bool> new_ignore_collision);
+
+    bool attach_fixed_constraint(
+        const std::string &constraint_name, const std::string &parent_name,
+        const std::string &child_name, const glm::vec3 &absolute_fixed_point);
+
+    bool remove_constraint(const std::string &constraint_name);
 
     void save_robot(const std::filesystem::path &output_json_path, const std::string &robot_name);
     void load_robot(const std::filesystem::path &input_json_path);
@@ -131,7 +137,7 @@ protected:
 private:
     std::string root_name;
 
-    std::map<std::string, std::vector<std::string>> skeleton_graph;
+    std::map<std::string, std::vector<std::tuple<std::string, std::string>>> skeleton_graph;
 
     std::vector<std::shared_ptr<BuilderMember>> members;
     std::vector<std::shared_ptr<BuilderConstraint>> constraints;

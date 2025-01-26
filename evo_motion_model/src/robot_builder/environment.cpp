@@ -21,9 +21,16 @@ bool RobotBuilderEnvironment::set_root(const std::string &member_name) {
 }
 
 bool RobotBuilderEnvironment::add_member(
-    const std::string &member_name, glm::vec3 center_pos, glm::quat rotation, glm::vec3 scale,
-    float mass, float friction) {
-    return !member_exists(member_name);
+    const std::string &member_name, ShapeKind shape_kind, glm::vec3 center_pos, glm::quat rotation,
+    glm::vec3 scale, float mass, float friction) {
+    if (member_exists(member_name)) return false;
+
+    skeleton_graph[member_name] = std::vector<std::tuple<std::string, std::string>>();
+
+    members.push_back(std::make_shared<BuilderMember>(
+        member_name, shape_kind, center_pos, rotation, scale, mass, friction, false));
+
+    return true;
 }
 
 bool RobotBuilderEnvironment::update_member(
@@ -51,7 +58,7 @@ bool RobotBuilderEnvironment::update_member(
 
             updated_members.insert(curr_member_name);
 
-            for (const auto &child_member_name: skeleton_graph[curr_member_name])
+            for (const auto &[_, child_member_name]: skeleton_graph[curr_member_name])
                 if (updated_members.find(child_member_name) == updated_members.end())
                     queue.push(child_member_name);
         }
@@ -59,6 +66,48 @@ bool RobotBuilderEnvironment::update_member(
         return true;
     }
     return false;
+}
+
+bool RobotBuilderEnvironment::attach_fixed_constraint(
+    const std::string &constraint_name, const std::string &parent_name,
+    const std::string &child_name, const glm::vec3 &absolute_fixed_point) {
+    if (constraint_exists(constraint_name) || !member_exists(parent_name)
+        || !member_exists(child_name))
+        return false;
+
+    const auto parent_model_matrix =
+        get_member(parent_name)->get_item().model_matrix_without_scale();
+    const auto child_model_matrix = get_member(child_name)->get_item().model_matrix_without_scale();
+
+    const auto absolute_frame = glm::translate(glm::mat4(1.f), absolute_fixed_point);
+    const auto frame_in_parent = glm::inverse(parent_model_matrix) * absolute_frame;
+    const auto frame_in_child = glm::inverse(child_model_matrix) * absolute_frame;
+
+    skeleton_graph[parent_name].emplace_back(constraint_name, child_name);
+    skeleton_graph[child_name].emplace_back(constraint_name, parent_name);
+
+    constraints.push_back(std::make_shared<BuilderFixedConstraint>(
+        constraint_name, get_member(parent_name), get_member(child_name), frame_in_parent,
+        frame_in_child));
+
+    return true;
+}
+
+bool RobotBuilderEnvironment::remove_constraint(const std::string &constraint_name) {
+    if (!constraint_exists(constraint_name)) return false;
+
+    for (auto [member, children]: skeleton_graph) {
+        std::erase_if(children, [constraint_name](const auto &t) {
+            const auto &[curr_constraint_name, _] = t;
+            return curr_constraint_name == constraint_name;
+        });
+        skeleton_graph[member] = children;
+    }
+
+    std::erase_if(
+        constraints, [constraint_name](const auto &c) { return c->get_name() == constraint_name; });
+
+    return true;
 }
 
 bool RobotBuilderEnvironment::member_exists(const std::string &member_name) {

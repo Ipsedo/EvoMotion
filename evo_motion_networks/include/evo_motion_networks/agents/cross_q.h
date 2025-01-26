@@ -42,6 +42,7 @@ private:
     LossMeter critic_2_loss_meter;
     LossMeter entropy_loss_meter;
     LossMeter episode_steps_meter;
+    LossMeter reward_meter;
 
     void check_train();
 

@@ -29,7 +29,8 @@ CrossQAgent::CrossQAgent(
       train_every(train_every), replay_buffer(replay_buffer_size, seed), curr_episode_step(0),
       curr_train_step(0L), global_curr_step(0L), actor_loss_meter("actor", 64),
       critic_1_loss_meter("critic_1", 64), critic_2_loss_meter("critic_2", 64),
-      entropy_loss_meter("entropy", 64), episode_steps_meter("steps", 64) {
+      entropy_loss_meter("entropy", 64), episode_steps_meter("steps", 64),
+      reward_meter("rewards", 64) {
     at::manual_seed(seed);
     set_eval(true);
 }
@@ -42,10 +43,7 @@ void CrossQAgent::train(
     set_eval(false);
 
     // prepared concatenated states and actions
-    actor->train(false);
     const auto [next_mu, next_sigma] = actor->forward(batched_next_state);
-    actor->train(true);
-
     const auto next_action = truncated_normal_sample(next_mu, next_sigma, -1.f, 1.f);
     const auto next_log_proba =
         truncated_normal_log_pdf(next_action, next_mu, next_sigma, -1.f, 1.f).sum(-1, true);
@@ -73,12 +71,14 @@ void CrossQAgent::train(
 
     // optimize critic 1
     const auto critic_1_loss = torch::mse_loss(q_value_1, target_q_values);
+
     critic_1_optimizer->zero_grad();
     critic_1_loss.backward();
     critic_1_optimizer->step();
 
     // optimize critic 2
     const auto critic_2_loss = torch::mse_loss(q_value_2, target_q_values);
+
     critic_2_optimizer->zero_grad();
     critic_2_loss.backward();
     critic_2_optimizer->step();
@@ -90,17 +90,15 @@ void CrossQAgent::train(
         truncated_normal_log_pdf(curr_action, curr_mu, curr_sigma, -1.f, 1.f).sum(-1, true);
 
     critic_1->train(false);
-    const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
-    critic_1->train(true);
-
     critic_2->train(false);
-    const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
-    critic_2->train(true);
 
+    const auto [curr_q_value_1] = critic_1->forward(batched_states, curr_action);
+    const auto [curr_q_value_2] = critic_2->forward(batched_states, curr_action);
     const auto curr_q_value = torch::min(curr_q_value_1, curr_q_value_2);
 
     const auto actor_loss =
         torch::mean(entropy_parameter->alpha().detach() * curr_log_proba - curr_q_value);
+
     actor_optimizer->zero_grad();
     actor_loss.backward();
     actor_optimizer->step();
@@ -108,6 +106,7 @@ void CrossQAgent::train(
     // optimize entropy
     const auto entropy_loss =
         -torch::mean(entropy_parameter->log_alpha() * (curr_log_proba.detach() + target_entropy));
+
     entropy_optimizer->zero_grad();
     entropy_loss.backward();
     entropy_optimizer->step();
@@ -151,6 +150,7 @@ void CrossQAgent::check_train() {
 
 torch::Tensor CrossQAgent::act(torch::Tensor state, float reward) {
     set_eval(true);
+
     const auto [mu, sigma] = actor->forward(state);
     const auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
 
@@ -168,7 +168,9 @@ torch::Tensor CrossQAgent::act(torch::Tensor state, float reward) {
 void CrossQAgent::done(torch::Tensor state, float reward) {
     replay_buffer.update_last(reward, state, true);
 
+    reward_meter.add(reward);
     episode_steps_meter.add(static_cast<float>(curr_episode_step));
+
     curr_episode_step = 0;
 }
 
@@ -211,9 +213,8 @@ void CrossQAgent::load(const std::string &input_folder_path) {
 }
 
 std::vector<LossMeter> CrossQAgent::get_metrics() {
-    return {
-        actor_loss_meter, critic_1_loss_meter, critic_2_loss_meter, entropy_loss_meter,
-        episode_steps_meter};
+    return {actor_loss_meter,   critic_1_loss_meter, critic_2_loss_meter,
+            entropy_loss_meter, episode_steps_meter, reward_meter};
 }
 
 void CrossQAgent::to(torch::DeviceType device) {
