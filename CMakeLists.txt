@@ -2,12 +2,16 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project(evo_motion)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # add evo_motion submodules
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_view")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_networks")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_model")
+
+# add evo_motion tests submodule
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_networks/tests")
+# add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests")
 
 # FetchContent -> get libraries from git
 include(FetchContent)

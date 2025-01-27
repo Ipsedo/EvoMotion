@@ -16,6 +16,10 @@
 #include "./camera.h"
 #include "./drawable.h"
 
+void GLAPIENTRY message_callback(
+    GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar *message,
+    const void *userParam);
+
 class Renderer {
 public:
     Renderer(const std::string &title, int width, int height, std::shared_ptr<Camera> camera);
@@ -26,7 +30,9 @@ public:
 
     void close();
 
-    void draw(const std::map<std::string, glm::mat4> &model_matrix);
+    void draw(const std::map<std::string, glm::mat4> &model_matrix, float delta_t);
+
+    void reset_camera() const;
 
     virtual ~Renderer();
 
@@ -35,7 +41,7 @@ protected:
 
     virtual void on_end_frame();
 
-    virtual void render_drawables(std::map<std::string, glm::mat4> model_matrix);
+    virtual void render_drawables(std::map<std::string, glm::mat4> model_matrix, float delta_t);
 
 private:
     std::string title;
@@ -51,6 +57,22 @@ private:
     std::map<std::string, std::shared_ptr<Drawable>> drawables;
 
     GLFWwindow *window;
+};
+
+class ImGuiRenderer {
+public:
+    ImGuiRenderer(const std::string &title, int width, int height);
+
+    void draw();
+
+    bool is_close() const;
+
+    virtual ~ImGuiRenderer();
+
+private:
+    GLFWwindow *window;
+    bool show_menu;
+    bool need_close;
 };
 
 #endif//EVO_MOTION_RENDERER_H

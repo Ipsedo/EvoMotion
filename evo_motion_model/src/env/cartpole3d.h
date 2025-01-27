@@ -11,7 +11,10 @@
 
 class CartPole3d final : public Environment {
 public:
-    explicit CartPole3d(int seed);
+    CartPole3d(
+        int num_threads, int seed, float slider_speed, float slider_force_per_kg,
+        float chariot_push_force, int reset_frame_nb, float limit_angle, float cart_x_mass,
+        float cart_z_mass, float pole_mass, int max_steps);
 
     std::vector<Item> get_items() override;
 
@@ -21,7 +24,7 @@ public:
 
     std::vector<int64_t> get_action_space() override;
 
-    [[nodiscard]] bool is_continuous() const override;
+    std::optional<Item> get_camera_track_item() override;
 
 protected:
     step compute_step() override;
@@ -30,9 +33,6 @@ protected:
 
 private:
     int reset_frame_nb;
-
-    float slider_force_per_kg;
-    float slider_speed;
 
     float chariot_push_force;
 
@@ -46,9 +46,6 @@ private:
     btVector3 cart_z_pos;
     btVector3 pole_pos;
 
-    float cart_x_mass;
-    float cart_z_mass;
-    float pole_mass;
     float base_mass;
 
     btRigidBody *cart_x_rg;

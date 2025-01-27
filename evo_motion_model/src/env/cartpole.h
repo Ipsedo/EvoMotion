@@ -13,7 +13,10 @@
 
 class CartPole final : public Environment {
 public:
-    explicit CartPole(int seed);
+    CartPole(
+        int num_threads, int seed, float slider_speed, float slider_force, float chariot_push_force,
+        float limit_angle, int reset_frame_nb, float chariot_mass, float pendulum_mass,
+        int max_steps);
 
     std::vector<Item> get_items() override;
 
@@ -23,7 +26,7 @@ public:
 
     std::vector<int64_t> get_action_space() override;
 
-    [[nodiscard]] bool is_continuous() const override;
+    std::optional<Item> get_camera_track_item() override;
 
 protected:
     step compute_step() override;
@@ -31,17 +34,11 @@ protected:
     void reset_engine() override;
 
 private:
-    float slider_speed;
-    float slider_force;
-
     float chariot_push_force;
 
     float limit_angle;
 
     int reset_frame_nb;
-
-    float chariot_mass;
-    float pendulum_mass;
 
     float chariot_pos;
     float pendulum_pos;

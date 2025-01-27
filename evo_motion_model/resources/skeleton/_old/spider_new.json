@@ -1,0 +1,1579 @@
+{
+  "skeleton": {
+    "name": "body",
+    "mass": 2.0,
+    "shape": "cube",
+    "scale": {
+      "x": 0.4,
+      "y": 0.2,
+      "z": 0.5
+    },
+    "transformation": {
+      "rotation": {
+        "point": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "axis": {
+          "x": 1.0,
+          "y": 0.0,
+          "z": 0.0
+        },
+        "angle_degree": 0.0
+      },
+      "translation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    },
+    "children": [
+      {
+        "constraint_type": "hinge",
+        "limit_degree": {
+          "min": 0.0,
+          "max": 90.0
+        },
+        "frame_in_parent": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": 0.4,
+            "y": 0.0,
+            "z": -0.5
+          }
+        },
+        "frame_in_child": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "child_member": {
+          "name": "legA",
+          "mass": 0.25,
+          "shape": "cube",
+          "scale": {
+            "x": 0.15,
+            "y": 0.15,
+            "z": 0.15
+          },
+          "option": {},
+          "transformation": {
+            "rotation": {
+              "point": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "axis": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+              },
+              "angle_degree": 45.0
+            },
+            "translation": {
+              "x": 0.4,
+              "y": 0.0,
+              "z": -0.5
+            }
+          },
+          "children": [
+            {
+              "constraint_type": "hinge",
+              "limit_degree": {
+                "min": -270.0,
+                "max": -150.0
+              },
+              "frame_in_parent": {
+                "rotation": {
+                  "point": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "axis": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "angle_degree": 0.0
+                },
+                "translation": {
+                  "x": 0.15,
+                  "y": -0.15,
+                  "z": 0.0
+                }
+              },
+              "frame_in_child": {
+                "rotation": {
+                  "point": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "axis": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "angle_degree": 0.0
+                },
+                "translation": {
+                  "x": 0.3,
+                  "y": 0.0,
+                  "z": 0.0
+                }
+              },
+              "child_member": {
+                "name": "leg1",
+                "mass": 0.25,
+                "shape": "cube",
+                "scale": {
+                  "x": 0.3,
+                  "y": 0.08,
+                  "z": 0.08
+                },
+                "option": {},
+                "transformation": {
+                  "rotation": {
+                    "point": {
+                      "x": 0.3,
+                      "y": 0.0,
+                      "z": 0.0
+                    },
+                    "axis": {
+                      "x": 0.0,
+                      "y": 0.0,
+                      "z": 1.0
+                    },
+                    "angle_degree": 200.0
+                  },
+                  "translation": {
+                    "x": -0.15,
+                    "y": -0.15,
+                    "z": 0.0
+                  }
+                },
+                "children": [
+                  {
+                    "constraint_type": "hinge",
+                    "limit_degree": {
+                      "min": -320.0,
+                      "max": -220.0
+                    },
+                    "frame_in_parent": {
+                      "rotation": {
+                        "point": {
+                          "x": 0.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "axis": {
+                          "x": 1.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "angle_degree": 0.0
+                      },
+                      "translation": {
+                        "x": -0.3,
+                        "y": 0.0,
+                        "z": 0.0
+                      }
+                    },
+                    "frame_in_child": {
+                      "rotation": {
+                        "point": {
+                          "x": 0.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "axis": {
+                          "x": 1.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "angle_degree": 0.0
+                      },
+                      "translation": {
+                        "x": 0.2,
+                        "y": 0.0,
+                        "z": 0.0
+                      }
+                    },
+                    "child_member": {
+                      "name": "leg2",
+                      "mass": 0.25,
+                      "shape": "cube",
+                      "scale": {
+                        "x": 0.4,
+                        "y": 0.08,
+                        "z": 0.08
+                      },
+                      "option": {},
+                      "transformation": {
+                        "rotation": {
+                          "point": {
+                            "x": 0.2,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "axis": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 1.0
+                          },
+                          "angle_degree": -90.0
+                        },
+                        "translation": {
+                          "x": -0.36,
+                          "y": 0.0,
+                          "z": 0.0
+                        }
+                      },
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.4,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "leg3",
+                            "mass": 0.1,
+                            "shape": "feet",
+                            "scale": {
+                              "x": 0.150,
+                              "y": 0.150,
+                              "z": 0.150
+                            },
+                            "option": {
+                              "friction": 0.8
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.4,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "constraint_type": "hinge",
+        "limit_degree": {
+          "min": 90.0,
+          "max": 180.0
+        },
+        "frame_in_parent": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": -0.4,
+            "y": 0.0,
+            "z": -0.5
+          }
+        },
+        "frame_in_child": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "child_member": {
+          "name": "legB",
+          "mass": 0.25,
+          "shape": "cube",
+          "scale": {
+            "x": 0.15,
+            "y": 0.15,
+            "z": 0.15
+          },
+          "option": {},
+          "transformation": {
+            "rotation": {
+              "point": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "axis": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+              },
+              "angle_degree": 135.0
+            },
+            "translation": {
+              "x": -0.4,
+              "y": 0.0,
+              "z": -0.5
+            }
+          },
+          "children": [
+            {
+              "constraint_type": "hinge",
+              "limit_degree": {
+                "min": -270.0,
+                "max": -150.0
+              },
+              "frame_in_parent": {
+                "rotation": {
+                  "point": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "axis": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "angle_degree": 0.0
+                },
+                "translation": {
+                  "x": 0.15,
+                  "y": -0.15,
+                  "z": 0.0
+                }
+              },
+              "frame_in_child": {
+                "rotation": {
+                  "point": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "axis": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "angle_degree": 0.0
+                },
+                "translation": {
+                  "x": 0.3,
+                  "y": 0.0,
+                  "z": 0.0
+                }
+              },
+              "child_member": {
+                "name": "leg1",
+                "mass": 0.25,
+                "shape": "cube",
+                "scale": {
+                  "x": 0.3,
+                  "y": 0.08,
+                  "z": 0.08
+                },
+                "option": {},
+                "transformation": {
+                  "rotation": {
+                    "point": {
+                      "x": 0.3,
+                      "y": 0.0,
+                      "z": 0.0
+                    },
+                    "axis": {
+                      "x": 0.0,
+                      "y": 0.0,
+                      "z": 1.0
+                    },
+                    "angle_degree": 200.0
+                  },
+                  "translation": {
+                    "x": -0.15,
+                    "y": -0.15,
+                    "z": 0.0
+                  }
+                },
+                "children": [
+                  {
+                    "constraint_type": "hinge",
+                    "limit_degree": {
+                      "min": -320.0,
+                      "max": -220.0
+                    },
+                    "frame_in_parent": {
+                      "rotation": {
+                        "point": {
+                          "x": 0.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "axis": {
+                          "x": 1.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "angle_degree": 0.0
+                      },
+                      "translation": {
+                        "x": -0.3,
+                        "y": 0.0,
+                        "z": 0.0
+                      }
+                    },
+                    "frame_in_child": {
+                      "rotation": {
+                        "point": {
+                          "x": 0.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "axis": {
+                          "x": 1.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "angle_degree": 0.0
+                      },
+                      "translation": {
+                        "x": 0.2,
+                        "y": 0.0,
+                        "z": 0.0
+                      }
+                    },
+                    "child_member": {
+                      "name": "leg2",
+                      "mass": 0.25,
+                      "shape": "cube",
+                      "scale": {
+                        "x": 0.4,
+                        "y": 0.08,
+                        "z": 0.08
+                      },
+                      "option": {},
+                      "transformation": {
+                        "rotation": {
+                          "point": {
+                            "x": 0.2,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "axis": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 1.0
+                          },
+                          "angle_degree": -90.0
+                        },
+                        "translation": {
+                          "x": -0.36,
+                          "y": 0.0,
+                          "z": 0.0
+                        }
+                      },
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.4,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "leg3",
+                            "mass": 0.1,
+                            "shape": "feet",
+                            "scale": {
+                              "x": 0.150,
+                              "y": 0.150,
+                              "z": 0.150
+                            },
+                            "option": {
+                              "friction": 0.8
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.4,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "constraint_type": "hinge",
+        "limit_degree": {
+          "min": 180.0,
+          "max": 270.0
+        },
+        "frame_in_parent": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": -0.4,
+            "y": 0.0,
+            "z": 0.5
+          }
+        },
+        "frame_in_child": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "child_member": {
+          "name": "legC",
+          "mass": 0.25,
+          "shape": "cube",
+          "scale": {
+            "x": 0.15,
+            "y": 0.15,
+            "z": 0.15
+          },
+          "option": {},
+          "transformation": {
+            "rotation": {
+              "point": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "axis": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+              },
+              "angle_degree": 225.0
+            },
+            "translation": {
+              "x": -0.4,
+              "y": 0.0,
+              "z": 0.5
+            }
+          },
+          "children": [
+            {
+              "constraint_type": "hinge",
+              "limit_degree": {
+                "min": -270.0,
+                "max": -150.0
+              },
+              "frame_in_parent": {
+                "rotation": {
+                  "point": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "axis": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "angle_degree": 0.0
+                },
+                "translation": {
+                  "x": 0.15,
+                  "y": -0.15,
+                  "z": 0.0
+                }
+              },
+              "frame_in_child": {
+                "rotation": {
+                  "point": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "axis": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "angle_degree": 0.0
+                },
+                "translation": {
+                  "x": 0.3,
+                  "y": 0.0,
+                  "z": 0.0
+                }
+              },
+              "child_member": {
+                "name": "leg1",
+                "mass": 0.25,
+                "shape": "cube",
+                "scale": {
+                  "x": 0.3,
+                  "y": 0.08,
+                  "z": 0.08
+                },
+                "option": {},
+                "transformation": {
+                  "rotation": {
+                    "point": {
+                      "x": 0.3,
+                      "y": 0.0,
+                      "z": 0.0
+                    },
+                    "axis": {
+                      "x": 0.0,
+                      "y": 0.0,
+                      "z": 1.0
+                    },
+                    "angle_degree": 200.0
+                  },
+                  "translation": {
+                    "x": -0.15,
+                    "y": -0.15,
+                    "z": 0.0
+                  }
+                },
+                "children": [
+                  {
+                    "constraint_type": "hinge",
+                    "limit_degree": {
+                      "min": -320.0,
+                      "max": -220.0
+                    },
+                    "frame_in_parent": {
+                      "rotation": {
+                        "point": {
+                          "x": 0.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "axis": {
+                          "x": 1.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "angle_degree": 0.0
+                      },
+                      "translation": {
+                        "x": -0.3,
+                        "y": 0.0,
+                        "z": 0.0
+                      }
+                    },
+                    "frame_in_child": {
+                      "rotation": {
+                        "point": {
+                          "x": 0.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "axis": {
+                          "x": 1.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "angle_degree": 0.0
+                      },
+                      "translation": {
+                        "x": 0.2,
+                        "y": 0.0,
+                        "z": 0.0
+                      }
+                    },
+                    "child_member": {
+                      "name": "leg2",
+                      "mass": 0.25,
+                      "shape": "cube",
+                      "scale": {
+                        "x": 0.4,
+                        "y": 0.08,
+                        "z": 0.08
+                      },
+                      "option": {},
+                      "transformation": {
+                        "rotation": {
+                          "point": {
+                            "x": 0.2,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "axis": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 1.0
+                          },
+                          "angle_degree": -90.0
+                        },
+                        "translation": {
+                          "x": -0.36,
+                          "y": 0.0,
+                          "z": 0.0
+                        }
+                      },
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.4,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "leg3",
+                            "mass": 0.1,
+                            "shape": "feet",
+                            "scale": {
+                              "x": 0.150,
+                              "y": 0.150,
+                              "z": 0.150
+                            },
+                            "option": {
+                              "friction": 0.8
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.4,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "constraint_type": "hinge",
+        "limit_degree": {
+          "min": 270.0,
+          "max": 360.0
+        },
+        "frame_in_parent": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": 0.4,
+            "y": 0.0,
+            "z": 0.5
+          }
+        },
+        "frame_in_child": {
+          "rotation": {
+            "point": {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "axis": {
+              "x": 1.0,
+              "y": 0.0,
+              "z": 0.0
+            },
+            "angle_degree": 90.0
+          },
+          "translation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "child_member": {
+          "name": "legD",
+          "mass": 0.25,
+          "shape": "cube",
+          "scale": {
+            "x": 0.15,
+            "y": 0.15,
+            "z": 0.15
+          },
+          "transformation": {
+            "rotation": {
+              "point": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "axis": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+              },
+              "angle_degree": 315.0
+            },
+            "translation": {
+              "x": 0.4,
+              "y": 0.0,
+              "z": 0.5
+            }
+          },
+          "children": [
+            {
+              "constraint_type": "hinge",
+              "limit_degree": {
+                "min": -270.0,
+                "max": -150.0
+              },
+              "frame_in_parent": {
+                "rotation": {
+                  "point": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "axis": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "angle_degree": 0.0
+                },
+                "translation": {
+                  "x": 0.15,
+                  "y": -0.15,
+                  "z": 0.0
+                }
+              },
+              "frame_in_child": {
+                "rotation": {
+                  "point": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "axis": {
+                    "x": 1.0,
+                    "y": 0.0,
+                    "z": 0.0
+                  },
+                  "angle_degree": 0.0
+                },
+                "translation": {
+                  "x": 0.3,
+                  "y": 0.0,
+                  "z": 0.0
+                }
+              },
+              "child_member": {
+                "name": "leg1",
+                "mass": 0.25,
+                "shape": "cube",
+                "scale": {
+                  "x": 0.3,
+                  "y": 0.08,
+                  "z": 0.08
+                },
+                "option": {},
+                "transformation": {
+                  "rotation": {
+                    "point": {
+                      "x": 0.3,
+                      "y": 0.0,
+                      "z": 0.0
+                    },
+                    "axis": {
+                      "x": 0.0,
+                      "y": 0.0,
+                      "z": 1.0
+                    },
+                    "angle_degree": 200.0
+                  },
+                  "translation": {
+                    "x": -0.15,
+                    "y": -0.15,
+                    "z": 0.0
+                  }
+                },
+                "children": [
+                  {
+                    "constraint_type": "hinge",
+                    "limit_degree": {
+                      "min": -320.0,
+                      "max": -220.0
+                    },
+                    "frame_in_parent": {
+                      "rotation": {
+                        "point": {
+                          "x": 0.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "axis": {
+                          "x": 1.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "angle_degree": 0.0
+                      },
+                      "translation": {
+                        "x": -0.3,
+                        "y": 0.0,
+                        "z": 0.0
+                      }
+                    },
+                    "frame_in_child": {
+                      "rotation": {
+                        "point": {
+                          "x": 0.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "axis": {
+                          "x": 1.0,
+                          "y": 0.0,
+                          "z": 0.0
+                        },
+                        "angle_degree": 0.0
+                      },
+                      "translation": {
+                        "x": 0.2,
+                        "y": 0.0,
+                        "z": 0.0
+                      }
+                    },
+                    "child_member": {
+                      "name": "leg2",
+                      "mass": 0.25,
+                      "shape": "cube",
+                      "scale": {
+                        "x": 0.4,
+                        "y": 0.08,
+                        "z": 0.08
+                      },
+                      "option": {},
+                      "transformation": {
+                        "rotation": {
+                          "point": {
+                            "x": 0.2,
+                            "y": 0.0,
+                            "z": 0.0
+                          },
+                          "axis": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 1.0
+                          },
+                          "angle_degree": -90.0
+                        },
+                        "translation": {
+                          "x": -0.36,
+                          "y": 0.0,
+                          "z": 0.0
+                        }
+                      },
+                      "children": [
+                        {
+                          "constraint_type": "fixed",
+                          "attach_in_parent": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": -0.4,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "attach_in_child": {
+                            "rotation": {
+                              "point": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 1.0
+                              },
+                              "axis": {
+                                "x": 1.0,
+                                "y": 0.0,
+                                "z": 0.0
+                              },
+                              "angle_degree": 0.0
+                            },
+                            "translation": {
+                              "x": 0.0,
+                              "y": 0.0,
+                              "z": 0.0
+                            }
+                          },
+                          "child_member": {
+                            "name": "leg3",
+                            "mass": 0.1,
+                            "shape": "feet",
+                            "scale": {
+                              "x": 0.150,
+                              "y": 0.150,
+                              "z": 0.150
+                            },
+                            "option": {
+                              "friction": 0.8
+                            },
+                            "transformation": {
+                              "rotation": {
+                                "point": {
+                                  "x": 0.0,
+                                  "y": 0.0,
+                                  "z": 0.0
+                                },
+                                "axis": {
+                                  "x": 0.0,
+                                  "y": 1.0,
+                                  "z": 0.0
+                                },
+                                "angle_degree": 0.0
+                              },
+                              "translation": {
+                                "x": -0.400,
+                                "y": 0.0,
+                                "z": 0.0
+                              }
+                            },
+                            "children": []
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "muscles": [
+    {
+      "name": "muscle_A1",
+      "item_a": "body",
+      "item_b": "body_legA",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": 0.5,
+        "y": 0.0,
+        "z": -0.2
+      },
+      "pos_in_b": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.15
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_A2",
+      "item_a": "body_legA",
+      "item_b": "body_legA_leg1",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": -0.15,
+        "y": 0.15,
+        "z": 0.0
+      },
+      "pos_in_b": {
+        "x": -0.2,
+        "y": -0.08,
+        "z": 0.0
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_A3",
+      "item_a": "body_legA_leg1",
+      "item_b": "body_legA_leg1_leg2",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": 0.3,
+        "y": -0.08,
+        "z": 0.0
+      },
+      "pos_in_b": {
+        "x": 0.4,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_B1",
+      "item_a": "body",
+      "item_b": "body_legB",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": -0.2,
+        "y": 0.0,
+        "z": -0.5
+      },
+      "pos_in_b": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.15
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_B2",
+      "item_a": "body_legB",
+      "item_b": "body_legB_leg1",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": -0.15,
+        "y": 0.15,
+        "z": 0.0
+      },
+      "pos_in_b": {
+        "x": -0.2,
+        "y": -0.08,
+        "z": 0.0
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_B3",
+      "item_a": "body_legB_leg1",
+      "item_b": "body_legB_leg1_leg2",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": 0.3,
+        "y": -0.08,
+        "z": 0.0
+      },
+      "pos_in_b": {
+        "x": 0.4,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_C1",
+      "item_a": "body",
+      "item_b": "body_legC",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": -0.5,
+        "y": 0.0,
+        "z": 0.2
+      },
+      "pos_in_b": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.15
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_C2",
+      "item_a": "body_legC",
+      "item_b": "body_legC_leg1",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": -0.15,
+        "y": 0.15,
+        "z": 0.0
+      },
+      "pos_in_b": {
+        "x": -0.2,
+        "y": -0.08,
+        "z": 0.0
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_C3",
+      "item_a": "body_legC_leg1",
+      "item_b": "body_legC_leg1_leg2",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": 0.3,
+        "y": -0.08,
+        "z": 0.0
+      },
+      "pos_in_b": {
+        "x": 0.4,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_D1",
+      "item_a": "body",
+      "item_b": "body_legD",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": 0.2,
+        "y": 0.0,
+        "z": 0.5
+      },
+      "pos_in_b": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.15
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_D2",
+      "item_a": "body_legD",
+      "item_b": "body_legD_leg1",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": -0.15,
+        "y": 0.15,
+        "z": 0.0
+      },
+      "pos_in_b": {
+        "x": -0.2,
+        "y": -0.08,
+        "z": 0.0
+      },
+      "force": 64.0,
+      "speed": 8.0
+    },
+    {
+      "name": "muscle_D3",
+      "item_a": "body_legD_leg1",
+      "item_b": "body_legD_leg1_leg2",
+      "attach_mass": 0.2,
+      "attach_scale": {
+        "x": 0.05,
+        "y": 0.05,
+        "z": 0.05
+      },
+      "pos_in_a": {
+        "x": 0.3,
+        "y": -0.08,
+        "z": 0.0
+      },
+      "pos_in_b": {
+        "x": 0.4,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "force": 64.0,
+      "speed": 8.0
+    }
+  ]
+}

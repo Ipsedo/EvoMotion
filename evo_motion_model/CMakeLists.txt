@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22.1)
 
 project(evo_motion_model)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 set(RESOURCES_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/constants.h.in" "${CMAKE_CURRENT_BINARY_DIR}/constants.h" @ONLY)

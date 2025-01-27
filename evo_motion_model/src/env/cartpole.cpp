@@ -8,11 +8,12 @@
 
 #include "../controller/slider.h"
 
-CartPole::CartPole(int seed)
-    : slider_speed(16.f), slider_force(64.f), chariot_push_force(2.f),
-      limit_angle(static_cast<float>(M_PI * 0.5)), reset_frame_nb(8), chariot_mass(1.f),
-      pendulum_mass(1.f), rng(seed), rd_uni(0.f, 1.f), step_idx(0), max_steps(60 * 60),
-      last_ang_vel(0.f), last_vel(0.f) {
+CartPole::CartPole(
+    int num_threads, int seed, float slider_speed, float slider_force, float chariot_push_force,
+    float limit_angle, int reset_frame_nb, float chariot_mass, float pendulum_mass, int max_steps)
+    : Environment(num_threads), chariot_push_force(chariot_push_force), limit_angle(limit_angle),
+      reset_frame_nb(reset_frame_nb), rng(seed), rd_uni(0.f, 1.f), step_idx(0),
+      max_steps(max_steps), last_vel(0.f), last_ang_vel(0.f) {
     float base_height = 2.f, base_pos = -4.f;
 
     float pendulum_height = 0.7f, pendulum_width = 0.1f, pendulum_offset = pendulum_height / 4.f;
@@ -26,17 +27,17 @@ CartPole::CartPole(int seed)
     // (init graphical and physical objects)
     Item base(
         "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
-        glm::vec3(0.f, base_pos, 10.f), glm::vec3(10.f, base_height, 10.f), 0.f);
+        glm::vec3(0.f, base_pos, 10.f), glm::vec3(10.f, base_height, 10.f), 0.f, TILE_SPECULAR);
 
     Item chariot(
         "chariot", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, chariot_pos, 10.f), glm::vec3(chariot_width, chariot_height, chariot_width),
-        chariot_mass);
+        chariot_mass, SPECULAR);
 
     Item pendulum(
         "pendulum", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, pendulum_pos, 10.f),
-        glm::vec3(pendulum_width, pendulum_height, pendulum_width), pendulum_mass);
+        glm::vec3(pendulum_width, pendulum_height, pendulum_width), pendulum_mass, SPECULAR);
 
     // Environment item vector
     items = {base, chariot, pendulum};
@@ -166,7 +167,7 @@ void CartPole::reset_engine() {
     chariot_rg->applyCentralImpulse(btVector3(rand_force, 0.f, 0.f));
     //chariot_rg->setLinearVelocity(btVector3(rand_force, 0, 0));
 
-    for (int i = 0; i < reset_frame_nb; i++) m_world->stepSimulation(1.f / 60.f);
+    for (int i = 0; i < reset_frame_nb; i++) step_world(1.f / 60.f);
 
     slider->setPoweredLinMotor(true);
 
@@ -177,4 +178,4 @@ std::vector<int64_t> CartPole::get_state_space() { return {7}; }
 
 std::vector<int64_t> CartPole::get_action_space() { return {1}; }
 
-bool CartPole::is_continuous() const { return true; }
+std::optional<Item> CartPole::get_camera_track_item() { return std::nullopt; }

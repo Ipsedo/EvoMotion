@@ -8,6 +8,9 @@
 #include <vector>
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionDispatch/btCollisionDispatcherMt.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolverMt.h>
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorldMt.h>
 #include <torch/torch.h>
 
 #include "./controller.h"
@@ -19,15 +22,29 @@ struct step {
     bool done;
 };
 
+class InitBtThread {
+public:
+    explicit InitBtThread(int num_threads);
+    btDefaultCollisionConstructionInfo get_cci() const;
+
+private:
+    btDefaultCollisionConstructionInfo cci;
+};
+
 class Environment {
+private:
+    int num_threads;
+    InitBtThread init_thread;
+
 protected:
     torch::DeviceType curr_device;
 
     btDefaultCollisionConfiguration *m_collision_configuration;
-    btCollisionDispatcher *m_dispatcher;
+    btCollisionDispatcherMt *m_dispatcher;
     btBroadphaseInterface *m_broad_phase;
-    btSequentialImpulseConstraintSolver *m_constraint_solver;
-    btDynamicsWorld *m_world;
+    btConstraintSolverPoolMt *m_pool_solver;
+    btSequentialImpulseConstraintSolverMt *m_constraint_solver;
+    btDiscreteDynamicsWorldMt *m_world;
 
     virtual step compute_step() = 0;
 
@@ -35,8 +52,10 @@ protected:
 
     void add_item(const Item &item) const;
 
+    void step_world(float delta) const;
+
 public:
-    Environment();
+    explicit Environment(int num_threads);
 
     virtual std::vector<Item> get_items() = 0;
 
@@ -50,11 +69,35 @@ public:
 
     virtual std::vector<int64_t> get_action_space() = 0;
 
-    [[nodiscard]] virtual bool is_continuous() const = 0;
+    virtual std::optional<Item> get_camera_track_item() = 0;
 
     void to(torch::DeviceType device);
 
     virtual ~Environment();
 };
+
+class EnvironmentFactory {
+public:
+    virtual ~EnvironmentFactory() = default;
+
+    explicit EnvironmentFactory(std::map<std::string, std::string> parameters);
+    virtual std::shared_ptr<Environment> get_env(int num_threads, int seed) = 0;
+
+private:
+    std::map<std::string, std::string> parameters;
+
+protected:
+    int get_value(const std::string &key, int default_value);
+    float get_value(const std::string &key, float default_value);
+    std::string get_value(const std::string &key, std::string default_value);
+
+    template<typename Value>
+    Value generic_get_value(
+        std::function<Value(const std::string &)> converter, const std::string &key,
+        Value default_value);
+};
+
+std::shared_ptr<EnvironmentFactory>
+get_environment_factory(const std::string &env_name, std::map<std::string, std::string> parameters);
 
 #endif//EVO_MOTION_ENVIRONMENT_H

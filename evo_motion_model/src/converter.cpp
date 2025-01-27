@@ -4,13 +4,15 @@
 
 #include "./converter.h"
 
-#include <filesystem>
 #include <fstream>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "./constants.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <bitset>
+
+#include <glm/gtx/matrix_decompose.hpp>
 
 /*
  * JSON stuff
@@ -19,7 +21,6 @@
 glm::mat4 json_transformation_to_model_matrix(nlohmann::json transformation) {
 
     nlohmann::json rotation = transformation["rotation"];
-    nlohmann::json translation = transformation["translation"];
 
     const glm::vec3 position = json_vec3_to_glm_vec3(transformation["translation"]);
     const glm::vec3 rotation_point = json_vec3_to_glm_vec3(rotation["point"]);
@@ -43,13 +44,46 @@ btVector3 json_vec3_to_bt_vector3(nlohmann::json vec3) {
 }
 
 nlohmann::json read_json(const std::string &json_path) {
-    std::filesystem::path resources_path(RESOURCES_PATH);
-    std::ifstream stream(resources_path / json_path, std::ios::in);
+    //std::filesystem::path resources_path(RESOURCES_PATH);
+    std::ifstream stream(json_path, std::ios::in);
 
     nlohmann::json json = nlohmann::json::parse(stream);
 
     return json;
 }
+
+/*
+ * GLM stuff
+ */
+
+std::tuple<glm::vec3, glm::quat, glm::vec3> decompose_model_matrix(glm::mat4 model_matrix) {
+    glm::vec3 curr_scale;
+    glm::quat curr_rotation;
+    glm::vec3 curr_translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+
+    glm::decompose(model_matrix, curr_scale, curr_rotation, curr_translation, skew, perspective);
+    return {curr_translation, curr_rotation, curr_scale};
+}
+
+/*
+ * GLM to JSON
+ */
+
+nlohmann::json model_matrix_to_json_transformation(glm::mat4 model_matrix) {
+
+    const auto [curr_translation, curr_rotation, curr_scale] = decompose_model_matrix(model_matrix);
+
+    return {
+        {"translation", vec3_to_json(curr_translation)},
+        {"rotation",
+         {{"point", vec3_to_json(glm::vec3(0.f))},
+          {"axis", vec3_to_json(glm::eulerAngles(curr_rotation))},
+          {"angle_degree", glm::angle(curr_rotation)}}}};
+}
+
+nlohmann::json vec3_to_json(glm::vec3 vec) { return {{"x", vec.x}, {"y", vec.y}, {"z", vec.z}}; }
 
 /*
  * GLM <-> Bullet3 conversions
@@ -78,3 +112,35 @@ glm::mat4 bullet_to_glm(const btTransform &m) {
 }
 
 glm::quat bullet_to_glm(const btQuaternion q) { return {q.w(), q.x(), q.y(), q.z()}; }
+
+/*
+ * Binary conversion
+ */
+
+std::string float_to_binary_string(float f) {
+    union {
+        float v_f;
+        uint32_t bits;
+    } data{};
+    data.v_f = f;
+
+    return std::bitset<32>(data.bits).to_string();
+    std::string s;
+    memcpy(&s, &f, sizeof(float));
+    return s;
+}
+
+float binary_string_to_float(std::string s) {
+    union {
+        uint32_t bits;
+        float output;
+    } data{};
+
+    data.bits = std::bitset<32>(s).to_ulong();
+
+    return data.output;
+
+    float f = 0.f;
+    memcpy(&f, s.c_str(), sizeof(float));
+    return f;
+}

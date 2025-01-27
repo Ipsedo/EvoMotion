@@ -6,6 +6,7 @@
 #define EVO_MOTION_DRAWABLE_H
 
 #include <memory>
+#include <random>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -13,18 +14,15 @@
 class Drawable {
 public:
     virtual void draw(
-        glm::mat4 mvp_matrix, glm::mat4 mv_matrix, glm::vec3 light_pos_from_camera,
-        glm::vec3 camera_pos) = 0;
+        glm::mat4 projection_matrix, glm::mat4 view_matrix, glm::mat4 model_matrix,
+        glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) = 0;
 
-    virtual ~Drawable();
+    virtual ~Drawable() = default;
+};
 
-    class Builder {
-    public:
-        static std::shared_ptr<Drawable> make_specular_obj(
-            const std::vector<std::tuple<float, float, float>> &vertices,
-            const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color,
-            glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess);
-    };
+class DrawableFactory {
+public:
+    virtual std::shared_ptr<Drawable> get_drawable() = 0;
 };
 
 #endif//EVO_MOTION_DRAWABLE_H

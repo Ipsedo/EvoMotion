@@ -8,15 +8,16 @@
 
 #include <indicators/progress_bar.hpp>
 
-#include <evo_motion_model/env_builder.h>
+#include <evo_motion_model/environment.h>
 #include <evo_motion_networks/agent.h>
 #include <evo_motion_networks/metrics.h>
 
 #include "./run.h"
 
 void train(
-    int seed, bool cuda, const train_params &params,
-    const std::shared_ptr<AgentFactory> &agent_factory) {
+    const int env_num_threads, const int seed, const bool cuda, const train_params &params,
+    const std::shared_ptr<AgentFactory> &agent_factory,
+    const std::shared_ptr<EnvironmentFactory> &environment_factory) {
 
     if (!std::filesystem::exists(params.output_path))
         std::filesystem::create_directory(params.output_path);
@@ -25,10 +26,9 @@ void train(
         exit(1);
     }
 
-    EnvBuilder env_builder(seed, params.env_name);
-    std::shared_ptr<Environment> env = env_builder.get();
+    const std::shared_ptr<Environment> env = environment_factory->get_env(env_num_threads, seed);
 
-    std::shared_ptr<Agent> agent =
+    const std::shared_ptr<Agent> agent =
         agent_factory->create_agent(env->get_state_space(), env->get_action_space());
 
     if (cuda) {
@@ -43,10 +43,6 @@ void train(
     std::cout << "state_space = " << env->get_state_space()
               << ", action_space = " << env->get_action_space() << std::endl;
     std::cout << "parameters_count = " << agent->count_parameters() << std::endl;
-
-    LossMeter policy_loss_meter("actor_loss", 128);
-    LossMeter critic_loss_meter("critic_loss", 128);
-    LossMeter episode_steps_meter("episode_steps", 128);
 
     for (int s = 0; s < params.nb_saves; s++) {
         indicators::ProgressBar p_bar{
@@ -65,25 +61,18 @@ void train(
         for (int e = 0; e < params.nb_episodes; e++) {
             while (!step.done) step = env->do_step(agent->act(step.state, step.reward));
 
-            agent->done(step.reward);
+            agent->done(step.state, step.reward);
             step = env->reset();
 
             auto metrics = agent->get_metrics();
-
-            policy_loss_meter.add(metrics["actor_loss"]);
-            critic_loss_meter.add(metrics["critic_loss"]);
-            episode_steps_meter.add(metrics["episode_steps"]);
-
             std::stringstream stream;
-            stream << "Save " + std::to_string(s - 1) << ", actor_loss = " << std::setprecision(6)
-                << std::fixed << policy_loss_meter.loss()
-                << ", critic_loss = " << std::setprecision(6) << std::fixed
-                << critic_loss_meter.loss() << ", actor_grad_norm = " << std::setprecision(4)
-                << std::fixed << metrics["actor_grad_mean"]
-                << ", critic_grad_norm = " << std::setprecision(4) << std::fixed
-                << metrics["critic_grad_mean"] << ", steps = " << std::setprecision(2)
-                << std::fixed << episode_steps_meter.loss() << " ";
-
+            stream << "Save " + std::to_string(s - 1)
+                   << std::accumulate(
+                          metrics.begin(), metrics.end(), std::string(),
+                          [](std::string acc, LossMeter m) {
+                              return acc.append(", ").append(m.to_string());
+                          })
+                   << " ";
             p_bar.set_option(indicators::option::PrefixText{stream.str()});
 
             p_bar.tick();

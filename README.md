@@ -24,8 +24,10 @@ Install dependencies with `pacman` :
 
 ```bash
 $ # as root
-$ pacman -Syu nvidia cuda cmake bullet glm glew glfw
+$ pacman -Syu nvidia cuda cmake bullet glm glew glfw imgui-full
 ```
+
+#### LibTorch
 
 Download `libtorch` from torch official website and then copy the extracted folder in `/opt/` (here version 2.3.0 with
 CUDA 12.1) :
@@ -53,8 +55,7 @@ $ cd /path/to/EvoMotion
 $ # build image
 $ docker build . --tag evo_motion
 $ # run training
-$ # /!\ TODO update CLI example /!\
-$ docker run -v /path/to/your/local/output_folder:/opt/evo_motion/out_train_muscle_a2c_liquid --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 12345 --cuda --hidden_size 32 train /opt/evo_motion/out_train_muscle_a2c_liquid --episodes 512 --nb_saves 4096 --learning_rate 1e-3
+$ docker run -v /path/to/your/local/output_folder:/opt/evo_motion/out_train_muscle_ppo --rm --runtime=nvidia --gpus all evo_motion robot_walk ppo --agent_parameters seed=1234 hidden_size=256 gamma=0.99 lambda=0.95 epsilon=0.2 epoch=8 batch_size=32 learning_rate=1e-3 replay_buffer_size=1024 train_every=8 entropy_factor=0.01 critic_loss_factor=0.5 grad_norm_clip=0.5 --cuda --env_seed 1234  train /opt/evo_motion/out_train_muscle_ppo --episodes 512 --nb_saves 4096
 ```
 
 To run graphical view of your trained agent you need first :
@@ -66,8 +67,7 @@ $ xhost +local:docker
 And then run the image :
 
 ```bash
-$ # /!\ TODO update CLI example /!\
-$ docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /path/to/your/local/output_folder:/opt/evo_motion/out_train_muscle_a2c_liquid --rm --runtime=nvidia --gpus all evo_motion muscles actor_critic_liquid --seed 30543 --hidden_size 32 --cuda run /opt/evo_motion/out_train_muscle_a2c_liquid/save_0 -w 1920 -h 1080
+$ docker run -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /path/to/your/local/output_folder:/opt/evo_motion/out_train_muscle_ppo --rm --runtime=nvidia --gpus all evo_motion robot_walk ppo --agent_parameters seed=1234 hidden_size=256 gamma=0.99 lambda=0.95 epsilon=0.2 epoch=8 batch_size=32 learning_rate=1e-3 replay_buffer_size=1024 train_every=8 entropy_factor=0.01 critic_loss_factor=0.5 grad_norm_clip=0.5 --cuda --env_seed 1234 run /opt/evo_motion/out_train_muscle_ppo/save_0 -w 1920 -h 1080
 ```
 
 ### Other OS
@@ -93,18 +93,21 @@ An internet connexion is also required in order to download dependencies inside 
    Run training on creature muscles
    ```bash
    $ cd /path/to/EvoMotion/build
-   $ evo_motion muscles actor_critic_liquid -p hidden_size=64 -p seed=1234 -p learning_rate=1e-2 -p batch_size=16 -p gamma=0.995 -p unfolding_steps=6 -p entropy_factor=1e-2 --env_seed 1234 --cuda train ./out/muscle_a2c_liquid --episodes 512 --nb_saves 4096
+   $ evo_motion robot_walk ppo --agent_parameters seed=1234 hidden_size=256 gamma=0.99 lambda=0.95 epsilon=0.2 epoch=8 batch_size=32 learning_rate=1e-3 replay_buffer_size=1024 train_every=8 entropy_factor=0.01 critic_loss_factor=0.5 grad_norm_clip=0.5 --cuda --env_seed 1234 train ./out/robot_walk_ppo --episodes 512 --nb_saves 4096
    ```
 4. After the first save (here after 1024 episodes), you can now evaluate your trained agent.
 
    Evaluate agent on creature muscles (here the first model save) with GLFW window of 1920 * 1024 pixels
    ```bash
-   $ evo_motion muscles actor_critic_liquid --env_seed 1234 -p hidden_size=64 -p seed=1234 -p learning_rate=1e-2 -p batch_size=16 -p gamma=0.995 -p unfolding_steps=6 -p entropy_factor=1e-2 --cuda run ./out/muscles_a2c_liquid/save_0 -w 1920 -h 1024
+   $ evo_motion robot_walk ppo --agent_parameters seed=1234 hidden_size=256 gamma=0.99 lambda=0.95 epsilon=0.2 epoch=8 batch_size=32 learning_rate=1e-3 replay_buffer_size=1024 train_every=8 entropy_factor=0.01 critic_loss_factor=0.5 grad_norm_clip=0.5 --cuda --env_seed 1234 run ./out/robot_walk_ppo/save_0 -w 1920 -h 1024
    ```
 
 ## References
 
 [1] Reinforcement Learning: An Introduction - *Richard S. Sutton and Andrew G. Barto* - Second Edition 2018
 
-[2] Liquid Time-constant Networks - *Ramin Hasani, Mathias Lechner, Alexander Amini, Daniela Rus, Radu Grosu* - 8 Jun
-2020
+[2] Liquid Time-constant Networks - *Ramin Hasani, Mathias Lechner, Alexander Amini, Daniela Rus, Radu Grosu* - 8 Jun 2020
+
+[4] Soft Actor-Critic Algorithms and Applications - *Tuomas Haarnoja, Aurick Zhou, Kristian Hartikainen, George Tucker, Sehoon Ha, Jie Tan, Vikash Kumar, Henry Zhu, Abhishek Gupta, Pieter Abbeel, Sergey Levine* - 29 Jan 2019
+
+[3] Proximal Policy Optimization Algorithms - *John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov* - 28 Aug 2017

@@ -9,19 +9,21 @@
 
 #include <torch/torch.h>
 
+#include "./metrics.h"
+
 // Agent abstract class
 
 class Agent {
 public:
     virtual torch::Tensor act(torch::Tensor state, float reward) = 0;
 
-    virtual void done(float reward) = 0;
+    virtual void done(torch::Tensor state, float reward) = 0;
 
     virtual void save(const std::string &output_folder_path) = 0;
 
     virtual void load(const std::string &input_folder_path) = 0;
 
-    virtual std::map<std::string, float> get_metrics() = 0;
+    virtual std::vector<LossMeter> get_metrics() = 0;
 
     virtual void to(torch::DeviceType device) = 0;
 
@@ -53,6 +55,6 @@ private:
 };
 
 std::shared_ptr<AgentFactory>
-get_factory(const std::string &agent_name, std::map<std::string, std::string> parameters);
+get_agent_factory(const std::string &agent_name, std::map<std::string, std::string> parameters);
 
 #endif//EVO_MOTION_AGENT_H

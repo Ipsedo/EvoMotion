@@ -6,12 +6,11 @@
 #define EVO_MOTION_MUSCLE_CONTROLLER_H
 
 #include <evo_motion_model/controller.h>
-
-#include "../creature/muscle.h"
+#include <evo_motion_model/robot/muscle.h>
 
 class MuscleController final : public Controller {
 public:
-    MuscleController(const Muscle &muscle, int action_index);
+    MuscleController(const std::shared_ptr<Muscle> &muscle, int action_index);
 
     void on_input(torch::Tensor action) override;
 
@@ -19,7 +18,7 @@ public:
 
 private:
     int action_index;
-    Muscle muscle;
+    std::shared_ptr<Muscle> muscle;
 };
 
 #endif//EVO_MOTION_MUSCLE_CONTROLLER_H

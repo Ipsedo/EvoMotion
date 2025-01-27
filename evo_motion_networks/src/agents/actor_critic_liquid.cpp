@@ -2,188 +2,182 @@
 // Created by samuel on 29/03/24.
 //
 
-#include "./actor_critic_liquid.h"
+#include <evo_motion_networks/agents/actor_critic_liquid.h>
+#include <evo_motion_networks/functions.h>
+#include <evo_motion_networks/saver.h>
 
-#include "../init.h"
-
-/*
- * Liquid Cell
- */
-
-LiquidCellModule::LiquidCellModule(
-    const int &input_space, int neuron_number, const int unfolding_steps) {
-    this->neuron_number = neuron_number;
-    steps = unfolding_steps;
-
-    constexpr float std_w = 1e-1f;
-    constexpr float std_b = 1e-1f;
-
-    weight = register_module(
-        "weight",
-        torch::nn::Linear(torch::nn::LinearOptions(input_space, neuron_number).bias(false)));
-
-    recurrent_weight = register_module(
-        "recurrent_weight",
-        torch::nn::Linear(torch::nn::LinearOptions(neuron_number, neuron_number).bias(false)));
-
-    bias = register_parameter("bias", torch::randn({1, neuron_number}));
-
-    a = register_parameter("a", torch::ones({1, neuron_number}));
-    tau = register_parameter("tau", torch::ones({1, neuron_number}));
-
-    torch::nn::init::normal_(weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
-    torch::nn::init::normal_(
-        recurrent_weight->weight, 0, std_w / static_cast<float>(unfolding_steps));
-    torch::nn::init::normal_(bias, 0, std_b);
-
-    reset_x_t();
-}
-
-void LiquidCellModule::reset_x_t() {
-    x_t = torch::silu(
-        torch::randn(
-            {1, neuron_number}, torch::TensorOptions().device(recurrent_weight->weight.device())));
-}
-
-torch::Tensor
-LiquidCellModule::compute_step(const torch::Tensor &x_t_curr, const torch::Tensor &i_t) {
-    return torch::silu(weight->forward(i_t) + recurrent_weight->forward(x_t_curr) + bias);
-}
-
-torch::Tensor LiquidCellModule::forward(const torch::Tensor &state) {
-    const float delta_t = 1.f / static_cast<float>(steps);
-
-    for (int i = 0; i < steps; i++)
-        x_t = (x_t + delta_t * compute_step(x_t, state) * a)
-              / (1.f + delta_t * (1.f / tau + compute_step(x_t, state)));
-
-    return x_t;
-}
-
-void LiquidCellModule::to(torch::Device device, const bool non_blocking) {
-    Module::to(device, non_blocking);
-    x_t = x_t.to(device, non_blocking);
-}
-
-/*
- * Actor critic
- */
-
-// shared network
-
-ActorCriticLiquidNetwork::ActorCriticLiquidNetwork(
-    const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
-    int unfolding_steps) {
-
-    const auto input_space = state_space[0];
-
-    liquid_network = register_module(
-        "liquid_network",
-        std::make_shared<LiquidCellModule>(input_space, hidden_size, unfolding_steps));
-
-    mu = register_module(
-        "mu",
-        torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
-
-    sigma = register_module(
-        "sigma", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
-
-    critic = register_module("critic", torch::nn::Linear(hidden_size, 1));
-
-    mu->apply(init_weights);
-    sigma->apply(init_weights);
-    critic->apply(init_weights);
-}
-
-a2c_response ActorCriticLiquidNetwork::forward(const torch::Tensor &state) {
-    const auto x_t = liquid_network->forward(state.unsqueeze(0));
-
-    return {
-        mu->forward(x_t).squeeze(0), sigma->forward(x_t).squeeze(0),
-        critic->forward(x_t).squeeze(0)};
-}
-
-void ActorCriticLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(); }
-
-// separated networks - actor
-
-ActorLiquidNetwork::ActorLiquidNetwork(
-    const std::vector<int64_t> &state_space, std::vector<int64_t> action_space, int hidden_size,
-    int unfolding_steps) {
-
-    const auto input_space = state_space[0];
-
-    liquid_network = register_module(
-        "liquid_network",
-        std::make_shared<LiquidCellModule>(input_space, hidden_size, unfolding_steps));
-
-    mu = register_module(
-        "mu",
-        torch::nn::Sequential(torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Tanh()));
-
-    sigma = register_module(
-        "sigma", torch::nn::Sequential(
-            torch::nn::Linear(hidden_size, action_space[0]), torch::nn::Softplus()));
-
-    mu->apply(init_weights);
-    sigma->apply(init_weights);
-}
-
-void ActorLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(); }
-
-actor_response ActorLiquidNetwork::forward(const torch::Tensor &state) {
-    const auto x_t = liquid_network->forward(state.unsqueeze(0));
-
-    return {mu->forward(x_t).squeeze(0), sigma->forward(x_t).squeeze(0)};
-}
-
-// separated networks - critic
-
-CriticLiquidNetwork::CriticLiquidNetwork(
-    const std::vector<int64_t> &state_space, int hidden_size, int unfolding_steps) {
-
-    const auto input_space = state_space[0];
-
-    liquid_network = register_module(
-        "liquid_network",
-        std::make_shared<LiquidCellModule>(input_space, hidden_size, unfolding_steps));
-
-    critic = register_module("critic", torch::nn::Linear(hidden_size, 1));
-
-    critic->apply(init_weights);
-}
-
-void CriticLiquidNetwork::reset_liquid() const { liquid_network->reset_x_t(); }
-
-critic_response CriticLiquidNetwork::forward(const torch::Tensor &state) {
-    const auto x_t = liquid_network->forward(state.unsqueeze(0));
-
-    return {critic->forward(x_t).squeeze(0)};
-}
-
-/*
- * Agent
- */
-
-ActorCriticLiquid::ActorCriticLiquid(
+ActorCriticLiquidAgent::ActorCriticLiquidAgent(
     const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int hidden_size, const int batch_size, float lr,
-    const float gamma, const float entropy_factor, int unfolding_steps)
-    : ActorCritic(
-        seed, state_space, action_space, hidden_size, batch_size, lr, gamma, entropy_factor) {
+    const std::vector<int64_t> &action_space, int neuron_number, const int batch_size, float lr,
+    const float gamma, const float entropy_start_factor, const float entropy_end_factor,
+    const long entropy_steps, int unfolding_steps, const int replay_buffer_size,
+    const int train_every)
+    : actor(std::make_shared<ActorLiquidModule>(
+          state_space, action_space, neuron_number, unfolding_steps)),
+      actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
+      critic(std::make_shared<CriticLiquidModule>(state_space, neuron_number, unfolding_steps)),
+      critic_optimizer(std::make_shared<torch::optim::Adam>(critic->parameters(), lr)),
+      gamma(gamma), entropy_start_factor(entropy_start_factor),
+      entropy_end_factor(entropy_end_factor), entropy_steps(entropy_steps),
+      curr_device(torch::kCPU), batch_size(batch_size), replay_buffer(replay_buffer_size, seed),
+      policy_loss_meter("policy", 64), entropy_meter("entropy", 64),
+      critic_loss_meter("critic", 64), episode_steps_meter("steps", 64), curr_episode_step(0),
+      curr_train_step(0L), global_curr_step(0L), train_every(train_every) {
+    at::manual_seed(seed);
 
-    actor = std::make_shared<ActorLiquidNetwork>(
-        state_space, action_space, hidden_size, unfolding_steps);
-    actor_optimizer = std::make_shared<torch::optim::Adam>(actor->parameters(), lr);
-
-    critic = std::make_shared<CriticLiquidNetwork>(state_space, hidden_size, unfolding_steps);
-    critic_optimizer = std::make_shared<torch::optim::Adam>(critic->parameters(), lr);
+    set_eval(true);
 }
 
-void ActorCriticLiquid::done(const float reward) {
-    ActorCritic::done(reward);
+void ActorCriticLiquidAgent::check_train() {
+    if (global_curr_step % train_every == train_every - 1 && replay_buffer.has_enough(batch_size)) {
+        std::vector<liquid_episode_step<liquid_a2c_memory>> tmp_replay_buffer =
+            replay_buffer.sample(batch_size);
 
-    std::dynamic_pointer_cast<ActorLiquidNetwork>(actor)->reset_liquid();
-    std::dynamic_pointer_cast<CriticLiquidNetwork>(critic)->reset_liquid();
+        std::vector<torch::Tensor> vec_states, vec_actions, vec_rewards, vec_done, vec_next_state,
+            input_actor_x, input_critic_x, output_actor_x, output_critic_x;
+
+        for (const auto &[episode_replay_buffer, x_t, next_x_t]: tmp_replay_buffer) {
+            vec_states.push_back(episode_replay_buffer.state);
+            vec_actions.push_back(episode_replay_buffer.action);
+            vec_rewards.push_back(torch::tensor(
+                episode_replay_buffer.reward, at::TensorOptions().device(curr_device)));
+            vec_done.push_back(torch::tensor(
+                episode_replay_buffer.done ? 1.f : 0.f, at::TensorOptions().device(curr_device)));
+            vec_next_state.push_back(episode_replay_buffer.next_state);
+
+            input_actor_x.push_back(x_t.actor_x_t);
+            input_critic_x.push_back(x_t.critic_x_t);
+
+            output_actor_x.push_back(next_x_t.actor_x_t);
+            output_critic_x.push_back(next_x_t.critic_x_t);
+        }
+
+        train(
+            torch::stack(vec_states), torch::stack(vec_actions),
+            torch::stack(vec_rewards).unsqueeze(1), torch::stack(vec_done).unsqueeze(1),
+            torch::stack(vec_next_state), {torch::cat(input_actor_x), torch::cat(input_critic_x)},
+            {torch::cat(output_actor_x), torch::cat(output_critic_x)});
+    }
+}
+
+void ActorCriticLiquidAgent::train(
+    const torch::Tensor &batched_states, const torch::Tensor &batched_actions,
+    const torch::Tensor &batched_rewards, const torch::Tensor &batched_done,
+    const torch::Tensor &batched_next_state, const liquid_a2c_memory &curr_memory,
+    const liquid_a2c_memory &next_memory) {
+
+    set_eval(false);
+
+    const auto [next_value, next_next_critic_x] =
+        critic->forward(next_memory.critic_x_t.detach(), batched_next_state);
+    const auto [value, next_critic_x] =
+        critic->forward(curr_memory.critic_x_t.detach(), batched_states);
+
+    const auto norm_reward =
+        (batched_rewards - batched_rewards.mean()) / (batched_rewards.std() + 1e-8);
+    const auto target = norm_reward + (1.f - batched_done) * gamma * next_value;
+
+    const auto critic_loss = torch::mse_loss(value, target, at::Reduction::Mean);
+
+    critic_optimizer->zero_grad();
+    critic_loss.backward();
+    critic_optimizer->step();
+
+    const auto [mu, sigma, next_actor_x] =
+        actor->forward(curr_memory.actor_x_t.detach(), batched_states);
+    const auto log_prob =
+        torch::log(truncated_normal_pdf(batched_actions.detach(), mu, sigma, -1.f, 1.f));
+    const auto policy_entropy =
+        truncated_normal_entropy(mu, sigma, -1.f, 1.f)
+        * exponential_decrease(
+            curr_train_step, entropy_steps, entropy_start_factor, entropy_end_factor);
+    const auto policy_loss = log_prob * (target - value).detach().unsqueeze(-1);
+
+    const auto actor_loss = -torch::mean(policy_loss + policy_entropy);
+
+    actor_optimizer->zero_grad();
+    actor_loss.backward();
+    actor_optimizer->step();
+
+    policy_loss_meter.add(-policy_loss.sum(-1).mean().cpu().item().toFloat());
+    entropy_meter.add(-policy_entropy.sum(-1).mean().cpu().item().toFloat());
+    critic_loss_meter.add(critic_loss.cpu().item().toFloat());
+
+    set_eval(true);
+
+    curr_train_step++;
+}
+
+torch::Tensor ActorCriticLiquidAgent::act(const torch::Tensor state, const float reward) {
+
+    const liquid_a2c_memory input_memory{actor->get_x(), critic->get_x()};
+
+    const auto [mu, sigma] = actor->forward(state);
+    auto action = truncated_normal_sample(mu, sigma, -1.f, 1.f);
+    const auto _ = critic->forward(state);
+
+    const liquid_a2c_memory next_memory{actor->get_x(), critic->get_x()};
+
+    if (!replay_buffer.empty()) { replay_buffer.update_last(reward, state, false); }
+    replay_buffer.add({{state, action, 0.f, false, state}, input_memory, next_memory});
+
+    check_train();
+
+    curr_episode_step++;
+    global_curr_step++;
+
+    return action;
+}
+
+void ActorCriticLiquidAgent::done(const torch::Tensor state, const float reward) {
+    replay_buffer.update_last(reward, state, true);
+
+    actor->reset_liquid();
+    critic->reset_liquid();
+
+    episode_steps_meter.add(static_cast<float>(curr_episode_step));
+    curr_episode_step = 0;
+}
+
+void ActorCriticLiquidAgent::save(const std::string &output_folder_path) {
+    const std::filesystem::path path(output_folder_path);
+
+    // actor
+    save_torch(output_folder_path, actor, "actor.th");
+    save_torch(output_folder_path, actor_optimizer, "actor.th");
+
+    // critic
+    save_torch(output_folder_path, critic, "critic.th");
+    save_torch(output_folder_path, critic_optimizer, "critic_optimizer.th");
+}
+
+void ActorCriticLiquidAgent::load(const std::string &input_folder_path) {
+    const std::filesystem::path path(input_folder_path);
+
+    // actor
+    load_torch(input_folder_path, actor, "actor.th");
+    load_torch(input_folder_path, actor_optimizer, "actor_optimizer.th");
+
+    // critic
+    load_torch(input_folder_path, critic, "critic.th");
+    load_torch(input_folder_path, critic_optimizer, "critic_optimizer.th");
+}
+
+std::vector<LossMeter> ActorCriticLiquidAgent::get_metrics() {
+    return {policy_loss_meter, entropy_meter, critic_loss_meter, episode_steps_meter};
+}
+
+void ActorCriticLiquidAgent::to(const torch::DeviceType device) {
+    curr_device = device;
+    actor->to(curr_device);
+    critic->to(curr_device);
+}
+
+void ActorCriticLiquidAgent::set_eval(const bool eval) {
+    actor->train(!eval);
+    critic->train(!eval);
+}
+
+int ActorCriticLiquidAgent::count_parameters() {
+    return count_module_parameters(actor) + count_module_parameters(critic);
 }
