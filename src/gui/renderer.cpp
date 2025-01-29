@@ -312,9 +312,13 @@ void ImGuiRenderer::init_robot() {
 
     builder_camera->set_focus([this]() {
         auto env = loaded_robots[curr_loaded_robot_index];
-        auto [pos, rot, scale] = env->get_member_transform(env->get_root_name());
-        return pos;
+        if (env->get_root_name() != "") {
+            auto [pos, rot, scale] = env->get_member_transform(env->get_root_name());
+            return pos;
+        }
+        return glm::vec3(0.f);
     });
+    builder_camera->reset();
 }
 
 void ImGuiRenderer::opengl_render_robot(
