@@ -285,6 +285,8 @@ RobotBuilderEnvironment::get_member_transform(const std::string &member_name) {
     return decompose_model_matrix(get_member(member_name)->get_item().model_matrix());
 }
 
+std::string RobotBuilderEnvironment::get_root_name() { return root_name; }
+
 /*
  * Environment methods
  */

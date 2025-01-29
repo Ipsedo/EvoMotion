@@ -7,10 +7,11 @@
 #include <iostream>
 
 ImGuiRenderer::ImGuiRenderer(const std::string &title, const int width, const int height)
-    : need_close(false), show_member_window(false), show_construct_tools_window(false),
-      show_training_window(true), show_robot_builder_window(false), loaded_robots(),
-      curr_loaded_robot_index(-1), member_focus(std::nullopt), robot_file_dialog(), drawables(),
-      rng(1234), rd_uni(0.f, 1.f), opengl_render_size(width, height) {
+    : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f), show_member_window(false),
+      show_construct_tools_window(false), show_training_window(true),
+      show_robot_builder_window(false), builder_camera(std::make_shared<ImGuiCamera>()),
+      loaded_robots(), curr_loaded_robot_index(-1), member_focus(std::nullopt), robot_file_dialog(),
+      drawables(), rng(1234), rd_uni(0.f, 1.f), opengl_render_size(width, height) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -69,11 +70,10 @@ ImGuiRenderer::ImGuiRenderer(const std::string &title, const int width, const in
 }
 
 void ImGuiRenderer::draw() {
-    constexpr auto clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
     glfwPollEvents();
 
-    if (curr_loaded_robot_index >= 0) render_opengl_robot();
+    if (curr_loaded_robot_index >= 0 && show_robot_builder_window)
+        opengl_render_robot(loaded_robots[curr_loaded_robot_index], builder_camera);
 
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
         ImGui_ImplGlfw_Sleep(10);
@@ -96,9 +96,7 @@ void ImGuiRenderer::draw() {
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    glClearColor(
-        clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
-        clear_color.w);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -169,6 +167,7 @@ void ImGuiRenderer::imgui_render_toolbar() {
             if (ImGui::MenuItem("Close robot")) {
                 show_robot_builder_window = false;
                 curr_loaded_robot_index = -1;
+                builder_camera->release_focus();
             }
 
             ImGui::EndMenu();
@@ -275,16 +274,18 @@ void ImGuiRenderer::imgui_render_robot_construct() {
         ImGui::SetNextWindowPos(window_pos);
         ImGui::SetNextWindowSize(available_size);
 
-        ImGuiWindowFlags flags =
-            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse
-            | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
-            | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDecoration;
+        ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
+                                 | ImGuiWindowFlags_NoCollapse
+                                 | ImGuiWindowFlags_NoBringToFrontOnFocus
+                                 | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDecoration;
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
         if (ImGui::Begin(robot_construct_message.c_str(), &show_robot_builder_window, flags)) {
+            if (ImGui::IsWindowHovered()) builder_camera->update();
+
             opengl_render_size = ImGui::GetContentRegionAvail();
             ImGui::Image(
                 frame_buffer->get_frame_texture(), opengl_render_size, ImVec2(0, 1), ImVec2(1, 0));
@@ -308,28 +309,35 @@ void ImGuiRenderer::init_robot() {
                                       ->get_drawable();
 
     member_focus = std::nullopt;
+
+    builder_camera->set_focus([this]() {
+        auto env = loaded_robots[curr_loaded_robot_index];
+        auto [pos, rot, scale] = env->get_member_transform(env->get_root_name());
+        return pos;
+    });
 }
 
-void ImGuiRenderer::render_opengl_robot() {
+void ImGuiRenderer::opengl_render_robot(
+    const std::shared_ptr<Environment> &env, const std::shared_ptr<Camera> &camera) {
     frame_buffer->rescale_frame_buffer(opengl_render_size.x, opengl_render_size.y);
 
     frame_buffer->bind();
 
-    glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glViewport(0, 0, opengl_render_size.x, opengl_render_size.y);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const glm::vec3 camera_pos(0, 1, 4);
-    const auto view_matrix = glm::lookAt(camera_pos, glm::vec3(0), glm::vec3(0, 1, 0));
+    const auto view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
+
     const auto projection_matrix = glm::frustum(
         -1.f, 1.f,
         -static_cast<float>(opengl_render_size.y) / static_cast<float>(opengl_render_size.x),
         static_cast<float>(opengl_render_size.y) / static_cast<float>(opengl_render_size.x), 1.f,
         200.f);
 
-    for (const auto &i: loaded_robots[curr_loaded_robot_index]->get_items())
+    for (const auto &i: env->get_items())
         drawables[i.get_name()]->draw(
-            projection_matrix, view_matrix, i.model_matrix(), glm::vec3(0, 20, 0), camera_pos);
+            projection_matrix, view_matrix, i.model_matrix(), glm::vec3(0, 20, 0), camera->pos());
 
     frame_buffer->unbind();
 }

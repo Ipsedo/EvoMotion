@@ -128,6 +128,7 @@ public:
     void load_robot(const std::filesystem::path &input_json_path);
 
     std::string get_robot_name();
+    std::string get_root_name();
     void set_robot_name(const std::string &new_robot_name);
 
     /*

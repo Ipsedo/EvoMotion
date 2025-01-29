@@ -2,8 +2,8 @@
 // Created by samuel on 28/01/25.
 //
 
-#ifndef EVO_MOTION_RENDERER_H
-#define EVO_MOTION_RENDERER_H
+#ifndef EVO_MOTION_GUI_RENDERER_H
+#define EVO_MOTION_GUI_RENDERER_H
 
 #include <optional>
 #include <random>
@@ -21,8 +21,10 @@
 // clang-format on
 
 #include <evo_motion_model/robot/builder.h>
+#include <evo_motion_view/camera.h>
 #include <evo_motion_view/factory.h>
 
+#include "./camera.h"
 #include "./frame_buffer.h"
 #include "./robot_tab.h"
 
@@ -40,11 +42,14 @@ private:
     GLFWwindow *window;
     bool need_close;
 
+    ImVec4 clear_color;
+
     bool show_member_window;
     bool show_construct_tools_window;
     bool show_training_window;
     bool show_robot_builder_window;
 
+    std::shared_ptr<ImGuiCamera> builder_camera;
     std::vector<std::shared_ptr<RobotBuilderEnvironment>> loaded_robots;
     int curr_loaded_robot_index;
     std::optional<std::string> member_focus;
@@ -62,7 +67,8 @@ private:
 
     void init_robot();
 
-    void render_opengl_robot();
+    void opengl_render_robot(
+        const std::shared_ptr<Environment> &env, const std::shared_ptr<Camera> &camera);
 
     void imgui_render_toolbar();
     void imgui_render_construct_tools();
@@ -70,4 +76,4 @@ private:
     void imgui_render_file_dialog();
 };
 
-#endif//EVO_MOTION_RENDERER_H
+#endif//EVO_MOTION_GUI_RENDERER_H
