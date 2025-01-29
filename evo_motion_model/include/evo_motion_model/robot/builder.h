@@ -118,6 +118,9 @@ public:
     bool remove_member(const std::string &member_name);
     bool remove_constraint(const std::string &constraint_name);
 
+    std::tuple<glm::vec3, glm::quat, glm::vec3>
+    get_member_transform(const std::string &member_name);
+
     std::optional<std::string>
     ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
 

@@ -7,10 +7,10 @@
 #include <iostream>
 
 ImGuiRenderer::ImGuiRenderer(const std::string &title, const int width, const int height)
-    : need_close(false), show_construct_tools(false), show_training(true),
-      show_construct_robot(false), loaded_robots(), curr_loaded_robot_index(-1),
-      robot_file_dialog(), drawables(), rng(1234), rd_uni(0.f, 1.f),
-      opengl_render_size(width, height) {
+    : need_close(false), show_member_window(false), show_construct_tools_window(false),
+      show_training_window(true), show_robot_builder_window(false), loaded_robots(),
+      curr_loaded_robot_index(-1), member_focus(std::nullopt), robot_file_dialog(), drawables(),
+      rng(1234), rd_uni(0.f, 1.f), opengl_render_size(width, height) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -85,7 +85,27 @@ void ImGuiRenderer::draw() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // MenuBar
+    // ImGui window definition
+    imgui_render_toolbar();
+    imgui_render_robot_construct();
+    imgui_render_construct_tools();
+    imgui_render_file_dialog();
+
+    // End - render
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(
+        clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
+        clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    glfwSwapBuffers(window);
+}
+
+void ImGuiRenderer::imgui_render_toolbar() {
     if (ImGui::BeginMainMenuBar()) {
 
         if (ImGui::BeginMenu("File")) {
@@ -114,8 +134,8 @@ void ImGuiRenderer::draw() {
                     "robot_" + std::to_string(loaded_robots.size()));
                 loaded_robots.push_back(new_robot);
                 curr_loaded_robot_index = loaded_robots.size() - 1;
-                init_drawables();
-                show_construct_robot = true;
+                init_robot();
+                show_robot_builder_window = true;
             }
 
             if (ImGui::MenuItem("Load robot")) robot_file_dialog.Open();
@@ -126,8 +146,8 @@ void ImGuiRenderer::draw() {
                             loaded_robots[i]->get_robot_name().c_str(), nullptr,
                             curr_loaded_robot_index == i)) {
                         curr_loaded_robot_index = i;
-                        init_drawables();
-                        show_construct_robot = true;
+                        init_robot();
+                        show_robot_builder_window = true;
                     }
                 }
 
@@ -139,13 +159,24 @@ void ImGuiRenderer::draw() {
 
                 ImGui::EndMenu();
             }
-            if (ImGui::MenuItem("Construct tools")) show_construct_tools = true;
+
+            if (ImGui::BeginMenu("Construct")) {
+                if (ImGui::MenuItem("Member settings")) show_member_window = true;
+                if (ImGui::MenuItem("Transform member")) show_construct_tools_window = true;
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::MenuItem("Close robot")) {
+                show_robot_builder_window = false;
+                curr_loaded_robot_index = -1;
+            }
+
             ImGui::EndMenu();
         }
 
         if (ImGui::BeginMenu("Algorithm")) {
             if (ImGui::BeginMenu("Train")) {
-                if (ImGui::MenuItem("training window")) show_training = true;
+                if (ImGui::MenuItem("training window")) show_training_window = true;
                 if (ImGui::MenuItem("on this robot")) { /* TODO run training in new thread */
                 }
                 ImGui::EndMenu();
@@ -166,18 +197,9 @@ void ImGuiRenderer::draw() {
 
         ImGui::EndMainMenuBar();
     }
+}
 
-    if (loaded_robots.size() > 0 && show_construct_robot) {
-        std::string robot_construct_message =
-            "Construct robot \"" + loaded_robots[curr_loaded_robot_index]->get_robot_name() + "\"";
-        if (ImGui::Begin(robot_construct_message.c_str(), &show_construct_robot)) {
-            opengl_render_size = ImGui::GetContentRegionAvail();
-            ImGui::Image(
-                frame_buffer->get_frame_texture(), opengl_render_size, ImVec2(0, 1), ImVec2(1, 0));
-        }
-        ImGui::End();
-    }
-
+void ImGuiRenderer::imgui_render_file_dialog() {
     robot_file_dialog.Display();
 
     if (robot_file_dialog.HasSelected()) {
@@ -188,30 +210,93 @@ void ImGuiRenderer::draw() {
 
         loaded_robots.push_back(robot);
         curr_loaded_robot_index = loaded_robots.size() - 1;
-        init_drawables();
-        show_construct_robot = true;
+        init_robot();
+        show_robot_builder_window = true;
 
         robot_file_dialog.ClearSelected();
     }
-
-    // Demo
-    //if (show_menu) ImGui::ShowDemoWindow(&show_menu);
-
-    // End - render
-    ImGui::Render();
-    int display_w, display_h;
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(
-        clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
-        clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    glfwSwapBuffers(window);
 }
 
-void ImGuiRenderer::init_drawables() {
+void ImGuiRenderer::imgui_render_construct_tools() {
+    if (show_member_window) {
+        if (ImGui::Begin("Construct tools", &show_member_window)) {
+            std::string message = "No focus member";
+
+            glm::vec3 pos(0.f);
+            glm::quat rot(0.f, glm::vec3(0.f));
+            glm::vec3 scale(1.f);
+
+            if (member_focus.has_value()) {
+                message = "Focus on \"" + member_focus.value() + "\" member";
+                const auto [member_pos, member_rot, member_scale] =
+                    loaded_robots[curr_loaded_robot_index]->get_member_transform(
+                        member_focus.value());
+                pos = member_pos;
+                rot = member_rot;
+                scale = member_scale;
+            }
+
+            ImGui::Text("%s", message.c_str());
+
+            ImGui::Separator();
+            ImGui::Text("Position");
+
+            float x_pos = pos.x;
+            if (ImGui::InputFloat("x", &x_pos)) { pos.x = x_pos; }
+            float y_pos = pos.y;
+            if (ImGui::InputFloat("y", &y_pos)) { pos.y = y_pos; }
+            float z_pos = pos.z;
+            if (ImGui::InputFloat("z", &z_pos)) { pos.z = z_pos; }
+
+            ImGui::Separator();
+            ImGui::Text("Rotation");
+
+            ImGui::Separator();
+            ImGui::Text("Scale");
+        }
+        ImGui::End();
+    }
+}
+
+void ImGuiRenderer::imgui_render_robot_construct() {
+    if (loaded_robots.size() > 0 && show_robot_builder_window) {
+        std::string robot_construct_message =
+            "Construct robot \"" + loaded_robots[curr_loaded_robot_index]->get_robot_name() + "\"";
+
+        ImGuiViewport *viewport = ImGui::GetMainViewport();
+        ImVec2 window_pos = viewport->Pos;
+        ImVec2 available_size = viewport->Size;
+
+        float menu_bar_height = ImGui::GetFrameHeight();
+        window_pos.y += menu_bar_height;
+        available_size.y -= menu_bar_height;
+
+        // Create the full-space background window
+        ImGui::SetNextWindowPos(window_pos);
+        ImGui::SetNextWindowSize(available_size);
+
+        ImGuiWindowFlags flags =
+            ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse
+            | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus
+            | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDecoration;
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+        if (ImGui::Begin(robot_construct_message.c_str(), &show_robot_builder_window, flags)) {
+            opengl_render_size = ImGui::GetContentRegionAvail();
+            ImGui::Image(
+                frame_buffer->get_frame_texture(), opengl_render_size, ImVec2(0, 1), ImVec2(1, 0));
+        }
+
+        ImGui::PopStyleVar(3);
+
+        ImGui::End();
+    }
+}
+
+void ImGuiRenderer::init_robot() {
     drawables.clear();
 
     for (const auto &i: loaded_robots[curr_loaded_robot_index]->get_items())
@@ -222,7 +307,7 @@ void ImGuiRenderer::init_drawables() {
                                       glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f), 300.f)
                                       ->get_drawable();
 
-    std::cout << drawables.size() << std::endl;
+    member_focus = std::nullopt;
 }
 
 void ImGuiRenderer::render_opengl_robot() {
@@ -230,7 +315,7 @@ void ImGuiRenderer::render_opengl_robot() {
 
     frame_buffer->bind();
 
-    glClearColor(0.5f, 0.1f, 0.1f, 1.f);
+    glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
     glViewport(0, 0, opengl_render_size.x, opengl_render_size.y);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

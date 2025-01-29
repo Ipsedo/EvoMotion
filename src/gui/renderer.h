@@ -40,12 +40,14 @@ private:
     GLFWwindow *window;
     bool need_close;
 
-    bool show_construct_tools;
-    bool show_training;
-    bool show_construct_robot;
+    bool show_member_window;
+    bool show_construct_tools_window;
+    bool show_training_window;
+    bool show_robot_builder_window;
 
     std::vector<std::shared_ptr<RobotBuilderEnvironment>> loaded_robots;
     int curr_loaded_robot_index;
+    std::optional<std::string> member_focus;
 
     ImGui::FileBrowser robot_file_dialog;
 
@@ -58,9 +60,14 @@ private:
 
     std::unique_ptr<FrameBuffer> frame_buffer;
 
-    void init_drawables();
+    void init_robot();
 
     void render_opengl_robot();
+
+    void imgui_render_toolbar();
+    void imgui_render_construct_tools();
+    void imgui_render_robot_construct();
+    void imgui_render_file_dialog();
 };
 
 #endif//EVO_MOTION_RENDERER_H

@@ -280,6 +280,11 @@ void RobotBuilderEnvironment::set_robot_name(const std::string &new_robot_name) 
     root_name = new_robot_name;
 }
 
+std::tuple<glm::vec3, glm::quat, glm::vec3>
+RobotBuilderEnvironment::get_member_transform(const std::string &member_name) {
+    return decompose_model_matrix(get_member(member_name)->get_item().model_matrix());
+}
+
 /*
  * Environment methods
  */
