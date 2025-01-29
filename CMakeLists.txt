@@ -13,6 +13,22 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_model")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/evo_motion_networks/tests")
 # add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/tests")
 
+# GLM
+find_package(glm REQUIRED)
+
+# GLEW
+find_package(GLEW REQUIRED)
+
+# OpenGL
+set(OpenGL_GL_PREFERENCE "LEGACY")
+find_package(OpenGL REQUIRED)
+
+# GLFW-3
+find_package(glfw3 REQUIRED)
+
+# ImGUI
+find_package(imgui REQUIRED)
+
 # FetchContent -> get libraries from git
 include(FetchContent)
 
@@ -30,6 +46,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(indicators)
 
+# ImGui File browser
+FetchContent_Declare(
+        imgui-file-browser
+        GIT_REPOSITORY https://github.com/AirGuanZ/imgui-filebrowser.git
+)
+FetchContent_MakeAvailable(imgui-file-browser)
+
 # evo_motion part
 # Get all source files
 file(GLOB_RECURSE SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
@@ -46,7 +69,14 @@ target_link_libraries(
         evo_motion
         argparse
         indicators
+        ${GLM_LIBRARIES}
+        OpenGL
+        GLEW
+        glfw
+        imgui
         evo_motion_view
         evo_motion_model
         evo_motion_networks
 )
+
+target_include_directories(evo_motion PRIVATE "${FETCHCONTENT_BASE_DIR}/imgui-file-browser-src")

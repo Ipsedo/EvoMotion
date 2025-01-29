@@ -22,9 +22,6 @@ find_package(OpenGL REQUIRED)
 # GLFW-3
 find_package(glfw3 REQUIRED)
 
-# ImGUI
-find_package(imgui REQUIRED)
-
 # evo_motion part
 # Get all source files
 file(GLOB_RECURSE SRC "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
@@ -41,7 +38,6 @@ target_link_libraries(
         OpenGL
         GLEW
         glfw
-        imgui
 )
 
 set(EVO_MOTION_VIEW_LIBRARIES evo_motion_view PARENT_SCOPE)

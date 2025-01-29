@@ -21,7 +21,7 @@
  * Parameter Member
  */
 
-class BuilderMember : public Member {
+class BuilderMember : public Member, public std::enable_shared_from_this<BuilderMember> {
 public:
     BuilderMember(
         const std::string &name, ShapeKind shape_kind, const glm::vec3 &center_pos,
@@ -31,11 +31,11 @@ public:
     explicit BuilderMember(const std::shared_ptr<AbstractDeserializer> &deserializer);
 
     void update_item(
-        std::optional<glm::vec3> new_pos, std::optional<glm::quat> new_rot,
-        std::optional<glm::vec3> new_scale, std::optional<float> new_friction,
-        std::optional<bool> new_ignore_collision);
-
-    void transform_item(std::optional<glm::vec3> new_pos, std::optional<glm::quat> new_rot);
+        std::optional<glm::vec3> new_pos = std::nullopt,
+        std::optional<glm::quat> new_rot = std::nullopt,
+        std::optional<glm::vec3> new_scale = std::nullopt,
+        std::optional<float> new_friction = std::nullopt,
+        std::optional<bool> new_ignore_collision = std::nullopt);
 };
 
 /*
@@ -99,7 +99,7 @@ public:
 
 class RobotBuilderEnvironment : public Environment {
 public:
-    RobotBuilderEnvironment();
+    RobotBuilderEnvironment(const std::string &robot_name);
 
     bool set_root(const std::string &member_name);
     bool add_member(
@@ -115,10 +115,17 @@ public:
         const std::string &constraint_name, const std::string &parent_name,
         const std::string &child_name, const glm::vec3 &absolute_fixed_point);
 
+    bool remove_member(const std::string &member_name);
     bool remove_constraint(const std::string &constraint_name);
 
-    void save_robot(const std::filesystem::path &output_json_path, const std::string &robot_name);
+    std::optional<std::string>
+    ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
+
+    void save_robot(const std::filesystem::path &output_json_path);
     void load_robot(const std::filesystem::path &input_json_path);
+
+    std::string get_robot_name();
+    void set_robot_name(const std::string &new_robot_name);
 
     /*
      * Environment
@@ -135,6 +142,7 @@ protected:
     void reset_engine() override;
 
 private:
+    std::string robot_name;
     std::string root_name;
 
     std::map<std::string, std::vector<std::tuple<std::string, std::string>>> skeleton_graph;

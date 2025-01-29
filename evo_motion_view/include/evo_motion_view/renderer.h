@@ -59,20 +59,4 @@ private:
     GLFWwindow *window;
 };
 
-class ImGuiRenderer {
-public:
-    ImGuiRenderer(const std::string &title, int width, int height);
-
-    void draw();
-
-    bool is_close() const;
-
-    virtual ~ImGuiRenderer();
-
-private:
-    GLFWwindow *window;
-    bool show_menu;
-    bool need_close;
-};
-
 #endif//EVO_MOTION_RENDERER_H
