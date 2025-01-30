@@ -46,8 +46,8 @@ TEST_P(ParamActorCriticAgent, TestSoftActorCritic) {
     const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = SoftActorCriticAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 2, 1e-3f, 0.9f, 0.005f, 128,
-        train_every);
+        1234, {state_space}, {action_space}, hidden_size, hidden_size, batch_size, 2, 1e-3f, 0.9f,
+        0.005f, 128, train_every);
 
     for (int i = 0; i < 5; i++) {
         for (int j = 0; j < batch_size * 2; j++) {
@@ -206,8 +206,8 @@ TEST_P(ParamActorCriticAgent, TestCrossQAgent) {
     const auto [state_space, action_space, hidden_size, batch_size, train_every] = GetParam();
 
     auto agent = CrossQAgent(
-        1234, {state_space}, {action_space}, hidden_size, batch_size, 2, 1e-3f, 0.9f, 128,
-        train_every);
+        1234, {state_space}, {action_space}, hidden_size, hidden_size, batch_size, 2, 1e-3f, 0.9f,
+        128, train_every);
 
     for (int j = 0; j < 5; j++) {
         for (int i = 0; i < batch_size * 2; i++) {

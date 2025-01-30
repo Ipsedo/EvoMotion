@@ -20,9 +20,11 @@ torch::Tensor BatchRenormalization::forward(const torch::Tensor &x) {
         const auto batch_mean = x.mean(0);
         const auto batch_std = x.std(0, false) + epsilon;
 
-        const auto r = torch::clamp(batch_std.detach() / running_std, 1.0 / r_max(), r_max());
+        const auto r =
+            torch::clamp(batch_std.detach() / running_std, 1.0 / r_max(), r_max()).detach();
         const auto d =
-            torch::clamp((batch_mean.detach() - running_mean) / running_std, -d_max(), d_max());
+            torch::clamp((batch_mean.detach() - running_mean) / running_std, -d_max(), d_max())
+                .detach();
 
         out = (x - batch_mean) / batch_std * r + d;
 
