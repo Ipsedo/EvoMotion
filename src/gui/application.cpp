@@ -77,7 +77,9 @@ void ImGuiApplication::draw() {
         if (gl_window->is_active())
             gl_window->draw_opengl(opengl_render_size.x, opengl_render_size.y);
 
-    std::for_each(opengl_windows.begin(), opengl_windows.end(), [this](const auto &gl_window) {
+    std::ranges::for_each(
+        opengl_windows
+        , [this](const auto &gl_window) {
         if (auto env = std::dynamic_pointer_cast<RobotBuilderEnvironment>(gl_window->get_env());
             gl_window->is_active() && env) {
             if (curr_robot_builder_env.has_value()
@@ -135,17 +137,8 @@ void ImGuiApplication::imgui_render_toolbar() {
         }
 
         if (ImGui::BeginMenu("Robots")) {
-            std::string message;
-            if (curr_robot_builder_env.has_value()) {
-                message =
-                    "Robot \"" + curr_robot_builder_env.value()->get_robot_name() + "\" selected";
-            } else {
-                message = "No robot selected";
-            }
-
-            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 200, 255));
-            ImGui::Text("%s", message.c_str());
-            ImGui::PopStyleColor();
+            const std::string message = curr_robot_builder_env.has_value() ? "Robot \"" + curr_robot_builder_env.value()->get_robot_name() + "\" selected" : "No robot selected";
+            ImGui::MenuItem(message.c_str(), nullptr, false, false);
 
             ImGui::Separator();
 
@@ -167,7 +160,7 @@ void ImGuiApplication::imgui_render_toolbar() {
             if (ImGui::BeginMenu("Show loaded robots")) {
                 bool empty = true;
                 for (const auto &gl_window: opengl_windows) {
-                    if (auto env = std::dynamic_pointer_cast<RobotBuilderEnvironment>(
+                    if (const auto env = std::dynamic_pointer_cast<RobotBuilderEnvironment>(
                             gl_window->get_env());
                         env) {
                         ImGui::MenuItem(
@@ -185,7 +178,14 @@ void ImGuiApplication::imgui_render_toolbar() {
                 ImGui::EndMenu();
             }
 
+
+
             if (ImGui::BeginMenu("Construct")) {
+                const std::string member_message = member_focus.has_value() ? "Member \"" + member_focus.value() + "\" selected" : "No member selected";
+                ImGui::MenuItem(member_message.c_str(), nullptr, false, false);
+
+                ImGui::Separator();
+
                 if (ImGui::MenuItem(
                         "Member settings", nullptr, false, curr_robot_builder_env.has_value()))
                     show_member_window = true;
