@@ -10,7 +10,8 @@ ImGuiRenderer::ImGuiRenderer(const std::string &title, const int width, const in
     : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f), show_member_window(false),
       show_construct_tools_window(false), show_training_window(true),
       curr_robot_builder_env(std::nullopt), opengl_windows(), robot_file_dialog(), rng(1234),
-      rd_uni(0.f, 1.f), opengl_render_size(static_cast<float>(width), static_cast<float>(height)), popup_already_opened_robot("Popup_robot_already_opened") {
+      rd_uni(0.f, 1.f), opengl_render_size(static_cast<float>(width), static_cast<float>(height)),
+      popup_already_opened_robot("Popup_robot_already_opened") {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -97,7 +98,9 @@ void ImGuiRenderer::draw() {
     imgui_render_construct_tools();
     imgui_render_file_dialog();
 
-    if (ImGui::BeginPopupModal(popup_already_opened_robot.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar)) {
+    if (ImGui::BeginPopupModal(
+            popup_already_opened_robot.c_str(), NULL,
+            ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar)) {
         ImGui::Text("Robot already opened");
 
         if (ImGui::Button("OK")) ImGui::CloseCurrentPopup();
@@ -160,7 +163,8 @@ void ImGuiRenderer::imgui_render_toolbar() {
                             gl_window->get_env());
                         env) {
                         if (ImGui::MenuItem(
-                                env->get_robot_name().c_str(), nullptr, gl_window->is_active(), false)) {
+                                env->get_robot_name().c_str(), nullptr, gl_window->is_active(),
+                                false)) {
                             curr_robot_builder_env = env;
                         }
                         empty = false;
