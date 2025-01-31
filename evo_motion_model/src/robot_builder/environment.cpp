@@ -124,9 +124,10 @@ bool RobotBuilderEnvironment::remove_member(const std::string &member_name) {
 
     for (const auto &constraint_name: constraints_to_remove) remove_constraint(constraint_name);
 
-    std::erase_if(members, [member_name](const auto &m) {
+    std::erase_if(members, [member_name, this](const auto &m) {
         if (m->get_name() == member_name) {
             delete (std::string *) m->get_item().get_body()->getUserPointer();
+            m_world->removeRigidBody(m->get_item().get_body());
             delete m->get_item().get_body();
             return true;
         }
@@ -149,8 +150,9 @@ bool RobotBuilderEnvironment::remove_constraint(const std::string &constraint_na
         skeleton_graph[member] = children;
     }
 
-    std::erase_if(constraints, [constraint_name](const auto &c) {
+    std::erase_if(constraints, [constraint_name, this](const auto &c) {
         if (c->get_name() == constraint_name) {
+            m_world->removeConstraint(c->get_constraint());
             delete c->get_constraint();
             return true;
         }
@@ -212,8 +214,8 @@ std::optional<std::string> RobotBuilderEnvironment::ray_cast_member(
     m_world->rayTest(from_bullet, to_bullet, callback);
 
     if (callback.hasHit())
-        return std::string(
-            *static_cast<std::string *>(callback.m_collisionObject->getUserPointer()));
+        if (const auto user_ptr = callback.m_collisionObject->getUserPointer(); user_ptr)
+            return std::string(*static_cast<std::string *>(user_ptr));
 
     return std::nullopt;
 }
@@ -244,9 +246,10 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
 
     std::transform(
         json_members_deserializer.begin(), json_members_deserializer.end(),
-        std::back_inserter(members), [](const auto &s) -> std::shared_ptr<BuilderMember> {
+        std::back_inserter(members), [this](const auto &s) -> std::shared_ptr<BuilderMember> {
             const auto m = std::make_shared<BuilderMember>(s);
             m->get_item().get_body()->setUserPointer(new std::string(m->get_name()));
+            add_item(m->get_item());
             return m;
         });
 
@@ -264,14 +267,18 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
             else
                 throw std::runtime_error("Unknown constraint type \"" + s->read_str("type") + "\"");
 
+            m_world->addConstraint(c->get_constraint());
             return c;
         });
 
     std::transform(
         json_muscles_deserializer.begin(), json_muscles_deserializer.end(),
         std::back_inserter(muscles), [this](const auto &s) -> std::shared_ptr<BuilderMuscle> {
-            return std::make_shared<BuilderMuscle>(
-                s, [this](const auto &n) { return get_member(n); });
+            const auto m =
+                std::make_shared<BuilderMuscle>(s, [this](const auto &n) { return get_member(n); });
+            for (const auto &i: m->get_items()) add_item(i);
+            for (const auto &c: m->get_constraints()) m_world->addConstraint(c);
+            return m;
         });
 }
 

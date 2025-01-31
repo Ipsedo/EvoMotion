@@ -13,11 +13,15 @@
 #include <evo_motion_view/drawable.h>
 
 #include "./camera.h"
+#include "./event.h"
 #include "./frame_buffer.h"
 
 class OpenGlWindow final {
 public:
-    OpenGlWindow(const std::string &bar_item_name, const std::shared_ptr<Environment> &env);
+    OpenGlWindow(
+        const std::string &bar_item_name, const std::shared_ptr<Environment> &env,
+        const std::optional<std::function<void(glm::vec3, glm::vec3)>> &on_left_click =
+            std::nullopt);
 
     void draw_opengl(float width, float height);
     bool draw_imgui_image();
@@ -38,7 +42,10 @@ private:
 
     bool active;
 
-    std::shared_ptr<ImGuiCamera> camera;
+    std::unique_ptr<ImGuiCamera> camera;
+
+    std::unique_ptr<MouseEvent> mouse_event;
+    std::function<void(glm::vec3, glm::vec3)> on_left_click;
 };
 
 #endif//EVO_MOTION_OPENGL_WINDOW_H

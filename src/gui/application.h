@@ -2,8 +2,8 @@
 // Created by samuel on 28/01/25.
 //
 
-#ifndef EVO_MOTION_GUI_RENDERER_H
-#define EVO_MOTION_GUI_RENDERER_H
+#ifndef EVO_MOTION_APPLICATION_H
+#define EVO_MOTION_APPLICATION_H
 
 #include <optional>
 #include <random>
@@ -29,15 +29,15 @@
 #include "./opengl_window.h"
 #include "./robot_tab.h"
 
-class ImGuiRenderer {
+class ImGuiApplication {
 public:
-    ImGuiRenderer(const std::string &title, int width, int height);
+    ImGuiApplication(const std::string &title, int width, int height);
 
     void draw();
 
     bool is_close() const;
 
-    virtual ~ImGuiRenderer();
+    virtual ~ImGuiApplication();
 
 private:
     GLFWwindow *window;
@@ -50,6 +50,7 @@ private:
     bool show_training_window;
 
     std::optional<std::shared_ptr<RobotBuilderEnvironment>> curr_robot_builder_env;
+    std::optional<std::string> member_focus;
 
     std::vector<std::shared_ptr<OpenGlWindow>> opengl_windows;
 
@@ -70,4 +71,4 @@ private:
     void imgui_render_file_dialog();
 };
 
-#endif//EVO_MOTION_GUI_RENDERER_H
+#endif//EVO_MOTION_APPLICATION_H

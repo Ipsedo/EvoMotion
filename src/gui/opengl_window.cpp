@@ -12,17 +12,22 @@
 #include <evo_motion_view/factory.h>
 
 OpenGlWindow::OpenGlWindow(
-    const std::string &bar_item_name, const std::shared_ptr<Environment> &env)
+    const std::string &bar_item_name, const std::shared_ptr<Environment> &env,
+    const std::optional<std::function<void(glm::vec3, glm::vec3)>> &on_left_click)
     : name(bar_item_name), frame_buffer(std::make_unique<FrameBuffer>(1920, 1080)), drawables(),
       env(env), rng(1234), rd_uni(0.f, 1.f), active(true),
-      camera(std::make_shared<ImGuiCamera>([env]() {
+      camera(std::make_unique<ImGuiCamera>([env]() {
           const auto track_item = env->get_camera_track_item();
           if (track_item.has_value()) {
               const auto pos = track_item.value().get_body()->getCenterOfMassPosition();
               return glm::vec3(pos.x(), pos.y(), pos.z());
           }
           return glm::vec3(0.f);
-      })) {}
+      })),
+      mouse_event(std::make_unique<MouseEvent>(1920, 1080)),
+      on_left_click(
+          on_left_click.has_value() ? on_left_click.value()
+                                    : [](const glm::vec3 &a, const glm::vec3 &b) {}) {}
 
 void OpenGlWindow::draw_opengl(float width, float height) {
     frame_buffer->rescale_frame_buffer(width, height);
@@ -35,6 +40,8 @@ void OpenGlWindow::draw_opengl(float width, float height) {
 
     const auto projection_matrix =
         glm::frustum(-1.f, 1.f, -height / width, height / width, 1.f, 200.f);
+
+    mouse_event->update(width, height, view_matrix, projection_matrix);
 
     for (const auto &i: env->get_items()) {
         if (drawables.find(i.get_name()) == drawables.end()) {
@@ -74,7 +81,16 @@ bool OpenGlWindow::draw_imgui_image() {
     bool opened = true;
 
     if (ImGui::BeginTabItem(name.c_str(), &opened)) {
-        if (ImGui::IsWindowHovered()) camera->update();
+        if (ImGui::IsWindowHovered()) {
+            camera->update();
+
+            const auto ray_coords = mouse_event->get_scene_absolute_click_pos(
+                ImGui::GetCursorPosX(), ImGui::GetCursorPosX());
+            if (ray_coords.has_value()) {
+                const auto &[near, far] = ray_coords.value();
+                on_left_click(near, far);
+            }
+        }
 
         ImGui::Image(
             frame_buffer->get_frame_texture(), ImGui::GetContentRegionAvail(), ImVec2(0, 1),

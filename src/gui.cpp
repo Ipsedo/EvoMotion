@@ -3,7 +3,7 @@
 //
 
 #include "./_convert.h"
-#include "./gui/renderer.h"
+#include "./gui/application.h"
 #include "./run.h"
 
 void gui() {
@@ -19,7 +19,7 @@ void gui() {
         "spider");
     return;*/
 
-    ImGuiRenderer renderer("evo_motion", 1920, 1080);
+    ImGuiApplication renderer("evo_motion", 1920, 1080);
 
     while (!renderer.is_close()) {
         auto before = std::chrono::system_clock::now();
