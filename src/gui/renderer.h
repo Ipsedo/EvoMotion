@@ -26,6 +26,7 @@
 
 #include "./camera.h"
 #include "./frame_buffer.h"
+#include "./opengl_window.h"
 #include "./robot_tab.h"
 
 class ImGuiRenderer {
@@ -47,16 +48,12 @@ private:
     bool show_member_window;
     bool show_construct_tools_window;
     bool show_training_window;
-    bool show_robot_builder_window;
 
-    std::shared_ptr<ImGuiCamera> builder_camera;
-    std::vector<std::shared_ptr<RobotBuilderEnvironment>> loaded_robots;
-    int curr_loaded_robot_index;
-    std::optional<std::string> member_focus;
+    std::optional<std::shared_ptr<RobotBuilderEnvironment>> curr_robot_builder_env;
+
+    std::vector<std::shared_ptr<OpenGlWindow>> opengl_windows;
 
     ImGui::FileBrowser robot_file_dialog;
-
-    std::map<std::string, std::shared_ptr<Drawable>> drawables;
 
     std::mt19937 rng;
     std::uniform_real_distribution<float> rd_uni;
@@ -65,14 +62,11 @@ private:
 
     std::unique_ptr<FrameBuffer> frame_buffer;
 
-    void init_robot();
-
-    void opengl_render_robot(
-        const std::shared_ptr<Environment> &env, const std::shared_ptr<Camera> &camera);
+    std::string popup_already_opened_robot;
 
     void imgui_render_toolbar();
     void imgui_render_construct_tools();
-    void imgui_render_robot_construct();
+    void imgui_render_opengl();
     void imgui_render_file_dialog();
 };
 

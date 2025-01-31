@@ -8,14 +8,9 @@
 
 #include <imgui.h>
 
-ImGuiCamera::ImGuiCamera()
+ImGuiCamera::ImGuiCamera(const std::function<glm::vec3()> &get_object_center)
     : in_action(false), last_x(0), last_y(0), factor(1e-2f), vertical_angle(M_PI / 4.f),
-      horizontal_angle(0.f), distance(4.f), get_item_pos(std::nullopt) {}
-
-void ImGuiCamera::set_focus(const std::function<glm::vec3()> &new_get_item_pos) {
-    get_item_pos = new_get_item_pos;
-}
-void ImGuiCamera::release_focus() { get_item_pos = std::nullopt; }
+      horizontal_angle(0.f), distance(4.f), get_item_pos(get_object_center) {}
 
 void ImGuiCamera::update() {
     if (ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
@@ -26,12 +21,12 @@ void ImGuiCamera::update() {
             in_action = true;
         }
 
-        int delta_x = mouse_pos.x - last_x;
-        int delta_y = mouse_pos.y - last_y;
+        float delta_x = mouse_pos.x - last_x;
+        float delta_y = mouse_pos.y - last_y;
 
-        horizontal_angle += static_cast<float>(delta_x) * factor;
+        horizontal_angle += delta_x * factor;
 
-        vertical_angle -= static_cast<float>(delta_y) * factor;
+        vertical_angle -= delta_y * factor;
         vertical_angle = std::max(static_cast<float>(M_PI) / 6.f, vertical_angle);
         vertical_angle = std::min(2.f * static_cast<float>(M_PI) / 3.f, vertical_angle);
 
@@ -56,12 +51,9 @@ glm::vec3 ImGuiCamera::pos() {
     return relative_pos * distance + item_pos;
 }
 
-glm::vec3 ImGuiCamera::look() {
-    if (get_item_pos.has_value()) return get_item_pos.value()();
-    return glm::vec3(0.f);
-}
+glm::vec3 ImGuiCamera::look() { return get_item_pos(); }
 
-glm::vec3 ImGuiCamera::up() { return glm::vec3(0, 1, 0); }
+glm::vec3 ImGuiCamera::up() { return {0, 1, 0}; }
 
 void ImGuiCamera::step(float delta) {}
 

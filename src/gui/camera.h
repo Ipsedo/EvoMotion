@@ -12,10 +12,8 @@
 
 class ImGuiCamera : public Camera {
 public:
-    ImGuiCamera();
+    ImGuiCamera(const std::function<glm::vec3()> &get_object_center);
 
-    void set_focus(const std::function<glm::vec3()> &get_object_center);
-    void release_focus();
     void update();
 
     glm::vec3 pos() override;
@@ -26,8 +24,8 @@ public:
 
 private:
     bool in_action;
-    int last_x;
-    int last_y;
+    float last_x;
+    float last_y;
 
     float factor;
 
@@ -35,7 +33,7 @@ private:
     float horizontal_angle;
     float distance;
 
-    std::optional<std::function<glm::vec3()>> get_item_pos;
+    std::function<glm::vec3()> get_item_pos;
 };
 
 #endif//EVO_MOTION_GUI_CAMERA_H
