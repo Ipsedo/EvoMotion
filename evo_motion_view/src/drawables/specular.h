@@ -5,6 +5,7 @@
 #ifndef EVO_MOTION_SPECULAR_H
 #define EVO_MOTION_SPECULAR_H
 
+#include <functional>
 #include <optional>
 #include <vector>
 
