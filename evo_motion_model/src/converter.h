@@ -55,6 +55,6 @@ glm::quat bullet_to_glm(btQuaternion q);
  */
 
 std::string float_to_binary_string(float f);
-float binary_string_to_float(const std::string& s);
+float binary_string_to_float(const std::string &s);
 
 #endif//EVO_MOTION_CONVERTER_H

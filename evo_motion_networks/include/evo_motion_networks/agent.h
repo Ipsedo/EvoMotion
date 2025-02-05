@@ -47,8 +47,7 @@ protected:
     Value get_value(const std::string &key);
 
     template<typename Value>
-    Value
-    generic_get_value(
+    Value generic_get_value(
         const std::function<Value(const std::string &)> &converter, const std::string &key);
 
 private:

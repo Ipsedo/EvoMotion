@@ -127,7 +127,7 @@ std::string float_to_binary_string(float f) {
     return std::bitset<32>(data.bits).to_string();
 }
 
-float binary_string_to_float(const std::string& s) {
+float binary_string_to_float(const std::string &s) {
     union {
         uint32_t bits;
         float output;

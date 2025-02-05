@@ -108,8 +108,10 @@ public:
 
     bool update_member(
         const std::string &member_name, std::optional<glm::vec3> new_pos = std::nullopt,
-        const std::optional<glm::quat> &new_rot = std::nullopt, std::optional<glm::vec3> new_scale = std::nullopt,
-        std::optional<float> new_friction = std::nullopt, std::optional<bool> new_ignore_collision = std::nullopt);
+        const std::optional<glm::quat> &new_rot = std::nullopt,
+        std::optional<glm::vec3> new_scale = std::nullopt,
+        std::optional<float> new_friction = std::nullopt,
+        std::optional<bool> new_ignore_collision = std::nullopt);
 
     bool attach_fixed_constraint(
         const std::string &constraint_name, const std::string &parent_name,

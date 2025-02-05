@@ -49,17 +49,15 @@ bool RobotBuilderEnvironment::update_member(
 
         const auto parent_member = get_member(member_name);
 
-        glm::mat4 old_member_model_mat =
-            parent_member->get_item().model_matrix_without_scale();
+        glm::mat4 old_member_model_mat = parent_member->get_item().model_matrix_without_scale();
 
         parent_member->update_item(new_pos, new_rot, new_scale, new_friction, new_ignore_collision);
         updated_members.insert(member_name);
 
-        glm::mat4 new_member_model_mat =
-            parent_member->get_item().model_matrix_without_scale();
+        glm::mat4 new_member_model_mat = parent_member->get_item().model_matrix_without_scale();
 
         std::queue<std::tuple<glm::mat4, glm::mat4, std::string>> queue;
-        for (const auto& [_, m_n]: skeleton_graph[member_name])
+        for (const auto &[_, m_n]: skeleton_graph[member_name])
             queue.emplace(old_member_model_mat, new_member_model_mat, m_n);
 
         while (!queue.empty()) {
@@ -277,8 +275,10 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
 
             m_world->addConstraint(c->get_constraint());
 
-            skeleton_graph[c->get_parent()->get_name()].emplace_back(c->get_name(), c->get_child()->get_name());
-            skeleton_graph[c->get_child()->get_name()].emplace_back(c->get_name(), c->get_parent()->get_name());
+            skeleton_graph[c->get_parent()->get_name()].emplace_back(
+                c->get_name(), c->get_child()->get_name());
+            skeleton_graph[c->get_child()->get_name()].emplace_back(
+                c->get_name(), c->get_parent()->get_name());
 
             return c;
         });

@@ -7,8 +7,9 @@
 #include <evo_motion_networks/saver.h>
 
 CrossQAgent::CrossQAgent(
-    const int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int actor_hidden_size, int critic_hidden_size, const int batch_size, const int epoch, const float lr, const float gamma,
+    const int seed, const std::vector<int64_t> &state_space,
+    const std::vector<int64_t> &action_space, int actor_hidden_size, int critic_hidden_size,
+    const int batch_size, const int epoch, const float lr, const float gamma,
     const int replay_buffer_size, const int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, actor_hidden_size)),
       critic_1(

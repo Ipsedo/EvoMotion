@@ -5,7 +5,8 @@
 #include <evo_motion_networks/networks/norm.h>
 
 BatchRenormalization::BatchRenormalization(
-    int num_features, const float epsilon, const float momentum, const bool affine, const int warmup_steps)
+    int num_features, const float epsilon, const float momentum, const bool affine,
+    const int warmup_steps)
     : running_mean(register_buffer("running_mean", torch::zeros({num_features}))),
       running_std(register_buffer("running_std", torch::ones({num_features}))),
       weight(register_parameter("weight", torch::ones({num_features}))),
@@ -23,7 +24,8 @@ torch::Tensor BatchRenormalization::forward(const torch::Tensor &x) {
         const auto r =
             torch::clamp(batch_std.detach() / running_std, 1.0 / r_max(), r_max()).detach();
         const auto d =
-            torch::clamp((batch_mean.detach() - running_mean) / (running_std + epsilon), -d_max(), d_max())
+            torch::clamp(
+                (batch_mean.detach() - running_mean) / (running_std + epsilon), -d_max(), d_max())
                 .detach();
 
         out = (x - batch_mean) / batch_std * r + d;

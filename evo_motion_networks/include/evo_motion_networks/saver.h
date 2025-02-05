@@ -11,7 +11,8 @@
 #include <torch/torch.h>
 
 template<typename T>
-void save_torch(const std::string &output_folder_path, const T &to_save, const std::string &file_name) {
+void save_torch(
+    const std::string &output_folder_path, const T &to_save, const std::string &file_name) {
     const std::filesystem::path path(output_folder_path);
 
     if (!std::filesystem::exists(path))
@@ -24,7 +25,8 @@ void save_torch(const std::string &output_folder_path, const T &to_save, const s
 }
 
 template<typename T>
-void load_torch(const std::string &input_folder_path, const T &to_fill, const std::string &file_name) {
+void load_torch(
+    const std::string &input_folder_path, const T &to_fill, const std::string &file_name) {
     const std::filesystem::path path(input_folder_path);
     const auto file = path / file_name;
 
