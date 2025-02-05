@@ -10,10 +10,10 @@ public:
     FrameBuffer(float width, float height);
     virtual ~FrameBuffer();
 
-    unsigned int get_frame_texture();
-    void rescale_frame_buffer(float width, float height);
+    unsigned int get_frame_texture() const;
+    void rescale_frame_buffer(float width, float height) const;
     void bind() const;
-    void unbind() const;
+    static void unbind();
 
 private:
     unsigned int fbo;

@@ -29,10 +29,13 @@ void BuilderMember::update_item(
     const auto model_matrix = translate * rotation;
 
     get_item().get_body()->setWorldTransform(glm_to_bullet(model_matrix));
+    get_item().get_body()->getMotionState()->setWorldTransform(glm_to_bullet(model_matrix));
 
-    if (new_scale.has_value())
-        get_item().get_body()->getCollisionShape()->setLocalScaling(
-            glm_to_bullet(new_scale.value()));
+    if (new_scale.has_value()) {
+        const auto shape = get_item().get_body()->getCollisionShape();
+        shape->setLocalScaling(glm_to_bullet(new_scale.value()));
+        get_item().get_body()->setCollisionShape(shape);
+    }
 
     if (new_friction.has_value()) get_item().get_body()->setFriction(new_friction.value());
 

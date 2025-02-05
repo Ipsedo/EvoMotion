@@ -10,8 +10,10 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
     : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f), show_member_window(false),
       show_construct_tools_window(false), show_training_window(true),
       curr_robot_builder_env(std::nullopt), member_focus(std::nullopt), opengl_windows(),
-      robot_file_dialog(), rng(1234), rd_uni(0.f, 1.f),
-      opengl_render_size(static_cast<float>(width), static_cast<float>(height)),
+      robot_file_dialog(), rng(std::chrono::duration_cast<std::chrono::microseconds>(
+                                   std::chrono::system_clock::now().time_since_epoch())
+                                   .count()),
+      rd_uni(0.f, 1.f), opengl_render_size(static_cast<float>(width), static_cast<float>(height)),
       popup_already_opened_robot("Popup_robot_already_opened") {
 
     if (!glfwInit()) {
@@ -77,9 +79,7 @@ void ImGuiApplication::draw() {
         if (gl_window->is_active())
             gl_window->draw_opengl(opengl_render_size.x, opengl_render_size.y);
 
-    std::ranges::for_each(
-        opengl_windows
-        , [this](const auto &gl_window) {
+    std::ranges::for_each(opengl_windows, [this](const auto &gl_window) {
         if (auto env = std::dynamic_pointer_cast<RobotBuilderEnvironment>(gl_window->get_env());
             gl_window->is_active() && env) {
             if (curr_robot_builder_env.has_value()
@@ -137,10 +137,6 @@ void ImGuiApplication::imgui_render_toolbar() {
         }
 
         if (ImGui::BeginMenu("Robots")) {
-            const std::string message = curr_robot_builder_env.has_value() ? "Robot \"" + curr_robot_builder_env.value()->get_robot_name() + "\" selected" : "No robot selected";
-            ImGui::MenuItem(message.c_str(), nullptr, false, false);
-
-            ImGui::Separator();
 
             if (ImGui::MenuItem("New robot")) {
 
@@ -157,7 +153,7 @@ void ImGuiApplication::imgui_render_toolbar() {
 
             if (ImGui::MenuItem("Load robot")) robot_file_dialog.Open();
 
-            if (ImGui::BeginMenu("Show loaded robots")) {
+            if (ImGui::BeginMenu("Loaded robots")) {
                 bool empty = true;
                 for (const auto &gl_window: opengl_windows) {
                     if (const auto env = std::dynamic_pointer_cast<RobotBuilderEnvironment>(
@@ -178,22 +174,30 @@ void ImGuiApplication::imgui_render_toolbar() {
                 ImGui::EndMenu();
             }
 
+            if (ImGui::BeginMenu("Robot information")) {
+                const std::string message =
+                    curr_robot_builder_env.has_value()
+                        ? "- Robot \"" + curr_robot_builder_env.value()->get_robot_name()
+                              + "\" selected."
+                        : "- No robot selected.";
+                ImGui::MenuItem(message.c_str(), nullptr, false, false);
 
-
-            if (ImGui::BeginMenu("Construct")) {
-                const std::string member_message = member_focus.has_value() ? "Member \"" + member_focus.value() + "\" selected" : "No member selected";
+                const std::string member_message =
+                    member_focus.has_value() ? "- Member \"" + member_focus.value() + "\" selected."
+                                             : "- No member selected.";
                 ImGui::MenuItem(member_message.c_str(), nullptr, false, false);
 
-                ImGui::Separator();
-
-                if (ImGui::MenuItem(
-                        "Member settings", nullptr, false, curr_robot_builder_env.has_value()))
-                    show_member_window = true;
-                if (ImGui::MenuItem(
-                        "Transform member", nullptr, false, curr_robot_builder_env.has_value()))
-                    show_construct_tools_window = true;
                 ImGui::EndMenu();
             }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem(
+                    "Member settings", nullptr, false, curr_robot_builder_env.has_value()))
+                show_member_window = true;
+            if (ImGui::MenuItem(
+                    "Transform member", nullptr, false, curr_robot_builder_env.has_value()))
+                show_construct_tools_window = true;
 
             ImGui::EndMenu();
         }
@@ -264,36 +268,46 @@ void ImGuiApplication::imgui_render_construct_tools() {
         if (ImGui::Begin("Construct tools", &show_member_window)) {
             std::string message = "No focus member";
 
-            glm::vec3 pos(0.f);
-            glm::quat rot(0.f, glm::vec3(0.f));
-            glm::vec3 scale(1.f);
-
             if (curr_robot_builder_env.has_value() && member_focus.has_value()) {
-                message = "Focus on \"" + member_focus.value() + "\" member";
-                const auto [member_pos, member_rot, member_scale] =
+                ImGui::Text("Focus on \"%s\" member", member_focus.value().c_str());
+
+                auto [member_pos, member_rot, member_scale] =
                     curr_robot_builder_env.value()->get_member_transform(member_focus.value());
-                pos = member_pos;
-                rot = member_rot;
-                scale = member_scale;
+
+                ImGui::Separator();
+                ImGui::Text("Position");
+
+                bool updated = false;
+
+                if (ImGui::InputFloat("pos.x", &member_pos.x)
+                    || ImGui::InputFloat("pos.y", &member_pos.y)
+                    || ImGui::InputFloat("pos.z", &member_pos.z))
+                    updated = true;
+
+                ImGui::Separator();
+                ImGui::Text("Rotation quaternion");
+
+                if (ImGui::InputFloat("quat.w", &member_rot.w)
+                    || ImGui::InputFloat("quat.x", &member_rot.w)
+                    || ImGui::InputFloat("quat.y", &member_rot.y)
+                    || ImGui::InputFloat("quat.z", &member_rot.z))
+                    updated = true;
+
+                ImGui::Separator();
+                ImGui::Text("Scale");
+
+                if (ImGui::InputFloat("scale.x", &member_scale.x)
+                    || ImGui::InputFloat("scale.y", &member_scale.y)
+                    || ImGui::InputFloat("scale.z", &member_scale.z))
+                    updated = true;
+
+                if (updated)
+                    curr_robot_builder_env.value()->update_member(
+                        member_focus.value(), member_pos, member_rot, member_scale);
+
+            } else {
+                ImGui::Text("No focus member");
             }
-
-            ImGui::Text("%s", message.c_str());
-
-            ImGui::Separator();
-            ImGui::Text("Position");
-
-            float x_pos = pos.x;
-            if (ImGui::InputFloat("x", &x_pos)) { pos.x = x_pos; }
-            float y_pos = pos.y;
-            if (ImGui::InputFloat("y", &y_pos)) { pos.y = y_pos; }
-            float z_pos = pos.z;
-            if (ImGui::InputFloat("z", &z_pos)) { pos.z = z_pos; }
-
-            ImGui::Separator();
-            ImGui::Text("Rotation");
-
-            ImGui::Separator();
-            ImGui::Text("Scale");
         }
         ImGui::End();
     }

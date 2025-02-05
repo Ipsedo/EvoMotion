@@ -13,7 +13,7 @@ MouseEvent::MouseEvent(float width, float height)
 
 void MouseEvent::update(
     float new_width, float new_height, const glm::mat4 &new_view_matrix,
-    const glm::mat4 new_proj_matrix) {
+    const glm::mat4 &new_proj_matrix) {
     width = new_width;
     height = new_height;
     view_matrix = new_view_matrix;

@@ -99,7 +99,7 @@ public:
 
 class RobotBuilderEnvironment : public Environment {
 public:
-    RobotBuilderEnvironment(const std::string &robot_name);
+    explicit RobotBuilderEnvironment(std::string robot_name);
 
     bool set_root(const std::string &member_name);
     bool add_member(
@@ -107,9 +107,9 @@ public:
         glm::quat rotation, glm::vec3 scale, float mass, float friction);
 
     bool update_member(
-        const std::string &member_name, std::optional<glm::vec3> new_pos,
-        const std::optional<glm::quat> &new_rot, std::optional<glm::vec3> new_scale,
-        std::optional<float> new_friction, std::optional<bool> new_ignore_collision);
+        const std::string &member_name, std::optional<glm::vec3> new_pos = std::nullopt,
+        const std::optional<glm::quat> &new_rot = std::nullopt, std::optional<glm::vec3> new_scale = std::nullopt,
+        std::optional<float> new_friction = std::nullopt, std::optional<bool> new_ignore_collision = std::nullopt);
 
     bool attach_fixed_constraint(
         const std::string &constraint_name, const std::string &parent_name,
