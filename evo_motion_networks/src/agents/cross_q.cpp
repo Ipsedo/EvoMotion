@@ -7,9 +7,9 @@
 #include <evo_motion_networks/saver.h>
 
 CrossQAgent::CrossQAgent(
-    int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int actor_hidden_size, int critic_hidden_size, int batch_size, int epoch, float lr, float gamma,
-    int replay_buffer_size, int train_every)
+    const int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+    int actor_hidden_size, int critic_hidden_size, const int batch_size, const int epoch, const float lr, const float gamma,
+    const int replay_buffer_size, const int train_every)
     : actor(std::make_shared<ActorModule>(state_space, action_space, actor_hidden_size)),
       critic_1(
           std::make_shared<BatchNormQNetworkModule>(state_space, action_space, critic_hidden_size)),
@@ -148,7 +148,7 @@ void CrossQAgent::check_train() {
     }
 }
 
-torch::Tensor CrossQAgent::act(torch::Tensor state, float reward) {
+torch::Tensor CrossQAgent::act(const torch::Tensor state, const float reward) {
     set_eval(true);
 
     const auto [mu, sigma] = actor->forward(state);
@@ -165,7 +165,7 @@ torch::Tensor CrossQAgent::act(torch::Tensor state, float reward) {
     return action;
 }
 
-void CrossQAgent::done(torch::Tensor state, float reward) {
+void CrossQAgent::done(const torch::Tensor state, const float reward) {
     replay_buffer.update_last(reward, state, true);
 
     reward_meter.add(reward);
@@ -217,7 +217,7 @@ std::vector<LossMeter> CrossQAgent::get_metrics() {
             entropy_loss_meter, episode_steps_meter, reward_meter};
 }
 
-void CrossQAgent::to(torch::DeviceType device) {
+void CrossQAgent::to(const torch::DeviceType device) {
     curr_device = device;
     actor->to(device);
     critic_1->to(device);
@@ -225,7 +225,7 @@ void CrossQAgent::to(torch::DeviceType device) {
     entropy_parameter->to(device);
 }
 
-void CrossQAgent::set_eval(bool eval) {
+void CrossQAgent::set_eval(const bool eval) {
     actor->train(!eval);
     critic_1->train(!eval);
     critic_2->train(!eval);
