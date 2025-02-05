@@ -5,6 +5,8 @@
 #ifndef EVO_MOTION_FACTORY_H
 #define EVO_MOTION_FACTORY_H
 
+#include <optional>
+
 #include "./drawable.h"
 
 class ObjSpecularFactory : public DrawableFactory {
@@ -21,6 +23,27 @@ public:
         const std::vector<std::tuple<float, float, float>> &vertices,
         const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color,
         glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess);
+
+    std::shared_ptr<Drawable> get_drawable() override;
+};
+
+class EdgeObjSpecularFactory : public DrawableFactory {
+private:
+    std::vector<std::tuple<float, float, float>> vertices;
+    std::vector<std::tuple<float, float, float>> normals;
+    glm::vec4 ambient_color;
+    glm::vec4 diffuse_color;
+    glm::vec4 specular_color;
+    float shininess;
+
+    std::optional<std::function<bool()>> is_focus_function;
+
+public:
+    EdgeObjSpecularFactory(
+        const std::vector<std::tuple<float, float, float>> &vertices,
+        const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color,
+        glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess,
+        const std::optional<std::function<bool()>> &is_focus_function);
 
     std::shared_ptr<Drawable> get_drawable() override;
 };

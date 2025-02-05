@@ -51,11 +51,13 @@ void OpenGlWindow::draw_opengl(float width, float height) {
 
             switch (i.get_drawable_kind()) {
                 case SPECULAR:
-                    factory = std::make_shared<ObjSpecularFactory>(
+                    factory = std::make_shared<EdgeObjSpecularFactory>(
                         i.get_shape()->get_vertices(), i.get_shape()->get_normals(),
                         glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f),
                         glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f),
-                        glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f), 300.f);
+                        glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f), 300.f, [this, i]() {
+                            return focus_item.has_value() && focus_item.value() == i.get_name();
+                        });
                     break;
                 case TILE_SPECULAR:
                     factory = std::make_shared<TileGroundFactory>(
@@ -114,3 +116,6 @@ bool OpenGlWindow::draw_imgui_image() {
 bool OpenGlWindow::is_active() const { return active; }
 
 std::shared_ptr<Environment> OpenGlWindow::get_env() { return env; }
+
+void OpenGlWindow::set_focus_item(const std::string &item_name) { focus_item = item_name; }
+void OpenGlWindow::release_focus_item() { focus_item = std::nullopt; }

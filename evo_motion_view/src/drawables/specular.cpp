@@ -4,6 +4,8 @@
 
 #include "./specular.h"
 
+#include <optional>
+
 #include "./constants.h"
 
 std::vector<float> OBjSpecular::to_vbo_data(
@@ -26,8 +28,8 @@ OBjSpecular::OBjSpecular(
     const std::vector<std::tuple<float, float, float>> &vertices,
     const std::vector<std::tuple<float, float, float>> &normals, const glm::vec4 ambient_color,
     const glm::vec4 diffuse_color, const glm::vec4 specular_color, const float shininess)
-    : position_size(3), normal_size(3), stride((position_size + normal_size) * BYTES_PER_FLOAT),
-      ambient_color(ambient_color), diffuse_color(diffuse_color), specular_color(specular_color),
+    : ambient_color(ambient_color), diffuse_color(diffuse_color), specular_color(specular_color),
+      position_size(3), normal_size(3), stride((position_size + normal_size) * BYTES_PER_FLOAT),
       shininess(shininess), nb_vertices(static_cast<int>(vertices.size())),
       program(
           Program::Builder("./shaders/specular_vs.glsl", "./shaders/specular_fs.glsl")
@@ -80,3 +82,52 @@ void OBjSpecular::draw(
 }
 
 OBjSpecular::~OBjSpecular() { program.kill(); }
+
+/*
+ * Edge
+ */
+
+EdgeObjSpecular::EdgeObjSpecular(
+    const std::vector<std::tuple<float, float, float>> &vertices,
+    const std::vector<std::tuple<float, float, float>> &normals, const glm::vec4 &ambient_color,
+    const glm::vec4 &diffuse_color, const glm::vec4 &specular_color, float shininess,
+    const std::optional<std::function<bool()>> &is_focus_function)
+    : OBjSpecular(vertices, normals, ambient_color, diffuse_color, specular_color, shininess),
+      is_focus_function(
+          is_focus_function.has_value() ? is_focus_function.value() : []() { return false; }) {}
+
+void EdgeObjSpecular::draw(
+    glm::mat4 projection_matrix, glm::mat4 view_matrix, glm::mat4 model_matrix,
+    glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) {
+
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(1.0, 1.0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+    OBjSpecular::draw(
+        projection_matrix, view_matrix, model_matrix, light_pos_from_camera, camera_pos);
+
+    glDisable(GL_POLYGON_OFFSET_FILL);
+
+    if (is_focus_function()) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glLineWidth(2.0f);
+
+        glm::vec4 original_amb_color = ambient_color;
+        glm::vec4 original_diff_color = diffuse_color;
+        glm::vec4 original_spec_color = specular_color;
+
+        ambient_color = glm::vec4(glm::vec3(0.f), 1.f);
+        diffuse_color = glm::vec4(glm::vec3(0.f), 1.f);
+        specular_color = glm::vec4(glm::vec3(0.f), 1.f);
+
+        OBjSpecular::draw(
+            projection_matrix, view_matrix, model_matrix, light_pos_from_camera, camera_pos);
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        ambient_color = original_amb_color;
+        diffuse_color = original_diff_color;
+        specular_color = original_spec_color;
+    }
+}

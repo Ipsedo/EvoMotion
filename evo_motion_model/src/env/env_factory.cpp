@@ -115,7 +115,6 @@ std::map<
 
 std::shared_ptr<EnvironmentFactory> get_environment_factory(
     const std::string &env_name, std::map<std::string, std::string> parameters) {
-    if (!ENV_FACTORY_CONSTRUCTORS.contains(env_name))
-        throw std::invalid_argument(env_name);
+    if (!ENV_FACTORY_CONSTRUCTORS.contains(env_name)) throw std::invalid_argument(env_name);
     return ENV_FACTORY_CONSTRUCTORS[env_name](std::move(parameters));
 }

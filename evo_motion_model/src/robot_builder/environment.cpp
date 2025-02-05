@@ -204,8 +204,6 @@ RobotBuilderEnvironment::get_part(const std::string &name, std::vector<std::shar
 
 std::optional<std::string> RobotBuilderEnvironment::ray_cast_member(
     const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) {
-    std::vector<std::shared_ptr<BuilderMember>> intersecting_members;
-
     const auto from_bullet = glm_to_bullet(from_absolute);
     const auto to_bullet = glm_to_bullet(to_absolute);
 
@@ -214,8 +212,10 @@ std::optional<std::string> RobotBuilderEnvironment::ray_cast_member(
     m_world->rayTest(from_bullet, to_bullet, callback);
 
     if (callback.hasHit())
-        if (const auto user_ptr = callback.m_collisionObject->getUserPointer(); user_ptr)
-            return std::string(*static_cast<std::string *>(user_ptr));
+        if (const auto user_ptr = callback.m_collisionObject->getUserPointer(); user_ptr) {
+            const std::string name(*static_cast<std::string *>(user_ptr));
+            if (member_exists(name)) return name;
+        }
 
     return std::nullopt;
 }

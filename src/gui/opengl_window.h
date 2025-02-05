@@ -30,6 +30,9 @@ public:
 
     std::shared_ptr<Environment> get_env();
 
+    void set_focus_item(const std::string &item_name);
+    void release_focus_item();
+
 private:
     std::string name;
 
@@ -46,6 +49,8 @@ private:
 
     std::unique_ptr<MouseEvent> mouse_event;
     std::function<void(glm::vec3, glm::vec3)> on_left_click;
+
+    std::optional<std::string> focus_item;
 };
 
 #endif//EVO_MOTION_OPENGL_WINDOW_H
