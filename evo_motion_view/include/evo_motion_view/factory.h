@@ -5,6 +5,7 @@
 #ifndef EVO_MOTION_FACTORY_H
 #define EVO_MOTION_FACTORY_H
 
+#include <functional>
 #include <optional>
 
 #include "./drawable.h"
