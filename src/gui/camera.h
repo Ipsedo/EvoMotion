@@ -12,7 +12,7 @@
 
 class ImGuiCamera : public Camera {
 public:
-    ImGuiCamera(const std::function<glm::vec3()> &get_object_center);
+    explicit ImGuiCamera(const std::function<glm::vec3()> &get_object_center);
 
     void update();
 

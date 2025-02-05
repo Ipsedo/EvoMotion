@@ -9,7 +9,7 @@
 
 class RobotTab {
 public:
-    RobotTab(const std::string &name);
+    explicit RobotTab(std::string name);
 
     void set_name(const std::string &new_name);
     std::string get_name();

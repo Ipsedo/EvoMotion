@@ -21,7 +21,7 @@ EnvironmentFactory::EnvironmentFactory(std::map<std::string, std::string> parame
 
 template<typename Value>
 Value EnvironmentFactory::generic_get_value(
-    std::function<Value(const std::string &)> converter, const std::string &key,
+    const std::function<Value(const std::string &)> &converter, const std::string &key,
     Value default_value) {
     if (parameters.find(key) == parameters.end()) return default_value;
     return converter(parameters[key]);

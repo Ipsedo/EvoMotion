@@ -4,9 +4,11 @@
 
 #include "./robot_tab.h"
 
+#include <utility>
+
 #include <imgui.h>
 
-RobotTab::RobotTab(const std::string &name) : robot_name(name) {}
+RobotTab::RobotTab(std::string name) : robot_name(std::move(name)) {}
 
 void RobotTab::set_name(const std::string &new_name) { robot_name = new_name; }
 

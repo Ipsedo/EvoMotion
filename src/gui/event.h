@@ -15,7 +15,7 @@ public:
 
     void update(
         float new_width, float new_height, const glm::mat4 &new_view_matrix,
-        const glm::mat4 new_proj_matrix);
+        const glm::mat4 &new_proj_matrix);
 
     std::optional<std::tuple<glm::vec3, glm::vec3>>
     get_scene_absolute_click_pos(float width_offset, float height_offset);

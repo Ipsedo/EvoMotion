@@ -19,14 +19,14 @@
 class OpenGlWindow final {
 public:
     OpenGlWindow(
-        const std::string &bar_item_name, const std::shared_ptr<Environment> &env,
+        std::string bar_item_name, const std::shared_ptr<Environment> &env,
         const std::optional<std::function<void(glm::vec3, glm::vec3)>> &on_left_click =
             std::nullopt);
 
     void draw_opengl(float width, float height);
     bool draw_imgui_image();
 
-    bool is_active();
+    bool is_active() const;
 
     std::shared_ptr<Environment> get_env();
 

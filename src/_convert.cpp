@@ -38,7 +38,8 @@ std::tuple<glm::vec3, glm::quat, glm::vec3> decompose(glm::mat4 mat4) {
 }
 
 float round_float(float f, int precision) {
-    return std::round(f * std::pow(2.f, precision)) / std::pow(2.f, precision);
+    return std::round(f * std::pow(2.f, static_cast<float>(precision)))
+           / std::pow(2.f, static_cast<float>(precision));
 }
 
 std::string float_to_binary_string(float f) {
@@ -49,12 +50,9 @@ std::string float_to_binary_string(float f) {
     data.v_f = round_float(f, 5);
 
     return std::bitset<32>(data.bits).to_string();
-    std::string s;
-    memcpy(&s, &f, sizeof(float));
-    return s;
 }
 
-float binary_string_to_float(std::string s) {
+float binary_string_to_float(const std::string &s) {
     union {
         uint32_t bits;
         float output;
@@ -63,9 +61,6 @@ float binary_string_to_float(std::string s) {
     data.bits = std::bitset<32>(s).to_ulong();
 
     return data.output;
-    float f = 0.f;
-    memcpy(&f, s.c_str(), sizeof(float));
-    return f;
 }
 
 void convert_tree_skeleton_to_graph_skeleton() {
@@ -109,7 +104,7 @@ void convert_tree_skeleton_to_graph_skeleton() {
         nlohmann::json new_member = {
             {"name", std::accumulate(
                          std::next(new_names.begin()), new_names.end(), new_names[0],
-                         [](std::string a, std::string b) { return a + "_" + b; })},
+                         [](const std::string &a, const std::string &b) { return a + "_" + b; })},
             {"mass", float_to_binary_string(curr_member["mass"].get<float>())},
             {"shape", curr_member["shape"].get<std::string>()},
             {"scale",

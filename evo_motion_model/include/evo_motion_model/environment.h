@@ -93,7 +93,7 @@ protected:
 
     template<typename Value>
     Value generic_get_value(
-        std::function<Value(const std::string &)> converter, const std::string &key,
+        const std::function<Value(const std::string &)> &converter, const std::string &key,
         Value default_value);
 };
 

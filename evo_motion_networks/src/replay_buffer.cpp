@@ -38,7 +38,7 @@ template<class ReplayBufferType, class... UpdateArgs>
 void AbstractReplayBuffer<ReplayBufferType, UpdateArgs...>::update_last(UpdateArgs... args) {
     ReplayBufferType last = memory.back();
     memory.erase(memory.end());
-    memory.push_back(update_last_item(last, args...));
+    memory.push_back(update_last_item(last, std::move(args)...));
 }
 
 template<class ReplayBufferType, class... UpdateArgs>
@@ -74,7 +74,7 @@ template<typename EpisodeStep, class... UpdateArgs>
 std::vector<episode_trajectory<EpisodeStep>>
 AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::sample(const int batch_size) {
     std::vector<episode_trajectory<EpisodeStep>> filtered;
-    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t) {
+    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](const auto &t) {
         return t.trajectory.size() > 1;
     });
 
@@ -110,7 +110,7 @@ template<typename EpisodeStep, class... UpdateArgs>
 void AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::update_last(UpdateArgs... args) {
     auto last_step = memory.back().trajectory.back();
     memory.back().trajectory.erase(memory.back().trajectory.end());
-    memory.back().trajectory.push_back(update_last_step(last_step, args...));
+    memory.back().trajectory.push_back(update_last_step(last_step, std::move(args)...));
 }
 
 template<typename EpisodeStep, class... UpdateArgs>
@@ -131,7 +131,7 @@ AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::~AbstractTrajectoryBuffer(
 template<typename EpisodeStep, class... UpdateArgs>
 bool AbstractTrajectoryBuffer<EpisodeStep, UpdateArgs...>::enough_trajectory(int batch_size) {
     std::vector<episode_trajectory<EpisodeStep>> filtered;
-    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](auto t) {
+    std::copy_if(memory.begin(), memory.end(), std::back_inserter(filtered), [](const auto &t) {
         return t.trajectory.size() > 1;
     });
     return filtered.size() >= batch_size;

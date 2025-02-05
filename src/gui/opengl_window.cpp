@@ -4,6 +4,8 @@
 
 #include "./opengl_window.h"
 
+#include <utility>
+
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,10 +14,10 @@
 #include <evo_motion_view/factory.h>
 
 OpenGlWindow::OpenGlWindow(
-    const std::string &bar_item_name, const std::shared_ptr<Environment> &env,
+    std::string bar_item_name, const std::shared_ptr<Environment> &env,
     const std::optional<std::function<void(glm::vec3, glm::vec3)>> &on_left_click)
-    : name(bar_item_name), frame_buffer(std::make_unique<FrameBuffer>(1920, 1080)), drawables(),
-      env(env), rng(1234), rd_uni(0.f, 1.f), active(true),
+    : name(std::move(bar_item_name)), frame_buffer(std::make_unique<FrameBuffer>(1920, 1080)),
+      drawables(), env(env), rng(1234), rd_uni(0.f, 1.f), active(true),
       camera(std::make_unique<ImGuiCamera>([env]() {
           const auto track_item = env->get_camera_track_item();
           if (track_item.has_value()) {
@@ -106,6 +108,6 @@ bool OpenGlWindow::draw_imgui_image() {
     return opened;
 }
 
-bool OpenGlWindow::is_active() { return active; }
+bool OpenGlWindow::is_active() const { return active; }
 
 std::shared_ptr<Environment> OpenGlWindow::get_env() { return env; }

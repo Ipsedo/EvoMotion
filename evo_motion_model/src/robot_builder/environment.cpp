@@ -3,6 +3,7 @@
 //
 
 #include <fstream>
+#include <utility>
 
 #include <evo_motion_model/robot/builder.h>
 #include <evo_motion_model/robot/skeleton.h>
@@ -11,8 +12,8 @@
 #include "../json_serializer.h"
 #include "../utils.h"
 
-RobotBuilderEnvironment::RobotBuilderEnvironment(const std::string &robot_name)
-    : Environment(1), robot_name(robot_name), root_name(), skeleton_graph(), members(),
+RobotBuilderEnvironment::RobotBuilderEnvironment(std::string robot_name)
+    : Environment(1), robot_name(std::move(robot_name)), root_name(), skeleton_graph(), members(),
       constraints(), muscles() {}
 
 bool RobotBuilderEnvironment::set_root(const std::string &member_name) {
@@ -49,15 +50,15 @@ bool RobotBuilderEnvironment::update_member(
         glm::mat4 old_member_model_mat =
             get_member(member_name)->get_item().model_matrix_without_scale();
 
-        get_member(member_name)
-            ->update_item(new_pos, new_rot, new_scale, new_friction, new_ignore_collision);
+        const auto parent_member = get_member(member_name);
+        parent_member->update_item(new_pos, new_rot, new_scale, new_friction, new_ignore_collision);
         updated_members.insert(member_name);
 
         glm::mat4 new_member_model_mat =
-            get_member(member_name)->get_item().model_matrix_without_scale();
+            parent_member->get_item().model_matrix_without_scale();
 
         std::queue<std::tuple<glm::mat4, glm::mat4, std::string>> queue;
-        for (const auto [c_n, m_n]: skeleton_graph[member_name])
+        for (const auto& [c_n, m_n]: skeleton_graph[member_name])
             queue.emplace(old_member_model_mat, new_member_model_mat, m_n);
 
         while (!queue.empty()) {
@@ -84,7 +85,6 @@ bool RobotBuilderEnvironment::update_member(
                 if (updated_members.find(child_member_name) == updated_members.end())
                     queue.emplace(curr_old_model_mat, curr_new_model_mat, child_member_name);
         }
-
         return true;
     }
     return false;
@@ -244,12 +244,15 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
     root_name = json_deserializer->read_str("root_name");
     robot_name = json_deserializer->read_str("robot_name");
 
+    skeleton_graph.clear();
+
     std::transform(
         json_members_deserializer.begin(), json_members_deserializer.end(),
         std::back_inserter(members), [this](const auto &s) -> std::shared_ptr<BuilderMember> {
             const auto m = std::make_shared<BuilderMember>(s);
             m->get_item().get_body()->setUserPointer(new std::string(m->get_name()));
             add_item(m->get_item());
+            skeleton_graph[m->get_name()] = std::vector<std::tuple<std::string, std::string>>();
             return m;
         });
 
@@ -268,6 +271,10 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
                 throw std::runtime_error("Unknown constraint type \"" + s->read_str("type") + "\"");
 
             m_world->addConstraint(c->get_constraint());
+
+            skeleton_graph[c->get_parent()->get_name()].emplace_back(c->get_name(), c->get_child()->get_name());
+            skeleton_graph[c->get_child()->get_name()].emplace_back(c->get_name(), c->get_parent()->get_name());
+
             return c;
         });
 

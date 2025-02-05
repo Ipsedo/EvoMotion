@@ -8,7 +8,7 @@
 
 ExpModule::ExpModule(const float epsilon) : epsilon(epsilon) {}
 
-torch::Tensor ExpModule::forward(const torch::Tensor &input) { return torch::exp(input) + epsilon; }
+torch::Tensor ExpModule::forward(const torch::Tensor &input) const { return torch::exp(input) + epsilon; }
 
 // Clamp
 ClampModule::ClampModule(const float min_value, const float max_value)

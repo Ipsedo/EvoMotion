@@ -48,7 +48,8 @@ protected:
 
     template<typename Value>
     Value
-    generic_get_value(std::function<Value(const std::string &)> converter, const std::string &key);
+    generic_get_value(
+        const std::function<Value(const std::string &)> &converter, const std::string &key);
 
 private:
     std::map<std::string, std::string> parameters;
