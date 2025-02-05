@@ -86,11 +86,14 @@ bool OpenGlWindow::draw_imgui_image() {
         if (ImGui::IsWindowHovered()) {
             camera->update();
 
-            const auto ray_coords = mouse_event->get_scene_absolute_click_pos(
-                ImGui::GetCursorPosX(), ImGui::GetCursorPosX());
-            if (ray_coords.has_value()) {
-                const auto &[near, far] = ray_coords.value();
-                on_left_click(near, far);
+            if (ImGui::IsWindowFocused()) {
+                const auto ray_coords = mouse_event->get_scene_absolute_click_pos(
+                    ImGui::GetCursorPosX(), ImGui::GetCursorPosX());
+
+                if (ray_coords.has_value()) {
+                    const auto &[near, far] = ray_coords.value();
+                    on_left_click(near, far);
+                }
             }
         }
 

@@ -177,14 +177,14 @@ void ImGuiApplication::imgui_render_toolbar() {
             if (ImGui::BeginMenu("Robot information")) {
                 const std::string message =
                     curr_robot_builder_env.has_value()
-                        ? "- Robot \"" + curr_robot_builder_env.value()->get_robot_name()
-                              + "\" selected."
-                        : "- No robot selected.";
+                        ? "Robot selected : \"" + curr_robot_builder_env.value()->get_robot_name()
+                              + "\""
+                        : "No robot selected";
                 ImGui::MenuItem(message.c_str(), nullptr, false, false);
 
                 const std::string member_message =
-                    member_focus.has_value() ? "- Member \"" + member_focus.value() + "\" selected."
-                                             : "- No member selected.";
+                    member_focus.has_value() ? "Member selected : \"" + member_focus.value() + "\""
+                                             : "No member selected";
                 ImGui::MenuItem(member_message.c_str(), nullptr, false, false);
 
                 ImGui::EndMenu();
@@ -279,27 +279,24 @@ void ImGuiApplication::imgui_render_construct_tools() {
 
                 bool updated = false;
 
-                if (ImGui::InputFloat("pos.x", &member_pos.x)
-                    || ImGui::InputFloat("pos.y", &member_pos.y)
-                    || ImGui::InputFloat("pos.z", &member_pos.z))
-                    updated = true;
+                if (ImGui::InputFloat("pos.x", &member_pos.x)) updated = true;
+                if (ImGui::InputFloat("pos.y", &member_pos.y)) updated = true;
+                if (ImGui::InputFloat("pos.z", &member_pos.z)) updated = true;
 
                 ImGui::Separator();
                 ImGui::Text("Rotation quaternion");
 
-                if (ImGui::InputFloat("quat.w", &member_rot.w)
-                    || ImGui::InputFloat("quat.x", &member_rot.w)
-                    || ImGui::InputFloat("quat.y", &member_rot.y)
-                    || ImGui::InputFloat("quat.z", &member_rot.z))
-                    updated = true;
+                if (ImGui::InputFloat("quat.w", &member_rot.w)) updated = true;
+                if (ImGui::InputFloat("quat.x", &member_rot.x)) updated = true;
+                if (ImGui::InputFloat("quat.y", &member_rot.y)) updated = true;
+                if (ImGui::InputFloat("quat.z", &member_rot.z)) updated = true;
 
                 ImGui::Separator();
                 ImGui::Text("Scale");
 
-                if (ImGui::InputFloat("scale.x", &member_scale.x)
-                    || ImGui::InputFloat("scale.y", &member_scale.y)
-                    || ImGui::InputFloat("scale.z", &member_scale.z))
-                    updated = true;
+                if (ImGui::InputFloat("scale.x", &member_scale.x)) updated = true;
+                if (ImGui::InputFloat("scale.y", &member_scale.y)) updated = true;
+                if (ImGui::InputFloat("scale.z", &member_scale.z)) updated = true;
 
                 if (updated)
                     curr_robot_builder_env.value()->update_member(

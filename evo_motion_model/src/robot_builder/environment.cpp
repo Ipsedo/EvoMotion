@@ -47,10 +47,11 @@ bool RobotBuilderEnvironment::update_member(
     if (member_exists(member_name)) {
         std::set<std::string> updated_members;
 
-        glm::mat4 old_member_model_mat =
-            get_member(member_name)->get_item().model_matrix_without_scale();
-
         const auto parent_member = get_member(member_name);
+
+        glm::mat4 old_member_model_mat =
+            parent_member->get_item().model_matrix_without_scale();
+
         parent_member->update_item(new_pos, new_rot, new_scale, new_friction, new_ignore_collision);
         updated_members.insert(member_name);
 
@@ -58,13 +59,12 @@ bool RobotBuilderEnvironment::update_member(
             parent_member->get_item().model_matrix_without_scale();
 
         std::queue<std::tuple<glm::mat4, glm::mat4, std::string>> queue;
-        for (const auto& [c_n, m_n]: skeleton_graph[member_name])
+        for (const auto& [_, m_n]: skeleton_graph[member_name])
             queue.emplace(old_member_model_mat, new_member_model_mat, m_n);
 
         while (!queue.empty()) {
             const auto &[parent_old_model_mat, parent_new_model_mat, curr_member_name] =
                 queue.front();
-            queue.pop();
 
             const auto curr_member = get_member(curr_member_name);
             const auto curr_old_model_mat = curr_member->get_item().model_matrix_without_scale();
@@ -84,6 +84,8 @@ bool RobotBuilderEnvironment::update_member(
             for (const auto &[_, child_member_name]: skeleton_graph[curr_member_name])
                 if (updated_members.find(child_member_name) == updated_members.end())
                     queue.emplace(curr_old_model_mat, curr_new_model_mat, child_member_name);
+
+            queue.pop();
         }
         return true;
     }
@@ -182,16 +184,16 @@ bool RobotBuilderEnvironment::exists_part(
 }
 
 std::shared_ptr<BuilderMember> RobotBuilderEnvironment::get_member(const std::string &member_name) {
-    return RobotBuilderEnvironment::get_part(member_name, members);
+    return get_part<BuilderMember>(member_name, members);
 }
 
 std::shared_ptr<BuilderConstraint>
 RobotBuilderEnvironment::get_constraint(const std::string &constraint_name) {
-    return RobotBuilderEnvironment::get_part(constraint_name, constraints);
+    return get_part<BuilderConstraint>(constraint_name, constraints);
 }
 
 std::shared_ptr<BuilderMuscle> RobotBuilderEnvironment::get_muscle(const std::string &muscle_name) {
-    return RobotBuilderEnvironment::get_part(muscle_name, muscles);
+    return get_part<BuilderMuscle>(muscle_name, muscles);
 }
 
 template<typename Part>
@@ -199,7 +201,7 @@ std::shared_ptr<Part>
 RobotBuilderEnvironment::get_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec) {
     for (const auto &o: vec)
         if (o->get_name() == name) return o;
-    throw std::runtime_error("\"" + name + "\" not found");
+    throw std::runtime_error("Part \"" + name + "\" not found");
 }
 
 std::optional<std::string> RobotBuilderEnvironment::ray_cast_member(
@@ -245,6 +247,9 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
     robot_name = json_deserializer->read_str("robot_name");
 
     skeleton_graph.clear();
+    members.clear();
+    constraints.clear();
+    muscles.clear();
 
     std::transform(
         json_members_deserializer.begin(), json_members_deserializer.end(),

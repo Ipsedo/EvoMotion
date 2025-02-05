@@ -26,8 +26,7 @@ MouseEvent::get_scene_absolute_click_pos(float width_offset, float height_offset
         float image_x = ImGui::GetMousePos().x - width_offset;
         float image_y = ImGui::GetMousePos().y - height_offset;
 
-        glm::vec2 screen_coord(
-            2.f * image_x / width - 1.f, -(2.f * image_y / height - 1.f) * height / width);
+        glm::vec2 screen_coord(2.f * image_x / width - 1.f, -(2.f * image_y / height - 1.f));
 
         glm::vec4 screen_coord_near = glm::vec4(screen_coord, -1.f, 1.f);
         glm::vec4 screen_coord_far = glm::vec4(screen_coord, 1.f, 1.f);
