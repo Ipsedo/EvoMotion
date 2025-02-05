@@ -23,7 +23,7 @@ template<typename Value>
 Value EnvironmentFactory::generic_get_value(
     std::function<Value(const std::string &)> converter, const std::string &key,
     Value default_value) {
-    if (parameters.find(key) == parameters.end()) return default_value;
+    if (!parameters.contains(key)) return default_value;
     return converter(parameters[key]);
 }
 
@@ -79,7 +79,7 @@ std::shared_ptr<Environment> RobotWalkFactory::get_env(int num_threads, int seed
             std::filesystem::path(RESOURCES_PATH) / "./resources/skeleton/new_format_spider.json"),
         get_value("initial_remaining_seconds", 1.f), get_value("max_episode_seconds", 30.f),
         get_value("target_velocity", 5e-1f), get_value("minimal_velocity", 1e-1f),
-        get_value("reset_frames", 10));
+        get_value("reset_frames", 30));
 }
 
 /*
@@ -115,7 +115,7 @@ std::map<
 
 std::shared_ptr<EnvironmentFactory> get_environment_factory(
     const std::string &env_name, std::map<std::string, std::string> parameters) {
-    if (ENV_FACTORY_CONSTRUCTORS.find(env_name) == ENV_FACTORY_CONSTRUCTORS.end())
+    if (!ENV_FACTORY_CONSTRUCTORS.contains(env_name))
         throw std::invalid_argument(env_name);
     return ENV_FACTORY_CONSTRUCTORS[env_name](std::move(parameters));
 }

@@ -77,7 +77,7 @@ void RobotWalk::reset_engine() {
     // reset model transform
     constexpr glm::vec3 root_pos(1.f, 0.25f, 2.f);
 
-    constexpr float angle_limit = static_cast<float>(M_PI) / 3.f;
+    constexpr float angle_limit = static_cast<float>(M_PI) * 2.f / 3.f;
 
     const float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
     const float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
