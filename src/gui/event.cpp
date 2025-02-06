@@ -8,10 +8,10 @@
 
 #include <imgui.h>
 
-MouseEvent::MouseEvent(float width, float height)
+RayMouseEvent::RayMouseEvent(float width, float height)
     : width(width), height(height), view_matrix(1.f), proj_matrix(1.f) {}
 
-void MouseEvent::update(
+void RayMouseEvent::update(
     float new_width, float new_height, const glm::mat4 &new_view_matrix,
     const glm::mat4 &new_proj_matrix) {
     width = new_width;
@@ -21,7 +21,7 @@ void MouseEvent::update(
 }
 
 std::optional<std::tuple<glm::vec3, glm::vec3>>
-MouseEvent::get_scene_absolute_click_pos(float width_offset, float height_offset) {
+RayMouseEvent::get_scene_absolute_click_pos(float width_offset, float height_offset) {
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         float image_x = ImGui::GetMousePos().x - width_offset;
         float image_y = ImGui::GetMousePos().y - height_offset;

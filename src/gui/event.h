@@ -9,9 +9,9 @@
 
 #include <glm/glm.hpp>
 
-class MouseEvent {
+class RayMouseEvent {
 public:
-    MouseEvent(float width, float height);
+    RayMouseEvent(float width, float height);
 
     void update(
         float new_width, float new_height, const glm::mat4 &new_view_matrix,

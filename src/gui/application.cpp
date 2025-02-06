@@ -7,13 +7,13 @@
 #include <iostream>
 
 ImGuiApplication::ImGuiApplication(const std::string &title, const int width, const int height)
-    : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f), show_member_window(false),
-      show_construct_tools_window(false), show_training_window(true),
-      curr_robot_builder_env(std::nullopt), member_focus(std::nullopt), opengl_windows(),
-      robot_file_dialog(), rng(std::chrono::duration_cast<std::chrono::microseconds>(
-                                   std::chrono::system_clock::now().time_since_epoch())
-                                   .count()),
-      rd_uni(0.f, 1.f), opengl_render_size(static_cast<float>(width), static_cast<float>(height)),
+    : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f),
+      show_member_settings_window(false), show_construct_tools_window(false),
+      show_manage_trainings_window(false), show_new_training_window(false),
+      show_robot_info_window(false), show_infer_window(false),
+      context(std::make_shared<AppContext>()), opengl_windows(), robot_builder_file_dialog(),
+      robot_infer_file_dialog(), agent_infer_file_dialog(ImGuiFileBrowserFlags_SelectDirectory),
+      opengl_render_size(static_cast<float>(width), static_cast<float>(height)),
       popup_already_opened_robot("Popup_robot_already_opened") {
 
     if (!glfwInit()) {
@@ -58,8 +58,13 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
 
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    robot_file_dialog.SetTitle("Load robot JSON");
-    robot_file_dialog.SetTypeFilters({".json"});
+    robot_builder_file_dialog.SetTitle("Load robot JSON");
+    robot_builder_file_dialog.SetTypeFilters({".json"});
+
+    robot_infer_file_dialog.SetTitle("Load robot JSON");
+    robot_infer_file_dialog.SetTypeFilters({".json"});
+
+    agent_infer_file_dialog.SetTitle("Load agent directory");
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -68,30 +73,14 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
     glDepthFunc(GL_LEQUAL);
 
     glDepthMask(GL_TRUE);
-
-    frame_buffer = std::make_unique<FrameBuffer>(width, height);
 }
 
-void ImGuiApplication::draw() {
+void ImGuiApplication::render() {
     glfwPollEvents();
 
     for (const auto &gl_window: opengl_windows)
-        if (gl_window->is_active()) {
-            if (member_focus.has_value()) gl_window->set_focus_item(member_focus.value());
-            else gl_window->release_focus_item();
-
+        if (gl_window->is_active())
             gl_window->draw_opengl(opengl_render_size.x, opengl_render_size.y);
-        }
-
-    std::ranges::for_each(opengl_windows, [this](const auto &gl_window) {
-        if (auto env = std::dynamic_pointer_cast<RobotBuilderEnvironment>(gl_window->get_env());
-            gl_window->is_active() && env) {
-            if (curr_robot_builder_env.has_value()
-                && curr_robot_builder_env.value()->get_robot_name() != env->get_robot_name())
-                member_focus = std::nullopt;
-            curr_robot_builder_env = env;
-        }
-    });
 
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
         ImGui_ImplGlfw_Sleep(10);
@@ -105,10 +94,22 @@ void ImGuiApplication::draw() {
 
     // ImGui window definition
     imgui_render_toolbar();
-    imgui_render_opengl();
-    imgui_render_construct_tools();
-    imgui_render_file_dialog();
 
+    imgui_render_opengl();
+
+    imgui_render_member_settings();
+    imgui_render_robot_info();
+    imgui_render_robot_builder_file_dialog();
+    imgui_render_construct_tools();
+
+    imgui_render_new_training();
+    imgui_render_manage_trainings();
+
+    imgui_render_robot_infer();
+    imgui_render_agent_infer_file_dialog();
+    imgui_render_robot_infer_file_dialog();
+
+    // Pop-ups
     if (ImGui::BeginPopupModal(
             popup_already_opened_robot.c_str(), nullptr,
             ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar)) {
@@ -146,61 +147,29 @@ void ImGuiApplication::imgui_render_toolbar() {
 
                 auto new_robot = std::make_shared<RobotBuilderEnvironment>(
                     "robot_" + std::to_string(opengl_windows.size()));
-                opengl_windows.push_back(std::make_shared<OpenGlWindow>(
-                    new_robot->get_robot_name(), new_robot,
-                    [this, new_robot](const glm::vec3 &near, const glm::vec3 &far) {
-                        member_focus = new_robot->ray_cast_member(near, far);
-                    }));
-                member_focus = std::nullopt;
-                curr_robot_builder_env = new_robot;
+
+                opengl_windows.push_back(std::make_shared<BuilderOpenGlWindow>(
+                    context, new_robot->get_robot_name(), new_robot));
+
+                context->release_focus_member();
+                context->set_builder_env(new_robot);
             }
 
-            if (ImGui::MenuItem("Load robot")) robot_file_dialog.Open();
+            if (ImGui::MenuItem("Load robot")) robot_builder_file_dialog.Open();
 
-            if (ImGui::BeginMenu("Loaded robots")) {
-                bool empty = true;
-                for (const auto &gl_window: opengl_windows) {
-                    if (const auto env = std::dynamic_pointer_cast<RobotBuilderEnvironment>(
-                            gl_window->get_env());
-                        env) {
-                        ImGui::MenuItem(
-                            env->get_robot_name().c_str(), nullptr, gl_window->is_active(), false);
-                        empty = false;
-                    }
-                }
+            if (ImGui::MenuItem(
+                    "Save robot", nullptr, nullptr, context->is_builder_env_selected())) {}
 
-                if (empty) {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 200, 255));
-                    ImGui::Text("No robot(s) loaded");
-                    ImGui::PopStyleColor();
-                }
+            ImGui::Separator();
 
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::BeginMenu("Robot information")) {
-                const std::string message =
-                    curr_robot_builder_env.has_value()
-                        ? "Robot selected : \"" + curr_robot_builder_env.value()->get_robot_name()
-                              + "\""
-                        : "No robot selected";
-                ImGui::MenuItem(message.c_str(), nullptr, false, false);
-
-                const std::string member_message =
-                    member_focus.has_value() ? "Member selected : \"" + member_focus.value() + "\""
-                                             : "No member selected";
-                ImGui::MenuItem(member_message.c_str(), nullptr, false, false);
-
-                ImGui::EndMenu();
-            }
+            if (ImGui::MenuItem("Robot information")) show_robot_info_window = true;
 
             ImGui::Separator();
 
             if (ImGui::MenuItem(
-                    "Member settings", nullptr, false, curr_robot_builder_env.has_value()))
-                show_member_window = true;
-            if (ImGui::MenuItem(
-                    "Transform member", nullptr, false, curr_robot_builder_env.has_value()))
+                    "Member settings", nullptr, false, context->is_builder_env_selected()))
+                show_member_settings_window = true;
+            if (ImGui::MenuItem("Construct tools", nullptr, false, context->is_member_focused()))
                 show_construct_tools_window = true;
 
             ImGui::EndMenu();
@@ -208,18 +177,12 @@ void ImGuiApplication::imgui_render_toolbar() {
 
         if (ImGui::BeginMenu("Algorithm")) {
             if (ImGui::BeginMenu("Train")) {
-                if (ImGui::MenuItem("training window")) show_training_window = true;
-                if (ImGui::MenuItem("on this robot")) { /* TODO run training in new thread */
-                }
+                if (ImGui::MenuItem("Start training")) show_new_training_window = true;
+                if (ImGui::MenuItem("Manage trainings")) show_manage_trainings_window = true;
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Run")) {
-                if (ImGui::MenuItem("on this robot")) {
-                    /* TODO run trained agent on main display */
-                }
-                ImGui::EndMenu();
-            }
+            if (ImGui::MenuItem("Infer")) show_infer_window = true;
 
             if (ImGui::MenuItem("Test / Debug")) { /* TODO run debug agent on robot */
             }
@@ -230,17 +193,17 @@ void ImGuiApplication::imgui_render_toolbar() {
         ImGui::EndMainMenuBar();
     }
 
-    if (!curr_robot_builder_env.has_value()) {
-        show_member_window = false;
+    if (!context->is_builder_env_selected()) {
+        show_member_settings_window = false;
         show_construct_tools_window = false;
     }
 }
 
-void ImGuiApplication::imgui_render_file_dialog() {
-    robot_file_dialog.Display();
+void ImGuiApplication::imgui_render_robot_builder_file_dialog() {
+    robot_builder_file_dialog.Display();
 
-    if (robot_file_dialog.HasSelected()) {
-        std::filesystem::path robot_json_path = robot_file_dialog.GetSelected();
+    if (robot_builder_file_dialog.HasSelected()) {
+        std::filesystem::path robot_json_path = robot_builder_file_dialog.GetSelected();
 
         const auto robot = std::make_shared<RobotBuilderEnvironment>("");
         robot->load_robot(robot_json_path);
@@ -248,35 +211,32 @@ void ImGuiApplication::imgui_render_file_dialog() {
         if (!std::any_of(
                 opengl_windows.begin(), opengl_windows.end(),
                 [robot](const std::shared_ptr<OpenGlWindow> &gl_window) {
-                    auto env =
-                        std::dynamic_pointer_cast<RobotBuilderEnvironment>(gl_window->get_env());
-                    return env && env->get_robot_name() == robot->get_robot_name();
+                    return gl_window->get_name() == robot->get_robot_name();
                 })) {
-            opengl_windows.push_back(std::make_shared<OpenGlWindow>(
-                robot->get_robot_name(), robot,
-                [this, robot](const glm::vec3 &near, const glm::vec3 &far) {
-                    member_focus = robot->ray_cast_member(near, far);
-                }));
-            curr_robot_builder_env = robot;
-            member_focus = std::nullopt;
+
+            opengl_windows.push_back(
+                std::make_shared<BuilderOpenGlWindow>(context, robot->get_robot_name(), robot));
+
+            context->set_builder_env(robot);
+            context->release_focus_member();
         } else {
             ImGui::OpenPopup(popup_already_opened_robot.c_str());
         }
 
-        robot_file_dialog.ClearSelected();
+        robot_builder_file_dialog.ClearSelected();
     }
 }
 
-void ImGuiApplication::imgui_render_construct_tools() {
-    if (show_member_window) {
-        if (ImGui::Begin("Construct tools", &show_member_window)) {
+void ImGuiApplication::imgui_render_member_settings() {
+    if (show_member_settings_window) {
+        if (ImGui::Begin("Construct tools", &show_member_settings_window)) {
             std::string message = "No focus member";
 
-            if (curr_robot_builder_env.has_value() && member_focus.has_value()) {
-                ImGui::Text("Focus on \"%s\" member", member_focus.value().c_str());
+            if (context->is_builder_env_selected() && context->is_member_focused()) {
+                ImGui::Text("Focus on \"%s\" member", context->get_focused_member().c_str());
 
                 auto [member_pos, member_rot, member_scale] =
-                    curr_robot_builder_env.value()->get_member_transform(member_focus.value());
+                    context->get_builder_env()->get_member_transform(context->get_focused_member());
 
                 ImGui::Separator();
                 ImGui::Text("Position");
@@ -303,12 +263,120 @@ void ImGuiApplication::imgui_render_construct_tools() {
                 if (ImGui::InputFloat("scale.z", &member_scale.z)) updated = true;
 
                 if (updated)
-                    curr_robot_builder_env.value()->update_member(
-                        member_focus.value(), member_pos, member_rot, member_scale);
+                    context->get_builder_env()->update_member(
+                        context->get_focused_member(), member_pos, member_rot, member_scale);
 
             } else {
                 ImGui::Text("No focus member");
             }
+        }
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_robot_info() {
+    if (show_robot_info_window) {
+        if (ImGui::Begin("Robot information", &show_robot_info_window)) {
+
+            ImGui::Text(
+                "Robot selected : %s", context->is_builder_env_selected()
+                                           ? context->get_builder_env()->get_robot_name().c_str()
+                                           : "no robot");
+            ImGui::Text(
+                "Member selected : %s",
+                context->is_member_focused() ? context->get_focused_member().c_str() : "no member");
+
+            ImGui::Separator();
+
+            ImGui::Text(
+                "Root member : %s", context->is_builder_env_selected()
+                                        ? context->get_builder_env()->get_root_name().c_str()
+                                        : "no root");
+            ImGui::Text(
+                "Members count : %i",
+                context->is_builder_env_selected()
+                    ? static_cast<int>(context->get_builder_env()->get_items().size())
+                    : 0);
+        }
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_construct_tools() {
+    if (show_construct_tools_window) {
+        if (ImGui::Begin("Construct tools", &show_construct_tools_window)) {}
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_new_training() {
+    if (show_new_training_window) {
+        if (ImGui::Begin("Start training", &show_new_training_window)) {}
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_manage_trainings() {
+    if (show_manage_trainings_window) {
+        if (ImGui::Begin("Manage trainings", &show_manage_trainings_window)) {}
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_robot_infer_file_dialog() {
+    robot_infer_file_dialog.Display();
+
+    if (robot_infer_file_dialog.HasSelected()) {
+        context->set_robot_infer_json_path(robot_infer_file_dialog.GetSelected());
+        robot_infer_file_dialog.ClearSelected();
+    }
+}
+
+void ImGuiApplication::imgui_render_agent_infer_file_dialog() {
+    agent_infer_file_dialog.Display();
+
+    if (agent_infer_file_dialog.HasSelected()) {
+        context->set_agent_infer_path(agent_infer_file_dialog.GetSelected());
+        agent_infer_file_dialog.ClearSelected();
+    }
+}
+
+void ImGuiApplication::imgui_render_robot_infer() {
+    if (show_infer_window) {
+        if (ImGui::Begin("Infer trained agent", &show_infer_window)) {
+
+            ImGui::Spacing();
+
+            // Robot
+            std::string loaded_json_path = context->is_robot_infer_json_path_selected()
+                                               ? context->get_robot_infer_json_path().string()
+                                               : "No robot selected";
+            loaded_json_path.resize(1024);
+
+            if (ImGui::InputText("Load robot", &loaded_json_path[0], loaded_json_path.size()))
+                context->set_robot_infer_json_path(std::filesystem::path(loaded_json_path.c_str()));
+
+            ImGui::SameLine();
+            if (ImGui::ArrowButton("Load robot button", ImGuiDir_Right))
+                robot_infer_file_dialog.Open();
+
+            ImGui::Spacing();
+
+            // Agent
+            std::string loaded_agent_path = context->is_agent_infer_path_selected()
+                                                ? context->get_agent_infer_path().string()
+                                                : "No agent selected";
+            loaded_agent_path.resize(1024);
+
+            if (ImGui::InputText("Load agent", &loaded_agent_path[0], loaded_agent_path.size()))
+                context->set_agent_infer_path(std::filesystem::path(loaded_agent_path.c_str()));
+
+            ImGui::SameLine();
+            if (ImGui::ArrowButton("Load agent button", ImGuiDir_Right))
+                agent_infer_file_dialog.Open();
+
+            ImGui::Spacing();
+            ImGui::Separator();
         }
         ImGui::End();
     }
@@ -343,8 +411,8 @@ void ImGuiApplication::imgui_render_opengl() {
 
         std::erase_if(opengl_windows, [this](const auto &gl_window) {
             if (gl_window->draw_imgui_image()) return false;
-            curr_robot_builder_env = std::nullopt;
-            member_focus = std::nullopt;
+            context->release_builder_env();
+            context->release_focus_member();
             return true;
         });
 

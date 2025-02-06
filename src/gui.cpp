@@ -24,7 +24,7 @@ void gui() {
     while (!renderer.is_close()) {
         auto before = std::chrono::system_clock::now();
 
-        renderer.draw();
+        renderer.render();
 
         std::chrono::duration<double, std::milli> delta = std::chrono::system_clock::now() - before;
 

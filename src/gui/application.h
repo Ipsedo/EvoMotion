@@ -25,15 +25,15 @@
 #include <evo_motion_view/factory.h>
 
 #include "./camera.h"
+#include "./context.h"
 #include "./frame_buffer.h"
 #include "./opengl_window.h"
-#include "./robot_tab.h"
 
 class ImGuiApplication {
 public:
     ImGuiApplication(const std::string &title, int width, int height);
 
-    void draw();
+    void render();
 
     bool is_close() const;
 
@@ -45,30 +45,41 @@ private:
 
     ImVec4 clear_color;
 
-    bool show_member_window;
+    bool show_member_settings_window;
     bool show_construct_tools_window;
-    bool show_training_window;
+    bool show_manage_trainings_window;
+    bool show_new_training_window;
+    bool show_robot_info_window;
+    bool show_infer_window;
 
-    std::optional<std::shared_ptr<RobotBuilderEnvironment>> curr_robot_builder_env;
-    std::optional<std::string> member_focus;
+    std::shared_ptr<AppContext> context;
 
     std::vector<std::shared_ptr<OpenGlWindow>> opengl_windows;
 
-    ImGui::FileBrowser robot_file_dialog;
+    ImGui::FileBrowser robot_builder_file_dialog;
 
-    std::mt19937 rng;
-    std::uniform_real_distribution<float> rd_uni;
+    ImGui::FileBrowser robot_infer_file_dialog;
+    ImGui::FileBrowser agent_infer_file_dialog;
 
     ImVec2 opengl_render_size;
-
-    std::unique_ptr<FrameBuffer> frame_buffer;
 
     std::string popup_already_opened_robot;
 
     void imgui_render_toolbar();
+
+    void imgui_render_robot_builder_file_dialog();
+    void imgui_render_member_settings();
     void imgui_render_construct_tools();
+    void imgui_render_robot_info();
+
     void imgui_render_opengl();
-    void imgui_render_file_dialog();
+
+    void imgui_render_new_training();
+    void imgui_render_manage_trainings();
+
+    void imgui_render_robot_infer_file_dialog();
+    void imgui_render_agent_infer_file_dialog();
+    void imgui_render_robot_infer();
 };
 
 #endif//EVO_MOTION_APPLICATION_H
