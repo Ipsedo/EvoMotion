@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include <evo_motion_networks/agents/cross_q.h>
+
 ImGuiApplication::ImGuiApplication(const std::string &title, const int width, const int height)
     : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f),
       show_member_settings_window(false), show_construct_tools_window(false),
@@ -229,7 +231,7 @@ void ImGuiApplication::imgui_render_robot_builder_file_dialog() {
 
 void ImGuiApplication::imgui_render_member_settings() {
     if (show_member_settings_window) {
-        if (ImGui::Begin("Construct tools", &show_member_settings_window)) {
+        if (ImGui::Begin("Member settings", &show_member_settings_window)) {
             std::string message = "No focus member";
 
             if (context->is_builder_env_selected() && context->is_member_focused()) {
@@ -377,6 +379,21 @@ void ImGuiApplication::imgui_render_robot_infer() {
 
             ImGui::Spacing();
             ImGui::Separator();
+
+            if (ImGui::Button("Start inference") && context->is_agent_infer_path_selected()
+                && context->is_robot_infer_json_path_selected()) {
+                const auto env = get_environment_factory("robot_walk", {})->get_env(4, 1234);
+                const auto agent = std::make_shared<CrossQAgent>(
+                    12345, env->get_state_space(), env->get_action_space(), 256, 1024, 128, 1,
+                    3e-4f, 0.99f, 1, 2);
+                agent->load(context->get_agent_infer_path());// TODO check if loaded successfully
+                agent->to(torch::kCPU);
+                opengl_windows.push_back(std::make_shared<InferOpenGlWindow>(agent, "Infer", env));
+
+                show_infer_window = false;
+                context->release_agent_infer_path();
+                context->release_robot_infer_json_path();
+            }
         }
         ImGui::End();
     }

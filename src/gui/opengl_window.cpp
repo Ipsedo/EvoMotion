@@ -53,6 +53,8 @@ void OpenGlWindow::draw_opengl(float width, float height) {
     frame_buffer->unbind();
 }
 
+void OpenGlWindow::on_hide_tab() {}
+
 bool OpenGlWindow::draw_imgui_image() {
     bool opened = true;
 
@@ -69,6 +71,7 @@ bool OpenGlWindow::draw_imgui_image() {
 
         ImGui::EndTabItem();
     } else {
+        on_hide_tab();
         active = false;
     }
 
@@ -152,6 +155,14 @@ BuilderOpenGlWindow::get_drawable_factory(const Item &item, std::mt19937 &curr_r
             });
 
     return OpenGlWindow::get_drawable_factory(item, curr_rng);
+}
+
+void BuilderOpenGlWindow::on_hide_tab() {
+    if (context->is_builder_env_selected()
+        && context->get_builder_env()->get_robot_name() == builder_env->get_robot_name()) {
+        context->release_focus_member();
+        context->release_builder_env();
+    }
 }
 
 /*

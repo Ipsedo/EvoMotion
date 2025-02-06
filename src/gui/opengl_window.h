@@ -52,6 +52,8 @@ protected:
 
     virtual std::shared_ptr<DrawableFactory>
     get_drawable_factory(const Item &item, std::mt19937 &curr_rng);
+
+    virtual void on_hide_tab();
 };
 
 /*
@@ -78,6 +80,7 @@ protected:
         const glm::mat4 &new_proj_matrix) override;
     std::shared_ptr<DrawableFactory>
     get_drawable_factory(const Item &item, std::mt19937 &curr_rng) override;
+    void on_hide_tab() override;
 };
 
 /*
