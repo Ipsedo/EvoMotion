@@ -35,7 +35,7 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
     }
 
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);// Enable vsync
+    glfwSwapInterval(1);
 
     if (glewInit() != GLEW_OK) {
         std::cerr << "GLEW initialization failed" << std::endl;
@@ -43,23 +43,19 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
         exit(1);
     }
 
-    // Setup Dear ImGui context
+    // Setup ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     (void) io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;// Enable Keyboard Controls
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-    // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
 
-    // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-
     ImGui_ImplOpenGL3_Init("#version 130");
 
+    // file dialog
     robot_builder_file_dialog.SetTitle("Load robot JSON");
     robot_builder_file_dialog.SetTypeFilters({".json"});
 
@@ -68,9 +64,11 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
 
     agent_infer_file_dialog.SetTitle("Load agent directory");
 
+    // OpenGL options
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     glDepthFunc(GL_LEQUAL);
 
@@ -164,7 +162,9 @@ void ImGuiApplication::imgui_render_toolbar() {
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("Robot information")) show_robot_info_window = true;
+            if (ImGui::MenuItem(
+                    "Robot information", nullptr, false, context->is_builder_env_selected()))
+                show_robot_info_window = true;
 
             ImGui::Separator();
 
@@ -198,6 +198,7 @@ void ImGuiApplication::imgui_render_toolbar() {
     if (!context->is_builder_env_selected()) {
         show_member_settings_window = false;
         show_construct_tools_window = false;
+        show_robot_info_window = false;
     }
 }
 
@@ -205,14 +206,13 @@ void ImGuiApplication::imgui_render_robot_builder_file_dialog() {
     robot_builder_file_dialog.Display();
 
     if (robot_builder_file_dialog.HasSelected()) {
-        std::filesystem::path robot_json_path = robot_builder_file_dialog.GetSelected();
+        const std::filesystem::path robot_json_path = robot_builder_file_dialog.GetSelected();
 
         const auto robot = std::make_shared<RobotBuilderEnvironment>("");
         robot->load_robot(robot_json_path);
 
-        if (!std::any_of(
-                opengl_windows.begin(), opengl_windows.end(),
-                [robot](const std::shared_ptr<OpenGlWindow> &gl_window) {
+        if (!std::ranges::any_of(
+                opengl_windows, [robot](const std::shared_ptr<OpenGlWindow> &gl_window) {
                     return gl_window->get_name() == robot->get_robot_name();
                 })) {
 
@@ -240,8 +240,12 @@ void ImGuiApplication::imgui_render_member_settings() {
                 auto [member_pos, member_rot, member_scale] =
                     context->get_builder_env()->get_member_transform(context->get_focused_member());
 
+                ImGui::Spacing();
                 ImGui::Separator();
+                ImGui::Spacing();
+
                 ImGui::Text("Position");
+                ImGui::Spacing();
 
                 bool updated = false;
 
@@ -249,16 +253,24 @@ void ImGuiApplication::imgui_render_member_settings() {
                 if (ImGui::InputFloat("pos.y", &member_pos.y)) updated = true;
                 if (ImGui::InputFloat("pos.z", &member_pos.z)) updated = true;
 
+                ImGui::Spacing();
                 ImGui::Separator();
+                ImGui::Spacing();
+
                 ImGui::Text("Rotation quaternion");
+                ImGui::Spacing();
 
                 if (ImGui::InputFloat("quat.w", &member_rot.w)) updated = true;
                 if (ImGui::InputFloat("quat.x", &member_rot.x)) updated = true;
                 if (ImGui::InputFloat("quat.y", &member_rot.y)) updated = true;
                 if (ImGui::InputFloat("quat.z", &member_rot.z)) updated = true;
 
+                ImGui::Spacing();
                 ImGui::Separator();
+                ImGui::Spacing();
+
                 ImGui::Text("Scale");
+                ImGui::Spacing();
 
                 if (ImGui::InputFloat("scale.x", &member_scale.x)) updated = true;
                 if (ImGui::InputFloat("scale.y", &member_scale.y)) updated = true;
@@ -280,6 +292,8 @@ void ImGuiApplication::imgui_render_robot_info() {
     if (show_robot_info_window) {
         if (ImGui::Begin("Robot information", &show_robot_info_window)) {
 
+            ImGui::Spacing();
+
             ImGui::Text(
                 "Robot selected : %s", context->is_builder_env_selected()
                                            ? context->get_builder_env()->get_robot_name().c_str()
@@ -288,7 +302,9 @@ void ImGuiApplication::imgui_render_robot_info() {
                 "Member selected : %s",
                 context->is_member_focused() ? context->get_focused_member().c_str() : "no member");
 
+            ImGui::Spacing();
             ImGui::Separator();
+            ImGui::Spacing();
 
             ImGui::Text(
                 "Root member : %s", context->is_builder_env_selected()
@@ -299,6 +315,12 @@ void ImGuiApplication::imgui_render_robot_info() {
                 context->is_builder_env_selected()
                     ? static_cast<int>(context->get_builder_env()->get_items().size())
                     : 0);
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // TODO rename robot and set root
         }
         ImGui::End();
     }
