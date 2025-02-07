@@ -94,12 +94,6 @@ void ImGuiApplication::render() {
         return;
     }
 
-    for (const auto &gl_window: opengl_windows)
-        if (gl_window->is_active()) {
-            glBindVertexArray(vao);
-            gl_window->draw_opengl(opengl_render_size.x, opengl_render_size.y);
-        }
-
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -119,6 +113,12 @@ void ImGuiApplication::render() {
     imgui_render_robot_infer();
     imgui_render_agent_infer_file_dialog();
     imgui_render_robot_infer_file_dialog();
+
+    for (const auto &gl_window: opengl_windows)
+        if (gl_window->is_active()) {
+            glBindVertexArray(vao);
+            gl_window->draw_opengl(opengl_render_size.x, opengl_render_size.y);
+        }
 
     imgui_render_opengl();
 
