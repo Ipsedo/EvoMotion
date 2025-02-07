@@ -61,8 +61,6 @@ private:
     ImGui::FileBrowser robot_infer_file_dialog;
     ImGui::FileBrowser agent_infer_file_dialog;
 
-    ImVec2 opengl_render_size;
-
     std::string popup_already_opened_robot;
 
     GLuint vao;

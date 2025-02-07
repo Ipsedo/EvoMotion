@@ -15,7 +15,6 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
       show_robot_info_window(false), show_infer_window(false),
       context(std::make_shared<AppContext>()), opengl_windows(), robot_builder_file_dialog(),
       robot_infer_file_dialog(), agent_infer_file_dialog(ImGuiFileBrowserFlags_SelectDirectory),
-      opengl_render_size(static_cast<float>(width), static_cast<float>(height)),
       popup_already_opened_robot("Popup_robot_already_opened"), vao(0) {
 
     if (!glfwInit()) {
@@ -113,12 +112,6 @@ void ImGuiApplication::render() {
     imgui_render_robot_infer();
     imgui_render_agent_infer_file_dialog();
     imgui_render_robot_infer_file_dialog();
-
-    for (const auto &gl_window: opengl_windows)
-        if (gl_window->is_active()) {
-            glBindVertexArray(vao);
-            gl_window->draw_opengl(opengl_render_size.x, opengl_render_size.y);
-        }
 
     imgui_render_opengl();
 
@@ -471,9 +464,15 @@ void ImGuiApplication::imgui_render_opengl() {
 
     if (ImGui::BeginTabBar(
             "OpenGL tab bar", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_NoTooltip)) {
-        opengl_render_size = ImGui::GetContentRegionAvail();
+        const auto opengl_render_size = ImGui::GetContentRegionAvail();
 
-        for (const auto &gl_win: opengl_windows) gl_win->draw_imgui_image();
+        for (const auto &gl_win: opengl_windows) {
+            if (gl_win->is_active()) {
+                glBindVertexArray(vao);
+                gl_win->draw_opengl(opengl_render_size.x, opengl_render_size.y);
+            }
+            gl_win->draw_imgui_image();
+        }
 
         ImGui::EndTabBar();
     }
