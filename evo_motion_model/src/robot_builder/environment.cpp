@@ -296,7 +296,7 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
 
 std::string RobotBuilderEnvironment::get_robot_name() { return robot_name; }
 void RobotBuilderEnvironment::set_robot_name(const std::string &new_robot_name) {
-    root_name = new_robot_name;
+    robot_name = new_robot_name;
 }
 
 std::tuple<glm::vec3, glm::quat, glm::vec3>
@@ -320,7 +320,8 @@ std::vector<std::shared_ptr<Controller>> RobotBuilderEnvironment::get_controller
 std::vector<int64_t> RobotBuilderEnvironment::get_state_space() { return std::vector<int64_t>(); }
 std::vector<int64_t> RobotBuilderEnvironment::get_action_space() { return std::vector<int64_t>(); }
 std::optional<Item> RobotBuilderEnvironment::get_camera_track_item() {
-    return std::optional<Item>();
+    if (root_name != "") return get_member(root_name)->get_item();
+    return std::nullopt;
 }
 step RobotBuilderEnvironment::compute_step() { return step(); }
 void RobotBuilderEnvironment::reset_engine() {}

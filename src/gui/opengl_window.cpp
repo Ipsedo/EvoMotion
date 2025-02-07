@@ -18,7 +18,8 @@ OpenGlWindow::OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Envi
               std::chrono::system_clock::now().time_since_epoch())
               .count()),
       name(std::move(bar_item_name)), frame_buffer(std::make_unique<FrameBuffer>(1920, 1080)),
-      drawables(), env(env), active(true), camera(std::make_unique<ImGuiCamera>([env]() {
+      drawables(), env(env), active(true), opened(true),
+      camera(std::make_unique<ImGuiCamera>([env]() {
           const auto track_item = env->get_camera_track_item();
           if (track_item.has_value()) {
               const auto pos = track_item.value().get_body()->getCenterOfMassPosition();
@@ -53,12 +54,11 @@ void OpenGlWindow::draw_opengl(float width, float height) {
     frame_buffer->unbind();
 }
 
-void OpenGlWindow::on_hide_tab() {}
-
-bool OpenGlWindow::draw_imgui_image() {
-    bool opened = true;
-
+void OpenGlWindow::draw_imgui_image() {
     if (ImGui::BeginTabItem(name.c_str(), &opened)) {
+
+        if (!active) on_open_tab();
+
         on_imgui_tab_begin();
 
         if (ImGui::IsWindowHovered()) camera->update();
@@ -71,20 +71,14 @@ bool OpenGlWindow::draw_imgui_image() {
 
         ImGui::EndTabItem();
     } else {
-        on_hide_tab();
+        if (active) on_hide_tab();
         active = false;
     }
-
-    return opened;
 }
 
 bool OpenGlWindow::is_active() const { return active; }
 
-void OpenGlWindow::on_imgui_tab_begin() {}
-
-void OpenGlWindow::on_opengl_frame(
-    float new_width, float new_height, const glm::mat4 &new_view_matrix,
-    const glm::mat4 &new_proj_matrix) {}
+bool OpenGlWindow::is_opened() const { return opened; }
 
 std::shared_ptr<DrawableFactory>
 OpenGlWindow::get_drawable_factory(const Item &item, std::mt19937 &curr_rng) {
@@ -115,8 +109,6 @@ BuilderOpenGlWindow::BuilderOpenGlWindow(
       mouse_event(std::make_unique<RayMouseEvent>(1920, 1080)), builder_env(env) {}
 
 void BuilderOpenGlWindow::on_imgui_tab_begin() {
-    OpenGlWindow::on_imgui_tab_begin();
-
     if (ImGui::IsWindowHovered() && ImGui::IsWindowFocused()) {
         const auto ray_coords = mouse_event->get_scene_absolute_click_pos(
             ImGui::GetCursorPosX(), ImGui::GetCursorPosX());
@@ -134,14 +126,7 @@ void BuilderOpenGlWindow::on_opengl_frame(
     float new_width, float new_height, const glm::mat4 &new_view_matrix,
     const glm::mat4 &new_proj_matrix) {
 
-    if (context->is_builder_env_selected()
-        && context->get_builder_env()->get_robot_name() != builder_env->get_robot_name())
-        context->release_focus_member();
-    context->set_builder_env(builder_env);
-
     mouse_event->update(new_width, new_height, new_view_matrix, new_proj_matrix);
-
-    OpenGlWindow::on_opengl_frame(new_width, new_height, new_view_matrix, new_proj_matrix);
 }
 
 std::shared_ptr<DrawableFactory>
@@ -165,6 +150,14 @@ void BuilderOpenGlWindow::on_hide_tab() {
     }
 }
 
+void BuilderOpenGlWindow::on_open_tab() {
+    if (!context->is_builder_env_selected()
+        || context->get_builder_env()->get_robot_name() != builder_env->get_robot_name()) {
+        context->release_focus_member();
+        context->set_builder_env(builder_env);
+    }
+}
+
 /*
  * Run
  */
@@ -182,6 +175,8 @@ void InferOpenGlWindow::on_opengl_frame(
 
     const auto action = agent->act(curr_step.state, curr_step.reward);
     curr_step = get_env()->do_step(action);
-
-    OpenGlWindow::on_opengl_frame(new_width, new_height, new_view_matrix, new_proj_matrix);
 }
+
+void InferOpenGlWindow::on_imgui_tab_begin() {}
+void InferOpenGlWindow::on_hide_tab() {}
+void InferOpenGlWindow::on_open_tab() {}

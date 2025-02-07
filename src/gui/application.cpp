@@ -81,7 +81,18 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
 }
 
 void ImGuiApplication::render() {
+    if (!context->is_builder_env_selected()) {
+        show_member_settings_window = false;
+        show_construct_tools_window = false;
+        show_robot_info_window = false;
+    }
+
     glfwPollEvents();
+
+    if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
+        ImGui_ImplGlfw_Sleep(10);
+        return;
+    }
 
     for (const auto &gl_window: opengl_windows)
         if (gl_window->is_active()) {
@@ -89,21 +100,14 @@ void ImGuiApplication::render() {
             gl_window->draw_opengl(opengl_render_size.x, opengl_render_size.y);
         }
 
-    if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
-        ImGui_ImplGlfw_Sleep(10);
-        return;
-    }
-
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // ImGui window definition
     imgui_render_toolbar();
 
-    imgui_render_opengl();
-
+    // ImGui window definition
     imgui_render_member_settings();
     imgui_render_robot_info();
     imgui_render_robot_builder_file_dialog();
@@ -115,6 +119,8 @@ void ImGuiApplication::render() {
     imgui_render_robot_infer();
     imgui_render_agent_infer_file_dialog();
     imgui_render_robot_infer_file_dialog();
+
+    imgui_render_opengl();
 
     // Pop-ups
     if (ImGui::BeginPopupModal(
@@ -137,6 +143,8 @@ void ImGuiApplication::render() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
+
+    std::erase_if(opengl_windows, [](const auto &gl_window) { return !gl_window->is_opened(); });
 }
 
 void ImGuiApplication::imgui_render_toolbar() {
@@ -157,9 +165,6 @@ void ImGuiApplication::imgui_render_toolbar() {
 
                 opengl_windows.push_back(std::make_shared<BuilderOpenGlWindow>(
                     context, new_robot->get_robot_name(), new_robot));
-
-                context->release_focus_member();
-                context->set_builder_env(new_robot);
             }
 
             if (ImGui::MenuItem("Load robot")) robot_builder_file_dialog.Open();
@@ -178,7 +183,8 @@ void ImGuiApplication::imgui_render_toolbar() {
             if (ImGui::MenuItem(
                     "Member settings", nullptr, false, context->is_builder_env_selected()))
                 show_member_settings_window = true;
-            if (ImGui::MenuItem("Construct tools", nullptr, false, context->is_member_focused()))
+            if (ImGui::MenuItem(
+                    "Construct tools", nullptr, false, context->is_builder_env_selected()))
                 show_construct_tools_window = true;
 
             ImGui::EndMenu();
@@ -201,12 +207,6 @@ void ImGuiApplication::imgui_render_toolbar() {
 
         ImGui::EndMainMenuBar();
     }
-
-    if (!context->is_builder_env_selected()) {
-        show_member_settings_window = false;
-        show_construct_tools_window = false;
-        show_robot_info_window = false;
-    }
 }
 
 void ImGuiApplication::imgui_render_robot_builder_file_dialog() {
@@ -225,9 +225,6 @@ void ImGuiApplication::imgui_render_robot_builder_file_dialog() {
 
             opengl_windows.push_back(
                 std::make_shared<BuilderOpenGlWindow>(context, robot->get_robot_name(), robot));
-
-            context->set_builder_env(robot);
-            context->release_focus_member();
         } else {
             ImGui::OpenPopup(popup_already_opened_robot.c_str());
         }
@@ -241,7 +238,7 @@ void ImGuiApplication::imgui_render_member_settings() {
         if (ImGui::Begin("Member settings", &show_member_settings_window)) {
             std::string message = "No focus member";
 
-            if (context->is_builder_env_selected() && context->is_member_focused()) {
+            if (context->is_member_focused()) {
                 ImGui::Text("Focus on \"%s\" member", context->get_focused_member().c_str());
 
                 auto [member_pos, member_rot, member_scale] =
@@ -302,9 +299,7 @@ void ImGuiApplication::imgui_render_robot_info() {
             ImGui::Spacing();
 
             ImGui::Text(
-                "Robot selected : %s", context->is_builder_env_selected()
-                                           ? context->get_builder_env()->get_robot_name().c_str()
-                                           : "no robot");
+                "Robot selected : %s", context->get_builder_env()->get_robot_name().c_str());
             ImGui::Text(
                 "Member selected : %s",
                 context->is_member_focused() ? context->get_focused_member().c_str() : "no member");
@@ -313,21 +308,43 @@ void ImGuiApplication::imgui_render_robot_info() {
             ImGui::Separator();
             ImGui::Spacing();
 
-            ImGui::Text(
-                "Root member : %s", context->is_builder_env_selected()
-                                        ? context->get_builder_env()->get_root_name().c_str()
-                                        : "no root");
+            ImGui::Text("Root member : %s", context->get_builder_env()->get_root_name().c_str());
             ImGui::Text(
                 "Members count : %i",
-                context->is_builder_env_selected()
-                    ? static_cast<int>(context->get_builder_env()->get_items().size())
-                    : 0);
+                static_cast<int>(context->get_builder_env()->get_items().size()));
 
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::Spacing();
 
-            // TODO rename robot and set root
+            // robot name
+            std::string robot_name = context->get_builder_env()->get_robot_name();
+            robot_name.resize(128);
+            if (ImGui::InputText("Robot name", &robot_name[0], robot_name.size()))
+                context->get_builder_env()->set_robot_name(robot_name.c_str());
+
+            // select root item
+            int selected_item = 0;
+            std::vector<std::string> item_names;
+
+            const auto items = context->get_builder_env()->get_items();
+            const auto root_name = context->get_builder_env()->get_root_name();
+
+            for (int i = 0; i < items.size(); i++) {
+                if (items[i].get_name() == root_name) selected_item = i;
+                item_names.push_back(items[i].get_name());
+            }
+
+            if (ImGui::Combo(
+                    "Select root item", &selected_item,
+                    [](void *user_ptr, int idx, const char **out_text) {
+                        auto &vec = *static_cast<std::vector<std::string> *>(user_ptr);
+                        if (idx < 0 || idx >= static_cast<int>(vec.size())) return false;
+                        *out_text = vec[idx].c_str();
+                        return true;
+                    },
+                    &item_names, item_names.size()))
+                context->get_builder_env()->set_root(item_names[selected_item]);
         }
         ImGui::End();
     }
@@ -417,7 +434,8 @@ void ImGuiApplication::imgui_render_robot_infer() {
                     3e-4f, 0.99f, 1, 2);
                 agent->load(context->get_agent_infer_path());// TODO check if loaded successfully
                 agent->to(torch::kCPU);
-                opengl_windows.push_back(std::make_shared<InferOpenGlWindow>(agent, "Infer", env));
+                opengl_windows.push_back(std::make_shared<InferOpenGlWindow>(
+                    agent, "Infer " + std::to_string(opengl_windows.size()), env));
 
                 show_infer_window = false;
                 context->release_agent_infer_path();
@@ -455,12 +473,7 @@ void ImGuiApplication::imgui_render_opengl() {
             "OpenGL tab bar", ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_NoTooltip)) {
         opengl_render_size = ImGui::GetContentRegionAvail();
 
-        std::erase_if(opengl_windows, [this](const auto &gl_window) {
-            if (gl_window->draw_imgui_image()) return false;
-            context->release_builder_env();
-            context->release_focus_member();
-            return true;
-        });
+        for (const auto &gl_win: opengl_windows) gl_win->draw_imgui_image();
 
         ImGui::EndTabBar();
     }

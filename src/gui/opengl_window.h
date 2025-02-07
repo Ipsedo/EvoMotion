@@ -23,9 +23,10 @@ public:
     OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Environment> &env);
 
     void draw_opengl(float width, float height);
-    bool draw_imgui_image();
+    void draw_imgui_image();
 
     bool is_active() const;
+    bool is_opened() const;
     std::string get_name();
 
 protected:
@@ -41,19 +42,21 @@ private:
     std::shared_ptr<Environment> env;
 
     bool active;
+    bool opened;
 
     std::unique_ptr<ImGuiCamera> camera;
 
 protected:
-    virtual void on_imgui_tab_begin();
+    virtual void on_imgui_tab_begin() = 0;
     virtual void on_opengl_frame(
         float new_width, float new_height, const glm::mat4 &new_view_matrix,
-        const glm::mat4 &new_proj_matrix);
+        const glm::mat4 &new_proj_matrix) = 0;
 
     virtual std::shared_ptr<DrawableFactory>
     get_drawable_factory(const Item &item, std::mt19937 &curr_rng);
 
-    virtual void on_hide_tab();
+    virtual void on_hide_tab() = 0;
+    virtual void on_open_tab() = 0;
 };
 
 /*
@@ -81,6 +84,7 @@ protected:
     std::shared_ptr<DrawableFactory>
     get_drawable_factory(const Item &item, std::mt19937 &curr_rng) override;
     void on_hide_tab() override;
+    void on_open_tab() override;
 };
 
 /*
@@ -97,6 +101,9 @@ protected:
     void on_opengl_frame(
         float new_width, float new_height, const glm::mat4 &new_view_matrix,
         const glm::mat4 &new_proj_matrix) override;
+    void on_imgui_tab_begin() override;
+    void on_hide_tab() override;
+    void on_open_tab() override;
 
 private:
     std::shared_ptr<Agent> agent;
