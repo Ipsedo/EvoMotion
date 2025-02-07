@@ -46,6 +46,11 @@ uint load_shader(GLenum type, const std::string &filename) {
     glShaderSource(shader, 1, const_cast<const char **>(&shaderSource), nullptr);
     glCompileShader(shader);
 
+    GLint success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+    if (!success) throw std::runtime_error("Shader compile failed");
+
     delete[] shaderSource;
 
     return shader;

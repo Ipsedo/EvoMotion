@@ -16,7 +16,7 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
       context(std::make_shared<AppContext>()), opengl_windows(), robot_builder_file_dialog(),
       robot_infer_file_dialog(), agent_infer_file_dialog(ImGuiFileBrowserFlags_SelectDirectory),
       opengl_render_size(static_cast<float>(width), static_cast<float>(height)),
-      popup_already_opened_robot("Popup_robot_already_opened") {
+      popup_already_opened_robot("Popup_robot_already_opened"), vao(0) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
@@ -24,7 +24,9 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 
@@ -68,19 +70,24 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_MULTISAMPLE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
 
     glDepthFunc(GL_LEQUAL);
 
     glDepthMask(GL_TRUE);
+
+    glGenVertexArrays(1, &vao);
+
+    glDebugMessageCallback(ImGuiApplication::message_callback, nullptr);
 }
 
 void ImGuiApplication::render() {
     glfwPollEvents();
 
     for (const auto &gl_window: opengl_windows)
-        if (gl_window->is_active())
+        if (gl_window->is_active()) {
+            glBindVertexArray(vao);
             gl_window->draw_opengl(opengl_render_size.x, opengl_render_size.y);
+        }
 
     if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
         ImGui_ImplGlfw_Sleep(10);
@@ -466,10 +473,21 @@ void ImGuiApplication::imgui_render_opengl() {
 bool ImGuiApplication::is_close() const { return need_close || glfwWindowShouldClose(window); }
 
 ImGuiApplication::~ImGuiApplication() {
+    glDeleteVertexArrays(1, &vao);
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+void GLAPIENTRY ImGuiApplication::message_callback(
+    const GLenum source, const GLenum type, const GLuint id, const GLenum severity,
+    const GLsizei length, const GLchar *message, const void *userParam) {
+    std::cerr << source << " " << type << " " << id << " " << severity << " " << length << " : "
+              << std::endl;
+    std::cerr << "params : " << userParam << std::endl;
+    std::cerr << message << std::endl << std::endl;
 }

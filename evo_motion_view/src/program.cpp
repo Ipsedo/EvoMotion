@@ -4,6 +4,7 @@
 
 #include "./program.h"
 
+#include <stdexcept>
 #include <utility>
 
 #include <GL/glew.h>
@@ -65,6 +66,15 @@ Program::Program(
     glAttachShader(program_id, fragment_shader_id);
 
     glLinkProgram(program_id);
+
+    int success;
+    glGetProgramiv(program_id, GL_LINK_STATUS, &success);
+    if (!success) {
+        std::string info_log;
+        info_log.resize(512);
+        glGetProgramInfoLog(program_id, 512, nullptr, &info_log[0]);
+        throw std::runtime_error("Program link failed : " + info_log);
+    }
 
     for (const auto &[name, data]: buffers) {
         buffer_ids.insert({name, 0});

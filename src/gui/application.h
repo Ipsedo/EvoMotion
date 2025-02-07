@@ -65,6 +65,8 @@ private:
 
     std::string popup_already_opened_robot;
 
+    GLuint vao;
+
     void imgui_render_toolbar();
 
     void imgui_render_robot_builder_file_dialog();
@@ -80,6 +82,10 @@ private:
     void imgui_render_robot_infer_file_dialog();
     void imgui_render_agent_infer_file_dialog();
     void imgui_render_robot_infer();
+
+    static void GLAPIENTRY message_callback(
+        const GLenum source, const GLenum type, const GLuint id, const GLenum severity,
+        const GLsizei length, const GLchar *message, const void *userParam);
 };
 
 #endif//EVO_MOTION_APPLICATION_H

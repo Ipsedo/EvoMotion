@@ -1,4 +1,4 @@
-#version 150
+#version 330 core
 
 precision mediump float;
 
@@ -20,10 +20,9 @@ uniform float u_shininess;
 
 uniform float u_tile_size;
 
-varying vec3 v_local_position;
-varying vec3 v_position;
-varying vec3 v_normal;
-
+in vec3 v_local_position;
+in vec3 v_position;
+in vec3 v_normal;
 
 void main(){
     float distance = length(u_light_pos - v_position);
