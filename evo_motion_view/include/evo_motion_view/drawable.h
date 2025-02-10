@@ -22,7 +22,7 @@ public:
 
 class DrawableFactory {
 public:
-    virtual std::shared_ptr<Drawable> get_drawable() = 0;
+    virtual std::shared_ptr<Drawable> create_drawable() = 0;
 };
 
 #endif//EVO_MOTION_DRAWABLE_H

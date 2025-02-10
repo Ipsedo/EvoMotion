@@ -5,7 +5,8 @@
 #include <evo_motion_networks/networks/norm.h>
 
 BatchRenormalization::BatchRenormalization(
-    int num_features, float epsilon, float momentum, bool affine, int warmup_steps)
+    int num_features, const float epsilon, const float momentum, const bool affine,
+    const int warmup_steps)
     : running_mean(register_buffer("running_mean", torch::zeros({num_features}))),
       running_std(register_buffer("running_std", torch::ones({num_features}))),
       weight(register_parameter("weight", torch::ones({num_features}))),
@@ -20,18 +21,21 @@ torch::Tensor BatchRenormalization::forward(const torch::Tensor &x) {
         const auto batch_mean = x.mean(0);
         const auto batch_std = x.std(0, false) + epsilon;
 
-        const auto r = torch::clamp(batch_std.detach() / running_std, 1.0 / r_max(), r_max());
+        const auto r =
+            torch::clamp(batch_std.detach() / running_std, 1.0 / r_max(), r_max()).detach();
         const auto d =
-            torch::clamp((batch_mean.detach() - running_mean) / running_std, -d_max(), d_max());
+            torch::clamp(
+                (batch_mean.detach() - running_mean) / (running_std + epsilon), -d_max(), d_max())
+                .detach();
 
         out = (x - batch_mean) / batch_std * r + d;
 
-        running_mean += momentum * (batch_mean.detach() - running_mean);
-        running_std += momentum * (batch_std.detach() - running_std);
+        running_mean = (1.f - momentum) * running_mean + momentum * batch_mean.detach();
+        running_std = (1.f - momentum) * running_std + momentum * batch_std.detach();
 
         curr_step = std::min(curr_step + 1, warmup_steps);
     } else {
-        out = (x - running_mean) / running_std;
+        out = (x - running_mean) / (running_std + epsilon);
     }
 
     if (affine) out = weight * out + bias;

@@ -30,8 +30,6 @@ Environment::Environment(const int num_threads)
     m_world->setGravity(btVector3(0, -9.8f, 0));
 }
 
-void Environment::add_item(const Item &item) const { m_world->addRigidBody(item.get_body()); }
-
 step Environment::do_step(const torch::Tensor &action) {
     for (const auto &c: get_controllers()) c->on_input(action);
 

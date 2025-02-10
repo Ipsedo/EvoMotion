@@ -24,34 +24,34 @@ CartPole3d::CartPole3d(
       last_vert_ang_vel(0.f), last_plan_ang(0.f), last_plan_ang_vec(0.f), limit_angle(limit_angle),
       step_idx(0), max_steps(max_steps) {
 
-    Item base(
+    auto base = std::make_shared<RigidBodyItem>(
         "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(base_pos.x(), base_pos.y(), base_pos.z()),
         glm::vec3(base_scale.x(), base_scale.y(), base_scale.z()), base_mass, TILE_SPECULAR);
 
-    Item cart_x(
+    auto cart_x = std::make_shared<RigidBodyItem>(
         "cart_x", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(cart_x_pos.x(), cart_x_pos.y(), cart_x_pos.z()),
         glm::vec3(cart_x_scale.x(), cart_x_scale.y(), cart_x_scale.z()), cart_x_mass, SPECULAR);
 
-    Item cart_z(
+    auto cart_z = std::make_shared<RigidBodyItem>(
         "cart_z", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(cart_z_pos.x(), cart_z_pos.y(), cart_z_pos.z()),
         glm::vec3(cart_z_scale.x(), cart_z_scale.y(), cart_z_scale.z()), cart_z_mass, SPECULAR);
 
-    Item pole(
+    auto pole = std::make_shared<RigidBodyItem>(
         "pole", std::make_shared<ObjShape>("./resources/obj/cylinder.obj"),
         glm::vec3(pole_pos.x(), pole_pos.y(), pole_pos.z()),
         glm::vec3(pole_scale.x(), pole_scale.y(), pole_scale.z()), pole_mass, SPECULAR);
 
     items = {base, cart_x, cart_z, pole};
 
-    for (const auto &item: items) add_item(item);
+    for (const auto &item: items) m_world->addRigidBody(item->get_body());
 
-    base_rg = base.get_body();
-    cart_x_rg = cart_x.get_body();
-    cart_z_rg = cart_z.get_body();
-    pole_rg = pole.get_body();
+    base_rg = base->get_body();
+    cart_x_rg = cart_x->get_body();
+    cart_z_rg = cart_z->get_body();
+    pole_rg = pole->get_body();
 
     btTransform tr_base;
     tr_base.setIdentity();
@@ -62,7 +62,7 @@ CartPole3d::CartPole3d(
     tr_cart_x.setOrigin(btVector3(0.f, -cart_x_scale.y(), 0.f));
 
     slider_x =
-        new btSliderConstraint(*base.get_body(), *cart_x.get_body(), tr_base, tr_cart_x, true);
+        new btSliderConstraint(*base->get_body(), *cart_x->get_body(), tr_base, tr_cart_x, true);
 
     slider_x->setEnabled(true);
     slider_x->setPoweredLinMotor(true);
@@ -130,7 +130,12 @@ CartPole3d::CartPole3d(
     m_world->addConstraint(p2p_constraint);
 }
 
-std::vector<Item> CartPole3d::get_items() { return items; }
+std::vector<std::shared_ptr<AbstractItem>> CartPole3d::get_draw_items() {
+    std::vector<std::shared_ptr<AbstractItem>> abs_items;
+    std::transform(
+        items.begin(), items.end(), std::back_inserter(abs_items), [](const auto &i) { return i; });
+    return abs_items;
+}
 
 std::vector<std::shared_ptr<Controller>> CartPole3d::get_controllers() { return controllers; }
 
@@ -320,4 +325,6 @@ std::vector<int64_t> CartPole3d::get_state_space() { return {28}; }
 
 std::vector<int64_t> CartPole3d::get_action_space() { return {2}; }
 
-std::optional<Item> CartPole3d::get_camera_track_item() { return std::nullopt; }
+std::optional<std::shared_ptr<AbstractItem>> CartPole3d::get_camera_track_item() {
+    return std::nullopt;
+}

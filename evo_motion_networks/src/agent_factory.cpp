@@ -24,7 +24,7 @@ AgentFactory::AgentFactory(std::map<std::string, std::string> parameters)
 
 template<typename Value>
 Value AgentFactory::generic_get_value(
-    std::function<Value(const std::string &)> converter, const std::string &key) {
+    const std::function<Value(const std::string &)> &converter, const std::string &key) {
     if (parameters.find(key) == parameters.end()) throw std::invalid_argument(key);
     return converter(parameters[key]);
 }

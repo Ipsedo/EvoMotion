@@ -11,7 +11,7 @@ class ExpModule final : public torch::nn::Module {
 public:
     explicit ExpModule(float epsilon = 0.f);
 
-    torch::Tensor forward(const torch::Tensor &input);
+    torch::Tensor forward(const torch::Tensor &input) const;
 
 private:
     float epsilon;

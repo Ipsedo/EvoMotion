@@ -17,8 +17,10 @@
 class Muscle {
 public:
     Muscle(
-        const std::string &name, float attach_mass, glm::vec3 attach_scale, const Item &item_a,
-        glm::vec3 pos_in_a, const Item &item_b, glm::vec3 pos_in_b, float force, float max_speed);
+        const std::string &name, const float attach_mass, const glm::vec3 attach_scale,
+        const std::shared_ptr<RigidBodyItem> &item_a, const glm::vec3 pos_in_a,
+        const std::shared_ptr<RigidBodyItem> &item_b, const glm::vec3 pos_in_b, const float force,
+        const float max_speed);
 
     Muscle(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
@@ -29,8 +31,12 @@ public:
     void release() const;
 
     std::string get_name();
-    std::vector<Item> get_items();
+
+    std::vector<std::shared_ptr<AbstractItem>> get_items();
+
+    std::vector<btRigidBody *> get_bodies();
     std::vector<btTypedConstraint *> get_constraints();
+
     btSliderConstraint *get_slider_constraint() const;
     std::tuple<btPoint2PointConstraint *, btPoint2PointConstraint *> get_p2p_constraints();
 
@@ -47,8 +53,8 @@ private:
 
     float max_speed;
 
-    Item attach_a;
-    Item attach_b;
+    std::shared_ptr<RigidBodyItem> attach_a;
+    std::shared_ptr<RigidBodyItem> attach_b;
 
     btSliderConstraint *muscle_slider_constraint;
     btPoint2PointConstraint *attach_a_constraint;

@@ -92,4 +92,4 @@ void TileGround::draw(
     program.disable_attrib_array();
 }
 
-TileGround::~TileGround() {}
+TileGround::~TileGround() = default;

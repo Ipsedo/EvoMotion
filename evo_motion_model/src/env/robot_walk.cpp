@@ -4,25 +4,25 @@
 
 #include "./robot_walk.h"
 
-#include "../controller/muscle_controller.h"
-#include "../json_serializer.h"
-#include "./constants.h"
-
-#define GLM_ENABLE_EXPERIMENTAL
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
+
+#include "../controller/muscle_controller.h"
+#include "../json_serializer.h"
+#include "../utils.h"
+#include "./constants.h"
 
 RobotWalk::RobotWalk(
     const int num_threads, const int seed, const std::string &skeleton_json_path,
     const float initial_remaining_seconds, const float max_episode_seconds,
     const float target_velocity, const float minimal_velocity, const int reset_frames)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f),
-      base(
+      base(std::make_shared<RigidBodyItem>(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
-          0.f, TILE_SPECULAR),
+          0.f, TILE_SPECULAR)),
       skeleton_json_path(skeleton_json_path),
       skeleton(std::make_shared<JsonDeserializer>(std::filesystem::path(skeleton_json_path))),
       initial_remaining_seconds(initial_remaining_seconds), target_velocity(target_velocity),
@@ -30,13 +30,13 @@ RobotWalk::RobotWalk(
       max_steps(static_cast<int>(max_episode_seconds / DELTA_T_MODEL)),
       remaining_steps(static_cast<int>(initial_remaining_seconds / DELTA_T_MODEL)),
       root_item(skeleton.get_member(skeleton.get_root_name())->get_item()) {
-    base.get_body()->setFriction(0.5f);
+    base->get_body()->setFriction(0.5f);
 
-    add_item(base);
+    m_world->addRigidBody(base->get_body());
 
-    for (const auto &item: skeleton.get_items()) {
-        add_item(item);
-        item.get_body()->setActivationState(DISABLE_DEACTIVATION);
+    for (const auto &b: skeleton.get_bodies()) {
+        m_world->addRigidBody(b);
+        b->setActivationState(DISABLE_DEACTIVATION);
     }
 
     for (const auto &c: skeleton.get_constraints()) m_world->addConstraint(c);
@@ -45,7 +45,7 @@ RobotWalk::RobotWalk(
     controllers = skeleton.get_controllers();
 }
 
-std::vector<Item> RobotWalk::get_items() {
+std::vector<std::shared_ptr<AbstractItem>> RobotWalk::get_draw_items() {
     auto items = skeleton.get_items();
     items.push_back(base);
     return items;
@@ -58,7 +58,7 @@ step RobotWalk::compute_step() {
 
     for (const auto &state: states) current_states.push_back(state->get_state(curr_device));
 
-    const float lin_vel_z = root_item.get_body()->getLinearVelocity().z();
+    const float lin_vel_z = root_item->get_body()->getLinearVelocity().z();
     const float reward = lin_vel_z;
 
     if (lin_vel_z < minimal_velocity) remaining_steps -= 1;
@@ -77,7 +77,7 @@ void RobotWalk::reset_engine() {
     // reset model transform
     constexpr glm::vec3 root_pos(1.f, 0.25f, 2.f);
 
-    constexpr float angle_limit = static_cast<float>(M_PI) / 3.f;
+    constexpr float angle_limit = static_cast<float>(M_PI) * 2.f / 3.f;
 
     const float angle_yaw = rd_uni(rng) * angle_limit - angle_limit / 2.f;
     const float angle_roll = rd_uni(rng) * angle_limit - angle_limit / 2.f;
@@ -85,14 +85,14 @@ void RobotWalk::reset_engine() {
     const glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
                                    * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
 
-    for (const auto &item: skeleton.get_items()) {
-        m_world->removeRigidBody(item.get_body());
-        item.reset(model_matrix);
-    }
+    for (const auto &b: skeleton.get_bodies()) m_world->removeRigidBody(b);
+
+    for (const auto &i: skeleton.get_items()) i->reset(model_matrix);
+
     for (const auto &c: skeleton.get_constraints()) m_world->removeConstraint(c);
 
     // re-add
-    for (const auto &item: skeleton.get_items()) m_world->addRigidBody(item.get_body());
+    for (const auto &b: skeleton.get_bodies()) m_world->addRigidBody(b);
     for (const auto &c: skeleton.get_constraints()) m_world->addConstraint(c);
 
     for (int i = 0; i < reset_frames; i++) step_world(DELTA_T_MODEL);
@@ -112,4 +112,6 @@ std::vector<int64_t> RobotWalk::get_action_space() {
     return {static_cast<long>(controllers.size())};
 }
 
-std::optional<Item> RobotWalk::get_camera_track_item() { return root_item; }
+std::optional<std::shared_ptr<AbstractItem>> RobotWalk::get_camera_track_item() {
+    return root_item;
+}

@@ -3,14 +3,18 @@
 //
 
 #include <fstream>
+#include <utility>
 
 #include <evo_motion_model/robot/builder.h>
 #include <evo_motion_model/robot/skeleton.h>
 
+#include "../converter.h"
 #include "../json_serializer.h"
+#include "../utils.h"
 
-RobotBuilderEnvironment::RobotBuilderEnvironment()
-    : Environment(1), root_name(), skeleton_graph(), members(), constraints(), muscles() {}
+RobotBuilderEnvironment::RobotBuilderEnvironment(std::string robot_name)
+    : Environment(1), robot_name(std::move(robot_name)), root_name(), skeleton_graph(), members(),
+      constraints(), muscles() {}
 
 bool RobotBuilderEnvironment::set_root(const std::string &member_name) {
     if (member_exists(member_name)) {
@@ -30,42 +34,85 @@ bool RobotBuilderEnvironment::add_member(
     members.push_back(std::make_shared<BuilderMember>(
         member_name, shape_kind, center_pos, rotation, scale, mass, friction, false));
 
+    members.back()->get_item()->get_body()->setUserPointer(new std::string(member_name));
+
     return true;
 }
 
 bool RobotBuilderEnvironment::update_member(
-    const std::string &member_name, const std::optional<glm::vec3> new_pos,
-    const std::optional<glm::quat> &new_rot, const std::optional<glm::vec3> new_scale,
-    const std::optional<float> new_friction, const std::optional<bool> new_ignore_collision) {
+    const std::string &member_name, std::optional<glm::vec3> new_pos,
+    const std::optional<glm::quat> &new_rot, std::optional<glm::vec3> new_scale,
+    std::optional<float> new_friction, std::optional<float> new_mass,
+    std::optional<bool> new_ignore_collision) {
 
     if (member_exists(member_name)) {
         std::set<std::string> updated_members;
 
-        get_member(member_name)
-            ->update_item(new_pos, new_rot, new_scale, new_friction, new_ignore_collision);
+        const auto parent_member = get_member(member_name);
+
+        glm::mat4 old_member_model_mat = parent_member->get_item()->model_matrix_without_scale();
+
+        parent_member->update_item(
+            new_pos, new_rot, new_scale, new_friction, new_mass, new_ignore_collision);
         updated_members.insert(member_name);
 
-        std::queue<std::string> queue;
-        queue.push(member_name);
+        glm::mat4 new_member_model_mat = parent_member->get_item()->model_matrix_without_scale();
+
+        std::queue<std::tuple<glm::mat4, glm::mat4, std::string>> queue;
+        for (const auto &[_, m_n]: skeleton_graph[member_name])
+            queue.emplace(old_member_model_mat, new_member_model_mat, m_n);
 
         while (!queue.empty()) {
-            const auto &curr_member_name = queue.front();
-            queue.pop();
+            const auto &[parent_old_model_mat, parent_new_model_mat, curr_member_name] =
+                queue.front();
 
             const auto curr_member = get_member(curr_member_name);
+            const auto curr_old_model_mat = curr_member->get_item()->model_matrix_without_scale();
 
-            curr_member->transform_item(new_pos, new_rot);
+            const auto in_old_parent_space =
+                glm::inverse(parent_old_model_mat) * curr_old_model_mat;
+            const auto in_new_parent_space = parent_new_model_mat * in_old_parent_space;
+
+            const auto [curr_tr, curr_rot, curr_scale] =
+                decompose_model_matrix(in_new_parent_space);
+
+            curr_member->update_item(curr_tr, curr_rot);
+            const auto curr_new_model_mat = curr_member->get_item()->model_matrix_without_scale();
 
             updated_members.insert(curr_member_name);
 
             for (const auto &[_, child_member_name]: skeleton_graph[curr_member_name])
                 if (updated_members.find(child_member_name) == updated_members.end())
-                    queue.push(child_member_name);
-        }
+                    queue.emplace(curr_old_model_mat, curr_new_model_mat, child_member_name);
 
+            queue.pop();
+        }
         return true;
     }
     return false;
+}
+
+bool RobotBuilderEnvironment::rename_member(
+    const std::string &old_name, const std::string &new_name) {
+    if (member_exists(new_name) || !member_exists(old_name)) return false;
+
+    get_member(old_name)->get_item()->rename(new_name);
+
+    if (root_name == old_name) root_name = new_name;
+
+    auto children = skeleton_graph.extract(old_name);
+    children.key() = new_name;
+    skeleton_graph.insert(std::move(children));
+
+    for (const auto [key, value]: skeleton_graph)
+        skeleton_graph[key] = transform_vector<
+            std::tuple<std::string, std::string>, std::tuple<std::string, std::string>>(
+            value, [old_name, new_name](const auto &t) {
+                const auto [c, n] = t;
+                return std::tuple<std::string, std::string>(c, n == old_name ? new_name : n);
+            });
+
+    return true;
 }
 
 bool RobotBuilderEnvironment::attach_fixed_constraint(
@@ -76,8 +123,9 @@ bool RobotBuilderEnvironment::attach_fixed_constraint(
         return false;
 
     const auto parent_model_matrix =
-        get_member(parent_name)->get_item().model_matrix_without_scale();
-    const auto child_model_matrix = get_member(child_name)->get_item().model_matrix_without_scale();
+        get_member(parent_name)->get_item()->model_matrix_without_scale();
+    const auto child_model_matrix =
+        get_member(child_name)->get_item()->model_matrix_without_scale();
 
     const auto absolute_frame = glm::translate(glm::mat4(1.f), absolute_fixed_point);
     const auto frame_in_parent = glm::inverse(parent_model_matrix) * absolute_frame;
@@ -93,6 +141,30 @@ bool RobotBuilderEnvironment::attach_fixed_constraint(
     return true;
 }
 
+bool RobotBuilderEnvironment::remove_member(const std::string &member_name) {
+    if (!member_exists(member_name)) return false;
+
+    std::vector<std::string> constraints_to_remove;
+    for (const auto &[constraint_name, curr_member_name]: skeleton_graph[member_name])
+        constraints_to_remove.push_back(constraint_name);
+
+    for (const auto &constraint_name: constraints_to_remove) remove_constraint(constraint_name);
+
+    std::erase_if(members, [member_name, this](const auto &m) {
+        if (m->get_name() == member_name) {
+            delete (std::string *) m->get_item()->get_body()->getUserPointer();
+            m_world->removeRigidBody(m->get_item()->get_body());
+            delete m->get_item()->get_body();
+            return true;
+        }
+        return false;
+    });
+
+    skeleton_graph.erase(member_name);
+
+    return true;
+}
+
 bool RobotBuilderEnvironment::remove_constraint(const std::string &constraint_name) {
     if (!constraint_exists(constraint_name)) return false;
 
@@ -104,8 +176,14 @@ bool RobotBuilderEnvironment::remove_constraint(const std::string &constraint_na
         skeleton_graph[member] = children;
     }
 
-    std::erase_if(
-        constraints, [constraint_name](const auto &c) { return c->get_name() == constraint_name; });
+    std::erase_if(constraints, [constraint_name, this](const auto &c) {
+        if (c->get_name() == constraint_name) {
+            m_world->removeConstraint(c->get_constraint());
+            delete c->get_constraint();
+            return true;
+        }
+        return false;
+    });
 
     return true;
 }
@@ -130,16 +208,16 @@ bool RobotBuilderEnvironment::exists_part(
 }
 
 std::shared_ptr<BuilderMember> RobotBuilderEnvironment::get_member(const std::string &member_name) {
-    return RobotBuilderEnvironment::get_part(member_name, members);
+    return get_part<BuilderMember>(member_name, members);
 }
 
 std::shared_ptr<BuilderConstraint>
 RobotBuilderEnvironment::get_constraint(const std::string &constraint_name) {
-    return RobotBuilderEnvironment::get_part(constraint_name, constraints);
+    return get_part<BuilderConstraint>(constraint_name, constraints);
 }
 
 std::shared_ptr<BuilderMuscle> RobotBuilderEnvironment::get_muscle(const std::string &muscle_name) {
-    return RobotBuilderEnvironment::get_part(muscle_name, muscles);
+    return get_part<BuilderMuscle>(muscle_name, muscles);
 }
 
 template<typename Part>
@@ -147,11 +225,83 @@ std::shared_ptr<Part>
 RobotBuilderEnvironment::get_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec) {
     for (const auto &o: vec)
         if (o->get_name() == name) return o;
-    throw std::runtime_error("\"" + name + "\" not found");
+    throw std::runtime_error("Part \"" + name + "\" not found");
 }
 
-void RobotBuilderEnvironment::save_robot(
-    const std::filesystem::path &output_json_path, const std::string &robot_name) {
+std::optional<std::string> RobotBuilderEnvironment::ray_cast_member(
+    const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) {
+    const auto from_bullet = glm_to_bullet(from_absolute);
+    const auto to_bullet = glm_to_bullet(to_absolute);
+
+    btCollisionWorld::ClosestRayResultCallback callback(from_bullet, to_bullet);
+
+    m_world->rayTest(from_bullet, to_bullet, callback);
+
+    if (callback.hasHit())
+        if (const auto user_ptr = callback.m_collisionObject->getUserPointer(); user_ptr) {
+            const std::string name(*static_cast<std::string *>(user_ptr));
+            if (member_exists(name)) return name;
+        }
+
+    return std::nullopt;
+}
+
+std::optional<std::string> RobotBuilderEnvironment::ray_cast_constraint(
+    const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) {
+
+    // prepare world
+    std::vector<btRigidBody *> bodies_to_re_add;
+    std::transform(
+        members.begin(), members.end(), std::back_inserter(bodies_to_re_add),
+        [this](const auto &m) {
+            const auto b = m->get_item()->get_body();
+            m_world->removeRigidBody(b);
+            return b;
+        });
+
+    for (const auto &m: muscles)
+        for (const auto &b: m->get_bodies()) {
+            m_world->removeRigidBody(b);
+            bodies_to_re_add.push_back(b);
+        }
+
+    std::vector<btRigidBody *> tmp_bodies;
+    std::transform(
+        constraints.begin(), constraints.end(), std::back_inserter(tmp_bodies),
+        [this](const std::shared_ptr<BuilderConstraint> &c) {
+            const auto b = c->create_fake_body();
+            b->setUserPointer(new std::string(c->get_name()));
+            m_world->addRigidBody(b);
+            return b;
+        });
+
+    // ray cast
+    const auto from_bullet = glm_to_bullet(from_absolute);
+    const auto to_bullet = glm_to_bullet(to_absolute);
+    std::optional<std::string> found = std::nullopt;
+
+    btCollisionWorld::ClosestRayResultCallback callback(from_bullet, to_bullet);
+
+    m_world->rayTest(from_bullet, to_bullet, callback);
+
+    if (callback.hasHit())
+        if (const auto user_ptr = callback.m_collisionObject->getUserPointer(); user_ptr) {
+            const std::string name(*static_cast<std::string *>(user_ptr));
+            if (constraint_exists(name)) found = name;
+        }
+
+    // re-populate world
+    for (const auto &b: tmp_bodies) {
+        delete static_cast<std::string *>(b->getUserPointer());
+        m_world->removeRigidBody(b);
+    }
+
+    for (const auto &b: bodies_to_re_add) m_world->addRigidBody(b);
+
+    return found;
+}
+
+void RobotBuilderEnvironment::save_robot(const std::filesystem::path &output_json_path) {
 
     std::vector<std::shared_ptr<Member>> members_vector(members.begin(), members.end());
     std::vector<std::shared_ptr<Constraint>> constraints_vector(
@@ -173,11 +323,24 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
     const auto json_muscles_deserializer = json_deserializer->read_array("muscles");
 
     root_name = json_deserializer->read_str("root_name");
+    robot_name = json_deserializer->read_str("robot_name");
+
+    skeleton_graph.clear();
+    members.clear();
+    constraints.clear();
+    muscles.clear();
 
     std::transform(
         json_members_deserializer.begin(), json_members_deserializer.end(),
-        std::back_inserter(members), [](const auto &s) -> std::shared_ptr<BuilderMember> {
-            return std::make_shared<BuilderMember>(s);
+        std::back_inserter(members), [this](const auto &s) -> std::shared_ptr<BuilderMember> {
+            const auto m = std::make_shared<BuilderMember>(s);
+
+            m->get_item()->get_body()->setUserPointer(new std::string(m->get_name()));
+
+            m_world->addRigidBody(m->get_item()->get_body());
+            skeleton_graph[m->get_name()] = std::vector<std::tuple<std::string, std::string>>();
+
+            return m;
         });
 
     std::transform(
@@ -194,29 +357,81 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
             else
                 throw std::runtime_error("Unknown constraint type \"" + s->read_str("type") + "\"");
 
+            m_world->addConstraint(c->get_constraint());
+
+            skeleton_graph[c->get_parent()->get_name()].emplace_back(
+                c->get_name(), c->get_child()->get_name());
+            skeleton_graph[c->get_child()->get_name()].emplace_back(
+                c->get_name(), c->get_parent()->get_name());
+
             return c;
         });
 
     std::transform(
         json_muscles_deserializer.begin(), json_muscles_deserializer.end(),
         std::back_inserter(muscles), [this](const auto &s) -> std::shared_ptr<BuilderMuscle> {
-            return std::make_shared<BuilderMuscle>(
-                s, [this](const auto &n) { return get_member(n); });
+            const auto m =
+                std::make_shared<BuilderMuscle>(s, [this](const auto &n) { return get_member(n); });
+            for (const auto &b: m->get_bodies()) m_world->addRigidBody(b);
+            for (const auto &c: m->get_constraints()) m_world->addConstraint(c);
+            return m;
         });
+}
+
+std::string RobotBuilderEnvironment::get_robot_name() { return robot_name; }
+void RobotBuilderEnvironment::set_robot_name(const std::string &new_robot_name) {
+    robot_name = new_robot_name;
+}
+
+std::tuple<glm::vec3, glm::quat, glm::vec3>
+RobotBuilderEnvironment::get_member_transform(const std::string &member_name) {
+    return decompose_model_matrix(get_member(member_name)->get_item()->model_matrix());
+}
+
+std::string RobotBuilderEnvironment::get_root_name() { return root_name; }
+
+float RobotBuilderEnvironment::get_member_mass(const std::string &member_name) {
+    return get_member(member_name)->get_item()->get_body()->getMass();
+}
+float RobotBuilderEnvironment::get_member_friction(const std::string &member_name) {
+    return get_member(member_name)->get_item()->get_body()->getFriction();
+}
+
+int RobotBuilderEnvironment::get_members_count() { return static_cast<int>(members.size()); }
+
+std::vector<std::string> RobotBuilderEnvironment::get_member_names() {
+    std::vector<std::string> names;
+    std::transform(members.begin(), members.end(), std::back_inserter(names), [](const auto &m) {
+        return m->get_name();
+    });
+    return names;
 }
 
 /*
  * Environment methods
  */
 
-std::vector<Item> RobotBuilderEnvironment::get_items() { return std::vector<Item>(); }
+std::vector<std::shared_ptr<AbstractItem>> RobotBuilderEnvironment::get_draw_items() {
+    std::vector<std::shared_ptr<AbstractItem>> items;
+
+    std::transform(members.begin(), members.end(), std::back_inserter(items), [](const auto &m) {
+        return m->get_item();
+    });
+
+    std::transform(
+        constraints.begin(), constraints.end(), std::back_inserter(items),
+        [](const std::shared_ptr<BuilderConstraint> &c) { return c->get_empty_item(); });
+
+    return items;
+}
 std::vector<std::shared_ptr<Controller>> RobotBuilderEnvironment::get_controllers() {
     return std::vector<std::shared_ptr<Controller>>();
 }
 std::vector<int64_t> RobotBuilderEnvironment::get_state_space() { return std::vector<int64_t>(); }
 std::vector<int64_t> RobotBuilderEnvironment::get_action_space() { return std::vector<int64_t>(); }
-std::optional<Item> RobotBuilderEnvironment::get_camera_track_item() {
-    return std::optional<Item>();
+std::optional<std::shared_ptr<AbstractItem>> RobotBuilderEnvironment::get_camera_track_item() {
+    if (root_name != "") return get_member(root_name)->get_item();
+    return std::nullopt;
 }
 step RobotBuilderEnvironment::compute_step() { return step(); }
 void RobotBuilderEnvironment::reset_engine() {}

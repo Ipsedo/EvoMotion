@@ -45,22 +45,6 @@ private:
     torch::nn::Sequential sigma{nullptr};
 };
 
-// batch norm actor
-
-class BatchNormActorModule final : public AbstractActor {
-public:
-    BatchNormActorModule(
-        std::vector<int64_t> state_space, std::vector<int64_t> action_space, int hidden_size);
-
-    actor_response forward(const torch::Tensor &state) override;
-
-private:
-    torch::nn::Sequential head{nullptr};
-
-    torch::nn::Sequential mu{nullptr};
-    torch::nn::Sequential sigma{nullptr};
-};
-
 // liquid
 
 class ActorLiquidModule final : public AbstractActor {

@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-/path/to/executable/evo_motion robot_walk ppo_gae --agent_parameters hidden_size=512 seed=1234 learning_rate=1e-4 batch_size=32 train_every=8 replay_buffer_size=256 gamma=0.99 epsilon=0.2 lambda=0.95 epoch=8 critic_loss_factor=0.5 entropy_factor=0.01 clip_grad_norm=0.5 --env_seed 1234 --cuda run ./robot_walk_ppo_gae/save_45 -w 1920 -h 1080

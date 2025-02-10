@@ -94,7 +94,7 @@ void JsonSerializer::write_object(
 
 template<typename T>
 void JsonSerializer::write_impl(const std::string &key, T value) {
-    content[key] = value;
+    content[key] = std::move(value);
 }
 
 void JsonSerializer::to_file(const std::filesystem::path output_file) {
