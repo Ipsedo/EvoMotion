@@ -19,7 +19,7 @@ public:
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
-    virtual EmptyItem get_empty_item() = 0;
+    virtual std::shared_ptr<EmptyItem> get_empty_item() = 0;
     virtual btTypedConstraint *get_constraint() = 0;
     virtual ~Constraint();
 
@@ -29,6 +29,9 @@ public:
 
     virtual std::shared_ptr<AbstractSerializer>
     serialize(const std::shared_ptr<AbstractSerializer> &serializer);
+
+protected:
+    virtual std::tuple<glm::vec3, glm::quat, glm::vec3> get_empty_item_transform() = 0;
 
 private:
     std::string name;
@@ -53,7 +56,7 @@ public:
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
     btTypedConstraint *get_constraint() override;
-    EmptyItem get_empty_item() override;
+    std::shared_ptr<EmptyItem> get_empty_item() override;
 
     std::shared_ptr<AbstractSerializer>
     serialize(const std::shared_ptr<AbstractSerializer> &serializer) override;
@@ -66,7 +69,7 @@ protected:
     float min_limit_radian;
     float max_limit_radian;
 
-    std::tuple<glm::vec3, glm::quat, glm::vec3> get_empty_item_transform();
+    std::tuple<glm::vec3, glm::quat, glm::vec3> get_empty_item_transform() override;
 };
 
 /*
@@ -88,14 +91,14 @@ public:
     std::shared_ptr<AbstractSerializer>
     serialize(const std::shared_ptr<AbstractSerializer> &serializer) override;
 
-    EmptyItem get_empty_item() override;
+    std::shared_ptr<EmptyItem> get_empty_item() override;
 
 protected:
     std::shared_ptr<Shape> shape;
 
     btFixedConstraint *constraint;
 
-    std::tuple<glm::vec3, glm::quat, glm::vec3> get_empty_item_transform();
+    std::tuple<glm::vec3, glm::quat, glm::vec3> get_empty_item_transform() override;
 };
 
 #endif//EVO_MOTION_CONSTRAINT_H

@@ -5,6 +5,7 @@
 #ifndef EVO_MOTION_ENVIRONMENT_H
 #define EVO_MOTION_ENVIRONMENT_H
 
+#include <memory>
 #include <vector>
 
 #include <btBulletDynamicsCommon.h>
@@ -50,27 +51,21 @@ protected:
 
     virtual void reset_engine() = 0;
 
-    void add_item(const Item &item) const;
-
     void step_world(float delta) const;
 
 public:
     explicit Environment(int num_threads);
 
-    virtual std::vector<Item> get_items() = 0;
-    virtual std::vector<EmptyItem> get_empty_items() = 0;
-
+    virtual std::vector<std::shared_ptr<AbstractItem>> get_draw_items() = 0;
     virtual std::vector<std::shared_ptr<Controller>> get_controllers() = 0;
 
     step do_step(const torch::Tensor &action);
-
     step reset();
 
     virtual std::vector<int64_t> get_state_space() = 0;
-
     virtual std::vector<int64_t> get_action_space() = 0;
 
-    virtual std::optional<Item> get_camera_track_item() = 0;
+    virtual std::optional<std::shared_ptr<AbstractItem>> get_camera_track_item() = 0;
 
     void to(torch::DeviceType device);
 

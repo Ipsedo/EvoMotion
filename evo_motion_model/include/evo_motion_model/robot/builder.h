@@ -52,7 +52,10 @@ public:
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
-    virtual Item get_fake_item() = 0;
+    btRigidBody *get_fake_body();
+
+protected:
+    virtual std::shared_ptr<Shape> get_shape() = 0;
 };
 
 class BuilderHingeConstraint : public virtual HingeConstraint, public virtual BuilderConstraint {
@@ -74,7 +77,9 @@ public:
         std::optional<glm::vec3> axis_in_child = std::nullopt,
         std::optional<float> limit_radian_min = std::nullopt,
         std::optional<float> limit_radian_max = std::nullopt);
-    Item get_fake_item() override;
+
+protected:
+    std::shared_ptr<Shape> get_shape() override;
 
 private:
     std::shared_ptr<Shape> shape;
@@ -90,7 +95,9 @@ public:
     BuilderFixedConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
-    Item get_fake_item() override;
+
+protected:
+    std::shared_ptr<Shape> get_shape() override;
 
 private:
     std::shared_ptr<Shape> shape;
@@ -104,8 +111,9 @@ class BuilderMuscle : public Muscle {
 public:
     BuilderMuscle(
         const std::string &name, float attach_mass, const glm::vec3 &attach_scale,
-        const Item &item_a, const glm::vec3 &pos_in_a, const Item &item_b,
-        const glm::vec3 &pos_in_b, float force, float max_speed);
+        const std::shared_ptr<Item> &item_a, const glm::vec3 &pos_in_a,
+        const std::shared_ptr<Item> &item_b, const glm::vec3 &pos_in_b, float force,
+        float max_speed);
 
     BuilderMuscle(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
@@ -159,16 +167,19 @@ public:
     std::string get_root_name();
     void set_robot_name(const std::string &new_robot_name);
 
+    std::vector<std::string> get_member_names();
+
+    int get_members_count();
+
     /*
      * Environment
      */
 
-    std::vector<Item> get_items() override;
-    std::vector<EmptyItem> get_empty_items() override;
+    std::vector<std::shared_ptr<AbstractItem>> get_draw_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
     std::vector<int64_t> get_state_space() override;
     std::vector<int64_t> get_action_space() override;
-    std::optional<Item> get_camera_track_item() override;
+    std::optional<std::shared_ptr<AbstractItem>> get_camera_track_item() override;
 
 protected:
     step compute_step() override;

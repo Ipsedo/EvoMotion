@@ -54,12 +54,12 @@ Skeleton::Skeleton(const std::shared_ptr<AbstractDeserializer> &deserializer)
 
 std::shared_ptr<Member> Skeleton::get_member(const std::string &name) {
     for (const auto &m: members)
-        if (m->get_item().get_name() == name) return m;
+        if (m->get_item()->get_name() == name) return m;
     throw std::runtime_error("Member \"" + name + "\"not found");
 }
 
-std::vector<Item> Skeleton::get_items() {
-    std::vector<Item> items;
+std::vector<std::shared_ptr<AbstractItem>> Skeleton::get_items() {
+    std::vector<std::shared_ptr<AbstractItem>> items;
     std::transform(members.begin(), members.end(), std::back_inserter(items), [](const auto &t) {
         return t->get_item();
     });
@@ -68,6 +68,10 @@ std::vector<Item> Skeleton::get_items() {
         auto muscle_items = m->get_items();
         items.insert(items.end(), muscle_items.begin(), muscle_items.end());
     }
+
+    std::transform(
+        constraints.begin(), constraints.end(), std::back_inserter(items),
+        [](const auto &c) { return c->get_empty_item(); });
 
     return items;
 }
@@ -87,9 +91,18 @@ std::vector<btTypedConstraint *> Skeleton::get_constraints() {
     return type_constraints;
 }
 
-std::vector<EmptyItem> Skeleton::get_empty_items() { return transform_vector<std::shared_ptr<Constraint>, EmptyItem>(constraints, [](const auto &c){
-        return c->get_empty_item();
-    }); }
+std::vector<btRigidBody *> Skeleton::get_bodies() {
+    std::vector<btRigidBody *> bodies;
+
+    std::transform(members.begin(), members.end(), std::back_inserter(bodies), [](const auto &m) {
+        return m->get_item()->get_body();
+    });
+
+    for (const auto &m: muscles)
+        for (const auto &b: m->get_bodies()) bodies.push_back(b);
+
+    return bodies;
+}
 
 std::string Skeleton::get_root_name() { return root_name; }
 std::string Skeleton::get_robot_name() { return robot_name; }
@@ -127,13 +140,13 @@ std::vector<std::shared_ptr<Controller>> Skeleton::get_controllers() const {
 }
 
 std::vector<std::shared_ptr<State>>
-Skeleton::get_states(const Item &floor, btDynamicsWorld *world) {
+Skeleton::get_states(const std::shared_ptr<Item> &floor, btDynamicsWorld *world) {
     std::vector<std::shared_ptr<State>> states;
 
     std::vector<std::shared_ptr<Member>> non_root_items;
     std::copy_if(
         members.begin(), members.end(), std::back_inserter(non_root_items),
-        [this](const auto &i) { return i->get_item().get_name() != get_root_name(); });
+        [this](const auto &i) { return i->get_item()->get_name() != get_root_name(); });
 
     const auto root_member = get_member(get_root_name());
 

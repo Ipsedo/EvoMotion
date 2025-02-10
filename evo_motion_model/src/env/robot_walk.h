@@ -18,27 +18,23 @@ public:
         float initial_remaining_seconds, float max_episode_seconds, float target_velocity,
         float minimal_velocity, int reset_frames);
 
-    std::vector<Item> get_items() override;
-    std::vector<EmptyItem> get_empty_items() override;
-
+    std::vector<std::shared_ptr<AbstractItem>> get_draw_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
 
     std::vector<int64_t> get_state_space() override;
-
     std::vector<int64_t> get_action_space() override;
 
-    std::optional<Item> get_camera_track_item() override;
+    std::optional<std::shared_ptr<AbstractItem>> get_camera_track_item() override;
 
 protected:
     step compute_step() override;
-
     void reset_engine() override;
 
 private:
     std::mt19937 rng;
     std::uniform_real_distribution<float> rd_uni;
 
-    Item base;
+    std::shared_ptr<Item> base;
 
     std::string skeleton_json_path;
     Skeleton skeleton;
@@ -58,7 +54,7 @@ private:
 
     int remaining_steps;
 
-    Item root_item;
+    std::shared_ptr<Item> root_item;
 };
 
 #endif//EVO_MOTION_ENV_TEST_MUSCLE_H

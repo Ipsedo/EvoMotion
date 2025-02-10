@@ -48,9 +48,6 @@ private:
 
     std::unique_ptr<ImGuiCamera> camera;
 
-virtual std::shared_ptr<DrawableFactory>
-get_drawable_factory(DrawableKind drawable_kind, const std::shared_ptr<Shape> &shape, std::mt19937 &curr_rng);
-
 protected:
     virtual void on_imgui_tab_begin() = 0;
     virtual void on_opengl_frame(
@@ -58,8 +55,7 @@ protected:
         const glm::mat4 &new_proj_matrix) = 0;
 
     virtual std::shared_ptr<DrawableFactory>
-    get_drawable_factory(const Item &item, std::mt19937 &curr_rng);
-    virtual std::shared_ptr<DrawableFactory> get_drawable_factory(const EmptyItem &empty_item, std::mt19937 &curr_rng);
+    get_drawable_factory(const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng);
 
     virtual void on_hide_tab() = 0;
     virtual void on_open_tab() = 0;
@@ -87,8 +83,8 @@ protected:
     void on_opengl_frame(
         float new_width, float new_height, const glm::mat4 &new_view_matrix,
         const glm::mat4 &new_proj_matrix) override;
-    std::shared_ptr<DrawableFactory>
-    get_drawable_factory(const Item &item, std::mt19937 &curr_rng) override;
+    std::shared_ptr<DrawableFactory> get_drawable_factory(
+        const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng) override;
     void on_hide_tab() override;
     void on_open_tab() override;
 };

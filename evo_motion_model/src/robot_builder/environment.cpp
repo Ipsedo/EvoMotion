@@ -34,7 +34,7 @@ bool RobotBuilderEnvironment::add_member(
     members.push_back(std::make_shared<BuilderMember>(
         member_name, shape_kind, center_pos, rotation, scale, mass, friction, false));
 
-    members.back()->get_item().get_body()->setUserPointer(new std::string(member_name));
+    members.back()->get_item()->get_body()->setUserPointer(new std::string(member_name));
 
     return true;
 }
@@ -50,13 +50,13 @@ bool RobotBuilderEnvironment::update_member(
 
         const auto parent_member = get_member(member_name);
 
-        glm::mat4 old_member_model_mat = parent_member->get_item().model_matrix_without_scale();
+        glm::mat4 old_member_model_mat = parent_member->get_item()->model_matrix_without_scale();
 
         parent_member->update_item(
             new_pos, new_rot, new_scale, new_friction, new_mass, new_ignore_collision);
         updated_members.insert(member_name);
 
-        glm::mat4 new_member_model_mat = parent_member->get_item().model_matrix_without_scale();
+        glm::mat4 new_member_model_mat = parent_member->get_item()->model_matrix_without_scale();
 
         std::queue<std::tuple<glm::mat4, glm::mat4, std::string>> queue;
         for (const auto &[_, m_n]: skeleton_graph[member_name])
@@ -67,7 +67,7 @@ bool RobotBuilderEnvironment::update_member(
                 queue.front();
 
             const auto curr_member = get_member(curr_member_name);
-            const auto curr_old_model_mat = curr_member->get_item().model_matrix_without_scale();
+            const auto curr_old_model_mat = curr_member->get_item()->model_matrix_without_scale();
 
             const auto in_old_parent_space =
                 glm::inverse(parent_old_model_mat) * curr_old_model_mat;
@@ -77,7 +77,7 @@ bool RobotBuilderEnvironment::update_member(
                 decompose_model_matrix(in_new_parent_space);
 
             curr_member->update_item(curr_tr, curr_rot);
-            const auto curr_new_model_mat = curr_member->get_item().model_matrix_without_scale();
+            const auto curr_new_model_mat = curr_member->get_item()->model_matrix_without_scale();
 
             updated_members.insert(curr_member_name);
 
@@ -96,7 +96,7 @@ bool RobotBuilderEnvironment::rename_member(
     const std::string &old_name, const std::string &new_name) {
     if (member_exists(new_name) || !member_exists(old_name)) return false;
 
-    get_member(old_name)->get_item().rename(new_name);
+    get_member(old_name)->get_item()->rename(new_name);
 
     if (root_name == old_name) root_name = new_name;
 
@@ -123,8 +123,9 @@ bool RobotBuilderEnvironment::attach_fixed_constraint(
         return false;
 
     const auto parent_model_matrix =
-        get_member(parent_name)->get_item().model_matrix_without_scale();
-    const auto child_model_matrix = get_member(child_name)->get_item().model_matrix_without_scale();
+        get_member(parent_name)->get_item()->model_matrix_without_scale();
+    const auto child_model_matrix =
+        get_member(child_name)->get_item()->model_matrix_without_scale();
 
     const auto absolute_frame = glm::translate(glm::mat4(1.f), absolute_fixed_point);
     const auto frame_in_parent = glm::inverse(parent_model_matrix) * absolute_frame;
@@ -151,9 +152,9 @@ bool RobotBuilderEnvironment::remove_member(const std::string &member_name) {
 
     std::erase_if(members, [member_name, this](const auto &m) {
         if (m->get_name() == member_name) {
-            delete (std::string *) m->get_item().get_body()->getUserPointer();
-            m_world->removeRigidBody(m->get_item().get_body());
-            delete m->get_item().get_body();
+            delete (std::string *) m->get_item()->get_body()->getUserPointer();
+            m_world->removeRigidBody(m->get_item()->get_body());
+            delete m->get_item()->get_body();
             return true;
         }
         return false;
@@ -278,9 +279,12 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
         json_members_deserializer.begin(), json_members_deserializer.end(),
         std::back_inserter(members), [this](const auto &s) -> std::shared_ptr<BuilderMember> {
             const auto m = std::make_shared<BuilderMember>(s);
-            m->get_item().get_body()->setUserPointer(new std::string(m->get_name()));
-            add_item(m->get_item());
+
+            m->get_item()->get_body()->setUserPointer(new std::string(m->get_name()));
+
+            m_world->addRigidBody(m->get_item()->get_body());
             skeleton_graph[m->get_name()] = std::vector<std::tuple<std::string, std::string>>();
+
             return m;
         });
 
@@ -313,7 +317,7 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
         std::back_inserter(muscles), [this](const auto &s) -> std::shared_ptr<BuilderMuscle> {
             const auto m =
                 std::make_shared<BuilderMuscle>(s, [this](const auto &n) { return get_member(n); });
-            for (const auto &i: m->get_items()) add_item(i);
+            for (const auto &b: m->get_bodies()) m_world->addRigidBody(b);
             for (const auto &c: m->get_constraints()) m_world->addConstraint(c);
             return m;
         });
@@ -326,29 +330,42 @@ void RobotBuilderEnvironment::set_robot_name(const std::string &new_robot_name) 
 
 std::tuple<glm::vec3, glm::quat, glm::vec3>
 RobotBuilderEnvironment::get_member_transform(const std::string &member_name) {
-    return decompose_model_matrix(get_member(member_name)->get_item().model_matrix());
+    return decompose_model_matrix(get_member(member_name)->get_item()->model_matrix());
 }
 
 std::string RobotBuilderEnvironment::get_root_name() { return root_name; }
 
 float RobotBuilderEnvironment::get_member_mass(const std::string &member_name) {
-    return get_member(member_name)->get_item().get_body()->getMass();
+    return get_member(member_name)->get_item()->get_body()->getMass();
 }
 float RobotBuilderEnvironment::get_member_friction(const std::string &member_name) {
-    return get_member(member_name)->get_item().get_body()->getFriction();
+    return get_member(member_name)->get_item()->get_body()->getFriction();
+}
+
+int RobotBuilderEnvironment::get_members_count() { return static_cast<int>(members.size()); }
+
+std::vector<std::string> RobotBuilderEnvironment::get_member_names() {
+    std::vector<std::string> names;
+    std::transform(members.begin(), members.end(), std::back_inserter(names), [](const auto &m) {
+        return m->get_name();
+    });
+    return names;
 }
 
 /*
  * Environment methods
  */
 
-std::vector<Item> RobotBuilderEnvironment::get_items() {
-    auto items = transform_vector<std::shared_ptr<BuilderMember>, Item>(
-        members, [](const auto &m) { return m->get_item(); });
+std::vector<std::shared_ptr<AbstractItem>> RobotBuilderEnvironment::get_draw_items() {
+    std::vector<std::shared_ptr<AbstractItem>> items;
 
-    std::transform(constraints.begin(), constraints.end(), std::back_inserter(items), [](const std::shared_ptr<BuilderConstraint> &c){
-        return c->get_fake_item();
+    std::transform(members.begin(), members.end(), std::back_inserter(items), [](const auto &m) {
+        return m->get_item();
     });
+
+    std::transform(
+        constraints.begin(), constraints.end(), std::back_inserter(items),
+        [](const std::shared_ptr<BuilderConstraint> &c) { return c->get_empty_item(); });
 
     return items;
 }
@@ -357,12 +374,9 @@ std::vector<std::shared_ptr<Controller>> RobotBuilderEnvironment::get_controller
 }
 std::vector<int64_t> RobotBuilderEnvironment::get_state_space() { return std::vector<int64_t>(); }
 std::vector<int64_t> RobotBuilderEnvironment::get_action_space() { return std::vector<int64_t>(); }
-std::optional<Item> RobotBuilderEnvironment::get_camera_track_item() {
+std::optional<std::shared_ptr<AbstractItem>> RobotBuilderEnvironment::get_camera_track_item() {
     if (root_name != "") return get_member(root_name)->get_item();
     return std::nullopt;
 }
 step RobotBuilderEnvironment::compute_step() { return step(); }
 void RobotBuilderEnvironment::reset_engine() {}
-std::vector<EmptyItem> RobotBuilderEnvironment::get_empty_items() {
-    return {};
-}

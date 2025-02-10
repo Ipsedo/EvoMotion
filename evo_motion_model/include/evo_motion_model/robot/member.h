@@ -23,7 +23,7 @@ public:
         const std::string &name, ShapeKind shape_kind, glm::vec3 center_pos, glm::quat rotation,
         glm::vec3 scale, float mass, float friction, bool ignore_collision);
     explicit Member(const std::shared_ptr<AbstractDeserializer> &deserializer);
-    virtual Item &get_item();
+    virtual std::shared_ptr<Item> get_item();
     virtual std::string get_name();
     virtual ~Member();
 
@@ -33,7 +33,7 @@ public:
 private:
     std::map<ShapeKind, std::string> shape_kind_to_path;
     ShapeKind shape_kind;
-    Item member;
+    std::shared_ptr<Item> member;
 };
 
 #endif//EVO_MOTION_MEMBER_H

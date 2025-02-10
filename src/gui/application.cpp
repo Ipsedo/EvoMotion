@@ -404,9 +404,7 @@ void ImGuiApplication::imgui_render_robot_info() {
             ImGui::Spacing();
 
             ImGui::Text("Root member : %s", context->get_builder_env()->get_root_name().c_str());
-            ImGui::Text(
-                "Members count : %i",
-                static_cast<int>(context->get_builder_env()->get_items().size()));
+            ImGui::Text("Members count : %i", context->get_builder_env()->get_members_count());
 
             ImGui::Spacing();
             ImGui::Separator();
@@ -420,15 +418,15 @@ void ImGuiApplication::imgui_render_robot_info() {
 
             // select root item
             int selected_item = 0;
-            std::vector<std::string> item_names;
 
-            const auto items = context->get_builder_env()->get_items();
+            std::vector<std::string> item_names = context->get_builder_env()->get_member_names();
             const auto root_name = context->get_builder_env()->get_root_name();
 
-            for (int i = 0; i < items.size(); i++) {
-                if (items[i].get_name() == root_name) selected_item = i;
-                item_names.push_back(items[i].get_name());
-            }
+            for (int i = 0; i < item_names.size(); i++)
+                if (item_names[i] == root_name) {
+                    selected_item = i;
+                    break;
+                }
 
             if (ImGui::Combo(
                     "Select root item", &selected_item,

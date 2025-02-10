@@ -25,16 +25,16 @@ CartPole::CartPole(
 
     // Create items
     // (init graphical and physical objects)
-    Item base(
+    auto base = std::make_shared<Item>(
         "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, base_pos, 10.f), glm::vec3(10.f, base_height, 10.f), 0.f, TILE_SPECULAR);
 
-    Item chariot(
+    auto chariot = std::make_shared<Item>(
         "chariot", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, chariot_pos, 10.f), glm::vec3(chariot_width, chariot_height, chariot_width),
         chariot_mass, SPECULAR);
 
-    Item pendulum(
+    auto pendulum = std::make_shared<Item>(
         "pendulum", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(0.f, pendulum_pos, 10.f),
         glm::vec3(pendulum_width, pendulum_height, pendulum_width), pendulum_mass, SPECULAR);
@@ -42,7 +42,7 @@ CartPole::CartPole(
     // Environment item vector
     items = {base, chariot, pendulum};
 
-    for (const auto &i: items) add_item(i);
+    for (const auto &i: items) m_world->addRigidBody(i->get_body());
 
     // For slider between chariot and base
     btTransform tr_base;
@@ -54,7 +54,7 @@ CartPole::CartPole(
     tr_chariot.setOrigin(btVector3(0.f, -chariot_height, 0.f));
 
     slider =
-        new btSliderConstraint(*base.get_body(), *chariot.get_body(), tr_base, tr_chariot, true);
+        new btSliderConstraint(*base->get_body(), *chariot->get_body(), tr_base, tr_chariot, true);
 
     controllers.push_back(std::make_shared<SliderController>(0, slider, slider_speed));
 
@@ -68,12 +68,12 @@ CartPole::CartPole(
     // For hinge between pendule and chariot
     btVector3 axis(0.f, 0.f, 1.f);
     hinge = new btHingeConstraint(
-        *chariot.get_body(), *pendulum.get_body(), btVector3(0.f, chariot_height, 0.f),
+        *chariot->get_body(), *pendulum->get_body(), btVector3(0.f, chariot_height, 0.f),
         btVector3(0.f, -pendulum_height + pendulum_offset, 0.f), axis, axis, true);
 
-    base_rg = base.get_body();
-    chariot_rg = chariot.get_body();
-    pendulum_rg = pendulum.get_body();
+    base_rg = base->get_body();
+    chariot_rg = chariot->get_body();
+    pendulum_rg = pendulum->get_body();
 
     base_rg->setActivationState(DISABLE_DEACTIVATION);
     chariot_rg->setActivationState(DISABLE_DEACTIVATION);
@@ -87,7 +87,12 @@ CartPole::CartPole(
     m_world->addConstraint(hinge);
 }
 
-std::vector<Item> CartPole::get_items() { return items; }
+std::vector<std::shared_ptr<AbstractItem>> CartPole::get_draw_items() {
+    std::vector<std::shared_ptr<AbstractItem>> abs_items;
+    std::transform(
+        items.begin(), items.end(), std::back_inserter(abs_items), [](const auto &i) { return i; });
+    return abs_items;
+}
 
 std::vector<std::shared_ptr<Controller>> CartPole::get_controllers() { return controllers; }
 
@@ -178,5 +183,6 @@ std::vector<int64_t> CartPole::get_state_space() { return {7}; }
 
 std::vector<int64_t> CartPole::get_action_space() { return {1}; }
 
-std::optional<Item> CartPole::get_camera_track_item() { return std::nullopt; }
-std::vector<EmptyItem> CartPole::get_empty_items() { return {}; }
+std::optional<std::shared_ptr<AbstractItem>> CartPole::get_camera_track_item() {
+    return std::nullopt;
+}

@@ -5,9 +5,9 @@
 #include <evo_motion_model/robot/builder.h>
 
 BuilderMuscle::BuilderMuscle(
-    const std::string &name, float attach_mass, const glm::vec3 &attach_scale, const Item &item_a,
-    const glm::vec3 &pos_in_a, const Item &item_b, const glm::vec3 &pos_in_b, float force,
-    float max_speed)
+    const std::string &name, float attach_mass, const glm::vec3 &attach_scale,
+    const std::shared_ptr<Item> &item_a, const glm::vec3 &pos_in_a,
+    const std::shared_ptr<Item> &item_b, const glm::vec3 &pos_in_b, float force, float max_speed)
     : Muscle(
           name, attach_mass, attach_scale, item_a, pos_in_a, item_b, pos_in_b, force, max_speed) {}
 

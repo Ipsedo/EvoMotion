@@ -22,8 +22,7 @@ OpenGlWindow::OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Envi
       camera(std::make_unique<ImGuiCamera>([env]() {
           const auto track_item = env->get_camera_track_item();
           if (track_item.has_value()) {
-              const auto pos = track_item.value().get_body()->getCenterOfMassPosition();
-              return glm::vec3(pos.x(), pos.y(), pos.z());
+              return glm::vec3(track_item.value()->model_matrix_without_scale()[3]);
           }
           return glm::vec3(0.f);
       })) {}
@@ -49,20 +48,12 @@ void OpenGlWindow::draw_opengl(float width, float height) {
     glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (const auto &i: env->get_items()) {
-        if (drawables.find(i.get_name()) == drawables.end())
-            drawables[i.get_name()] = get_drawable_factory(i, rng)->get_drawable();
+    for (const auto &i: env->get_draw_items()) {
+        if (drawables.find(i->get_name()) == drawables.end())
+            drawables[i->get_name()] = get_drawable_factory(i, rng)->get_drawable();
 
-        drawables[i.get_name()]->draw(
-            projection_matrix, view_matrix, i.model_matrix(), glm::vec3(0, 20, 0), camera->pos());
-    }
-
-    for (const auto &i: env->get_empty_items()) {
-        if (drawables.find(i.get_name()) == drawables.end())
-            drawables[i.get_name()] = get_drawable_factory(i, rng)->get_drawable();
-
-        drawables[i.get_name()]->draw(
-            projection_matrix, view_matrix, i.model_matrix(), glm::vec3(0, 20, 0), camera->pos());
+        drawables[i->get_name()]->draw(
+            projection_matrix, view_matrix, i->model_matrix(), glm::vec3(0, 20, 0), camera->pos());
     }
 
     frame_buffer->unbind();
@@ -96,15 +87,12 @@ bool OpenGlWindow::is_active() const { return active; }
 
 bool OpenGlWindow::is_opened() const { return opened; }
 
-std::shared_ptr<DrawableFactory>
-OpenGlWindow::get_drawable_factory(const Item &item, std::mt19937 &curr_rng) {
-    return get_drawable_factory(item.get_drawable_kind(), item.get_shape(), curr_rng);
-}
-
 std::shared_ptr<DrawableFactory> OpenGlWindow::get_drawable_factory(
-    DrawableKind drawable_kind, const std::shared_ptr<Shape> &shape, std::mt19937 &curr_rng) {
+    const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng) {
     std::shared_ptr<DrawableFactory> factory;
-    switch (drawable_kind) {
+    const auto shape = item->get_shape();
+
+    switch (item->get_drawable_kind()) {
         case SPECULAR:
             factory = std::make_shared<ObjSpecularFactory>(
                 shape->get_vertices(), shape->get_normals(), rng, 300.f);
@@ -115,11 +103,6 @@ std::shared_ptr<DrawableFactory> OpenGlWindow::get_drawable_factory(
             break;
     }
     return factory;
-}
-
-std::shared_ptr<DrawableFactory>
-OpenGlWindow::get_drawable_factory(const EmptyItem &empty_item, std::mt19937 &curr_rng) {
-    return get_drawable_factory(empty_item.get_drawable_kind(), empty_item.get_shape(), curr_rng);
 }
 
 std::shared_ptr<Environment> OpenGlWindow::get_env() { return env; }
@@ -155,14 +138,14 @@ void BuilderOpenGlWindow::on_opengl_frame(
     mouse_event->update(new_width, new_height, new_view_matrix, new_proj_matrix);
 }
 
-std::shared_ptr<DrawableFactory>
-BuilderOpenGlWindow::get_drawable_factory(const Item &item, std::mt19937 &curr_rng) {
-    if (item.get_drawable_kind() == SPECULAR)
+std::shared_ptr<DrawableFactory> BuilderOpenGlWindow::get_drawable_factory(
+    const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng) {
+    if (item->get_drawable_kind() == SPECULAR)
         return std::make_shared<EdgeObjSpecularFactory>(
-            item.get_shape()->get_vertices(), item.get_shape()->get_normals(), rng, 300.f,
+            item->get_shape()->get_vertices(), item->get_shape()->get_normals(), rng, 300.f,
             [this, item]() {
                 return context->is_member_focused()
-                       && context->get_focused_member() == item.get_name();
+                       && context->get_focused_member() == item->get_name();
             });
 
     return OpenGlWindow::get_drawable_factory(item, curr_rng);

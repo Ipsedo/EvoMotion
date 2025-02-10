@@ -25,6 +25,28 @@ BuilderConstraint::BuilderConstraint(
     const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
     : Constraint(deserializer, get_member_function) {}
 
+btRigidBody *BuilderConstraint::get_fake_body() {
+    const auto [pos, rot, scale] = get_empty_item_transform();
+
+    auto *convex_hull_shape = new btConvexHullShape();
+
+    for (auto [x, y, z]: get_shape()->get_vertices())
+        convex_hull_shape->addPoint(btVector3(x, y, z));
+
+    convex_hull_shape->setLocalScaling(glm_to_bullet(scale));
+
+    btTransform original_tr;
+    original_tr.setOrigin(glm_to_bullet(pos));
+    original_tr.setRotation(glm_to_bullet(rot));
+
+    auto *motion_state = new btDefaultMotionState(original_tr);
+
+    const btRigidBody::btRigidBodyConstructionInfo body_info(
+        0.f, motion_state, convex_hull_shape, btVector3(0, 0, 0));
+
+    return new btRigidBody(body_info);
+}
+
 /*
  * Hinge
  */
@@ -37,24 +59,23 @@ BuilderHingeConstraint::BuilderHingeConstraint(
     : HingeConstraint(
           name, parent, child, pivot_in_parent, pivot_in_child, axis_in_parent, axis_in_child,
           limit_radian_min, limit_radian_max),
-      BuilderConstraint(name, parent, child), Constraint(name, parent, child), shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
+      BuilderConstraint(name, parent, child), Constraint(name, parent, child),
+      shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
 
 BuilderHingeConstraint::BuilderHingeConstraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
     const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
     : HingeConstraint(deserializer, get_member_function),
       BuilderConstraint(deserializer, get_member_function),
-      Constraint(deserializer, get_member_function), shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
+      Constraint(deserializer, get_member_function),
+      shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
 
 void BuilderHingeConstraint::update_constraint(
     const std::optional<glm::vec3> &pivot_in_parent, const std::optional<glm::vec3> &pivot_in_child,
     std::optional<glm::vec3> axis_in_parent, std::optional<glm::vec3> axis_in_child,
     std::optional<float> limit_radian_min, std::optional<float> limit_radian_max) {}
 
-Item BuilderHingeConstraint::get_fake_item(){
-    const auto [pos, rot, scale] = get_empty_item_transform();
-    return Item(get_name(), shape, pos, rot, scale, 0.f, SPECULAR);
-}
+std::shared_ptr<Shape> BuilderHingeConstraint::get_shape() { return shape; }
 
 /*
  * Fixed
@@ -65,16 +86,15 @@ BuilderFixedConstraint::BuilderFixedConstraint(
     const std::shared_ptr<Member> &child, const glm::mat4 &frame_in_parent,
     const glm::mat4 &frame_in_child)
     : FixedConstraint(name, parent, child, frame_in_parent, frame_in_child),
-      BuilderConstraint(name, parent, child), Constraint(name, parent, child), shape(std::make_shared<ObjShape>("./resources/obj/cube.obj")) {}
+      BuilderConstraint(name, parent, child), Constraint(name, parent, child),
+      shape(std::make_shared<ObjShape>("./resources/obj/cube.obj")) {}
 
 BuilderFixedConstraint::BuilderFixedConstraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
     const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
     : FixedConstraint(deserializer, get_member_function),
       BuilderConstraint(deserializer, get_member_function),
-      Constraint(deserializer, get_member_function), shape(std::make_shared<ObjShape>("./resources/obj/cube.obj")) {}
+      Constraint(deserializer, get_member_function),
+      shape(std::make_shared<ObjShape>("./resources/obj/cube.obj")) {}
 
-Item BuilderFixedConstraint::get_fake_item() {
-    const auto [pos, rot, scale] = get_empty_item_transform();
-    return Item(get_name(), shape, pos, rot, scale, 0.f, SPECULAR);
-}
+std::shared_ptr<Shape> BuilderFixedConstraint::get_shape() { return shape; }

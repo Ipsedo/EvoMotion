@@ -38,13 +38,15 @@ public:
 
     std::shared_ptr<Member> get_member(const std::string &name);
 
-    std::vector<Item> get_items();
-    std::vector<EmptyItem> get_empty_items();
+    std::vector<std::shared_ptr<AbstractItem>> get_items();
+
+    std::vector<btRigidBody *> get_bodies();
     std::vector<btTypedConstraint *> get_constraints();
 
     std::vector<std::shared_ptr<Controller>> get_controllers() const;
 
-    std::vector<std::shared_ptr<State>> get_states(const Item &floor, btDynamicsWorld *world);
+    std::vector<std::shared_ptr<State>>
+    get_states(const std::shared_ptr<Item> &floor, btDynamicsWorld *world);
 
     std::string get_root_name();
     std::string get_robot_name();

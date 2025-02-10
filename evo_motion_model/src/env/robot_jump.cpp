@@ -20,22 +20,22 @@ RobotJump::RobotJump(
     const float initial_seconds, const float reset_seconds)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f), skeleton_json_path(skeleton_json_path),
       skeleton(std::make_shared<JsonDeserializer>(std::filesystem::path(skeleton_json_path))),
-      base(
+      base(std::make_shared<Item>(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
-          0.f, TILE_SPECULAR),
+          0.f, TILE_SPECULAR)),
       root_item(skeleton.get_member(skeleton.get_root_name())->get_item()), controllers(), states(),
       max_steps(static_cast<int>(max_seconds / DELTA_T_MODEL)), curr_steps(0),
       initial_steps(static_cast<int>(initial_seconds / DELTA_T_MODEL)),
       remaining_steps(initial_steps), reset_frames(static_cast<int>(reset_seconds / DELTA_T_MODEL)),
       minimal_velocity(minimal_velocity), target_velocity(target_velocity) {
-    base.get_body()->setFriction(0.5f);
+    base->get_body()->setFriction(0.5f);
 
-    add_item(base);
+    m_world->addRigidBody(base->get_body());
 
-    for (const auto &item: skeleton.get_items()) {
-        add_item(item);
-        item.get_body()->setActivationState(DISABLE_DEACTIVATION);
+    for (const auto &b: skeleton.get_bodies()) {
+        m_world->addRigidBody(b);
+        b->setActivationState(DISABLE_DEACTIVATION);
     }
 
     for (const auto &c: skeleton.get_constraints()) m_world->addConstraint(c);
@@ -44,7 +44,7 @@ RobotJump::RobotJump(
     controllers = skeleton.get_controllers();
 }
 
-std::vector<Item> RobotJump::get_items() {
+std::vector<std::shared_ptr<AbstractItem>> RobotJump::get_draw_items() {
     auto items = skeleton.get_items();
     items.push_back(base);
     return items;
@@ -61,15 +61,17 @@ std::vector<int64_t> RobotJump::get_action_space() {
     return {static_cast<long>(controllers.size())};
 }
 
-std::optional<Item> RobotJump::get_camera_track_item() { return root_item; }
+std::optional<std::shared_ptr<AbstractItem>> RobotJump::get_camera_track_item() {
+    return root_item;
+}
 
 step RobotJump::compute_step() {
     std::vector<torch::Tensor> current_states;
 
     for (const auto &state: states) current_states.push_back(state->get_state(curr_device));
 
-    const auto velocity = std::max(root_item.get_body()->getLinearVelocity().y(), 0.f)
-                          + root_item.get_body()->getLinearVelocity().z();
+    const auto velocity = std::max(root_item->get_body()->getLinearVelocity().y(), 0.f)
+                          + root_item->get_body()->getLinearVelocity().z();
     const float reward = velocity;
 
     if (velocity < minimal_velocity) remaining_steps -= 1;
@@ -95,14 +97,12 @@ void RobotJump::reset_engine() {
     const glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), root_pos)
                                    * glm::eulerAngleYXZ(angle_yaw, angle_pitch, angle_roll);
 
-    for (const auto &item: skeleton.get_items()) {
-        m_world->removeRigidBody(item.get_body());
-        item.reset(model_matrix);
-    }
+    for (const auto &b: skeleton.get_bodies()) m_world->removeRigidBody(b);
+    for (const auto &i: skeleton.get_items()) i->reset(model_matrix);
     for (const auto &c: skeleton.get_constraints()) m_world->removeConstraint(c);
 
     // re-add
-    for (const auto &item: skeleton.get_items()) m_world->addRigidBody(item.get_body());
+    for (const auto &b: skeleton.get_bodies()) m_world->addRigidBody(b);
     for (const auto &c: skeleton.get_constraints()) m_world->addConstraint(c);
 
     for (int i = 0; i < reset_frames; i++) step_world(DELTA_T_MODEL);
@@ -110,4 +110,3 @@ void RobotJump::reset_engine() {
     remaining_steps = initial_steps;
     curr_steps = 0;
 }
-std::vector<EmptyItem> RobotJump::get_empty_items() { return skeleton.get_empty_items(); }

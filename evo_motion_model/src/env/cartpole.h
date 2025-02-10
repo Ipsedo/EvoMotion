@@ -18,16 +18,13 @@ public:
         float limit_angle, int reset_frame_nb, float chariot_mass, float pendulum_mass,
         int max_steps);
 
-    std::vector<Item> get_items() override;
-    std::vector<EmptyItem> get_empty_items() override;
-
+    std::vector<std::shared_ptr<AbstractItem>> get_draw_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
 
     std::vector<int64_t> get_state_space() override;
-
     std::vector<int64_t> get_action_space() override;
 
-    std::optional<Item> get_camera_track_item() override;
+    std::optional<std::shared_ptr<AbstractItem>> get_camera_track_item() override;
 
 protected:
     step compute_step() override;
@@ -44,7 +41,7 @@ private:
     float chariot_pos;
     float pendulum_pos;
 
-    std::vector<Item> items;
+    std::vector<std::shared_ptr<Item>> items;
     std::vector<std::shared_ptr<Controller>> controllers;
 
     btHingeConstraint *hinge;
