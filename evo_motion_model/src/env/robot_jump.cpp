@@ -110,3 +110,4 @@ void RobotJump::reset_engine() {
     remaining_steps = initial_steps;
     curr_steps = 0;
 }
+std::vector<EmptyItem> RobotJump::get_empty_items() { return skeleton.get_empty_items(); }

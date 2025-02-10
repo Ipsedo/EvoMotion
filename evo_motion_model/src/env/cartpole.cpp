@@ -179,3 +179,4 @@ std::vector<int64_t> CartPole::get_state_space() { return {7}; }
 std::vector<int64_t> CartPole::get_action_space() { return {1}; }
 
 std::optional<Item> CartPole::get_camera_track_item() { return std::nullopt; }
+std::vector<EmptyItem> CartPole::get_empty_items() { return {}; }

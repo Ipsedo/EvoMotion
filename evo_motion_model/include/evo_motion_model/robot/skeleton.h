@@ -39,6 +39,7 @@ public:
     std::shared_ptr<Member> get_member(const std::string &name);
 
     std::vector<Item> get_items();
+    std::vector<EmptyItem> get_empty_items();
     std::vector<btTypedConstraint *> get_constraints();
 
     std::vector<std::shared_ptr<Controller>> get_controllers() const;

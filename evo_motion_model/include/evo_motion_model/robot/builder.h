@@ -35,6 +35,7 @@ public:
         std::optional<glm::quat> new_rot = std::nullopt,
         std::optional<glm::vec3> new_scale = std::nullopt,
         std::optional<float> new_friction = std::nullopt,
+        std::optional<float> new_mass = std::nullopt,
         std::optional<bool> new_ignore_collision = std::nullopt);
 };
 
@@ -50,6 +51,8 @@ public:
     BuilderConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
+
+    virtual Item get_fake_item() = 0;
 };
 
 class BuilderHingeConstraint : public virtual HingeConstraint, public virtual BuilderConstraint {
@@ -63,6 +66,18 @@ public:
     BuilderHingeConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
+
+    void update_constraint(
+        const std::optional<glm::vec3> &pivot_in_parent = std::nullopt,
+        const std::optional<glm::vec3> &pivot_in_child = std::nullopt,
+        std::optional<glm::vec3> axis_in_parent = std::nullopt,
+        std::optional<glm::vec3> axis_in_child = std::nullopt,
+        std::optional<float> limit_radian_min = std::nullopt,
+        std::optional<float> limit_radian_max = std::nullopt);
+    Item get_fake_item() override;
+
+private:
+    std::shared_ptr<Shape> shape;
 };
 
 class BuilderFixedConstraint : public virtual FixedConstraint, public virtual BuilderConstraint {
@@ -75,6 +90,10 @@ public:
     BuilderFixedConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
+    Item get_fake_item() override;
+
+private:
+    std::shared_ptr<Shape> shape;
 };
 
 /*
@@ -102,6 +121,7 @@ public:
     explicit RobotBuilderEnvironment(std::string robot_name);
 
     bool set_root(const std::string &member_name);
+
     bool add_member(
         const std::string &member_name, ShapeKind shape_kind, glm::vec3 center_pos,
         glm::quat rotation, glm::vec3 scale, float mass, float friction);
@@ -111,7 +131,10 @@ public:
         const std::optional<glm::quat> &new_rot = std::nullopt,
         std::optional<glm::vec3> new_scale = std::nullopt,
         std::optional<float> new_friction = std::nullopt,
+        std::optional<float> new_mass = std::nullopt,
         std::optional<bool> new_ignore_collision = std::nullopt);
+
+    bool rename_member(const std::string &old_name, const std::string &new_name);
 
     bool attach_fixed_constraint(
         const std::string &constraint_name, const std::string &parent_name,
@@ -122,6 +145,9 @@ public:
 
     std::tuple<glm::vec3, glm::quat, glm::vec3>
     get_member_transform(const std::string &member_name);
+
+    float get_member_mass(const std::string &member_name);
+    float get_member_friction(const std::string &member_name);
 
     std::optional<std::string>
     ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
@@ -138,6 +164,7 @@ public:
      */
 
     std::vector<Item> get_items() override;
+    std::vector<EmptyItem> get_empty_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
     std::vector<int64_t> get_state_space() override;
     std::vector<int64_t> get_action_space() override;

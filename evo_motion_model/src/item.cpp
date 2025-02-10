@@ -8,6 +8,8 @@
 #include <btBulletDynamicsCommon.h>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
 #include <evo_motion_model/item.h>
 
@@ -83,3 +85,28 @@ void Item::reset(const glm::mat4 &main_model_matrix) const {
 }
 
 DrawableKind Item::get_drawable_kind() const { return kind; }
+
+void Item::rename(const std::string &new_name) { name = new_name; }
+
+/*
+ * Empty item
+ */
+
+EmptyItem::EmptyItem(
+    const std::string &name, const std::shared_ptr<Shape> &shape, glm::vec3 position,
+    glm::quat rotation, glm::vec3 scale, DrawableKind drawable_kind) : EmptyItem(name, shape, [position](){return position;}, [rotation](){return rotation;},[scale](){return scale;}, drawable_kind) {}
+
+EmptyItem::EmptyItem(
+    const std::string &name, const std::shared_ptr<Shape> &shape,
+    std::function<glm::vec3()> get_position, std::function<glm::quat()> get_rotation,
+    std::function<glm::vec3()> get_scale, DrawableKind drawable_kind) : name(name), shape(shape), drawable_kind(drawable_kind), get_position(get_position), get_rotation(get_rotation), get_scale(get_scale) {}
+
+std::shared_ptr<Shape> EmptyItem::get_shape() const { return shape; }
+
+std::string EmptyItem::get_name() const { return name; }
+
+glm::mat4 EmptyItem::model_matrix() const { return model_matrix_without_scale() * glm::scale(glm::mat4(1), get_scale()); }
+
+glm::mat4 EmptyItem::model_matrix_without_scale() const { return glm::translate(glm::mat4(1), get_position()) * glm::toMat4(get_rotation()); }
+
+DrawableKind EmptyItem::get_drawable_kind() const { return drawable_kind; }

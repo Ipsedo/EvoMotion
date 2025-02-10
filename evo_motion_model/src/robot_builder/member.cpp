@@ -20,7 +20,7 @@ BuilderMember::BuilderMember(const std::shared_ptr<AbstractDeserializer> &deseri
 void BuilderMember::update_item(
     std::optional<glm::vec3> new_pos, std::optional<glm::quat> new_rot,
     std::optional<glm::vec3> new_scale, std::optional<float> new_friction,
-    std::optional<bool> new_ignore_collision) {
+    std::optional<float> new_mass, std::optional<bool> new_ignore_collision) {
 
     const auto translate =
         new_pos.has_value() ? glm::translate(glm::mat4(1.f), new_pos.value()) : glm::mat4(1.f);
@@ -38,6 +38,11 @@ void BuilderMember::update_item(
     }
 
     if (new_friction.has_value()) get_item().get_body()->setFriction(new_friction.value());
+    if (new_mass.has_value()) {
+        get_item().get_body()->setMassProps(
+            new_mass.value(), get_item().get_body()->getLocalInertia());
+        get_item().get_body()->updateInertiaTensor();
+    }
 
     // TODO ignore collision
 }

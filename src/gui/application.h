@@ -45,8 +45,12 @@ private:
 
     ImVec4 clear_color;
 
+    bool show_new_member_window;
     bool show_member_settings_window;
-    bool show_construct_tools_window;
+    bool show_new_constraint_window;
+    bool show_constraint_settings_window;
+    bool show_member_construct_tools_window;
+    bool show_constraint_construct_tools_window;
     bool show_manage_trainings_window;
     bool show_new_training_window;
     bool show_robot_info_window;
@@ -68,8 +72,12 @@ private:
     void imgui_render_toolbar();
 
     void imgui_render_robot_builder_file_dialog();
+    void imgui_render_new_member();
     void imgui_render_member_settings();
-    void imgui_render_construct_tools();
+    void imgui_render_construct_member_tools();
+    void imgui_render_new_constraint();
+    void imgui_render_constraint_settings();
+    void imgui_render_construct_constraint_tools();
     void imgui_render_robot_info();
 
     void imgui_render_opengl();

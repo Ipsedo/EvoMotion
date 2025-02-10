@@ -19,6 +19,7 @@ public:
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
+    virtual EmptyItem get_empty_item() = 0;
     virtual btTypedConstraint *get_constraint() = 0;
     virtual ~Constraint();
 
@@ -52,15 +53,20 @@ public:
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
     btTypedConstraint *get_constraint() override;
+    EmptyItem get_empty_item() override;
 
     std::shared_ptr<AbstractSerializer>
     serialize(const std::shared_ptr<AbstractSerializer> &serializer) override;
 
 protected:
+    std::shared_ptr<Shape> shape;
+
     btHingeConstraint *constraint;
 
     float min_limit_radian;
     float max_limit_radian;
+
+    std::tuple<glm::vec3, glm::quat, glm::vec3> get_empty_item_transform();
 };
 
 /*
@@ -82,8 +88,14 @@ public:
     std::shared_ptr<AbstractSerializer>
     serialize(const std::shared_ptr<AbstractSerializer> &serializer) override;
 
+    EmptyItem get_empty_item() override;
+
 protected:
+    std::shared_ptr<Shape> shape;
+
     btFixedConstraint *constraint;
+
+    std::tuple<glm::vec3, glm::quat, glm::vec3> get_empty_item_transform();
 };
 
 #endif//EVO_MOTION_CONSTRAINT_H

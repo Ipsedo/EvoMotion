@@ -9,10 +9,11 @@
 #include <evo_motion_networks/agents/cross_q.h>
 
 ImGuiApplication::ImGuiApplication(const std::string &title, const int width, const int height)
-    : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f),
-      show_member_settings_window(false), show_construct_tools_window(false),
-      show_manage_trainings_window(false), show_new_training_window(false),
-      show_robot_info_window(false), show_infer_window(false),
+    : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f), show_new_member_window(false),
+      show_member_settings_window(false), show_new_constraint_window(false),
+      show_constraint_settings_window(false), show_member_construct_tools_window(false),
+      show_constraint_construct_tools_window(false), show_manage_trainings_window(false),
+      show_new_training_window(false), show_robot_info_window(false), show_infer_window(false),
       context(std::make_shared<AppContext>()), opengl_windows(), robot_builder_file_dialog(),
       robot_infer_file_dialog(), agent_infer_file_dialog(ImGuiFileBrowserFlags_SelectDirectory),
       popup_already_opened_robot("Popup_robot_already_opened"), vao(0) {
@@ -82,7 +83,7 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
 void ImGuiApplication::render() {
     if (!context->is_builder_env_selected()) {
         show_member_settings_window = false;
-        show_construct_tools_window = false;
+        show_member_construct_tools_window = false;
         show_robot_info_window = false;
     }
 
@@ -101,10 +102,14 @@ void ImGuiApplication::render() {
     imgui_render_toolbar();
 
     // ImGui window definition
+    imgui_render_new_member();
     imgui_render_member_settings();
+    imgui_render_construct_member_tools();
+    imgui_render_new_constraint();
+    imgui_render_constraint_settings();
+    imgui_render_construct_constraint_tools();
     imgui_render_robot_info();
     imgui_render_robot_builder_file_dialog();
-    imgui_render_construct_tools();
 
     imgui_render_new_training();
     imgui_render_manage_trainings();
@@ -173,12 +178,27 @@ void ImGuiApplication::imgui_render_toolbar() {
 
             ImGui::Separator();
 
+            if (ImGui::MenuItem("New member", nullptr, false, context->is_builder_env_selected()))
+                show_new_member_window = true;
             if (ImGui::MenuItem(
                     "Member settings", nullptr, false, context->is_builder_env_selected()))
                 show_member_settings_window = true;
             if (ImGui::MenuItem(
-                    "Construct tools", nullptr, false, context->is_builder_env_selected()))
-                show_construct_tools_window = true;
+                    "Construct member tools", nullptr, false, context->is_builder_env_selected()))
+                show_member_construct_tools_window = true;
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem(
+                    "New constraint", nullptr, false, context->is_builder_env_selected()))
+                show_new_constraint_window = true;
+            if (ImGui::MenuItem(
+                    "Constraint settings", nullptr, false, context->is_builder_env_selected()))
+                show_constraint_settings_window = true;
+            if (ImGui::MenuItem(
+                    "Construct constraint tools", nullptr, false,
+                    context->is_builder_env_selected()))
+                show_constraint_construct_tools_window = true;
 
             ImGui::EndMenu();
         }
@@ -241,6 +261,12 @@ void ImGuiApplication::imgui_render_member_settings() {
                 ImGui::Separator();
                 ImGui::Spacing();
 
+                ImGui::Columns(2, nullptr, false);
+
+                // Position
+                ImGui::Spacing();
+
+                ImGui::BeginGroup();
                 ImGui::Text("Position");
                 ImGui::Spacing();
 
@@ -250,9 +276,12 @@ void ImGuiApplication::imgui_render_member_settings() {
                 if (ImGui::InputFloat("pos.y", &member_pos.y)) updated = true;
                 if (ImGui::InputFloat("pos.z", &member_pos.z)) updated = true;
 
+                ImGui::EndGroup();
+
+                // Rotation
                 ImGui::Spacing();
-                ImGui::Separator();
-                ImGui::Spacing();
+
+                ImGui::BeginGroup();
 
                 ImGui::Text("Rotation quaternion");
                 ImGui::Spacing();
@@ -262,9 +291,12 @@ void ImGuiApplication::imgui_render_member_settings() {
                 if (ImGui::InputFloat("quat.y", &member_rot.y)) updated = true;
                 if (ImGui::InputFloat("quat.z", &member_rot.z)) updated = true;
 
+                ImGui::EndGroup();
+
+                // Scaling
                 ImGui::Spacing();
-                ImGui::Separator();
-                ImGui::Spacing();
+
+                ImGui::BeginGroup();
 
                 ImGui::Text("Scale");
                 ImGui::Spacing();
@@ -273,13 +305,83 @@ void ImGuiApplication::imgui_render_member_settings() {
                 if (ImGui::InputFloat("scale.y", &member_scale.y)) updated = true;
                 if (ImGui::InputFloat("scale.z", &member_scale.z)) updated = true;
 
+                ImGui::EndGroup();
+
+                ImGui::NextColumn();
+
+                // Member name
+                ImGui::Spacing();
+                ImGui::Text("Member parameters");
+                ImGui::Spacing();
+
+                // Member name
+                std::string member_name = context->get_focused_member();
+                member_name.resize(128);
+                if (ImGui::InputText("Member name", &member_name[0], member_name.size()))
+                    if (context->get_builder_env()->rename_member(
+                            context->get_focused_member(), member_name.c_str()))
+                        context->set_focus_member(member_name.c_str());
+
+                ImGui::Spacing();
+
+                // mass
+                float mass =
+                    context->get_builder_env()->get_member_mass(context->get_focused_member());
+                if (ImGui::InputFloat("mass (kg)", &mass)) updated = true;
+
+                ImGui::Spacing();
+
+                // friction
+                float friction =
+                    context->get_builder_env()->get_member_friction(context->get_focused_member());
+                if (ImGui::DragFloat("friction", &friction, 0.01f, 0.f, 1.f)) updated = true;
+
+                ImGui::Columns(1);
+
                 if (updated)
                     context->get_builder_env()->update_member(
-                        context->get_focused_member(), member_pos, member_rot, member_scale);
+                        context->get_focused_member(), member_pos, member_rot, member_scale,
+                        friction, mass);
 
             } else {
                 ImGui::Text("No focus member");
             }
+        }
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_new_member() {
+    if (show_new_member_window) {
+        if (ImGui::Begin("New member", &show_new_member_window)) {}
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_new_constraint() {
+    if (show_new_constraint_window) {
+        if (ImGui::Begin("New constraint", &show_new_constraint_window)) {}
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_constraint_settings() {
+    if (show_constraint_settings_window) {
+        if (ImGui::Begin("Constraint settings", &show_constraint_settings_window)) {}
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_construct_member_tools() {
+    if (show_member_construct_tools_window) {
+        if (ImGui::Begin("Construct tools - Member", &show_member_construct_tools_window)) {}
+        ImGui::End();
+    }
+}
+
+void ImGuiApplication::imgui_render_construct_constraint_tools() {
+    if (show_constraint_construct_tools_window) {
+        if (ImGui::Begin("Construct tools - Constraint", &show_constraint_construct_tools_window)) {
         }
         ImGui::End();
     }
@@ -339,13 +441,6 @@ void ImGuiApplication::imgui_render_robot_info() {
                     &item_names, item_names.size()))
                 context->get_builder_env()->set_root(item_names[selected_item]);
         }
-        ImGui::End();
-    }
-}
-
-void ImGuiApplication::imgui_render_construct_tools() {
-    if (show_construct_tools_window) {
-        if (ImGui::Begin("Construct tools", &show_construct_tools_window)) {}
         ImGui::End();
     }
 }

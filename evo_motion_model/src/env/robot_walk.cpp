@@ -4,15 +4,15 @@
 
 #include "./robot_walk.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
+
 #include "../controller/muscle_controller.h"
 #include "../json_serializer.h"
 #include "./constants.h"
-
-#define GLM_ENABLE_EXPERIMENTAL
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
+#include "../utils.h"
 
 RobotWalk::RobotWalk(
     const int num_threads, const int seed, const std::string &skeleton_json_path,
@@ -113,3 +113,5 @@ std::vector<int64_t> RobotWalk::get_action_space() {
 }
 
 std::optional<Item> RobotWalk::get_camera_track_item() { return root_item; }
+
+std::vector<EmptyItem> RobotWalk::get_empty_items() { return skeleton.get_empty_items(); }

@@ -87,6 +87,10 @@ std::vector<btTypedConstraint *> Skeleton::get_constraints() {
     return type_constraints;
 }
 
+std::vector<EmptyItem> Skeleton::get_empty_items() { return transform_vector<std::shared_ptr<Constraint>, EmptyItem>(constraints, [](const auto &c){
+        return c->get_empty_item();
+    }); }
+
 std::string Skeleton::get_root_name() { return root_name; }
 std::string Skeleton::get_robot_name() { return robot_name; }
 

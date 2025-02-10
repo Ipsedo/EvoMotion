@@ -40,9 +40,10 @@ bool RobotBuilderEnvironment::add_member(
 }
 
 bool RobotBuilderEnvironment::update_member(
-    const std::string &member_name, const std::optional<glm::vec3> new_pos,
-    const std::optional<glm::quat> &new_rot, const std::optional<glm::vec3> new_scale,
-    const std::optional<float> new_friction, const std::optional<bool> new_ignore_collision) {
+    const std::string &member_name, std::optional<glm::vec3> new_pos,
+    const std::optional<glm::quat> &new_rot, std::optional<glm::vec3> new_scale,
+    std::optional<float> new_friction, std::optional<float> new_mass,
+    std::optional<bool> new_ignore_collision) {
 
     if (member_exists(member_name)) {
         std::set<std::string> updated_members;
@@ -51,7 +52,8 @@ bool RobotBuilderEnvironment::update_member(
 
         glm::mat4 old_member_model_mat = parent_member->get_item().model_matrix_without_scale();
 
-        parent_member->update_item(new_pos, new_rot, new_scale, new_friction, new_ignore_collision);
+        parent_member->update_item(
+            new_pos, new_rot, new_scale, new_friction, new_mass, new_ignore_collision);
         updated_members.insert(member_name);
 
         glm::mat4 new_member_model_mat = parent_member->get_item().model_matrix_without_scale();
@@ -88,6 +90,29 @@ bool RobotBuilderEnvironment::update_member(
         return true;
     }
     return false;
+}
+
+bool RobotBuilderEnvironment::rename_member(
+    const std::string &old_name, const std::string &new_name) {
+    if (member_exists(new_name) || !member_exists(old_name)) return false;
+
+    get_member(old_name)->get_item().rename(new_name);
+
+    if (root_name == old_name) root_name = new_name;
+
+    auto children = skeleton_graph.extract(old_name);
+    children.key() = new_name;
+    skeleton_graph.insert(std::move(children));
+
+    for (const auto [key, value]: skeleton_graph)
+        skeleton_graph[key] = transform_vector<
+            std::tuple<std::string, std::string>, std::tuple<std::string, std::string>>(
+            value, [old_name, new_name](const auto &t) {
+                const auto [c, n] = t;
+                return std::tuple<std::string, std::string>(c, n == old_name ? new_name : n);
+            });
+
+    return true;
 }
 
 bool RobotBuilderEnvironment::attach_fixed_constraint(
@@ -306,13 +331,26 @@ RobotBuilderEnvironment::get_member_transform(const std::string &member_name) {
 
 std::string RobotBuilderEnvironment::get_root_name() { return root_name; }
 
+float RobotBuilderEnvironment::get_member_mass(const std::string &member_name) {
+    return get_member(member_name)->get_item().get_body()->getMass();
+}
+float RobotBuilderEnvironment::get_member_friction(const std::string &member_name) {
+    return get_member(member_name)->get_item().get_body()->getFriction();
+}
+
 /*
  * Environment methods
  */
 
 std::vector<Item> RobotBuilderEnvironment::get_items() {
-    return transform_vector<std::shared_ptr<BuilderMember>, Item>(
+    auto items = transform_vector<std::shared_ptr<BuilderMember>, Item>(
         members, [](const auto &m) { return m->get_item(); });
+
+    std::transform(constraints.begin(), constraints.end(), std::back_inserter(items), [](const std::shared_ptr<BuilderConstraint> &c){
+        return c->get_fake_item();
+    });
+
+    return items;
 }
 std::vector<std::shared_ptr<Controller>> RobotBuilderEnvironment::get_controllers() {
     return std::vector<std::shared_ptr<Controller>>();
@@ -325,3 +363,6 @@ std::optional<Item> RobotBuilderEnvironment::get_camera_track_item() {
 }
 step RobotBuilderEnvironment::compute_step() { return step(); }
 void RobotBuilderEnvironment::reset_engine() {}
+std::vector<EmptyItem> RobotBuilderEnvironment::get_empty_items() {
+    return {};
+}

@@ -55,6 +55,7 @@ HingeConstraint::HingeConstraint(
     const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
     const float limit_radian_min, const float limit_radian_max)
     : Constraint(name, parent, child),
+      shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")),
       constraint(new btHingeConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
           glm_to_bullet(pivot_in_parent), glm_to_bullet(pivot_in_child),
@@ -105,6 +106,31 @@ HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer
     return constraint_serializer;
 }
 
+std::tuple<glm::vec3, glm::quat, glm::vec3> HingeConstraint::get_empty_item_transform() {
+    auto parent_model_mat = get_parent()->get_item().model_matrix_without_scale();
+
+    const auto pre_rot = glm::rotate(glm::mat4(1), static_cast<float>(M_PI) / 2.f, glm::vec3(1, 0, 0));
+
+    const auto [parent_pos, parent_rot, _1] = decompose_model_matrix(parent_model_mat * bullet_to_glm(constraint->getFrameOffsetA()) * pre_rot);
+
+    const auto [_2, _3, parent_scale] = decompose_model_matrix(get_parent()->get_item().model_matrix());
+    const auto [_4, _5, child_scale] = decompose_model_matrix(get_parent()->get_item().model_matrix());
+
+    glm::vec3 scale = (parent_scale + child_scale) / 4.f;
+    float min_scale = std::min(std::min(scale.x, scale.y), scale.z);
+    scale = glm::vec3(min_scale);
+
+    return {parent_pos, parent_rot, scale};
+}
+
+EmptyItem HingeConstraint::get_empty_item() {
+    const auto [pos, rot, scale] = get_empty_item_transform();
+
+    return EmptyItem(
+        get_name(), shape, pos, rot, scale,
+        SPECULAR);
+}
+
 /*
  * Fixed Constraint
  */
@@ -114,6 +140,7 @@ FixedConstraint::FixedConstraint(
     const std::shared_ptr<Member> &child, const glm::mat4 &attach_in_parent,
     const glm::mat4 &attach_in_child)
     : Constraint(name, parent, child),
+      shape(std::make_shared<ObjShape>("./resources/obj/cube.obj")),
       constraint(new btFixedConstraint(
           *parent->get_item().get_body(), *child->get_item().get_body(),
           glm_to_bullet(attach_in_parent), glm_to_bullet(attach_in_child))) {
@@ -161,4 +188,27 @@ FixedConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer
     constraint_serializer->write_str("type", "fixed");
 
     return constraint_serializer;
+}
+
+std::tuple<glm::vec3, glm::quat, glm::vec3> FixedConstraint::get_empty_item_transform() {
+    auto parent_model_mat = get_parent()->get_item().model_matrix_without_scale();
+
+
+    const auto [parent_pos, parent_rot, _1] = decompose_model_matrix(parent_model_mat * bullet_to_glm(constraint->getFrameOffsetA()));
+
+    const auto [_2, _3, parent_scale] = decompose_model_matrix(get_parent()->get_item().model_matrix());
+    const auto [_4, _5, child_scale] = decompose_model_matrix(get_parent()->get_item().model_matrix());
+
+    glm::vec3 scale = (parent_scale + child_scale) / 4.f;
+    float min_scale = std::min(std::min(scale.x, scale.y), scale.z);
+    scale = glm::vec3(min_scale);
+
+    return {parent_pos, parent_rot, scale};
+}
+
+EmptyItem FixedConstraint::get_empty_item() {
+    const auto [pos, rot, scale] = get_empty_item_transform();
+    return EmptyItem(
+        get_name(), shape, pos, rot, scale,
+        SPECULAR);
 }

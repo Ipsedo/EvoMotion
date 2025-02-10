@@ -30,6 +30,12 @@ OpenGlWindow::OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Envi
 
 std::string OpenGlWindow::get_name() { return name; }
 
+void OpenGlWindow::rename_drawable(const std::string &old_name, const std::string &new_name) {
+    auto n = drawables.extract(old_name);
+    n.key() = new_name;
+    drawables.insert(std::move(n));
+}
+
 void OpenGlWindow::draw_opengl(float width, float height) {
     const auto view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
     const auto projection_matrix =
@@ -44,6 +50,14 @@ void OpenGlWindow::draw_opengl(float width, float height) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (const auto &i: env->get_items()) {
+        if (drawables.find(i.get_name()) == drawables.end())
+            drawables[i.get_name()] = get_drawable_factory(i, rng)->get_drawable();
+
+        drawables[i.get_name()]->draw(
+            projection_matrix, view_matrix, i.model_matrix(), glm::vec3(0, 20, 0), camera->pos());
+    }
+
+    for (const auto &i: env->get_empty_items()) {
         if (drawables.find(i.get_name()) == drawables.end())
             drawables[i.get_name()] = get_drawable_factory(i, rng)->get_drawable();
 
@@ -74,6 +88,8 @@ void OpenGlWindow::draw_imgui_image() {
         if (active) on_hide_tab();
         active = false;
     }
+
+    if (!opened) on_hide_tab();
 }
 
 bool OpenGlWindow::is_active() const { return active; }
@@ -82,18 +98,28 @@ bool OpenGlWindow::is_opened() const { return opened; }
 
 std::shared_ptr<DrawableFactory>
 OpenGlWindow::get_drawable_factory(const Item &item, std::mt19937 &curr_rng) {
+    return get_drawable_factory(item.get_drawable_kind(), item.get_shape(), curr_rng);
+}
+
+std::shared_ptr<DrawableFactory> OpenGlWindow::get_drawable_factory(
+    DrawableKind drawable_kind, const std::shared_ptr<Shape> &shape, std::mt19937 &curr_rng) {
     std::shared_ptr<DrawableFactory> factory;
-    switch (item.get_drawable_kind()) {
+    switch (drawable_kind) {
         case SPECULAR:
             factory = std::make_shared<ObjSpecularFactory>(
-                item.get_shape()->get_vertices(), item.get_shape()->get_normals(), rng, 300.f);
+                shape->get_vertices(), shape->get_normals(), rng, 300.f);
             break;
         case TILE_SPECULAR:
             factory = std::make_shared<TileGroundFactory>(
-                item.get_shape()->get_vertices(), item.get_shape()->get_normals(), rng, 300.f, 1.f);
+                shape->get_vertices(), shape->get_normals(), rng, 300.f, 1.f);
             break;
     }
     return factory;
+}
+
+std::shared_ptr<DrawableFactory>
+OpenGlWindow::get_drawable_factory(const EmptyItem &empty_item, std::mt19937 &curr_rng) {
+    return get_drawable_factory(empty_item.get_drawable_kind(), empty_item.get_shape(), curr_rng);
 }
 
 std::shared_ptr<Environment> OpenGlWindow::get_env() { return env; }

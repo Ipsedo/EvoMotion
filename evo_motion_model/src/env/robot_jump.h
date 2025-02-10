@@ -19,6 +19,7 @@ public:
         float target_velocity, float max_seconds, float initial_seconds, float reset_seconds);
 
     std::vector<Item> get_items() override;
+    std::vector<EmptyItem> get_empty_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
     std::vector<int64_t> get_state_space() override;
     std::vector<int64_t> get_action_space() override;

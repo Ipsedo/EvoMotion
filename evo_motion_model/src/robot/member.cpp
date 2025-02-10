@@ -40,7 +40,7 @@ Member::Member(const std::shared_ptr<AbstractDeserializer> &deserializer)
           deserializer->read_vec3("scale"), deserializer->read_float("mass"),
           deserializer->read_float("friction"), deserializer->read_bool("ignore_collision")) {}
 
-Item Member::get_item() { return member; }
+Item &Member::get_item() { return member; }
 
 std::string Member::get_name() { return get_item().get_name(); }
 

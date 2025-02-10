@@ -58,6 +58,7 @@ public:
     explicit Environment(int num_threads);
 
     virtual std::vector<Item> get_items() = 0;
+    virtual std::vector<EmptyItem> get_empty_items() = 0;
 
     virtual std::vector<std::shared_ptr<Controller>> get_controllers() = 0;
 

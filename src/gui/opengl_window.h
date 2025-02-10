@@ -29,6 +29,8 @@ public:
     bool is_opened() const;
     std::string get_name();
 
+    void rename_drawable(const std::string &old_name, const std::string &new_name);
+
 protected:
     std::mt19937 rng;
 
@@ -46,6 +48,9 @@ private:
 
     std::unique_ptr<ImGuiCamera> camera;
 
+virtual std::shared_ptr<DrawableFactory>
+get_drawable_factory(DrawableKind drawable_kind, const std::shared_ptr<Shape> &shape, std::mt19937 &curr_rng);
+
 protected:
     virtual void on_imgui_tab_begin() = 0;
     virtual void on_opengl_frame(
@@ -54,6 +59,7 @@ protected:
 
     virtual std::shared_ptr<DrawableFactory>
     get_drawable_factory(const Item &item, std::mt19937 &curr_rng);
+    virtual std::shared_ptr<DrawableFactory> get_drawable_factory(const EmptyItem &empty_item, std::mt19937 &curr_rng);
 
     virtual void on_hide_tab() = 0;
     virtual void on_open_tab() = 0;

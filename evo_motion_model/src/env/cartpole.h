@@ -19,6 +19,7 @@ public:
         int max_steps);
 
     std::vector<Item> get_items() override;
+    std::vector<EmptyItem> get_empty_items() override;
 
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
 

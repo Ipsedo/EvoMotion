@@ -23,7 +23,7 @@ public:
         const std::string &name, ShapeKind shape_kind, glm::vec3 center_pos, glm::quat rotation,
         glm::vec3 scale, float mass, float friction, bool ignore_collision);
     explicit Member(const std::shared_ptr<AbstractDeserializer> &deserializer);
-    virtual Item get_item();
+    virtual Item &get_item();
     virtual std::string get_name();
     virtual ~Member();
 

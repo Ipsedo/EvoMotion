@@ -19,6 +19,7 @@ public:
         float minimal_velocity, int reset_frames);
 
     std::vector<Item> get_items() override;
+    std::vector<EmptyItem> get_empty_items() override;
 
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
 

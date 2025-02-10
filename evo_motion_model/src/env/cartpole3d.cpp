@@ -321,3 +321,4 @@ std::vector<int64_t> CartPole3d::get_state_space() { return {28}; }
 std::vector<int64_t> CartPole3d::get_action_space() { return {2}; }
 
 std::optional<Item> CartPole3d::get_camera_track_item() { return std::nullopt; }
+std::vector<EmptyItem> CartPole3d::get_empty_items() { return {}; }
