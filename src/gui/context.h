@@ -21,14 +21,26 @@ public:
     bool is_member_focused();
     std::string get_focused_member();
 
+    bool is_constraint_focused();
+    std::string get_focused_constraint();
+
     bool is_builder_env_selected();
     std::shared_ptr<RobotBuilderEnvironment> get_builder_env();
 
     void set_focus_member(const std::string &new_focus_member);
     void release_focus_member();
 
+    void set_focus_constraint(const std::string &new_focus_constraint);
+    void release_focus_constraint();
+
     void set_builder_env(const std::shared_ptr<RobotBuilderEnvironment> &new_env);
     void release_builder_env();
+
+    void hide_members(bool hidden);
+    bool are_members_hidden();
+
+    void hide_constraints(bool hidden);
+    bool are_constraints_hidden();
 
     /*
      * Infer helper function
@@ -46,9 +58,13 @@ public:
 private:
     std::optional<std::shared_ptr<RobotBuilderEnvironment>> curr_robot_builder_env;
     std::optional<std::string> member_focus;
+    std::optional<std::string> constraint_focus;
 
     std::optional<std::filesystem::path> robot_infer_json_path;
     std::optional<std::filesystem::path> agent_infer_folder_path;
+
+    bool members_hidden;
+    bool constraints_hidden;
 };
 
 #endif//EVO_MOTION_CONTEXT_H

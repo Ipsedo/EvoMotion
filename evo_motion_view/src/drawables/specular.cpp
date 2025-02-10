@@ -87,18 +87,34 @@ OBjSpecular::~OBjSpecular() { program.kill(); }
  * Edge
  */
 
-EdgeObjSpecular::EdgeObjSpecular(
+BuilderObjSpecular::BuilderObjSpecular(
     const std::vector<std::tuple<float, float, float>> &vertices,
     const std::vector<std::tuple<float, float, float>> &normals, const glm::vec4 &ambient_color,
     const glm::vec4 &diffuse_color, const glm::vec4 &specular_color, float shininess,
-    const std::optional<std::function<bool()>> &is_focus_function)
+    const std::optional<std::function<bool()>> &is_focus_function,
+    const std::optional<std::function<bool()>> &is_hidden_function)
     : OBjSpecular(vertices, normals, ambient_color, diffuse_color, specular_color, shininess),
       is_focus_function(
-          is_focus_function.has_value() ? is_focus_function.value() : []() { return false; }) {}
+          is_focus_function.has_value() ? is_focus_function.value() : []() { return false; }),
+      is_hidden_function(
+          is_hidden_function.has_value() ? is_hidden_function.value() : []() { return false; }) {}
 
-void EdgeObjSpecular::draw(
+void BuilderObjSpecular::draw(
     glm::mat4 projection_matrix, glm::mat4 view_matrix, glm::mat4 model_matrix,
     glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) {
+
+    if (is_hidden_function()) {
+        glEnable(GL_BLEND);
+        glDepthMask(GL_FALSE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        ambient_color.z = 0.25f;
+        diffuse_color.z = 0.25f;
+        specular_color.z = 0.25f;
+    } else {
+        ambient_color.z = 1.f;
+        diffuse_color.z = 1.f;
+        specular_color.z = 1.f;
+    }
 
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(1.0, 1.0);
@@ -108,6 +124,8 @@ void EdgeObjSpecular::draw(
         projection_matrix, view_matrix, model_matrix, light_pos_from_camera, camera_pos);
 
     glDisable(GL_POLYGON_OFFSET_FILL);
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
 
     if (is_focus_function()) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

@@ -25,7 +25,7 @@ BuilderConstraint::BuilderConstraint(
     const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
     : Constraint(deserializer, get_member_function) {}
 
-btRigidBody *BuilderConstraint::get_fake_body() {
+btRigidBody *BuilderConstraint::create_fake_body() {
     const auto [pos, rot, scale] = get_empty_item_transform();
 
     auto *convex_hull_shape = new btConvexHullShape();

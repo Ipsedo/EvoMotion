@@ -52,7 +52,7 @@ public:
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
-    btRigidBody *get_fake_body();
+    btRigidBody *create_fake_body();
 
 protected:
     virtual std::shared_ptr<Shape> get_shape() = 0;
@@ -160,6 +160,9 @@ public:
     std::optional<std::string>
     ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
 
+    std::optional<std::string>
+    ray_cast_constraint(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
+
     void save_robot(const std::filesystem::path &output_json_path);
     void load_robot(const std::filesystem::path &input_json_path);
 
@@ -170,6 +173,10 @@ public:
     std::vector<std::string> get_member_names();
 
     int get_members_count();
+
+    bool member_exists(const std::string &member_name);
+    bool constraint_exists(const std::string &constraint_name);
+    bool muscle_exists(const std::string &muscle_name);
 
     /*
      * Environment
@@ -194,10 +201,6 @@ private:
     std::vector<std::shared_ptr<BuilderMember>> members;
     std::vector<std::shared_ptr<BuilderConstraint>> constraints;
     std::vector<std::shared_ptr<BuilderMuscle>> muscles;
-
-    bool member_exists(const std::string &member_name);
-    bool constraint_exists(const std::string &constraint_name);
-    bool muscle_exists(const std::string &muscle_name);
 
     std::shared_ptr<BuilderMember> get_member(const std::string &member_name);
     std::shared_ptr<BuilderConstraint> get_constraint(const std::string &constraint_name);

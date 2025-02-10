@@ -49,19 +49,21 @@ public:
     ~OBjSpecular() override;
 };
 
-class EdgeObjSpecular : public OBjSpecular {
+class BuilderObjSpecular : public OBjSpecular {
 public:
-    EdgeObjSpecular(
+    BuilderObjSpecular(
         const std::vector<std::tuple<float, float, float>> &vertices,
         const std::vector<std::tuple<float, float, float>> &normals, const glm::vec4 &ambient_color,
         const glm::vec4 &diffuse_color, const glm::vec4 &specular_color, float shininess,
-        const std::optional<std::function<bool()>> &is_focus_function);
+        const std::optional<std::function<bool()>> &is_focus_function,
+        const std::optional<std::function<bool()>> &is_hidden_function);
     void draw(
         glm::mat4 projection_matrix, glm::mat4 view_matrix, glm::mat4 model_matrix,
         glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) override;
 
 private:
     std::function<bool()> is_focus_function;
+    std::function<bool()> is_hidden_function;
 };
 
 #endif//EVO_MOTION_SPECULAR_H

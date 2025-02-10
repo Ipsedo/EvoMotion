@@ -32,10 +32,10 @@ public:
         const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng,
         float shininess);
 
-    std::shared_ptr<Drawable> get_drawable() override;
+    std::shared_ptr<Drawable> create_drawable() override;
 };
 
-class EdgeObjSpecularFactory : public DrawableFactory {
+class BuilderObjSpecularFactory : public DrawableFactory {
 private:
     std::uniform_real_distribution<float> rd_uni;
 
@@ -47,20 +47,23 @@ private:
     float shininess;
 
     std::optional<std::function<bool()>> is_focus_function;
+    std::optional<std::function<bool()>> is_hidden_function;
 
 public:
-    EdgeObjSpecularFactory(
+    BuilderObjSpecularFactory(
         const std::vector<std::tuple<float, float, float>> &vertices,
         const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color,
         glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess,
-        const std::optional<std::function<bool()>> &is_focus_function);
+        const std::optional<std::function<bool()>> &is_focus_function,
+        const std::optional<std::function<bool()>> &is_hidden_function);
 
-    EdgeObjSpecularFactory(
+    BuilderObjSpecularFactory(
         const std::vector<std::tuple<float, float, float>> &vertices,
         const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng,
-        float shininess, const std::optional<std::function<bool()>> &is_focus_function);
+        float shininess, const std::optional<std::function<bool()>> &is_focus_function,
+        const std::optional<std::function<bool()>> &is_hidden_function);
 
-    std::shared_ptr<Drawable> get_drawable() override;
+    std::shared_ptr<Drawable> create_drawable() override;
 };
 
 class TileGroundFactory : public DrawableFactory {
@@ -94,7 +97,7 @@ public:
         const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng,
         float shininess, float tile_size);
 
-    std::shared_ptr<Drawable> get_drawable() override;
+    std::shared_ptr<Drawable> create_drawable() override;
 };
 
 #endif//EVO_MOTION_FACTORY_H

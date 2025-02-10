@@ -50,7 +50,7 @@ void OpenGlWindow::draw_opengl(float width, float height) {
 
     for (const auto &i: env->get_draw_items()) {
         if (drawables.find(i->get_name()) == drawables.end())
-            drawables[i->get_name()] = get_drawable_factory(i, rng)->get_drawable();
+            drawables[i->get_name()] = get_drawable_factory(i, rng)->create_drawable();
 
         drawables[i->get_name()]->draw(
             projection_matrix, view_matrix, i->model_matrix(), glm::vec3(0, 20, 0), camera->pos());
@@ -124,9 +124,15 @@ void BuilderOpenGlWindow::on_imgui_tab_begin() {
 
         if (ray_coords.has_value()) {
             const auto &[near, far] = ray_coords.value();
-            const auto result = builder_env->ray_cast_member(near, far);
-            if (result.has_value()) context->set_focus_member(result.value());
-            else context->release_focus_member();
+            if (!context->are_members_hidden()) {
+                const auto result = builder_env->ray_cast_member(near, far);
+                if (result.has_value()) context->set_focus_member(result.value());
+                else context->release_focus_member();
+            } else if (!context->are_constraints_hidden()) {
+                const auto result = builder_env->ray_cast_constraint(near, far);
+                if (result.has_value()) context->set_focus_constraint(result.value());
+                else context->release_focus_constraint();
+            }
         }
     }
 }
@@ -141,11 +147,25 @@ void BuilderOpenGlWindow::on_opengl_frame(
 std::shared_ptr<DrawableFactory> BuilderOpenGlWindow::get_drawable_factory(
     const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng) {
     if (item->get_drawable_kind() == SPECULAR)
-        return std::make_shared<EdgeObjSpecularFactory>(
+        return std::make_shared<BuilderObjSpecularFactory>(
             item->get_shape()->get_vertices(), item->get_shape()->get_normals(), rng, 300.f,
             [this, item]() {
-                return context->is_member_focused()
-                       && context->get_focused_member() == item->get_name();
+                if (builder_env->member_exists(item->get_name()))
+                    return context->is_member_focused()
+                           && context->get_focused_member() == item->get_name();
+                else if (builder_env->constraint_exists(item->get_name()))
+                    return context->is_constraint_focused()
+                           && context->get_focused_constraint() == item->get_name();
+
+                return false;
+            },
+            [this, item]() {
+                if (context->are_members_hidden() && builder_env->member_exists(item->get_name()))
+                    return true;
+                if (context->are_constraints_hidden()
+                    && builder_env->constraint_exists(item->get_name()))
+                    return true;
+                return false;
             });
 
     return OpenGlWindow::get_drawable_factory(item, curr_rng);

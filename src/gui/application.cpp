@@ -178,27 +178,40 @@ void ImGuiApplication::imgui_render_toolbar() {
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem("New member", nullptr, false, context->is_builder_env_selected()))
-                show_new_member_window = true;
-            if (ImGui::MenuItem(
-                    "Member settings", nullptr, false, context->is_builder_env_selected()))
-                show_member_settings_window = true;
-            if (ImGui::MenuItem(
-                    "Construct member tools", nullptr, false, context->is_builder_env_selected()))
-                show_member_construct_tools_window = true;
+            if (ImGui::BeginMenu("Show parts", context->is_builder_env_selected())) {
+                if (ImGui::MenuItem("Members", nullptr, !context->are_members_hidden())) {
+                    context->hide_constraints(true);
+                    context->release_focus_constraint();
+
+                    context->hide_members(false);
+                }
+                if (ImGui::MenuItem("Constraints", nullptr, !context->are_constraints_hidden())) {
+                    context->hide_members(true);
+                    context->release_focus_member();
+
+                    context->hide_constraints(false);
+                }
+                ImGui::EndMenu();
+            }
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem(
-                    "New constraint", nullptr, false, context->is_builder_env_selected()))
-                show_new_constraint_window = true;
-            if (ImGui::MenuItem(
-                    "Constraint settings", nullptr, false, context->is_builder_env_selected()))
-                show_constraint_settings_window = true;
-            if (ImGui::MenuItem(
-                    "Construct constraint tools", nullptr, false,
-                    context->is_builder_env_selected()))
-                show_constraint_construct_tools_window = true;
+            if (ImGui::BeginMenu("Member", context->is_builder_env_selected())) {
+                if (ImGui::MenuItem("New member")) show_new_member_window = true;
+                if (ImGui::MenuItem("Settings")) show_member_settings_window = true;
+                if (ImGui::MenuItem("Construct tools")) show_member_construct_tools_window = true;
+
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Constraint", context->is_builder_env_selected())) {
+                if (ImGui::MenuItem("New constraint")) show_new_constraint_window = true;
+                if (ImGui::MenuItem("Settings")) show_constraint_settings_window = true;
+                if (ImGui::MenuItem("Construct tools"))
+                    show_constraint_construct_tools_window = true;
+
+                ImGui::EndMenu();
+            }
 
             ImGui::EndMenu();
         }

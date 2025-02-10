@@ -246,6 +246,61 @@ std::optional<std::string> RobotBuilderEnvironment::ray_cast_member(
     return std::nullopt;
 }
 
+std::optional<std::string> RobotBuilderEnvironment::ray_cast_constraint(
+    const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) {
+
+    // prepare world
+    std::vector<btRigidBody *> bodies_to_re_add;
+    std::transform(
+        members.begin(), members.end(), std::back_inserter(bodies_to_re_add),
+        [this](const auto &m) {
+            const auto b = m->get_item()->get_body();
+            m_world->removeRigidBody(b);
+            return b;
+        });
+
+    for (const auto &m: muscles)
+        for (const auto &b: m->get_bodies()) {
+            m_world->removeRigidBody(b);
+            bodies_to_re_add.push_back(b);
+        }
+
+    std::vector<btRigidBody *> tmp_bodies;
+    std::transform(
+        constraints.begin(), constraints.end(), std::back_inserter(tmp_bodies),
+        [this](const std::shared_ptr<BuilderConstraint> &c) {
+            const auto b = c->create_fake_body();
+            b->setUserPointer(new std::string(c->get_name()));
+            m_world->addRigidBody(b);
+            return b;
+        });
+
+    // ray cast
+    const auto from_bullet = glm_to_bullet(from_absolute);
+    const auto to_bullet = glm_to_bullet(to_absolute);
+    std::optional<std::string> found = std::nullopt;
+
+    btCollisionWorld::ClosestRayResultCallback callback(from_bullet, to_bullet);
+
+    m_world->rayTest(from_bullet, to_bullet, callback);
+
+    if (callback.hasHit())
+        if (const auto user_ptr = callback.m_collisionObject->getUserPointer(); user_ptr) {
+            const std::string name(*static_cast<std::string *>(user_ptr));
+            if (constraint_exists(name)) found = name;
+        }
+
+    // re-populate world
+    for (const auto &b: tmp_bodies) {
+        delete static_cast<std::string *>(b->getUserPointer());
+        m_world->removeRigidBody(b);
+    }
+
+    for (const auto &b: bodies_to_re_add) m_world->addRigidBody(b);
+
+    return found;
+}
+
 void RobotBuilderEnvironment::save_robot(const std::filesystem::path &output_json_path) {
 
     std::vector<std::shared_ptr<Member>> members_vector(members.begin(), members.end());

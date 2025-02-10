@@ -63,7 +63,7 @@ void infer(
                 break;
         }
 
-        renderer.add_drawable(i->get_name(), factory->get_drawable());
+        renderer.add_drawable(i->get_name(), factory->create_drawable());
     }
 
     std::shared_ptr<Agent> agent =
