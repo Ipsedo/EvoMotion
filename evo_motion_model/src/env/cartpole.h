@@ -41,7 +41,7 @@ private:
     float chariot_pos;
     float pendulum_pos;
 
-    std::vector<std::shared_ptr<Item>> items;
+    std::vector<std::shared_ptr<RigidBodyItem>> items;
     std::vector<std::shared_ptr<Controller>> controllers;
 
     btHingeConstraint *hinge;

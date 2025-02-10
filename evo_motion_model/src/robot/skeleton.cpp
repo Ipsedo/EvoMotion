@@ -140,7 +140,7 @@ std::vector<std::shared_ptr<Controller>> Skeleton::get_controllers() const {
 }
 
 std::vector<std::shared_ptr<State>>
-Skeleton::get_states(const std::shared_ptr<Item> &floor, btDynamicsWorld *world) {
+Skeleton::get_states(const std::shared_ptr<RigidBodyItem> &floor, btDynamicsWorld *world) {
     std::vector<std::shared_ptr<State>> states;
 
     std::vector<std::shared_ptr<Member>> non_root_items;

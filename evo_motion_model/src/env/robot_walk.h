@@ -34,7 +34,7 @@ private:
     std::mt19937 rng;
     std::uniform_real_distribution<float> rd_uni;
 
-    std::shared_ptr<Item> base;
+    std::shared_ptr<RigidBodyItem> base;
 
     std::string skeleton_json_path;
     Skeleton skeleton;
@@ -54,7 +54,7 @@ private:
 
     int remaining_steps;
 
-    std::shared_ptr<Item> root_item;
+    std::shared_ptr<RigidBodyItem> root_item;
 };
 
 #endif//EVO_MOTION_ENV_TEST_MUSCLE_H

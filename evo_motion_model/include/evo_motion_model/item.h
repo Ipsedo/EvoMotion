@@ -28,17 +28,17 @@ public:
     virtual DrawableKind get_drawable_kind() const = 0;
 };
 
-class Item : public AbstractItem {
+class RigidBodyItem : public AbstractItem {
 public:
-    Item(
+    RigidBodyItem(
         std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,
         glm::vec3 scale, float mass, DrawableKind drawable_kind);
 
-    Item(
+    RigidBodyItem(
         std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale,
         float mass, DrawableKind drawable_kind);
 
-    Item(
+    RigidBodyItem(
         std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position,
         glm::quat rotation, glm::vec3 scale, float mass, DrawableKind drawable_kind);
 

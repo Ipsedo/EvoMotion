@@ -22,7 +22,7 @@ Member::Member(
            {CYLINDER, "./resources/obj/cylinder.obj"},
            {FEET, "./resources/obj/feet.obj"}}),
       shape_kind(shape_kind),
-      member(std::make_shared<Item>(
+      member(std::make_shared<RigidBodyItem>(
           name, std::make_shared<ObjShape>(shape_kind_to_path[shape_kind]),
           glm::translate(glm::mat4(1.f), center_pos) * glm::mat4_cast(rotation), scale, mass,
           SPECULAR)) {
@@ -40,7 +40,7 @@ Member::Member(const std::shared_ptr<AbstractDeserializer> &deserializer)
           deserializer->read_vec3("scale"), deserializer->read_float("mass"),
           deserializer->read_float("friction"), deserializer->read_bool("ignore_collision")) {}
 
-std::shared_ptr<Item> Member::get_item() { return member; }
+std::shared_ptr<RigidBodyItem> Member::get_item() { return member; }
 
 std::string Member::get_name() { return get_item()->get_name(); }
 

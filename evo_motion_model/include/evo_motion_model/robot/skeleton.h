@@ -46,7 +46,7 @@ public:
     std::vector<std::shared_ptr<Controller>> get_controllers() const;
 
     std::vector<std::shared_ptr<State>>
-    get_states(const std::shared_ptr<Item> &floor, btDynamicsWorld *world);
+    get_states(const std::shared_ptr<RigidBodyItem> &floor, btDynamicsWorld *world);
 
     std::string get_root_name();
     std::string get_robot_name();

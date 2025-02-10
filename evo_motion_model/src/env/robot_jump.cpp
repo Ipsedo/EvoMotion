@@ -20,7 +20,7 @@ RobotJump::RobotJump(
     const float initial_seconds, const float reset_seconds)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f), skeleton_json_path(skeleton_json_path),
       skeleton(std::make_shared<JsonDeserializer>(std::filesystem::path(skeleton_json_path))),
-      base(std::make_shared<Item>(
+      base(std::make_shared<RigidBodyItem>(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
           0.f, TILE_SPECULAR)),

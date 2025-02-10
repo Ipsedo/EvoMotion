@@ -15,7 +15,7 @@
 class ItemProprioceptionState : public State, public btCollisionWorld::ContactResultCallback {
 public:
     ItemProprioceptionState(
-        const std::shared_ptr<Item> &item, const std::shared_ptr<Item> &floor,
+        const std::shared_ptr<RigidBodyItem> &item, const std::shared_ptr<RigidBodyItem> &floor,
         btDynamicsWorld *world);
 
     int get_size() override;
@@ -27,7 +27,7 @@ public:
         const btCollisionObjectWrapper *colObj1Wrap, int partId1, int index1) override;
 
 protected:
-    std::shared_ptr<Item> state_item;
+    std::shared_ptr<RigidBodyItem> state_item;
     btVector3 last_ang_vel;
     btVector3 last_lin_vel;
 
@@ -40,21 +40,21 @@ private:
 class MemberState : public ItemProprioceptionState {
 public:
     MemberState(
-        const std::shared_ptr<Item> &item, const std::shared_ptr<Item> &root_item,
-        const std::shared_ptr<Item> &floor, btDynamicsWorld *world);
+        const std::shared_ptr<RigidBodyItem> &item, const std::shared_ptr<RigidBodyItem> &root_item,
+        const std::shared_ptr<RigidBodyItem> &floor, btDynamicsWorld *world);
 
     int get_size() override;
 
     torch::Tensor get_state(torch::Device device) override;
 
 private:
-    std::shared_ptr<Item> root_item;
+    std::shared_ptr<RigidBodyItem> root_item;
 };
 
 class RootMemberState : public ItemProprioceptionState {
 public:
     RootMemberState(
-        const std::shared_ptr<Item> &item, const std::shared_ptr<Item> &floor,
+        const std::shared_ptr<RigidBodyItem> &item, const std::shared_ptr<RigidBodyItem> &floor,
         btDynamicsWorld *world);
 
     int get_size() override;

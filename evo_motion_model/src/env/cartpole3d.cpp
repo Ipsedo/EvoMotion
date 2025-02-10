@@ -24,22 +24,22 @@ CartPole3d::CartPole3d(
       last_vert_ang_vel(0.f), last_plan_ang(0.f), last_plan_ang_vec(0.f), limit_angle(limit_angle),
       step_idx(0), max_steps(max_steps) {
 
-    auto base = std::make_shared<Item>(
+    auto base = std::make_shared<RigidBodyItem>(
         "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(base_pos.x(), base_pos.y(), base_pos.z()),
         glm::vec3(base_scale.x(), base_scale.y(), base_scale.z()), base_mass, TILE_SPECULAR);
 
-    auto cart_x = std::make_shared<Item>(
+    auto cart_x = std::make_shared<RigidBodyItem>(
         "cart_x", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(cart_x_pos.x(), cart_x_pos.y(), cart_x_pos.z()),
         glm::vec3(cart_x_scale.x(), cart_x_scale.y(), cart_x_scale.z()), cart_x_mass, SPECULAR);
 
-    auto cart_z = std::make_shared<Item>(
+    auto cart_z = std::make_shared<RigidBodyItem>(
         "cart_z", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
         glm::vec3(cart_z_pos.x(), cart_z_pos.y(), cart_z_pos.z()),
         glm::vec3(cart_z_scale.x(), cart_z_scale.y(), cart_z_scale.z()), cart_z_mass, SPECULAR);
 
-    auto pole = std::make_shared<Item>(
+    auto pole = std::make_shared<RigidBodyItem>(
         "pole", std::make_shared<ObjShape>("./resources/obj/cylinder.obj"),
         glm::vec3(pole_pos.x(), pole_pos.y(), pole_pos.z()),
         glm::vec3(pole_scale.x(), pole_scale.y(), pole_scale.z()), pole_mass, SPECULAR);

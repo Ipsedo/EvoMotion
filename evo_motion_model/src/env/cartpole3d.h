@@ -56,7 +56,7 @@ private:
 
     btPoint2PointConstraint *p2p_constraint;
 
-    std::vector<std::shared_ptr<Item>> items;
+    std::vector<std::shared_ptr<RigidBodyItem>> items;
     std::vector<std::shared_ptr<Controller>> controllers;
 
     std::mt19937 rng;

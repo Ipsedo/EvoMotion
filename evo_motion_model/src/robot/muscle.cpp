@@ -20,16 +20,16 @@ glm::mat4 get_rotation(const glm::vec3 a, const glm::vec3 b) {
 
 Muscle::Muscle(
     const std::string &name, const float attach_mass, const glm::vec3 attach_scale,
-    const std::shared_ptr<Item> &item_a, const glm::vec3 pos_in_a,
-    const std::shared_ptr<Item> &item_b, const glm::vec3 pos_in_b, const float force,
+    const std::shared_ptr<RigidBodyItem> &item_a, const glm::vec3 pos_in_a,
+    const std::shared_ptr<RigidBodyItem> &item_b, const glm::vec3 pos_in_b, const float force,
     const float max_speed)
     : name(name), item_a_name(item_a->get_name()), item_b_name(item_b->get_name()),
       max_speed(max_speed),
-      attach_a(std::make_shared<Item>(
+      attach_a(std::make_shared<RigidBodyItem>(
           name + "_attach_a", std::make_shared<ObjShape>("./resources/obj/sphere.obj"),
           item_a->model_matrix_without_scale() * glm::translate(glm::mat4(1), pos_in_a),
           attach_scale, attach_mass, SPECULAR)),
-      attach_b(std::make_shared<Item>(
+      attach_b(std::make_shared<RigidBodyItem>(
           name + "_attach_b", std::make_shared<ObjShape>("./resources/obj/sphere.obj"),
           item_b->model_matrix_without_scale() * glm::translate(glm::mat4(1), pos_in_b),
           attach_scale, attach_mass, SPECULAR)) {

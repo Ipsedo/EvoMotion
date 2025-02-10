@@ -15,7 +15,7 @@
 
 #include "./converter.h"
 
-Item::Item(
+RigidBodyItem::RigidBodyItem(
     std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,
     const glm::vec3 scale, const float mass, const DrawableKind drawable_kind)
     : name(std::move(name)), shape(shape), scale(scale), first_model_matrix(model_matrix),
@@ -42,38 +42,38 @@ Item::Item(
     body = new btRigidBody(body_info);
 }
 
-Item::Item(
+RigidBodyItem::RigidBodyItem(
     std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 position,
     const glm::quat rotation, const glm::vec3 scale, const float mass, DrawableKind drawable_kind)
-    : Item(
+    : RigidBodyItem(
           std::move(name), shape,
           glm::translate(glm::mat4(1.f), position) * glm::mat4_cast(rotation), scale, mass,
           drawable_kind) {}
 
-Item::Item(
+RigidBodyItem::RigidBodyItem(
     std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 position,
     const glm::vec3 scale, const float mass, DrawableKind drawable_kind)
-    : Item(
+    : RigidBodyItem(
           std::move(name), shape, position, glm::quat_cast(glm::mat4(1.f)), scale, mass,
           drawable_kind) {}
 
-std::shared_ptr<Shape> Item::get_shape() const { return shape; }
+std::shared_ptr<Shape> RigidBodyItem::get_shape() const { return shape; }
 
-std::string Item::get_name() const { return name; }
+std::string RigidBodyItem::get_name() const { return name; }
 
-btRigidBody *Item::get_body() const { return body; }
+btRigidBody *RigidBodyItem::get_body() const { return body; }
 
-glm::mat4 Item::model_matrix() const {
+glm::mat4 RigidBodyItem::model_matrix() const {
     return model_matrix_without_scale() * glm::scale(glm::mat4(1.f), scale);
 }
 
-glm::mat4 Item::model_matrix_without_scale() const {
+glm::mat4 RigidBodyItem::model_matrix_without_scale() const {
     btTransform tr;
     body->getMotionState()->getWorldTransform(tr);
     return bullet_to_glm(tr);
 }
 
-void Item::reset(const glm::mat4 &main_model_matrix) {
+void RigidBodyItem::reset(const glm::mat4 &main_model_matrix) {
     const btTransform original_tr = glm_to_bullet(main_model_matrix * first_model_matrix);
 
     body->setWorldTransform(original_tr);
@@ -84,9 +84,9 @@ void Item::reset(const glm::mat4 &main_model_matrix) {
     body->clearForces();
 }
 
-DrawableKind Item::get_drawable_kind() const { return kind; }
+DrawableKind RigidBodyItem::get_drawable_kind() const { return kind; }
 
-void Item::rename(const std::string &new_name) { name = new_name; }
+void RigidBodyItem::rename(const std::string &new_name) { name = new_name; }
 
 /*
  * Empty item

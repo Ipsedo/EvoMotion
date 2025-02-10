@@ -111,8 +111,8 @@ class BuilderMuscle : public Muscle {
 public:
     BuilderMuscle(
         const std::string &name, float attach_mass, const glm::vec3 &attach_scale,
-        const std::shared_ptr<Item> &item_a, const glm::vec3 &pos_in_a,
-        const std::shared_ptr<Item> &item_b, const glm::vec3 &pos_in_b, float force,
+        const std::shared_ptr<RigidBodyItem> &item_a, const glm::vec3 &pos_in_a,
+        const std::shared_ptr<RigidBodyItem> &item_b, const glm::vec3 &pos_in_b, float force,
         float max_speed);
 
     BuilderMuscle(

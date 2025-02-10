@@ -37,8 +37,8 @@ private:
     std::string skeleton_json_path;
     Skeleton skeleton;
 
-    std::shared_ptr<Item> base;
-    std::shared_ptr<Item> root_item;
+    std::shared_ptr<RigidBodyItem> base;
+    std::shared_ptr<RigidBodyItem> root_item;
 
     std::vector<std::shared_ptr<Controller>> controllers;
 

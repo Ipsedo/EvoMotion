@@ -19,7 +19,7 @@ RobotWalk::RobotWalk(
     const float initial_remaining_seconds, const float max_episode_seconds,
     const float target_velocity, const float minimal_velocity, const int reset_frames)
     : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f),
-      base(std::make_shared<Item>(
+      base(std::make_shared<RigidBodyItem>(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
           glm::translate(glm::mat4(1), glm::vec3(0.f, -2.f, 2.f)), glm::vec3(1000.f, 1.f, 1000.f),
           0.f, TILE_SPECULAR)),

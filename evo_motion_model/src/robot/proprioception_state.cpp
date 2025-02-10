@@ -12,7 +12,8 @@
 
 // Base class for proprioception
 ItemProprioceptionState::ItemProprioceptionState(
-    const std::shared_ptr<Item> &item, const std::shared_ptr<Item> &floor, btDynamicsWorld *world)
+    const std::shared_ptr<RigidBodyItem> &item, const std::shared_ptr<RigidBodyItem> &floor,
+    btDynamicsWorld *world)
     : state_item(item), last_ang_vel(0, 0, 0), last_lin_vel(0, 0, 0), floor_touched(false) {
     world->contactPairTest(state_item->get_body(), floor->get_body(), *this);
 }
@@ -76,8 +77,8 @@ btScalar ItemProprioceptionState::addSingleResult(
 // Member class
 
 MemberState::MemberState(
-    const std::shared_ptr<Item> &item, const std::shared_ptr<Item> &root_item,
-    const std::shared_ptr<Item> &floor, btDynamicsWorld *world)
+    const std::shared_ptr<RigidBodyItem> &item, const std::shared_ptr<RigidBodyItem> &root_item,
+    const std::shared_ptr<RigidBodyItem> &floor, btDynamicsWorld *world)
     : ItemProprioceptionState(item, floor, world), root_item(root_item) {}
 
 int MemberState::get_size() { return ItemProprioceptionState::get_size() + 3; }
@@ -95,7 +96,8 @@ torch::Tensor MemberState::get_state(torch::Device device) {
 // Root Member class
 
 RootMemberState::RootMemberState(
-    const std::shared_ptr<Item> &item, const std::shared_ptr<Item> &floor, btDynamicsWorld *world)
+    const std::shared_ptr<RigidBodyItem> &item, const std::shared_ptr<RigidBodyItem> &floor,
+    btDynamicsWorld *world)
     : ItemProprioceptionState(item, floor, world) {}
 
 int RootMemberState::get_size() { return ItemProprioceptionState::get_size() + 3; }
