@@ -43,6 +43,8 @@ public:
  * Builder Constraints
  */
 
+enum ConstraintType { FIXED, HINGE };
+
 class BuilderConstraint : public virtual Constraint {
 public:
     BuilderConstraint(
@@ -71,12 +73,10 @@ public:
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
     void update_constraint(
-        const std::optional<glm::vec3> &pivot_in_parent = std::nullopt,
-        const std::optional<glm::vec3> &pivot_in_child = std::nullopt,
-        std::optional<glm::vec3> axis_in_parent = std::nullopt,
-        std::optional<glm::vec3> axis_in_child = std::nullopt,
-        std::optional<float> limit_radian_min = std::nullopt,
-        std::optional<float> limit_radian_max = std::nullopt);
+        const std::optional<glm::vec3> &new_pivot = std::nullopt,
+        const std::optional<glm::vec3> &new_axis = std::nullopt,
+        std::optional<float> new_limit_radian_min = std::nullopt,
+        std::optional<float> new_limit_radian_max = std::nullopt);
 
 protected:
     std::shared_ptr<Shape> get_shape() override;
@@ -95,6 +95,10 @@ public:
     BuilderFixedConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
+
+    void update_constraint(
+        const std::optional<glm::vec3> &new_pivot = std::nullopt,
+        const std::optional<glm::quat> &new_rot = std::nullopt);
 
 protected:
     std::shared_ptr<Shape> get_shape() override;
@@ -142,6 +146,16 @@ public:
         std::optional<float> new_mass = std::nullopt,
         std::optional<bool> new_ignore_collision = std::nullopt);
 
+    bool update_hinge_constraint(
+        const std::string &hinge_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
+        std::optional<glm::vec3> new_axis = std::nullopt,
+        std::optional<float> new_limit_angle_min = std::nullopt,
+        std::optional<float> new_angle_limit_max = std::nullopt);
+
+    bool update_fixed_constraint(
+        const std::string &fixed_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
+        std::optional<glm::quat> new_rot = std::nullopt);
+
     bool rename_member(const std::string &old_name, const std::string &new_name);
 
     bool attach_fixed_constraint(
@@ -156,6 +170,12 @@ public:
 
     float get_member_mass(const std::string &member_name);
     float get_member_friction(const std::string &member_name);
+
+    ConstraintType get_constraint_type(const std::string &constraint_name);
+    std::tuple<glm::vec3, glm::vec3, float, float>
+    get_constraint_hinge_info(const std::string &hinge_constraint_name);
+    std::tuple<glm::vec3, glm::quat>
+    get_constraint_fixed_info(const std::string &fixed_constraint_name);
 
     std::optional<std::string>
     ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);

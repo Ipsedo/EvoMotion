@@ -175,6 +175,7 @@ void BuilderOpenGlWindow::on_hide_tab() {
     if (context->is_builder_env_selected()
         && context->get_builder_env()->get_robot_name() == builder_env->get_robot_name()) {
         context->release_focus_member();
+        context->release_focus_constraint();
         context->release_builder_env();
     }
 }
@@ -183,6 +184,7 @@ void BuilderOpenGlWindow::on_open_tab() {
     if (!context->is_builder_env_selected()
         || context->get_builder_env()->get_robot_name() != builder_env->get_robot_name()) {
         context->release_focus_member();
+        context->release_focus_constraint();
         context->set_builder_env(builder_env);
     }
 }

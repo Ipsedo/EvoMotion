@@ -262,8 +262,6 @@ void ImGuiApplication::imgui_render_robot_builder_file_dialog() {
 void ImGuiApplication::imgui_render_member_settings() {
     if (show_member_settings_window) {
         if (ImGui::Begin("Member settings", &show_member_settings_window)) {
-            std::string message = "No focus member";
-
             if (context->is_member_focused()) {
                 ImGui::Text("Focus on \"%s\" member", context->get_focused_member().c_str());
 
@@ -356,6 +354,16 @@ void ImGuiApplication::imgui_render_member_settings() {
                         context->get_focused_member(), member_pos, member_rot, member_scale,
                         friction, mass);
 
+                // remove
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                if (ImGui::Button("Remove member")) {
+                    context->get_builder_env()->remove_member(context->get_focused_member());
+                    context->release_focus_member();
+                }
+
             } else {
                 ImGui::Text("No focus member");
             }
@@ -380,7 +388,127 @@ void ImGuiApplication::imgui_render_new_constraint() {
 
 void ImGuiApplication::imgui_render_constraint_settings() {
     if (show_constraint_settings_window) {
-        if (ImGui::Begin("Constraint settings", &show_constraint_settings_window)) {}
+        if (ImGui::Begin("Constraint settings", &show_constraint_settings_window)) {
+            if (context->is_constraint_focused()) {
+                ImGui::Text(
+                    "Focus on \"%s\" constraint", context->get_focused_constraint().c_str());
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                const auto constraint_type = context->get_builder_env()->get_constraint_type(
+                    context->get_focused_constraint());
+
+                if (constraint_type == HINGE) {
+                    ImGui::Text("Hinge constraint");
+
+                    bool updated = false;
+
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    auto [pos, axis, limit_angle_min, limit_angle_max] =
+                        context->get_builder_env()->get_constraint_hinge_info(
+                            context->get_focused_constraint());
+
+                    // position
+                    ImGui::BeginGroup();
+                    ImGui::Text("Position");
+                    ImGui::Spacing();
+
+                    if (ImGui::InputFloat("pos.x", &pos.x)) updated = true;
+                    if (ImGui::InputFloat("pos.y", &pos.y)) updated = true;
+                    if (ImGui::InputFloat("pos.z", &pos.z)) updated = true;
+
+                    ImGui::EndGroup();
+                    ImGui::Spacing();
+
+                    // axis
+                    ImGui::BeginGroup();
+                    ImGui::Text("Axis");
+                    ImGui::Spacing();
+
+                    if (ImGui::InputFloat("axis.x", &axis.x)) updated = true;
+                    if (ImGui::InputFloat("axis.y", &axis.y)) updated = true;
+                    if (ImGui::InputFloat("axis.z", &axis.z)) updated = true;
+
+                    ImGui::EndGroup();
+                    ImGui::Spacing();
+
+                    // Limit
+                    ImGui::BeginGroup();
+                    ImGui::Text("Angular limits");
+                    ImGui::Spacing();
+
+                    if (ImGui::InputFloat("min", &limit_angle_min)) updated = true;
+                    if (ImGui::InputFloat("max", &limit_angle_max)) updated = true;
+
+                    ImGui::EndGroup();
+
+                    // final
+                    if (updated)
+                        context->get_builder_env()->update_hinge_constraint(
+                            context->get_focused_constraint(), pos, axis, limit_angle_min,
+                            limit_angle_max);
+
+                } else if (constraint_type == FIXED) {
+                    ImGui::Text("Fixed constraint");
+
+                    bool updated = false;
+
+                    ImGui::Spacing();
+                    ImGui::Separator();
+                    ImGui::Spacing();
+
+                    auto [pos, rot] = context->get_builder_env()->get_constraint_fixed_info(
+                        context->get_focused_constraint());
+
+                    // position
+                    ImGui::BeginGroup();
+                    ImGui::Text("Position");
+                    ImGui::Spacing();
+
+                    if (ImGui::InputFloat("pos.x", &pos.x)) updated = true;
+                    if (ImGui::InputFloat("pos.y", &pos.y)) updated = true;
+                    if (ImGui::InputFloat("pos.z", &pos.z)) updated = true;
+
+                    ImGui::EndGroup();
+                    ImGui::Spacing();
+
+                    // axis
+                    ImGui::BeginGroup();
+                    ImGui::Text("Rotation");
+                    ImGui::Spacing();
+
+                    if (ImGui::InputFloat("axis.w", &rot.w)) updated = true;
+                    if (ImGui::InputFloat("axis.x", &rot.x)) updated = true;
+                    if (ImGui::InputFloat("axis.y", &rot.y)) updated = true;
+                    if (ImGui::InputFloat("axis.z", &rot.z)) updated = true;
+
+                    ImGui::EndGroup();
+                    ImGui::Spacing();
+
+                    if (updated)
+                        context->get_builder_env()->update_fixed_constraint(
+                            context->get_focused_constraint(), pos, rot);
+                }
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                if (ImGui::Button("Remove constraint")) {
+                    context->get_builder_env()->remove_constraint(
+                        context->get_focused_constraint());
+                    context->release_focus_constraint();
+                }
+
+            } else {
+                ImGui::Text("No focused constraint");
+            }
+        }
         ImGui::End();
     }
 }
