@@ -2,6 +2,8 @@
 // Created by samuel on 11/02/25.
 //
 
+#include <evo_motion_model/converter.h>
+
 #include "../window.h"
 
 NewMemberWindow::NewMemberWindow()
@@ -42,12 +44,12 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
     ImGui::Spacing();
 
     if (ImGui::InputFloat("axis.x", &rotation_axis.x, 0.f, 0.f, "%.8f"))
-        rotation_axis = glm::normalize(rotation_axis);
+        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
     if (ImGui::InputFloat("axis.y", &rotation_axis.y, 0.f, 0.f, "%.8f"))
-        rotation_axis = glm::normalize(rotation_axis);
+        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
     if (ImGui::InputFloat("axis.z", &rotation_axis.z, 0.f, 0.f, "%.8f"))
-        rotation_axis = glm::normalize(rotation_axis);
-    ImGui::Spacing();
+        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
+
     ImGui::InputFloat("angle", &rotation_angle, 0.f, 0.f, "%.8f");
 
     ImGui::EndGroup();
@@ -59,13 +61,14 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
 
     ImGui::Text("Scale");
     ImGui::Spacing();
+    float min_scale = 1e-4f;
 
-    if (ImGui::InputFloat("scale.x", &scale.x, 0.f, 0.f, "%.8f"))
-        scale.x = std::max(scale.x, 1e-8f);
-    if (ImGui::InputFloat("scale.y", &scale.y, 0.f, 0.f, "%.8f"))
-        scale.y = std::max(scale.y, 1e-8f);
-    if (ImGui::InputFloat("scale.z", &scale.z, 0.f, 0.f, "%.8f"))
-        scale.z = std::max(scale.z, 1e-8f);
+    if (ImGui::InputFloat("scale.x", &scale.x, 0.f, 0.f, "%.4f"))
+        scale.x = std::max(scale.x, min_scale);
+    if (ImGui::InputFloat("scale.y", &scale.y, 0.f, 0.f, "%.4f"))
+        scale.y = std::max(scale.y, min_scale);
+    if (ImGui::InputFloat("scale.z", &scale.z, 0.f, 0.f, "%.4f"))
+        scale.z = std::max(scale.z, min_scale);
 
     ImGui::EndGroup();
     ImGui::Spacing();
@@ -90,8 +93,8 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
 
     if (ImGui::Button("Create member")) {
         if (context->get_builder_env()->add_member(
-                member_name, CUBE, pos, glm::angleAxis(rotation_angle, rotation_axis), scale, mass,
-                friction)) {
+                member_name, CUBE, pos, axis_angle_to_quat(rotation_axis, rotation_angle), scale,
+                mass, friction)) {
             member_name = "";
             pos = glm::vec3(0.f);
             rotation_axis = glm::vec3(0, 1, 0);

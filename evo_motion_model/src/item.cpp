@@ -11,9 +11,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include <evo_motion_model/converter.h>
 #include <evo_motion_model/item.h>
-
-#include "./converter.h"
 
 RigidBodyItem::RigidBodyItem(
     std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,

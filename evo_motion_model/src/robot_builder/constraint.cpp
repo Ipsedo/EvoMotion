@@ -9,7 +9,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#include "../converter.h"
+#include <evo_motion_model/converter.h>
 
 /*
  * Builder Constraint

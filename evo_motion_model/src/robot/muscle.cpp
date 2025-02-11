@@ -8,9 +8,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <evo_motion_model/converter.h>
 #include <evo_motion_model/robot/muscle.h>
-
-#include "../converter.h"
 
 glm::mat4 get_rotation(const glm::vec3 a, const glm::vec3 b) {
     return glm::rotate(

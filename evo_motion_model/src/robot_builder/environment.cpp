@@ -5,10 +5,10 @@
 #include <fstream>
 #include <utility>
 
+#include <evo_motion_model/converter.h>
 #include <evo_motion_model/robot/builder.h>
 #include <evo_motion_model/robot/skeleton.h>
 
-#include "../converter.h"
 #include "../json_serializer.h"
 #include "../utils.h"
 

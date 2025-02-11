@@ -4,6 +4,8 @@
 
 #include <imgui.h>
 
+#include <evo_motion_model/converter.h>
+
 #include "../window.h"
 
 MemberSettingsWindow::MemberSettingsWindow() : ImGuiWindow("Member settings") {}
@@ -44,25 +46,23 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<AppContex
         ImGui::Text("Rotation");
         ImGui::Spacing();
 
-        float rotation_angle = glm::angle(member_rot);
-        glm::vec3 rotation_axis = glm::axis(member_rot);
+        auto [rotation_axis, rotation_angle] = quat_to_axis_angle(member_rot);
 
         if (ImGui::InputFloat("axis.x", &rotation_axis.x, 0.f, 0.f, "%.8f")) {
-            rotation_axis = glm::normalize(rotation_axis);
+            rotation_axis = glm::normalize(rotation_axis + 1e-9f);
             updated = true;
         }
         if (ImGui::InputFloat("axis.y", &rotation_axis.y, 0.f, 0.f, "%.8f")) {
-            rotation_axis = glm::normalize(rotation_axis);
+            rotation_axis = glm::normalize(rotation_axis + 1e-9f);
             updated = true;
         }
         if (ImGui::InputFloat("axis.z", &rotation_axis.z, 0.f, 0.f, "%.8f")) {
-            rotation_axis = glm::normalize(rotation_axis);
+            rotation_axis = glm::normalize(rotation_axis + 1e-9f);
             updated = true;
         }
-        if (ImGui::Spacing(); ImGui::InputFloat("angle", &rotation_angle, 0.f, 0.f, "%.8f"))
-            updated = true;
+        if (ImGui::InputFloat("angle", &rotation_angle, 0.f, 0.f, "%.8f")) updated = true;
 
-        member_rot = glm::angleAxis(rotation_angle, rotation_axis);
+        member_rot = axis_angle_to_quat(rotation_axis, rotation_angle);
 
         ImGui::EndGroup();
 
@@ -74,16 +74,18 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<AppContex
         ImGui::Text("Scale");
         ImGui::Spacing();
 
-        if (ImGui::InputFloat("scale.x", &member_scale.x, 0.f, 0.f, "%.8f")) {
-            member_scale.x = std::max(member_scale.x, 1e-8f);
+        float min_scale = 1e-4f;
+
+        if (ImGui::InputFloat("scale.x", &member_scale.x, 0.f, 0.f, "%.4f")) {
+            member_scale.x = std::max(member_scale.x, min_scale);
             updated = true;
         }
-        if (ImGui::InputFloat("scale.y", &member_scale.y, 0.f, 0.f, "%.8f")) {
-            member_scale.y = std::max(member_scale.y, 1e-8f);
+        if (ImGui::InputFloat("scale.y", &member_scale.y, 0.f, 0.f, "%.4f")) {
+            member_scale.y = std::max(member_scale.y, min_scale);
             updated = true;
         }
-        if (ImGui::InputFloat("scale.z", &member_scale.z, 0.f, 0.f, "%.8f")) {
-            member_scale.z = std::max(member_scale.z, 1e-8f);
+        if (ImGui::InputFloat("scale.z", &member_scale.z, 0.f, 0.f, "%.4f")) {
+            member_scale.z = std::max(member_scale.z, min_scale);
             updated = true;
         }
 
