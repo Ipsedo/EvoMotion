@@ -283,9 +283,9 @@ void ImGuiApplication::imgui_render_member_settings() {
 
                 bool updated = false;
 
-                if (ImGui::InputFloat("pos.x", &member_pos.x)) updated = true;
-                if (ImGui::InputFloat("pos.y", &member_pos.y)) updated = true;
-                if (ImGui::InputFloat("pos.z", &member_pos.z)) updated = true;
+                if (ImGui::InputFloat("pos.x", &member_pos.x, 0.f, 0.f, "%.8f")) updated = true;
+                if (ImGui::InputFloat("pos.y", &member_pos.y, 0.f, 0.f, "%.8f")) updated = true;
+                if (ImGui::InputFloat("pos.z", &member_pos.z, 0.f, 0.f, "%.8f")) updated = true;
 
                 ImGui::EndGroup();
 
@@ -297,10 +297,10 @@ void ImGuiApplication::imgui_render_member_settings() {
                 ImGui::Text("Rotation quaternion");
                 ImGui::Spacing();
 
-                if (ImGui::InputFloat("quat.w", &member_rot.w)) updated = true;
-                if (ImGui::InputFloat("quat.x", &member_rot.x)) updated = true;
-                if (ImGui::InputFloat("quat.y", &member_rot.y)) updated = true;
-                if (ImGui::InputFloat("quat.z", &member_rot.z)) updated = true;
+                if (ImGui::InputFloat("quat.w", &member_rot.w, 0.f, 0.f, "%.8f")) updated = true;
+                if (ImGui::InputFloat("quat.x", &member_rot.x, 0.f, 0.f, "%.8f")) updated = true;
+                if (ImGui::InputFloat("quat.y", &member_rot.y, 0.f, 0.f, "%.8f")) updated = true;
+                if (ImGui::InputFloat("quat.z", &member_rot.z, 0.f, 0.f, "%.8f")) updated = true;
 
                 ImGui::EndGroup();
 
@@ -312,9 +312,9 @@ void ImGuiApplication::imgui_render_member_settings() {
                 ImGui::Text("Scale");
                 ImGui::Spacing();
 
-                if (ImGui::InputFloat("scale.x", &member_scale.x)) updated = true;
-                if (ImGui::InputFloat("scale.y", &member_scale.y)) updated = true;
-                if (ImGui::InputFloat("scale.z", &member_scale.z)) updated = true;
+                if (ImGui::InputFloat("scale.x", &member_scale.x, 0.f, 0.f, "%.8f")) updated = true;
+                if (ImGui::InputFloat("scale.y", &member_scale.y, 0.f, 0.f, "%.8f")) updated = true;
+                if (ImGui::InputFloat("scale.z", &member_scale.z, 0.f, 0.f, "%.8f")) updated = true;
 
                 ImGui::EndGroup();
 
@@ -338,7 +338,7 @@ void ImGuiApplication::imgui_render_member_settings() {
                 // mass
                 float mass =
                     context->get_builder_env()->get_member_mass(context->get_focused_member());
-                if (ImGui::InputFloat("mass (kg)", &mass)) updated = true;
+                if (ImGui::InputFloat("mass (kg)", &mass, 0.f, 0.f, "%.8f")) updated = true;
 
                 ImGui::Spacing();
 
@@ -418,9 +418,9 @@ void ImGuiApplication::imgui_render_constraint_settings() {
                     ImGui::Text("Position");
                     ImGui::Spacing();
 
-                    if (ImGui::InputFloat("pos.x", &pos.x)) updated = true;
-                    if (ImGui::InputFloat("pos.y", &pos.y)) updated = true;
-                    if (ImGui::InputFloat("pos.z", &pos.z)) updated = true;
+                    if (ImGui::InputFloat("pos.x", &pos.x, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("pos.y", &pos.y, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("pos.z", &pos.z, 0.f, 0.f, "%.8f")) updated = true;
 
                     ImGui::EndGroup();
                     ImGui::Spacing();
@@ -430,9 +430,9 @@ void ImGuiApplication::imgui_render_constraint_settings() {
                     ImGui::Text("Axis");
                     ImGui::Spacing();
 
-                    if (ImGui::InputFloat("axis.x", &axis.x)) updated = true;
-                    if (ImGui::InputFloat("axis.y", &axis.y)) updated = true;
-                    if (ImGui::InputFloat("axis.z", &axis.z)) updated = true;
+                    if (ImGui::InputFloat("axis.x", &axis.x, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("axis.y", &axis.y, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("axis.z", &axis.z, 0.f, 0.f, "%.8f")) updated = true;
 
                     ImGui::EndGroup();
                     ImGui::Spacing();
@@ -442,8 +442,8 @@ void ImGuiApplication::imgui_render_constraint_settings() {
                     ImGui::Text("Angular limits");
                     ImGui::Spacing();
 
-                    if (ImGui::InputFloat("min", &limit_angle_min)) updated = true;
-                    if (ImGui::InputFloat("max", &limit_angle_max)) updated = true;
+                    if (ImGui::InputFloat("min", &limit_angle_min, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("max", &limit_angle_max, 0.f, 0.f, "%.8f")) updated = true;
 
                     ImGui::EndGroup();
 
@@ -470,9 +470,9 @@ void ImGuiApplication::imgui_render_constraint_settings() {
                     ImGui::Text("Position");
                     ImGui::Spacing();
 
-                    if (ImGui::InputFloat("pos.x", &pos.x)) updated = true;
-                    if (ImGui::InputFloat("pos.y", &pos.y)) updated = true;
-                    if (ImGui::InputFloat("pos.z", &pos.z)) updated = true;
+                    if (ImGui::InputFloat("pos.x", &pos.x, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("pos.y", &pos.y, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("pos.z", &pos.z, 0.f, 0.f, "%.8f")) updated = true;
 
                     ImGui::EndGroup();
                     ImGui::Spacing();
@@ -482,10 +482,10 @@ void ImGuiApplication::imgui_render_constraint_settings() {
                     ImGui::Text("Rotation");
                     ImGui::Spacing();
 
-                    if (ImGui::InputFloat("axis.w", &rot.w)) updated = true;
-                    if (ImGui::InputFloat("axis.x", &rot.x)) updated = true;
-                    if (ImGui::InputFloat("axis.y", &rot.y)) updated = true;
-                    if (ImGui::InputFloat("axis.z", &rot.z)) updated = true;
+                    if (ImGui::InputFloat("axis.w", &rot.w, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("axis.x", &rot.x, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("axis.y", &rot.y, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("axis.z", &rot.z, 0.f, 0.f, "%.8f")) updated = true;
 
                     ImGui::EndGroup();
                     ImGui::Spacing();
