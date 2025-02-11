@@ -442,8 +442,10 @@ void ImGuiApplication::imgui_render_constraint_settings() {
                     ImGui::Text("Angular limits");
                     ImGui::Spacing();
 
-                    if (ImGui::InputFloat("min", &limit_angle_min, 0.f, 0.f, "%.8f")) updated = true;
-                    if (ImGui::InputFloat("max", &limit_angle_max, 0.f, 0.f, "%.8f")) updated = true;
+                    if (ImGui::InputFloat("min", &limit_angle_min, 0.f, 0.f, "%.8f"))
+                        updated = true;
+                    if (ImGui::InputFloat("max", &limit_angle_max, 0.f, 0.f, "%.8f"))
+                        updated = true;
 
                     ImGui::EndGroup();
 
