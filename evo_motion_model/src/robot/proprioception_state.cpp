@@ -8,7 +8,7 @@
 
 #include <glm/gtc/quaternion.hpp>
 
-#include "../converter.h"
+#include <evo_motion_model/converter.h>
 
 // Base class for proprioception
 ItemProprioceptionState::ItemProprioceptionState(

@@ -4,9 +4,9 @@
 
 #include <utility>
 
+#include <evo_motion_model/converter.h>
 #include <evo_motion_model/robot/constraint.h>
 
-#include "../converter.h"
 #include "../utils.h"
 
 /*

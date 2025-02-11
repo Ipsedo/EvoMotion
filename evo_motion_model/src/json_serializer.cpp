@@ -14,7 +14,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#include "./converter.h"
+#include <evo_motion_model/converter.h>
+
 #include "./utils.h"
 
 /*

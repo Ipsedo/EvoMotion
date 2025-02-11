@@ -12,11 +12,11 @@
 #include <evo_motion_networks/agent.h>
 #include <evo_motion_view/camera.h>
 #include <evo_motion_view/drawable.h>
+#include <evo_motion_view/frame_buffer.h>
 
-#include "./camera.h"
-#include "./context.h"
-#include "./event.h"
-#include "./frame_buffer.h"
+#include "../camera.h"
+#include "../context.h"
+#include "../event.h"
 
 class OpenGlWindow {
 public:

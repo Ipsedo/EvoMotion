@@ -4,9 +4,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include <evo_motion_model/converter.h>
 #include <evo_motion_model/robot/builder.h>
-
-#include "../converter.h"
 
 BuilderMember::BuilderMember(
     const std::string &name, const ShapeKind shape_kind, const glm::vec3 &center_pos,
@@ -22,9 +21,11 @@ void BuilderMember::update_item(
     std::optional<glm::vec3> new_scale, std::optional<float> new_friction,
     std::optional<float> new_mass, std::optional<bool> new_ignore_collision) {
 
+    const auto [pos, rot, _] = decompose_model_matrix(get_item()->model_matrix_without_scale());
+
     const auto translate =
-        new_pos.has_value() ? glm::translate(glm::mat4(1.f), new_pos.value()) : glm::mat4(1.f);
-    const auto rotation = new_pos.has_value() ? glm::toMat4(new_rot.value()) : glm::mat4(1.f);
+        glm::translate(glm::mat4(1.f), new_pos.has_value() ? new_pos.value() : pos);
+    const auto rotation = glm::toMat4(new_pos.has_value() ? new_rot.value() : rot);
 
     const auto model_matrix = translate * rotation;
 
@@ -34,7 +35,11 @@ void BuilderMember::update_item(
     if (new_scale.has_value()) {
         const auto shape = get_item()->get_body()->getCollisionShape();
         shape->setLocalScaling(glm_to_bullet(new_scale.value()));
-        get_item()->get_body()->setCollisionShape(shape);
+
+        btVector3 local_inertia(0, 0, 0);
+        shape->calculateLocalInertia(get_item()->get_body()->getMass(), local_inertia);
+
+        get_item()->get_body()->updateInertiaTensor();
     }
 
     if (new_friction.has_value()) get_item()->get_body()->setFriction(new_friction.value());

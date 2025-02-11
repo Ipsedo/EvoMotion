@@ -7,6 +7,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <nlohmann/json.hpp>
 
 /*
@@ -49,6 +50,14 @@ glm::vec4 bullet_to_glm(btVector4 v);
 glm::mat4 bullet_to_glm(const btTransform &m);
 
 glm::quat bullet_to_glm(btQuaternion q);
+
+/*
+ * GLM conversion
+ */
+
+glm::quat axis_angle_to_quat(const glm::vec3 &axis, float angle);
+
+std::tuple<glm::vec3, float> quat_to_axis_angle(const glm::quat &q);
 
 /*
  * Binary conversion

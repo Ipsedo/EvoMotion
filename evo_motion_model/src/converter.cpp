@@ -2,12 +2,12 @@
 // Created by samuel on 03/04/24.
 //
 
-#include "./converter.h"
-
 #include <fstream>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include <evo_motion_model/converter.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <bitset>
@@ -112,6 +112,14 @@ glm::mat4 bullet_to_glm(const btTransform &m) {
 }
 
 glm::quat bullet_to_glm(const btQuaternion q) { return {q.w(), q.x(), q.y(), q.z()}; }
+
+glm::quat axis_angle_to_quat(const glm::vec3 &axis, float angle) {
+    return glm::angleAxis(angle, axis);
+}
+
+std::tuple<glm::vec3, float> quat_to_axis_angle(const glm::quat &q) {
+    return {glm::axis(q), glm::angle(q)};
+}
 
 /*
  * Binary conversion

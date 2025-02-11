@@ -9,7 +9,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-#include "../converter.h"
+#include <evo_motion_model/converter.h>
 
 /*
  * Builder Constraint
@@ -71,9 +71,38 @@ BuilderHingeConstraint::BuilderHingeConstraint(
       shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
 
 void BuilderHingeConstraint::update_constraint(
-    const std::optional<glm::vec3> &pivot_in_parent, const std::optional<glm::vec3> &pivot_in_child,
-    std::optional<glm::vec3> axis_in_parent, std::optional<glm::vec3> axis_in_child,
-    std::optional<float> limit_radian_min, std::optional<float> limit_radian_max) {}
+    const std::optional<glm::vec3> &new_pivot, const std::optional<glm::vec3> &new_axis,
+    std::optional<float> new_limit_radian_min, std::optional<float> new_limit_radian_max) {
+
+    // Frames
+    const auto parent_model_mat = get_parent()->get_item()->model_matrix_without_scale();
+    const auto frame_in_parent = bullet_to_glm(constraint->getFrameOffsetA());
+    // force to use parent absolute pos (from parent frame)
+    const auto absolute_model_mat = parent_model_mat * frame_in_parent;
+
+    const auto child_model_mat = get_child()->get_item()->model_matrix_without_scale();
+
+    const auto absolute_pivot =
+        new_pivot.has_value() ? new_pivot.value() : glm::vec3(absolute_model_mat[3]);
+    const auto absolute_axis =
+        new_axis.has_value() ? new_axis.value() : glm::mat3(absolute_model_mat)[2];
+
+    glm::mat4 new_absolute_frame =
+        glm::translate(glm::mat4(1.f), absolute_pivot)
+        * glm::toMat4(glm::rotation(glm::vec3(0, 0, 1), glm::normalize(absolute_axis)));
+
+    glm::mat4 new_frame_in_parent = glm::inverse(parent_model_mat) * new_absolute_frame;
+    glm::mat4 new_frame_in_child = glm::inverse(child_model_mat) * new_absolute_frame;
+
+    constraint->setFrames(glm_to_bullet(new_frame_in_parent), glm_to_bullet(new_frame_in_child));
+
+    // Limit
+    constraint->setLimit(
+        new_limit_radian_min.has_value() ? new_limit_radian_min.value()
+                                         : constraint->getLowerLimit(),
+        new_limit_radian_max.has_value() ? new_limit_radian_max.value()
+                                         : constraint->getUpperLimit());
+}
 
 std::shared_ptr<Shape> BuilderHingeConstraint::get_shape() { return shape; }
 
@@ -98,3 +127,26 @@ BuilderFixedConstraint::BuilderFixedConstraint(
       shape(std::make_shared<ObjShape>("./resources/obj/cube.obj")) {}
 
 std::shared_ptr<Shape> BuilderFixedConstraint::get_shape() { return shape; }
+
+void BuilderFixedConstraint::update_constraint(
+    const std::optional<glm::vec3> &new_pivot, const std::optional<glm::quat> &new_rot) {
+    const auto parent_model_mat = get_parent()->get_item()->model_matrix_without_scale();
+    const auto frame_in_parent = bullet_to_glm(constraint->getFrameOffsetA());
+    // force to use parent absolute pos (from parent frame)
+    const auto absolute_model_mat = parent_model_mat * frame_in_parent;
+
+    const auto child_model_mat = get_child()->get_item()->model_matrix_without_scale();
+
+    const auto [old_pos, old_rot, _] = decompose_model_matrix(absolute_model_mat);
+
+    const auto absolute_pivot = new_pivot.has_value() ? new_pivot.value() : old_pos;
+    const auto absolute_rot = new_rot.has_value() ? new_rot.value() : old_rot;
+
+    glm::mat4 new_absolute_frame =
+        glm::translate(glm::mat4(1.f), absolute_pivot) * glm::toMat4(absolute_rot);
+
+    glm::mat4 new_frame_in_parent = glm::inverse(parent_model_mat) * new_absolute_frame;
+    glm::mat4 new_frame_in_child = glm::inverse(child_model_mat) * new_absolute_frame;
+
+    constraint->setFrames(glm_to_bullet(new_frame_in_parent), glm_to_bullet(new_frame_in_child));
+}
