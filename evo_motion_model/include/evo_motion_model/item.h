@@ -5,6 +5,7 @@
 #ifndef EVO_MOTION_ITEM_H
 #define EVO_MOTION_ITEM_H
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -26,6 +27,8 @@ public:
     virtual void reset(const glm::mat4 &main_model_matrix) = 0;
 
     virtual DrawableKind get_drawable_kind() const = 0;
+
+    virtual ~AbstractItem() = default;
 };
 
 class RigidBodyItem : public AbstractItem {
@@ -76,7 +79,7 @@ public:
         glm::quat rotation, glm::vec3 scale, DrawableKind drawable_kind);
 
     EmptyItem(
-        const std::string &name, const std::shared_ptr<Shape> &shape,
+        std::string name, const std::shared_ptr<Shape> &shape,
         std::function<glm::vec3()> get_position, std::function<glm::quat()> get_rotation,
         std::function<glm::vec3()> get_scale, DrawableKind drawable_kind);
 

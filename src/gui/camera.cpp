@@ -14,15 +14,15 @@ ImGuiCamera::ImGuiCamera(const std::function<glm::vec3()> &get_object_center)
 
 void ImGuiCamera::update() {
     if (ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
-        ImVec2 mouse_pos = ImGui::GetMousePos();
+        const ImVec2 mouse_pos = ImGui::GetMousePos();
         if (!in_action) {
             last_x = mouse_pos.x;
             last_y = mouse_pos.y;
             in_action = true;
         }
 
-        float delta_x = mouse_pos.x - last_x;
-        float delta_y = mouse_pos.y - last_y;
+        const float delta_x = mouse_pos.x - last_x;
+        const float delta_y = mouse_pos.y - last_y;
 
         horizontal_angle += delta_x * factor;
 

@@ -114,7 +114,7 @@ void ImGuiApplication::render() {
     imgui_render_robot_builder_file_dialog();
 
     // render imgui windows
-    for (const auto &[_, w]: imgui_windows) w->render_window(context);
+    for (const auto &w: imgui_windows | std::views::values) w->render_window(context);
 
     imgui_render_opengl();
 
@@ -260,11 +260,11 @@ void ImGuiApplication::imgui_render_robot_builder_file_dialog() {
 }
 
 void ImGuiApplication::imgui_render_opengl() {
-    ImGuiViewport *viewport = ImGui::GetMainViewport();
+    const ImGuiViewport *viewport = ImGui::GetMainViewport();
     ImVec2 window_pos = viewport->Pos;
     ImVec2 available_size = viewport->Size;
 
-    float menu_bar_height = ImGui::GetFrameHeight();
+    const float menu_bar_height = ImGui::GetFrameHeight();
     window_pos.y += menu_bar_height;
     available_size.y -= menu_bar_height;
 
@@ -272,9 +272,10 @@ void ImGuiApplication::imgui_render_opengl() {
     ImGui::SetNextWindowPos(window_pos);
     ImGui::SetNextWindowSize(available_size);
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
-                             | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus
-                             | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDecoration;
+    constexpr ImGuiWindowFlags flags =
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse
+        | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoTitleBar
+        | ImGuiWindowFlags_NoDecoration;
 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);

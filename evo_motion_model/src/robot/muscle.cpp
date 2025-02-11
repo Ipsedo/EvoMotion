@@ -96,7 +96,7 @@ std::string Muscle::get_name() { return name; }
 
 std::vector<std::shared_ptr<AbstractItem>> Muscle::get_items() { return {attach_a, attach_b}; }
 
-std::vector<btRigidBody *> Muscle::get_bodies() {
+std::vector<btRigidBody *> Muscle::get_bodies() const {
     return {attach_a->get_body(), attach_b->get_body()};
 }
 

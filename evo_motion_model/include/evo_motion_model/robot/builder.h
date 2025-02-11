@@ -65,8 +65,8 @@ public:
     BuilderHingeConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,
         const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
-        const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
-        float limit_radian_min, float limit_radian_max);
+        const glm::vec3 &pivot_in_child, const glm::vec3 &axis_in_parent,
+        const glm::vec3 &axis_in_child, float limit_radian_min, float limit_radian_max);
 
     BuilderHingeConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
@@ -154,7 +154,7 @@ public:
 
     bool update_fixed_constraint(
         const std::string &fixed_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
-        std::optional<glm::quat> new_rot = std::nullopt);
+        const std::optional<glm::quat> &new_rot = std::nullopt);
 
     bool rename_member(const std::string &old_name, const std::string &new_name);
 
@@ -178,7 +178,7 @@ public:
     get_constraint_fixed_info(const std::string &fixed_constraint_name);
 
     std::optional<std::string>
-    ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
+    ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) const;
 
     std::optional<std::string>
     ray_cast_constraint(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
@@ -192,11 +192,11 @@ public:
 
     std::vector<std::string> get_member_names();
 
-    int get_members_count();
+    int get_members_count() const;
 
-    bool member_exists(const std::string &member_name);
-    bool constraint_exists(const std::string &constraint_name);
-    bool muscle_exists(const std::string &muscle_name);
+    bool member_exists(const std::string &member_name) const;
+    bool constraint_exists(const std::string &constraint_name) const;
+    bool muscle_exists(const std::string &muscle_name) const;
 
     /*
      * Environment
@@ -222,9 +222,9 @@ private:
     std::vector<std::shared_ptr<BuilderConstraint>> constraints;
     std::vector<std::shared_ptr<BuilderMuscle>> muscles;
 
-    std::shared_ptr<BuilderMember> get_member(const std::string &member_name);
-    std::shared_ptr<BuilderConstraint> get_constraint(const std::string &constraint_name);
-    std::shared_ptr<BuilderMuscle> get_muscle(const std::string &muscle_name);
+    std::shared_ptr<BuilderMember> get_member(const std::string &member_name) const;
+    std::shared_ptr<BuilderConstraint> get_constraint(const std::string &constraint_name) const;
+    std::shared_ptr<BuilderMuscle> get_muscle(const std::string &muscle_name) const;
 
     template<typename Part>
     static std::shared_ptr<Part>

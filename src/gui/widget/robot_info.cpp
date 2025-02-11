@@ -47,12 +47,12 @@ void RobotInfoWindow::render_window_content(const std::shared_ptr<AppContext> &c
 
     if (ImGui::Combo(
             "Select root item", &selected_item,
-            [](void *user_ptr, int idx, const char **out_text) {
-                auto &vec = *static_cast<std::vector<std::string> *>(user_ptr);
+            [](void *user_ptr, const int idx, const char **out_text) {
+                const auto &vec = *static_cast<std::vector<std::string> *>(user_ptr);
                 if (idx < 0 || idx >= static_cast<int>(vec.size())) return false;
                 *out_text = vec[idx].c_str();
                 return true;
             },
-            &item_names, item_names.size()))
+            &item_names, static_cast<int>(item_names.size())))
         context->get_builder_env()->set_root(item_names[selected_item]);
 }

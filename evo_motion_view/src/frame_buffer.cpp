@@ -9,7 +9,7 @@
 
 #include <evo_motion_view/frame_buffer.h>
 
-FrameBuffer::FrameBuffer(float width, float height) : fbo(0), texture(0), rbo(0) {
+FrameBuffer::FrameBuffer(const float width, const float height) : fbo(0), texture(0), rbo(0) {
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -45,7 +45,7 @@ FrameBuffer::~FrameBuffer() {
 
 unsigned int FrameBuffer::get_frame_texture() const { return texture; }
 
-void FrameBuffer::rescale_frame_buffer(float width, float height) const {
+void FrameBuffer::rescale_frame_buffer(const float width, const float height) const {
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGBA, static_cast<GLsizei>(width), static_cast<GLsizei>(height), 0,

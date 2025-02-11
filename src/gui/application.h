@@ -29,7 +29,7 @@
 #include "./widget/opengl_window.h"
 #include "./widget/window.h"
 
-class ImGuiApplication {
+class ImGuiApplication final {
 public:
     ImGuiApplication(const std::string &title, int width, int height);
 
@@ -78,8 +78,8 @@ private:
     void imgui_render_opengl();
 
     static void GLAPIENTRY message_callback(
-        const GLenum source, const GLenum type, const GLuint id, const GLenum severity,
-        const GLsizei length, const GLchar *message, const void *userParam);
+        GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+        const GLchar *message, const void *userParam);
 };
 
 #endif//EVO_MOTION_APPLICATION_H

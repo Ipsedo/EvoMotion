@@ -34,7 +34,7 @@ public:
 
     std::vector<std::shared_ptr<AbstractItem>> get_items();
 
-    std::vector<btRigidBody *> get_bodies();
+    std::vector<btRigidBody *> get_bodies() const;
     std::vector<btTypedConstraint *> get_constraints();
 
     btSliderConstraint *get_slider_constraint() const;

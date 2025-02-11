@@ -60,27 +60,25 @@ std::shared_ptr<Member> Skeleton::get_member(const std::string &name) {
 
 std::vector<std::shared_ptr<AbstractItem>> Skeleton::get_items() {
     std::vector<std::shared_ptr<AbstractItem>> items;
-    std::transform(members.begin(), members.end(), std::back_inserter(items), [](const auto &t) {
-        return t->get_item();
-    });
+    std::ranges::transform(
+        members, std::back_inserter(items), [](const auto &t) { return t->get_item(); });
 
     for (const auto &m: muscles) {
         auto muscle_items = m->get_items();
         items.insert(items.end(), muscle_items.begin(), muscle_items.end());
     }
 
-    std::transform(
-        constraints.begin(), constraints.end(), std::back_inserter(items),
-        [](const auto &c) { return c->get_empty_item(); });
+    std::ranges::transform(
+        constraints, std::back_inserter(items), [](const auto &c) { return c->get_empty_item(); });
 
     return items;
 }
 
 std::vector<btTypedConstraint *> Skeleton::get_constraints() {
     std::vector<btTypedConstraint *> type_constraints;
-    std::transform(
-        constraints.begin(), constraints.end(), std::back_inserter(type_constraints),
-        [](const auto &t) { return t->get_constraint(); });
+    std::ranges::transform(constraints, std::back_inserter(type_constraints), [](const auto &t) {
+        return t->get_constraint();
+    });
 
     for (const auto &m: muscles) {
         auto muscle_constraints = m->get_constraints();
@@ -94,7 +92,7 @@ std::vector<btTypedConstraint *> Skeleton::get_constraints() {
 std::vector<btRigidBody *> Skeleton::get_bodies() {
     std::vector<btRigidBody *> bodies;
 
-    std::transform(members.begin(), members.end(), std::back_inserter(bodies), [](const auto &m) {
+    std::ranges::transform(members, std::back_inserter(bodies), [](const auto &m) {
         return m->get_item()->get_body();
     });
 
@@ -113,20 +111,20 @@ Skeleton::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
     serializer->write_str("root_name", root_name);
 
     std::vector<std::shared_ptr<AbstractSerializer>> serializer_members;
-    std::transform(
-        members.begin(), members.end(), std::back_inserter(serializer_members),
+    std::ranges::transform(
+        members, std::back_inserter(serializer_members),
         [serializer](const auto &m) { return m->serialize(serializer); });
     serializer->write_array("members", serializer_members);
 
     std::vector<std::shared_ptr<AbstractSerializer>> serializer_constraints;
-    std::transform(
-        constraints.begin(), constraints.end(), std::back_inserter(serializer_constraints),
+    std::ranges::transform(
+        constraints, std::back_inserter(serializer_constraints),
         [serializer](const auto &c) { return c->serialize(serializer); });
     serializer->write_array("constraints", serializer_constraints);
 
     std::vector<std::shared_ptr<AbstractSerializer>> serializer_muscles;
-    std::transform(
-        muscles.begin(), muscles.end(), std::back_inserter(serializer_muscles),
+    std::ranges::transform(
+        muscles, std::back_inserter(serializer_muscles),
         [serializer](const auto &m) { return m->serialize(serializer); });
     serializer->write_array("muscles", serializer_muscles);
 
@@ -144,9 +142,9 @@ Skeleton::get_states(const std::shared_ptr<RigidBodyItem> &floor, btDynamicsWorl
     std::vector<std::shared_ptr<State>> states;
 
     std::vector<std::shared_ptr<Member>> non_root_items;
-    std::copy_if(
-        members.begin(), members.end(), std::back_inserter(non_root_items),
-        [this](const auto &i) { return i->get_item()->get_name() != get_root_name(); });
+    std::ranges::copy_if(members, std::back_inserter(non_root_items), [this](const auto &i) {
+        return i->get_item()->get_name() != get_root_name();
+    });
 
     const auto root_member = get_member(get_root_name());
 

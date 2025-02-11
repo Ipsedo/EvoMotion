@@ -36,7 +36,7 @@ glm::vec3 FollowCamera::look() { return look_vec; }
 
 glm::vec3 FollowCamera::up() { return up_vec; }
 
-void FollowCamera::step(float delta) {
+void FollowCamera::step(const float delta) {
 
     object_smooth_pos += (get_object_center() - object_smooth_pos) * factor * delta;
 

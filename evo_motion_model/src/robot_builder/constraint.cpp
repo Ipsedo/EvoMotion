@@ -54,25 +54,26 @@ btRigidBody *BuilderConstraint::create_fake_body() {
 BuilderHingeConstraint::BuilderHingeConstraint(
     const std::string &name, const std::shared_ptr<Member> &parent,
     const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
-    const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
-    float limit_radian_min, float limit_radian_max)
+    const glm::vec3 &pivot_in_child, const glm::vec3 &axis_in_parent,
+    const glm::vec3 &axis_in_child, const float limit_radian_min, const float limit_radian_max)
     : HingeConstraint(
           name, parent, child, pivot_in_parent, pivot_in_child, axis_in_parent, axis_in_child,
           limit_radian_min, limit_radian_max),
-      BuilderConstraint(name, parent, child), Constraint(name, parent, child),
+      Constraint(name, parent, child), BuilderConstraint(name, parent, child),
       shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
 
 BuilderHingeConstraint::BuilderHingeConstraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
     const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
     : HingeConstraint(deserializer, get_member_function),
-      BuilderConstraint(deserializer, get_member_function),
       Constraint(deserializer, get_member_function),
+      BuilderConstraint(deserializer, get_member_function),
       shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
 
 void BuilderHingeConstraint::update_constraint(
     const std::optional<glm::vec3> &new_pivot, const std::optional<glm::vec3> &new_axis,
-    std::optional<float> new_limit_radian_min, std::optional<float> new_limit_radian_max) {
+    const std::optional<float> new_limit_radian_min,
+    const std::optional<float> new_limit_radian_max) {
 
     // Frames
     const auto parent_model_mat = get_parent()->get_item()->model_matrix_without_scale();
@@ -87,12 +88,12 @@ void BuilderHingeConstraint::update_constraint(
     const auto absolute_axis =
         new_axis.has_value() ? new_axis.value() : glm::mat3(absolute_model_mat)[2];
 
-    glm::mat4 new_absolute_frame =
+    const glm::mat4 new_absolute_frame =
         glm::translate(glm::mat4(1.f), absolute_pivot)
         * glm::toMat4(glm::rotation(glm::vec3(0, 0, 1), glm::normalize(absolute_axis)));
 
-    glm::mat4 new_frame_in_parent = glm::inverse(parent_model_mat) * new_absolute_frame;
-    glm::mat4 new_frame_in_child = glm::inverse(child_model_mat) * new_absolute_frame;
+    const glm::mat4 new_frame_in_parent = glm::inverse(parent_model_mat) * new_absolute_frame;
+    const glm::mat4 new_frame_in_child = glm::inverse(child_model_mat) * new_absolute_frame;
 
     constraint->setFrames(glm_to_bullet(new_frame_in_parent), glm_to_bullet(new_frame_in_child));
 
@@ -115,15 +116,15 @@ BuilderFixedConstraint::BuilderFixedConstraint(
     const std::shared_ptr<Member> &child, const glm::mat4 &frame_in_parent,
     const glm::mat4 &frame_in_child)
     : FixedConstraint(name, parent, child, frame_in_parent, frame_in_child),
-      BuilderConstraint(name, parent, child), Constraint(name, parent, child),
+      Constraint(name, parent, child), BuilderConstraint(name, parent, child),
       shape(std::make_shared<ObjShape>("./resources/obj/cube.obj")) {}
 
 BuilderFixedConstraint::BuilderFixedConstraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
     const std::function<std::shared_ptr<Member>(std::string)> &get_member_function)
     : FixedConstraint(deserializer, get_member_function),
-      BuilderConstraint(deserializer, get_member_function),
       Constraint(deserializer, get_member_function),
+      BuilderConstraint(deserializer, get_member_function),
       shape(std::make_shared<ObjShape>("./resources/obj/cube.obj")) {}
 
 std::shared_ptr<Shape> BuilderFixedConstraint::get_shape() { return shape; }
@@ -142,11 +143,11 @@ void BuilderFixedConstraint::update_constraint(
     const auto absolute_pivot = new_pivot.has_value() ? new_pivot.value() : old_pos;
     const auto absolute_rot = new_rot.has_value() ? new_rot.value() : old_rot;
 
-    glm::mat4 new_absolute_frame =
+    const glm::mat4 new_absolute_frame =
         glm::translate(glm::mat4(1.f), absolute_pivot) * glm::toMat4(absolute_rot);
 
-    glm::mat4 new_frame_in_parent = glm::inverse(parent_model_mat) * new_absolute_frame;
-    glm::mat4 new_frame_in_child = glm::inverse(child_model_mat) * new_absolute_frame;
+    const glm::mat4 new_frame_in_parent = glm::inverse(parent_model_mat) * new_absolute_frame;
+    const glm::mat4 new_frame_in_child = glm::inverse(child_model_mat) * new_absolute_frame;
 
     constraint->setFrames(glm_to_bullet(new_frame_in_parent), glm_to_bullet(new_frame_in_child));
 }

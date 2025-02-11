@@ -59,9 +59,9 @@ void InferSettingsWindow::render_window_content(const std::shared_ptr<AppContext
         agent->load(context->get_agent_infer_path());// TODO check if loaded successfully
         agent->to(torch::kCPU);
 
-        auto now = std::chrono::system_clock::now().time_since_epoch();
-        int id = std::chrono::duration_cast<std::chrono::seconds>(now).count();
-        auto gl_window =
+        const auto now = std::chrono::system_clock::now().time_since_epoch();
+        const long id = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+        const auto gl_window =
             std::make_shared<InferOpenGlWindow>(agent, "Infer " + std::to_string(id), env);
 
         close();

@@ -22,16 +22,16 @@ Renderer::Renderer(
     const std::string &title, const int width, const int height, std::shared_ptr<Camera> camera)
     : title(title), width(width), height(height), is_open(false),
       light_pos(glm::vec3(0.f, 0.f, -1.f)), camera(std::move(camera)), drawables({}),
-      window(nullptr) {
+      window(nullptr), vao(0) {
 
     if (!glfwInit()) {
         std::cerr << "GLFW initialization failed" << std::endl;
         exit(1);
     }
 
-    glfwDefaultWindowHints();
-    glfwWindowHint(GLFW_REFRESH_RATE, 60);
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
@@ -56,12 +56,13 @@ Renderer::Renderer(
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_MULTISAMPLE);
 
     glDepthFunc(GL_LEQUAL);
 
     glDepthMask(GL_TRUE);
+
+    glGenVertexArrays(1, &vao);
 
     glDebugMessageCallback(message_callback, nullptr);
 
@@ -84,7 +85,7 @@ void Renderer::close() {
     is_open = false;
 }
 
-void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix, float delta_t) {
+void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix, const float delta_t) {
     if (glfwWindowShouldClose(window)) {
         is_open = false;
         return;
@@ -99,6 +100,7 @@ void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix, float 
     glViewport(0, 0, display_w, display_h);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    glBindVertexArray(vao);
     render_drawables(model_matrix, delta_t);
 
     on_end_frame();

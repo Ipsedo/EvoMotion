@@ -18,13 +18,13 @@ public:
      * Builder context function
      */
 
-    bool is_member_focused();
+    bool is_member_focused() const;
     std::string get_focused_member();
 
-    bool is_constraint_focused();
+    bool is_constraint_focused() const;
     std::string get_focused_constraint();
 
-    bool is_builder_env_selected();
+    bool is_builder_env_selected() const;
     std::shared_ptr<RobotBuilderEnvironment> get_builder_env();
 
     void set_focus_member(const std::string &new_focus_member);
@@ -37,20 +37,20 @@ public:
     void release_builder_env();
 
     void hide_members(bool hidden);
-    bool are_members_hidden();
+    [[nodiscard]] bool are_members_hidden() const;
 
     void hide_constraints(bool hidden);
-    bool are_constraints_hidden();
+    [[nodiscard]] bool are_constraints_hidden() const;
 
     /*
      * Infer helper function
      */
-    bool is_robot_infer_json_path_selected();
+    bool is_robot_infer_json_path_selected() const;
     std::filesystem::path get_robot_infer_json_path();
     void set_robot_infer_json_path(const std::filesystem::path &robot_json_path);
     void release_robot_infer_json_path();
 
-    bool is_agent_infer_path_selected();
+    bool is_agent_infer_path_selected() const;
     std::filesystem::path get_agent_infer_path();
     void set_agent_infer_path(const std::filesystem::path &agent_folder_path);
     void release_agent_infer_path();

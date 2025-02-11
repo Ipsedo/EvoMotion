@@ -57,6 +57,8 @@ private:
     std::map<std::string, std::shared_ptr<Drawable>> drawables;
 
     GLFWwindow *window;
+
+    GLuint vao{};
 };
 
 #endif//EVO_MOTION_RENDERER_H
