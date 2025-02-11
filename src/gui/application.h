@@ -26,8 +26,8 @@
 
 #include "./camera.h"
 #include "./context.h"
-#include "./frame_buffer.h"
-#include "./opengl_window.h"
+#include "./widget/opengl_window.h"
+#include "./widget/window.h"
 
 class ImGuiApplication {
 public:
@@ -45,49 +45,37 @@ private:
 
     ImVec4 clear_color;
 
-    bool show_new_member_window;
-    bool show_member_settings_window;
-    bool show_new_constraint_window;
-    bool show_constraint_settings_window;
-    bool show_member_construct_tools_window;
-    bool show_constraint_construct_tools_window;
-    bool show_manage_trainings_window;
-    bool show_new_training_window;
-    bool show_robot_info_window;
-    bool show_infer_window;
-
     std::shared_ptr<AppContext> context;
 
+    // ImGui window map keys
+    const std::string NEW_MEMBER_NAME = "new_member";
+    const std::string MEMBER_SETTINGS_NAME = "member_settings";
+    const std::string MEMBER_CONSTRUCT_TOOLS_NAME = "member_construct_tools";
+
+    const std::string NEW_CONSTRAINT_NAME = "new_constraint";
+    const std::string CONSTRAINT_SETTINGS_NAME = "constraint_settings";
+    const std::string CONSTRAINT_CONSTRUCT_TOOLS_NAME = "constraint_construct_tools";
+
+    const std::string ROBOT_INFO_NAME = "robot_info";
+
+    const std::string INFER_SETTINGS_NAME = "infer_settings";
+    const std::string START_TRAINING_NAME = "start_training";
+    const std::string MANAGE_TRAINING_WINDOW = "manage_training";
+
+    // window maps
+    std::map<std::string, std::shared_ptr<ImGuiWindow>> imgui_windows;
     std::vector<std::shared_ptr<OpenGlWindow>> opengl_windows;
 
     ImGui::FileBrowser robot_builder_file_dialog;
-
-    ImGui::FileBrowser robot_infer_file_dialog;
-    ImGui::FileBrowser agent_infer_file_dialog;
 
     std::string popup_already_opened_robot;
 
     GLuint vao;
 
     void imgui_render_toolbar();
-
     void imgui_render_robot_builder_file_dialog();
-    void imgui_render_new_member();
-    void imgui_render_member_settings();
-    void imgui_render_construct_member_tools();
-    void imgui_render_new_constraint();
-    void imgui_render_constraint_settings();
-    void imgui_render_construct_constraint_tools();
-    void imgui_render_robot_info();
 
     void imgui_render_opengl();
-
-    void imgui_render_new_training();
-    void imgui_render_manage_trainings();
-
-    void imgui_render_robot_infer_file_dialog();
-    void imgui_render_agent_infer_file_dialog();
-    void imgui_render_robot_infer();
 
     static void GLAPIENTRY message_callback(
         const GLenum source, const GLenum type, const GLuint id, const GLenum severity,
