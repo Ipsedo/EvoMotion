@@ -64,8 +64,6 @@ private:
     btRigidBody *body;
     btCollisionShape *collision_shape;
 
-    glm::vec3 scale;
-
     glm::mat4 first_model_matrix;
 
     DrawableKind kind;

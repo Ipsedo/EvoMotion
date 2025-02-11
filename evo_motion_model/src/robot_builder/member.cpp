@@ -34,7 +34,11 @@ void BuilderMember::update_item(
     if (new_scale.has_value()) {
         const auto shape = get_item()->get_body()->getCollisionShape();
         shape->setLocalScaling(glm_to_bullet(new_scale.value()));
-        get_item()->get_body()->setCollisionShape(shape);
+
+        btVector3 local_inertia(0, 0, 0);
+        shape->calculateLocalInertia(get_item()->get_body()->getMass(), local_inertia);
+
+        get_item()->get_body()->updateInertiaTensor();
     }
 
     if (new_friction.has_value()) get_item()->get_body()->setFriction(new_friction.value());

@@ -32,6 +32,8 @@ bool RobotBuilderEnvironment::add_member(
 
     members.back()->get_item()->get_body()->setUserPointer(new std::string(member_name));
 
+    m_world->addRigidBody(members.back()->get_item()->get_body());
+
     return true;
 }
 
@@ -48,9 +50,11 @@ bool RobotBuilderEnvironment::update_member(
 
         glm::mat4 old_member_model_mat = parent_member->get_item()->model_matrix_without_scale();
 
+        m_world->removeRigidBody(parent_member->get_item()->get_body());// for scaling
         parent_member->update_item(
             new_pos, new_rot, new_scale, new_friction, new_mass, new_ignore_collision);
         updated_members.insert(member_name);
+        m_world->addRigidBody(parent_member->get_item()->get_body());// for scaling
 
         glm::mat4 new_member_model_mat = parent_member->get_item()->model_matrix_without_scale();
 

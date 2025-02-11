@@ -100,10 +100,25 @@ void ConstraintSettingsWindow::render_window_content(const std::shared_ptr<AppCo
             ImGui::Text("Rotation");
             ImGui::Spacing();
 
-            if (ImGui::InputFloat("axis.w", &rot.w, 0.f, 0.f, "%.8f")) updated = true;
-            if (ImGui::InputFloat("axis.x", &rot.x, 0.f, 0.f, "%.8f")) updated = true;
-            if (ImGui::InputFloat("axis.y", &rot.y, 0.f, 0.f, "%.8f")) updated = true;
-            if (ImGui::InputFloat("axis.z", &rot.z, 0.f, 0.f, "%.8f")) updated = true;
+            float rotation_angle = glm::angle(rot);
+            glm::vec3 rotation_axis = glm::axis(rot);
+
+            if (ImGui::InputFloat("axis.x", &rotation_axis.x, 0.f, 0.f, "%.8f")) {
+                rotation_axis = glm::normalize(rotation_axis);
+                updated = true;
+            }
+            if (ImGui::InputFloat("axis.y", &rotation_axis.y, 0.f, 0.f, "%.8f")) {
+                rotation_axis = glm::normalize(rotation_axis);
+                updated = true;
+            }
+            if (ImGui::InputFloat("axis.z", &rotation_axis.z, 0.f, 0.f, "%.8f")) {
+                rotation_axis = glm::normalize(rotation_axis);
+                updated = true;
+            }
+            if (ImGui::Spacing(); ImGui::InputFloat("angle", &rotation_angle, 0.f, 0.f, "%.8f"))
+                updated = true;
+
+            rot = glm::angleAxis(rotation_angle, rotation_axis);
 
             ImGui::EndGroup();
             ImGui::Spacing();

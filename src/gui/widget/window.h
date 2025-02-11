@@ -57,6 +57,19 @@ public:
 
 protected:
     void render_window_content(const std::shared_ptr<AppContext> &context) override;
+
+private:
+    std::string member_name;
+
+    glm::vec3 pos;
+
+    glm::vec3 rotation_axis;
+    float rotation_angle;
+
+    glm::vec3 scale;
+
+    float mass;
+    float friction;
 };
 
 class MemberSettingsWindow : public ImGuiWindow {

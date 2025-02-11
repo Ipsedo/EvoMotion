@@ -18,8 +18,7 @@
 RigidBodyItem::RigidBodyItem(
     std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,
     const glm::vec3 scale, const float mass, const DrawableKind drawable_kind)
-    : name(std::move(name)), shape(shape), scale(scale), first_model_matrix(model_matrix),
-      kind(drawable_kind) {
+    : name(std::move(name)), shape(shape), first_model_matrix(model_matrix), kind(drawable_kind) {
     auto *convex_hull_shape = new btConvexHullShape();
 
     for (auto [x, y, z]: shape->get_vertices()) convex_hull_shape->addPoint(btVector3(x, y, z));
@@ -64,7 +63,9 @@ std::string RigidBodyItem::get_name() const { return name; }
 btRigidBody *RigidBodyItem::get_body() const { return body; }
 
 glm::mat4 RigidBodyItem::model_matrix() const {
-    return model_matrix_without_scale() * glm::scale(glm::mat4(1.f), scale);
+    return model_matrix_without_scale()
+           * glm::scale(
+               glm::mat4(1.f), bullet_to_glm(get_body()->getCollisionShape()->getLocalScaling()));
 }
 
 glm::mat4 RigidBodyItem::model_matrix_without_scale() const {
