@@ -45,32 +45,20 @@ private:
 
     ImVec4 clear_color;
 
-    std::shared_ptr<AppContext> context;
+    std::shared_ptr<ItemFocusContext> context;
 
-    // ImGui window map keys
-    enum WindowId {
-        NEW_MEMBER_NAME,
-        MEMBER_SETTINGS_NAME,
-        MEMBER_CONSTRUCT_TOOLS_NAME,
-
-        NEW_CONSTRAINT_NAME,
-        CONSTRAINT_SETTINGS_NAME,
-        CONSTRAINT_CONSTRUCT_TOOLS_NAME,
-
-        ROBOT_INFO_NAME,
-
-        INFER_SETTINGS_NAME,
-        START_TRAINING_NAME,
-        MANAGE_TRAINING_WINDOW
-    };
+    std::queue<std::tuple<std::string, std::string, std::shared_ptr<RobotBuilderEnvironment>>>
+        member_popup_queue;
 
     // window maps
-    std::map<WindowId, std::shared_ptr<ImGuiWindow>> imgui_windows;
+    std::map<std::string, std::vector<std::shared_ptr<ImGuiWindow>>> imgui_windows;
     std::vector<std::shared_ptr<OpenGlWindow>> opengl_windows;
 
     ImGui::FileBrowser robot_builder_file_dialog;
 
     std::string popup_already_opened_robot;
+
+    PartKind part_kind;
 
     GLuint vao;
 
@@ -83,8 +71,8 @@ private:
         GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
         const GLchar *message, const void *userParam);
 
-    void close_member_stuff();
-    void close_constraint_stuff();
+    std::shared_ptr<BuilderOpenGlWindow>
+    create_builder_opengl_window(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 };
 
 #endif//EVO_MOTION_APPLICATION_H

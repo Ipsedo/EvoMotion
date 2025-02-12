@@ -2,9 +2,9 @@
 // Created by samuel on 11/02/25.
 //
 
-#include <evo_motion_networks/agents/cross_q.h>
+#include "./infer_settings.h"
 
-#include "../window.h"
+#include <evo_motion_networks/agents/cross_q.h>
 
 InferSettingsWindow::InferSettingsWindow(
     const std::function<void(std::shared_ptr<OpenGlWindow>)> &on_start_infer)
@@ -18,7 +18,7 @@ InferSettingsWindow::InferSettingsWindow(
     agent_infer_file_dialog.SetTitle("Load agent directory");
 }
 
-void InferSettingsWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
+void InferSettingsWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
 
     ImGui::Spacing();
 
@@ -65,14 +65,11 @@ void InferSettingsWindow::render_window_content(const std::shared_ptr<AppContext
 
         close();
 
-        robot_json_path = std::nullopt;
-        agent_folder_path = std::nullopt;
-
         on_start_infer(gl_window);
     }
 }
 
-void InferSettingsWindow::render_window(const std::shared_ptr<AppContext> &context) {
+void InferSettingsWindow::render_window(const std::shared_ptr<ItemFocusContext> &context) {
     // robot JSON file dialog
     robot_infer_file_dialog.Display();
     if (robot_infer_file_dialog.HasSelected()) {
@@ -89,3 +86,7 @@ void InferSettingsWindow::render_window(const std::shared_ptr<AppContext> &conte
 
     ImGuiWindow::render_window(context);
 }
+
+void InferSettingsWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {}
+void InferSettingsWindow::on_focus_change(
+    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {}

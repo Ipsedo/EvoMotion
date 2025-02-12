@@ -2,61 +2,52 @@
 // Created by samuel on 11/02/25.
 //
 
+#include "./robot_info.h"
+
 #include <imgui.h>
 
-#include "./window.h"
+RobotInfoWindow::RobotInfoWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
+    : ImGuiWindow("Robot information"), builder_env(builder_env) {}
 
-RobotInfoWindow::RobotInfoWindow() : ImGuiWindow("Robot information") {}
+void RobotInfoWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+    ImGui::Text("Robot selected : %s", builder_env->get_robot_name().c_str());
 
-void RobotInfoWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
+    ImGui::Spacing();
+    ImGui::Separator();
     ImGui::Spacing();
 
-    if (context->builder_env.is_set()) {
+    const auto root_name = builder_env->get_root_name();
+    ImGui::Text("Root member : %s", root_name.has_value() ? root_name.value().c_str() : "No root");
+    ImGui::Text("Members count : %i", builder_env->get_members_count());
 
-        ImGui::Text("Robot selected : %s", context->builder_env.get()->get_robot_name().c_str());
-        ImGui::Text(
-            "Member selected : %s",
-            context->focused_member.is_set() ? context->focused_member.get().c_str() : "no member");
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
 
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
+    // robot name
+    std::string robot_name = builder_env->get_robot_name();
+    robot_name.resize(128);
+    if (ImGui::InputText("Robot name", &robot_name[0], robot_name.size()))
+        builder_env->set_robot_name(robot_name.c_str());
 
-        const auto root_name = context->builder_env.get()->get_root_name();
-        ImGui::Text(
-            "Root member : %s", root_name.has_value() ? root_name.value().c_str() : "No root");
-        ImGui::Text("Members count : %i", context->builder_env.get()->get_members_count());
+    // select root item
+    int selected_item = 0;
 
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
+    std::vector<std::string> item_names = builder_env->get_member_names();
+    for (int i = 0; i < item_names.size(); i++)
+        if (root_name.has_value() && item_names[i] == root_name.value()) {
+            selected_item = i;
+            break;
+        }
 
-        // robot name
-        std::string robot_name = context->builder_env.get()->get_robot_name();
-        robot_name.resize(128);
-        if (ImGui::InputText("Robot name", &robot_name[0], robot_name.size()))
-            context->builder_env.get()->set_robot_name(robot_name.c_str());
-
-        // select root item
-        int selected_item = 0;
-
-        std::vector<std::string> item_names = context->builder_env.get()->get_member_names();
+    if (ImGui::BeginCombo(
+            "Select root member", root_name.has_value() ? root_name.value().c_str() : "No root")) {
         for (int i = 0; i < item_names.size(); i++)
-            if (root_name.has_value() && item_names[i] == root_name.value()) {
-                selected_item = i;
-                break;
+            if (ImGui::Selectable(item_names[i].c_str(), i == selected_item)) {
+                builder_env->set_root(item_names[i]);
+                ImGui::SetItemDefaultFocus();
             }
 
-        if (ImGui::BeginCombo(
-                "Select root member",
-                root_name.has_value() ? root_name.value().c_str() : "No root")) {
-            for (int i = 0; i < item_names.size(); i++)
-                if (ImGui::Selectable(item_names[i].c_str(), i == selected_item)) {
-                    context->builder_env.get()->set_root(item_names[i]);
-                    ImGui::SetItemDefaultFocus();
-                }
-
-            ImGui::EndCombo();
-        }
+        ImGui::EndCombo();
     }
 }

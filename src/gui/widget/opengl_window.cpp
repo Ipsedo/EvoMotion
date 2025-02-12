@@ -20,9 +20,8 @@ OpenGlWindow::OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Envi
       name(std::move(bar_item_name)), frame_buffer(std::make_unique<FrameBuffer>(1920, 1080)),
       drawables(), env(env), active(true), opened(true),
       camera(std::make_unique<ImGuiCamera>([env]() {
-          if (const auto track_item = env->get_camera_track_item(); track_item.has_value()) {
+          if (const auto track_item = env->get_camera_track_item(); track_item.has_value())
               return glm::vec3(track_item.value()->model_matrix_without_scale()[3]);
-          }
           return glm::vec3(0.f);
       })) {}
 
@@ -61,8 +60,6 @@ void OpenGlWindow::draw_opengl(const float width, const float height) {
 void OpenGlWindow::draw_imgui_image() {
     if (ImGui::BeginTabItem(name.c_str(), &opened)) {
 
-        if (!active) on_open_tab();
-
         on_imgui_tab_begin();
 
         if (ImGui::IsWindowHovered()) camera->update();
@@ -75,11 +72,8 @@ void OpenGlWindow::draw_imgui_image() {
 
         ImGui::EndTabItem();
     } else {
-        if (active) on_hide_tab();
         active = false;
     }
-
-    if (!opened) on_hide_tab();
 }
 
 bool OpenGlWindow::is_active() const { return active; }
@@ -111,10 +105,19 @@ std::shared_ptr<Environment> OpenGlWindow::get_env() { return env; }
  */
 
 BuilderOpenGlWindow::BuilderOpenGlWindow(
-    const std::shared_ptr<AppContext> &context, std::string bar_item_name,
-    const std::shared_ptr<RobotBuilderEnvironment> &env)
+    const std::shared_ptr<ItemFocusContext> &context, std::string bar_item_name,
+    const std::shared_ptr<RobotBuilderEnvironment> &env,
+    const std::function<
+        void(std::string, std::optional<std::string>, std::shared_ptr<RobotBuilderEnvironment>)>
+        &on_member_focused,
+    const std::function<
+        void(std::string, std::optional<std::string>, std::shared_ptr<RobotBuilderEnvironment>)>
+        &on_constraint_focused,
+    const std::function<PartKind()> &get_part_type)
     : OpenGlWindow(std::move(bar_item_name), env), context(context),
-      mouse_event(std::make_unique<RayMouseEvent>(1920, 1080)), builder_env(env) {}
+      mouse_event(std::make_unique<RayMouseEvent>(1920, 1080)), builder_env(env),
+      on_member_focused(on_member_focused), on_constraint_focused(on_constraint_focused),
+      get_part_type(get_part_type) {}
 
 void BuilderOpenGlWindow::on_imgui_tab_begin() {
     if (ImGui::IsWindowHovered() && ImGui::IsWindowFocused()) {
@@ -123,26 +126,18 @@ void BuilderOpenGlWindow::on_imgui_tab_begin() {
 
         if (ray_coords.has_value()) {
             const auto &[near, far] = ray_coords.value();
-            if (!context->are_members_hidden()) {
 
-                if (const auto result = builder_env->ray_cast_member(near, far); result.has_value())
-                    context->focused_member.set(result.value());
-                else context->focused_member.release();
-
-            } else if (!context->are_constraints_hidden()) {
-
-                if (const auto result = builder_env->ray_cast_constraint(near, far);
-                    result.has_value()) {
-                    context->focused_constraint.set(result.value());
-                    const auto [parent_name, child_name] = builder_env->get_constraint_members(context->focused_constraint.get());
-                    context->constraint_parent.set(parent_name);
-                    context->constraint_child.set(child_name);
-                } else {
-                    context->focused_constraint.release();
-                    context->constraint_parent.release();
-                    context->constraint_child.release();
-                }
-            }
+            switch (get_part_type()) {
+                case MEMBER:
+                    on_member_focused(
+                        get_name(), builder_env->ray_cast_member(near, far), builder_env);
+                    break;
+                case CONSTRAINT:
+                    on_constraint_focused(
+                        get_name(), builder_env->ray_cast_constraint(near, far), builder_env);
+                    break;
+                case MUSCLE: break;
+            };
         }
     }
 }
@@ -159,62 +154,16 @@ std::shared_ptr<DrawableFactory> BuilderOpenGlWindow::get_drawable_factory(
     if (item->get_drawable_kind() == SPECULAR)
         return std::make_shared<BuilderObjSpecularFactory>(
             item->get_shape()->get_vertices(), item->get_shape()->get_normals(), rng, 300.f,
+            [this, item]() { return context->get_focus_color(item->get_name()); },
             [this, item]() {
-                if ((builder_env->member_exists(item->get_name())
-                     && context->focused_member.is_set()
-                     && context->focused_member.get() == item->get_name())
-                    || (builder_env->constraint_exists(item->get_name())
-                        && context->focused_constraint.is_set()
-                        && context->focused_constraint.get() == item->get_name()))
-                    return true;
-
-                if ((context->constraint_parent.is_set()
-                     && builder_env->member_exists(context->constraint_parent.get())
-                     && context->constraint_parent.get() == item->get_name())
-                    || (context->constraint_child.is_set()
-                        && builder_env->member_exists(context->constraint_child.get())
-                        && context->constraint_child.get() == item->get_name()))
-                    return true;
-
-                return false;
-            },
-            [this, item]() {
-                if (context->are_members_hidden() && builder_env->member_exists(item->get_name()))
-                    return true;
-                if (context->are_constraints_hidden()
-                    && builder_env->constraint_exists(item->get_name()))
-                    return true;
-                return false;
+                switch (get_part_type()) {
+                    case MEMBER: return !builder_env->member_exists(item->get_name());
+                    case CONSTRAINT: return !builder_env->constraint_exists(item->get_name());
+                    case MUSCLE: return false;
+                }
             });
 
     return OpenGlWindow::get_drawable_factory(item, curr_rng);
-}
-
-void BuilderOpenGlWindow::on_hide_tab() {
-    if (context->builder_env.is_set()
-        && context->builder_env.get()->get_robot_name() == builder_env->get_robot_name()) {
-
-        context->focused_member.release();
-        context->focused_constraint.release();
-
-        context->constraint_parent.release();
-        context->constraint_child.release();
-
-        context->builder_env.release();
-    }
-}
-
-void BuilderOpenGlWindow::on_open_tab() {
-    if (!context->builder_env.is_set()
-        || context->builder_env.get()->get_robot_name() != builder_env->get_robot_name()) {
-        context->focused_member.release();
-        context->focused_constraint.release();
-
-        context->constraint_parent.release();
-        context->constraint_child.release();
-
-        context->builder_env.set(builder_env);
-    }
 }
 
 /*
@@ -237,5 +186,3 @@ void InferOpenGlWindow::on_opengl_frame(
 }
 
 void InferOpenGlWindow::on_imgui_tab_begin() {}
-void InferOpenGlWindow::on_hide_tab() {}
-void InferOpenGlWindow::on_open_tab() {}

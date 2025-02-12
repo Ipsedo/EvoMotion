@@ -50,4 +50,16 @@ private:
     bool constraints_hidden;
 };
 
+class ItemFocusContext {
+public:
+    ItemFocusContext();
+
+    std::optional<glm::vec3> get_focus_color(const std::string &item_name);
+    void release_focus(const std::string &item_name);
+    void focus(const std::string &item_name, const glm::vec3 &focus_color);
+
+private:
+    std::map<std::string, glm::vec3> item_to_focus_color;
+};
+
 #endif//EVO_MOTION_CONTEXT_H

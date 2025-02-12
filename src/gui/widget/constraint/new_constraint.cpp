@@ -2,17 +2,18 @@
 // Created by samuel on 11/02/25.
 //
 
+#include "./new_constraint.h"
+
 #include <imgui.h>
 
-#include "../window.h"
+NewConstraintWindow::NewConstraintWindow(
+    const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
+    : ImGuiWindow("New constraint"), builder_env(builder_env), constraint_name(),
+      parent_name(std::nullopt), child_name(std::nullopt), absolute_position(0.f) {}
 
-NewConstraintWindow::NewConstraintWindow()
-    : ImGuiWindow("New constraint"), constraint_name(), parent_name(std::nullopt),
-      child_name(std::nullopt), absolute_position(0.f) {}
+void NewConstraintWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
 
-void NewConstraintWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
-
-    const auto member_names = context->builder_env.get()->get_member_names();
+    const auto member_names = builder_env->get_member_names();
 
     ImGui::Columns(2, nullptr, false);
 
@@ -32,9 +33,11 @@ void NewConstraintWindow::render_window_content(const std::shared_ptr<AppContext
                     member_names[i].c_str(),
                     parent_name.has_value() && parent_name.value() == member_names[i])) {
 
+                if (parent_name.has_value()) context->release_focus(parent_name.value());
                 parent_name = member_names[i];
-                context->constraint_parent.set(parent_name.value());
+                context->focus(parent_name.value(), glm::vec3(0.7f));
             }
+
         ImGui::EndCombo();
     }
 
@@ -48,12 +51,36 @@ void NewConstraintWindow::render_window_content(const std::shared_ptr<AppContext
                 && ImGui::Selectable(
                     member_names[i].c_str(),
                     child_name.has_value() && child_name.value() == member_names[i])) {
+                if (child_name.has_value()) context->release_focus(child_name.value());
                 child_name = member_names[i];
-                context->constraint_child.set(child_name.value());
+                context->focus(child_name.value(), glm::vec3(0.7f));
             }
 
         ImGui::EndCombo();
     }
 
     ImGui::Spacing();
+}
+
+void NewConstraintWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {
+    clear_focus(context);
+}
+void NewConstraintWindow::on_focus_change(
+    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    if (new_focus) add_focus(context);
+    else clear_focus(context);
+}
+
+void NewConstraintWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
+    context->focus(constraint_name, glm::vec3(0.f));
+
+    if (parent_name.has_value()) context->focus(parent_name.value(), glm::vec3(0.7f));
+    if (child_name.has_value()) context->focus(child_name.value(), glm::vec3(0.7f));
+}
+
+void NewConstraintWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
+    context->release_focus(constraint_name);
+
+    if (parent_name.has_value()) context->release_focus(parent_name.value());
+    if (child_name.has_value()) context->release_focus(child_name.value());
 }

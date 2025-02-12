@@ -68,7 +68,7 @@ BuilderObjSpecularFactory::BuilderObjSpecularFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
     const std::vector<std::tuple<float, float, float>> &normals, const glm::vec4 ambient_color,
     const glm::vec4 diffuse_color, const glm::vec4 specular_color, const float shininess,
-    const std::optional<std::function<bool()>> &is_focus_function,
+    const std::optional<std::function<std::optional<glm::vec3>()>> &is_focus_function,
     const std::optional<std::function<bool()>> &is_hidden_function)
     : rd_uni(0.f, 1.f), vertices(vertices), normals(normals), ambient_color(ambient_color),
       diffuse_color(diffuse_color), specular_color(specular_color), shininess(shininess),
@@ -77,7 +77,8 @@ BuilderObjSpecularFactory::BuilderObjSpecularFactory(
 BuilderObjSpecularFactory::BuilderObjSpecularFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
     const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng,
-    const float shininess, const std::optional<std::function<bool()>> &is_focus_function,
+    const float shininess,
+    const std::optional<std::function<std::optional<glm::vec3>()>> &is_focus_function,
     const std::optional<std::function<bool()>> &is_hidden_function)
     : rd_uni(0.f, 1.f), vertices(vertices), normals(normals),
       ambient_color(glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f)),

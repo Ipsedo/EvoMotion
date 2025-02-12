@@ -2,15 +2,15 @@
 // Created by samuel on 11/02/25.
 //
 
+#include "./new_member.h"
+
 #include <evo_motion_model/converter.h>
 
-#include "../window.h"
+NewMemberWindow::NewMemberWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
+    : ImGuiWindow("New member"), builder_env(builder_env), member_name(), pos(0),
+      rotation_axis(0, 1, 0), rotation_angle(0.f), scale(1.f), mass(1.f), friction(0.5f) {}
 
-NewMemberWindow::NewMemberWindow()
-    : ImGuiWindow("New member"), member_name(), pos(0), rotation_axis(0, 1, 0), rotation_angle(0.f),
-      scale(1.f), mass(1.f), friction(0.5f) {}
-
-void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
+void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
     member_name.resize(128);
     ImGui::InputText("Name", &member_name[0], member_name.size());
     member_name = member_name.c_str();
@@ -91,7 +91,7 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
     ImGui::Spacing();
 
     if (ImGui::Button("Create member") && !member_name.empty()) {
-        if (context->builder_env.get()->add_member(
+        if (builder_env->add_member(
                 member_name, CUBE, pos, axis_angle_to_quat(rotation_axis, rotation_angle), scale,
                 mass, friction)) {
 
@@ -107,3 +107,7 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
         }
     }
 }
+
+void NewMemberWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {}
+void NewMemberWindow::on_focus_change(
+    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {}

@@ -91,11 +91,12 @@ BuilderObjSpecular::BuilderObjSpecular(
     const std::vector<std::tuple<float, float, float>> &vertices,
     const std::vector<std::tuple<float, float, float>> &normals, const glm::vec4 &ambient_color,
     const glm::vec4 &diffuse_color, const glm::vec4 &specular_color, const float shininess,
-    const std::optional<std::function<bool()>> &is_focus_function,
+    const std::optional<std::function<std::optional<glm::vec3>()>> &is_focus_function,
     const std::optional<std::function<bool()>> &is_hidden_function)
     : OBjSpecular(vertices, normals, ambient_color, diffuse_color, specular_color, shininess),
       is_focus_function(
-          is_focus_function.has_value() ? is_focus_function.value() : []() { return false; }),
+          is_focus_function.has_value() ? is_focus_function.value()
+                                        : []() { return std::nullopt; }),
       is_hidden_function(
           is_hidden_function.has_value() ? is_hidden_function.value() : []() { return false; }) {}
 
@@ -127,7 +128,7 @@ void BuilderObjSpecular::draw(
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 
-    if (is_focus_function()) {
+    if (const auto focus_color = is_focus_function(); focus_color.has_value()) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glLineWidth(2.0f);
 
@@ -135,9 +136,9 @@ void BuilderObjSpecular::draw(
         const glm::vec4 original_diff_color = diffuse_color;
         const glm::vec4 original_spec_color = specular_color;
 
-        ambient_color = glm::vec4(glm::vec3(0.f), 1.f);
-        diffuse_color = glm::vec4(glm::vec3(0.f), 1.f);
-        specular_color = glm::vec4(glm::vec3(0.f), 1.f);
+        ambient_color = glm::vec4(focus_color.value(), ambient_color.z);
+        diffuse_color = glm::vec4(focus_color.value(), diffuse_color.z);
+        specular_color = glm::vec4(focus_color.value(), specular_color.z);
 
         OBjSpecular::draw(
             projection_matrix, view_matrix, model_matrix, light_pos_from_camera, camera_pos);
