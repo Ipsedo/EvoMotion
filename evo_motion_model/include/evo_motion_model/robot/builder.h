@@ -164,7 +164,8 @@ public:
 
     bool attach_fixed_constraint(
         const std::string &constraint_name, const std::string &parent_name,
-        const std::string &child_name, const glm::vec3 &absolute_fixed_point);
+        const std::string &child_name, const glm::vec3 &absolute_fixed_point,
+        const glm::quat &absolute_rotation);
 
     bool remove_member(const std::string &member_name);
     bool remove_constraint(const std::string &constraint_name);
@@ -180,6 +181,7 @@ public:
     get_constraint_hinge_info(const std::string &hinge_constraint_name) const;
     std::tuple<glm::vec3, glm::quat>
     get_constraint_fixed_info(const std::string &fixed_constraint_name) const;
+    std::tuple<std::string, std::string> get_constraint_members(const std::string &constraint_name);
 
     std::optional<std::string>
     ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) const;

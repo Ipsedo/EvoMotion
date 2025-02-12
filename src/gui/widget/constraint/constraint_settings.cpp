@@ -11,15 +11,17 @@
 ConstraintSettingsWindow::ConstraintSettingsWindow() : ImGuiWindow("Constraint settings") {}
 
 void ConstraintSettingsWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
-    if (context->is_constraint_focused()) {
-        ImGui::Text("Focus on \"%s\" constraint", context->get_focused_constraint().c_str());
+    if (context->focused_constraint.is_set()) {
+        const auto builder_env = context->builder_env.get();
+        auto focused_constraint = context->focused_constraint.get();
+
+        ImGui::Text("Focus on \"%s\" constraint", focused_constraint.c_str());
 
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
 
-        const auto constraint_type =
-            context->get_builder_env()->get_constraint_type(context->get_focused_constraint());
+        const auto constraint_type = builder_env->get_constraint_type(focused_constraint);
 
         if (constraint_type == HINGE) {
             ImGui::Text("Hinge constraint");
@@ -31,8 +33,7 @@ void ConstraintSettingsWindow::render_window_content(const std::shared_ptr<AppCo
             ImGui::Spacing();
 
             auto [pos, axis, limit_angle_min, limit_angle_max] =
-                context->get_builder_env()->get_constraint_hinge_info(
-                    context->get_focused_constraint());
+                builder_env->get_constraint_hinge_info(focused_constraint);
 
             // position
             ImGui::BeginGroup();
@@ -79,8 +80,8 @@ void ConstraintSettingsWindow::render_window_content(const std::shared_ptr<AppCo
 
             // final
             if (updated)
-                context->get_builder_env()->update_hinge_constraint(
-                    context->get_focused_constraint(), pos, axis, limit_angle_min, limit_angle_max);
+                builder_env->update_hinge_constraint(
+                    focused_constraint, pos, axis, limit_angle_min, limit_angle_max);
 
         } else if (constraint_type == FIXED) {
             ImGui::Text("Fixed constraint");
@@ -91,8 +92,7 @@ void ConstraintSettingsWindow::render_window_content(const std::shared_ptr<AppCo
             ImGui::Separator();
             ImGui::Spacing();
 
-            auto [pos, rot] = context->get_builder_env()->get_constraint_fixed_info(
-                context->get_focused_constraint());
+            auto [pos, rot] = builder_env->get_constraint_fixed_info(focused_constraint);
 
             // position
             ImGui::BeginGroup();
@@ -132,9 +132,7 @@ void ConstraintSettingsWindow::render_window_content(const std::shared_ptr<AppCo
             ImGui::EndGroup();
             ImGui::Spacing();
 
-            if (updated)
-                context->get_builder_env()->update_fixed_constraint(
-                    context->get_focused_constraint(), pos, rot);
+            if (updated) builder_env->update_fixed_constraint(focused_constraint, pos, rot);
         }
 
         ImGui::Spacing();
@@ -142,8 +140,8 @@ void ConstraintSettingsWindow::render_window_content(const std::shared_ptr<AppCo
         ImGui::Spacing();
 
         if (ImGui::Button("Remove constraint")) {
-            context->get_builder_env()->remove_constraint(context->get_focused_constraint());
-            context->release_focus_constraint();
+            builder_env->remove_constraint(focused_constraint);
+            context->focused_constraint.release();
         }
 
     } else {

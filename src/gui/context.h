@@ -10,6 +10,19 @@
 
 #include <evo_motion_model/robot/builder.h>
 
+template<typename T>
+class Option {
+public:
+    Option() : value(std::nullopt) {}
+    bool is_set() const { return value.has_value(); }
+    T get() const { return value.value(); }
+    void set(const T &new_value) { value = new_value; }
+    void release() { value = std::nullopt; }
+
+private:
+    std::optional<T> value;
+};
+
 class AppContext {
 public:
     explicit AppContext();
@@ -18,23 +31,13 @@ public:
      * Builder context function
      */
 
-    bool is_member_focused() const;
-    std::string get_focused_member();
+    Option<std::string> focused_member;
+    Option<std::string> focused_constraint;
 
-    bool is_constraint_focused() const;
-    std::string get_focused_constraint();
+    Option<std::shared_ptr<RobotBuilderEnvironment>> builder_env;
 
-    bool is_builder_env_selected() const;
-    std::shared_ptr<RobotBuilderEnvironment> get_builder_env();
-
-    void set_focus_member(const std::string &new_focus_member);
-    void release_focus_member();
-
-    void set_focus_constraint(const std::string &new_focus_constraint);
-    void release_focus_constraint();
-
-    void set_builder_env(const std::shared_ptr<RobotBuilderEnvironment> &new_env);
-    void release_builder_env();
+    Option<std::string> constraint_parent;
+    Option<std::string> constraint_child;
 
     void hide_members(bool hidden);
     [[nodiscard]] bool are_members_hidden() const;
@@ -42,27 +45,7 @@ public:
     void hide_constraints(bool hidden);
     [[nodiscard]] bool are_constraints_hidden() const;
 
-    /*
-     * Infer helper function
-     */
-    bool is_robot_infer_json_path_selected() const;
-    std::filesystem::path get_robot_infer_json_path();
-    void set_robot_infer_json_path(const std::filesystem::path &robot_json_path);
-    void release_robot_infer_json_path();
-
-    bool is_agent_infer_path_selected() const;
-    std::filesystem::path get_agent_infer_path();
-    void set_agent_infer_path(const std::filesystem::path &agent_folder_path);
-    void release_agent_infer_path();
-
 private:
-    std::optional<std::shared_ptr<RobotBuilderEnvironment>> curr_robot_builder_env;
-    std::optional<std::string> member_focus;
-    std::optional<std::string> constraint_focus;
-
-    std::optional<std::filesystem::path> robot_infer_json_path;
-    std::optional<std::filesystem::path> agent_infer_folder_path;
-
     bool members_hidden;
     bool constraints_hidden;
 };

@@ -98,6 +98,13 @@ public:
 
 protected:
     void render_window_content(const std::shared_ptr<AppContext> &context) override;
+
+private:
+    std::string constraint_name;
+    std::optional<std::string> parent_name;
+    std::optional<std::string> child_name;
+
+    glm::vec3 absolute_position;
 };
 
 class ConstraintSettingsWindow final : public ImGuiWindow {
@@ -134,6 +141,9 @@ private:
 
     ImGui::FileBrowser robot_infer_file_dialog;
     ImGui::FileBrowser agent_infer_file_dialog;
+
+    std::optional<std::filesystem::path> robot_json_path;
+    std::optional<std::filesystem::path> agent_folder_path;
 };
 
 /*

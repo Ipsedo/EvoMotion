@@ -76,7 +76,10 @@ bool RobotBuilderEnvironment::update_member(
             const auto [curr_tr, curr_rot, curr_scale] =
                 decompose_model_matrix(in_new_parent_space);
 
+            m_world->removeRigidBody(curr_member->get_item()->get_body());
             curr_member->update_item(curr_tr, curr_rot);
+            m_world->addRigidBody(curr_member->get_item()->get_body());
+
             const auto curr_new_model_mat = curr_member->get_item()->model_matrix_without_scale();
 
             updated_members.insert(curr_member_name);
@@ -179,7 +182,8 @@ RobotBuilderEnvironment::get_member(const std::string &member_name) const {
 
 bool RobotBuilderEnvironment::attach_fixed_constraint(
     const std::string &constraint_name, const std::string &parent_name,
-    const std::string &child_name, const glm::vec3 &absolute_fixed_point) {
+    const std::string &child_name, const glm::vec3 &absolute_fixed_point,
+    const glm::quat &absolute_rotation) {
     if (constraint_exists(constraint_name) || !member_exists(parent_name)
         || !member_exists(child_name))
         return false;
@@ -189,7 +193,8 @@ bool RobotBuilderEnvironment::attach_fixed_constraint(
     const auto child_model_matrix =
         get_member(child_name)->get_item()->model_matrix_without_scale();
 
-    const auto absolute_frame = glm::translate(glm::mat4(1.f), absolute_fixed_point);
+    const auto absolute_frame =
+        glm::translate(glm::mat4(1.f), absolute_fixed_point) * glm::toMat4(absolute_rotation);
     const auto frame_in_parent = glm::inverse(parent_model_matrix) * absolute_frame;
     const auto frame_in_child = glm::inverse(child_model_matrix) * absolute_frame;
 
@@ -224,6 +229,12 @@ bool RobotBuilderEnvironment::remove_constraint(const std::string &constraint_na
     });
 
     return true;
+}
+
+std::tuple<std::string, std::string>
+RobotBuilderEnvironment::get_constraint_members(const std::string &constraint_name) {
+    const auto c = get_constraint(constraint_name);
+    return {c->get_parent()->get_name(), c->get_child()->get_name()};
 }
 
 ConstraintType

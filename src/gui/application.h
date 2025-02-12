@@ -48,22 +48,24 @@ private:
     std::shared_ptr<AppContext> context;
 
     // ImGui window map keys
-    const std::string NEW_MEMBER_NAME = "new_member";
-    const std::string MEMBER_SETTINGS_NAME = "member_settings";
-    const std::string MEMBER_CONSTRUCT_TOOLS_NAME = "member_construct_tools";
+    enum WindowId {
+        NEW_MEMBER_NAME,
+        MEMBER_SETTINGS_NAME,
+        MEMBER_CONSTRUCT_TOOLS_NAME,
 
-    const std::string NEW_CONSTRAINT_NAME = "new_constraint";
-    const std::string CONSTRAINT_SETTINGS_NAME = "constraint_settings";
-    const std::string CONSTRAINT_CONSTRUCT_TOOLS_NAME = "constraint_construct_tools";
+        NEW_CONSTRAINT_NAME,
+        CONSTRAINT_SETTINGS_NAME,
+        CONSTRAINT_CONSTRUCT_TOOLS_NAME,
 
-    const std::string ROBOT_INFO_NAME = "robot_info";
+        ROBOT_INFO_NAME,
 
-    const std::string INFER_SETTINGS_NAME = "infer_settings";
-    const std::string START_TRAINING_NAME = "start_training";
-    const std::string MANAGE_TRAINING_WINDOW = "manage_training";
+        INFER_SETTINGS_NAME,
+        START_TRAINING_NAME,
+        MANAGE_TRAINING_WINDOW
+    };
 
     // window maps
-    std::map<std::string, std::shared_ptr<ImGuiWindow>> imgui_windows;
+    std::map<WindowId, std::shared_ptr<ImGuiWindow>> imgui_windows;
     std::vector<std::shared_ptr<OpenGlWindow>> opengl_windows;
 
     ImGui::FileBrowser robot_builder_file_dialog;
@@ -80,6 +82,9 @@ private:
     static void GLAPIENTRY message_callback(
         GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
         const GLchar *message, const void *userParam);
+
+    void close_member_stuff();
+    void close_constraint_stuff();
 };
 
 #endif//EVO_MOTION_APPLICATION_H

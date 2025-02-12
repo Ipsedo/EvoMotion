@@ -11,11 +11,15 @@
 MemberSettingsWindow::MemberSettingsWindow() : ImGuiWindow("Member settings") {}
 
 void MemberSettingsWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
-    if (context->is_member_focused()) {
-        ImGui::Text("Focus on \"%s\" member", context->get_focused_member().c_str());
+    if (context->focused_member.is_set()) {
+
+        auto focused_member_name = context->focused_member.get();
+        const auto builder_env = context->builder_env.get();
+
+        ImGui::Text("Focus on \"%s\" member", focused_member_name.c_str());
 
         auto [member_pos, member_rot, member_scale] =
-            context->get_builder_env()->get_member_transform(context->get_focused_member());
+            builder_env->get_member_transform(focused_member_name);
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -99,32 +103,32 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<AppContex
         ImGui::Spacing();
 
         // Member name
-        std::string member_name = context->get_focused_member();
+        std::string member_name = focused_member_name;
         member_name.resize(128);
         if (ImGui::InputText("Member name", &member_name[0], member_name.size()))
-            if (context->get_builder_env()->rename_member(
-                    context->get_focused_member(), member_name.c_str()))
-                context->set_focus_member(member_name.c_str());
+            if (context->builder_env.get()->rename_member(
+                    focused_member_name, member_name.c_str())) {
+                context->focused_member.set(member_name.c_str());
+                focused_member_name = context->focused_member.get();
+            }
 
         ImGui::Spacing();
 
         // mass
-        float mass = context->get_builder_env()->get_member_mass(context->get_focused_member());
+        float mass = builder_env->get_member_mass(focused_member_name);
         if (ImGui::InputFloat("mass (kg)", &mass, 0.f, 0.f, "%.8f")) updated = true;
 
         ImGui::Spacing();
 
         // friction
-        float friction =
-            context->get_builder_env()->get_member_friction(context->get_focused_member());
+        float friction = builder_env->get_member_friction(focused_member_name);
         if (ImGui::DragFloat("friction", &friction, 0.01f, 0.f, 1.f)) updated = true;
 
         ImGui::Columns(1);
 
         if (updated)
-            context->get_builder_env()->update_member(
-                context->get_focused_member(), member_pos, member_rot, member_scale, friction,
-                mass);
+            builder_env->update_member(
+                focused_member_name, member_pos, member_rot, member_scale, friction, mass);
 
         // remove
         ImGui::Spacing();
@@ -132,8 +136,8 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<AppContex
         ImGui::Spacing();
 
         if (ImGui::Button("Remove member")) {
-            context->get_builder_env()->remove_member(context->get_focused_member());
-            context->release_focus_member();
+            builder_env->remove_member(focused_member_name);
+            context->focused_member.release();
         }
 
     } else {

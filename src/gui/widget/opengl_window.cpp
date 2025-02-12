@@ -124,14 +124,24 @@ void BuilderOpenGlWindow::on_imgui_tab_begin() {
         if (ray_coords.has_value()) {
             const auto &[near, far] = ray_coords.value();
             if (!context->are_members_hidden()) {
+
                 if (const auto result = builder_env->ray_cast_member(near, far); result.has_value())
-                    context->set_focus_member(result.value());
-                else context->release_focus_member();
+                    context->focused_member.set(result.value());
+                else context->focused_member.release();
+
             } else if (!context->are_constraints_hidden()) {
+
                 if (const auto result = builder_env->ray_cast_constraint(near, far);
-                    result.has_value())
-                    context->set_focus_constraint(result.value());
-                else context->release_focus_constraint();
+                    result.has_value()) {
+                    context->focused_constraint.set(result.value());
+                    const auto [parent_name, child_name] = builder_env->get_constraint_members(context->focused_constraint.get());
+                    context->constraint_parent.set(parent_name);
+                    context->constraint_child.set(child_name);
+                } else {
+                    context->focused_constraint.release();
+                    context->constraint_parent.release();
+                    context->constraint_child.release();
+                }
             }
         }
     }
@@ -150,12 +160,21 @@ std::shared_ptr<DrawableFactory> BuilderOpenGlWindow::get_drawable_factory(
         return std::make_shared<BuilderObjSpecularFactory>(
             item->get_shape()->get_vertices(), item->get_shape()->get_normals(), rng, 300.f,
             [this, item]() {
-                if (builder_env->member_exists(item->get_name()))
-                    return context->is_member_focused()
-                           && context->get_focused_member() == item->get_name();
-                if (builder_env->constraint_exists(item->get_name()))
-                    return context->is_constraint_focused()
-                           && context->get_focused_constraint() == item->get_name();
+                if ((builder_env->member_exists(item->get_name())
+                     && context->focused_member.is_set()
+                     && context->focused_member.get() == item->get_name())
+                    || (builder_env->constraint_exists(item->get_name())
+                        && context->focused_constraint.is_set()
+                        && context->focused_constraint.get() == item->get_name()))
+                    return true;
+
+                if ((context->constraint_parent.is_set()
+                     && builder_env->member_exists(context->constraint_parent.get())
+                     && context->constraint_parent.get() == item->get_name())
+                    || (context->constraint_child.is_set()
+                        && builder_env->member_exists(context->constraint_child.get())
+                        && context->constraint_child.get() == item->get_name()))
+                    return true;
 
                 return false;
             },
@@ -172,20 +191,29 @@ std::shared_ptr<DrawableFactory> BuilderOpenGlWindow::get_drawable_factory(
 }
 
 void BuilderOpenGlWindow::on_hide_tab() {
-    if (context->is_builder_env_selected()
-        && context->get_builder_env()->get_robot_name() == builder_env->get_robot_name()) {
-        context->release_focus_member();
-        context->release_focus_constraint();
-        context->release_builder_env();
+    if (context->builder_env.is_set()
+        && context->builder_env.get()->get_robot_name() == builder_env->get_robot_name()) {
+
+        context->focused_member.release();
+        context->focused_constraint.release();
+
+        context->constraint_parent.release();
+        context->constraint_child.release();
+
+        context->builder_env.release();
     }
 }
 
 void BuilderOpenGlWindow::on_open_tab() {
-    if (!context->is_builder_env_selected()
-        || context->get_builder_env()->get_robot_name() != builder_env->get_robot_name()) {
-        context->release_focus_member();
-        context->release_focus_constraint();
-        context->set_builder_env(builder_env);
+    if (!context->builder_env.is_set()
+        || context->builder_env.get()->get_robot_name() != builder_env->get_robot_name()) {
+        context->focused_member.release();
+        context->focused_constraint.release();
+
+        context->constraint_parent.release();
+        context->constraint_child.release();
+
+        context->builder_env.set(builder_env);
     }
 }
 

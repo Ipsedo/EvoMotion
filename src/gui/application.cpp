@@ -85,15 +85,9 @@ ImGuiApplication::ImGuiApplication(const std::string &title, const int width, co
 }
 
 void ImGuiApplication::render() {
-    if (!context->is_builder_env_selected()) {
-        imgui_windows[NEW_MEMBER_NAME]->close();
-        imgui_windows[MEMBER_SETTINGS_NAME]->close();
-
-        imgui_windows[NEW_CONSTRAINT_NAME]->close();
-        imgui_windows[CONSTRAINT_SETTINGS_NAME]->close();
-
-        imgui_windows[MEMBER_CONSTRUCT_TOOLS_NAME]->close();
-        imgui_windows[CONSTRAINT_CONSTRUCT_TOOLS_NAME]->close();
+    if (!context->builder_env.is_set()) {
+        close_member_stuff();
+        close_constraint_stuff();
 
         imgui_windows[ROBOT_INFO_NAME]->close();
     }
@@ -165,27 +159,25 @@ void ImGuiApplication::imgui_render_toolbar() {
 
             if (ImGui::MenuItem("Load robot")) robot_builder_file_dialog.Open();
 
-            if (ImGui::MenuItem(
-                    "Save robot", nullptr, nullptr, context->is_builder_env_selected())) {}
+            if (ImGui::MenuItem("Save robot", nullptr, nullptr, context->builder_env.is_set())) {}
 
             ImGui::Separator();
 
-            if (ImGui::MenuItem(
-                    "Robot information", nullptr, false, context->is_builder_env_selected()))
+            if (ImGui::MenuItem("Robot information", nullptr, false, context->builder_env.is_set()))
                 imgui_windows[ROBOT_INFO_NAME]->open();
 
             ImGui::Separator();
 
-            if (ImGui::BeginMenu("Show parts", context->is_builder_env_selected())) {
+            if (ImGui::BeginMenu("Show parts", context->builder_env.is_set())) {
                 if (ImGui::MenuItem("Members", nullptr, !context->are_members_hidden())) {
                     context->hide_constraints(true);
-                    context->release_focus_constraint();
+                    close_constraint_stuff();
 
                     context->hide_members(false);
                 }
                 if (ImGui::MenuItem("Constraints", nullptr, !context->are_constraints_hidden())) {
                     context->hide_members(true);
-                    context->release_focus_member();
+                    close_member_stuff();
 
                     context->hide_constraints(false);
                 }
@@ -194,7 +186,8 @@ void ImGuiApplication::imgui_render_toolbar() {
 
             ImGui::Separator();
 
-            if (ImGui::BeginMenu("Member", context->is_builder_env_selected())) {
+            if (ImGui::BeginMenu(
+                    "Member", context->builder_env.is_set() && !context->are_members_hidden())) {
                 if (ImGui::MenuItem("New member")) imgui_windows[NEW_MEMBER_NAME]->open();
                 if (ImGui::MenuItem("Settings")) imgui_windows[MEMBER_SETTINGS_NAME]->open();
                 if (ImGui::MenuItem("Construct tools"))
@@ -203,7 +196,9 @@ void ImGuiApplication::imgui_render_toolbar() {
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Constraint", context->is_builder_env_selected())) {
+            if (ImGui::BeginMenu(
+                    "Constraint",
+                    context->builder_env.is_set() && !context->are_constraints_hidden())) {
                 if (ImGui::MenuItem("New constraint")) imgui_windows[NEW_CONSTRAINT_NAME]->open();
                 if (ImGui::MenuItem("Settings")) imgui_windows[CONSTRAINT_SETTINGS_NAME]->open();
                 if (ImGui::MenuItem("Construct tools"))
@@ -323,4 +318,21 @@ void GLAPIENTRY ImGuiApplication::message_callback(
               << std::endl;
     std::cerr << "params : " << userParam << std::endl;
     std::cerr << message << std::endl << std::endl;
+}
+
+void ImGuiApplication::close_member_stuff() {
+    context->focused_member.release();
+
+    imgui_windows[NEW_MEMBER_NAME]->close();
+    imgui_windows[MEMBER_CONSTRUCT_TOOLS_NAME]->close();
+    imgui_windows[MEMBER_SETTINGS_NAME]->close();
+}
+void ImGuiApplication::close_constraint_stuff() {
+    context->focused_constraint.release();
+    context->constraint_parent.release();
+    context->constraint_child.release();
+
+    imgui_windows[NEW_CONSTRAINT_NAME]->close();
+    imgui_windows[CONSTRAINT_CONSTRUCT_TOOLS_NAME]->close();
+    imgui_windows[CONSTRAINT_SETTINGS_NAME]->close();
 }

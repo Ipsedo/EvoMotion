@@ -91,7 +91,7 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
     ImGui::Spacing();
 
     if (ImGui::Button("Create member") && !member_name.empty()) {
-        if (context->get_builder_env()->add_member(
+        if (context->builder_env.get()->add_member(
                 member_name, CUBE, pos, axis_angle_to_quat(rotation_axis, rotation_angle), scale,
                 mass, friction)) {
 
