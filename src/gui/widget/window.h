@@ -25,6 +25,7 @@ public:
     virtual void render_window(const std::shared_ptr<ItemFocusContext> &context);
     virtual std::optional<std::shared_ptr<ImGuiWindow>> pop_child();
     virtual ~ImGuiWindow();
+    std::string get_name() const;
 
 protected:
     virtual void render_window_content(const std::shared_ptr<ItemFocusContext> &context) = 0;
