@@ -152,10 +152,10 @@ void ConstraintSettingsWindow::render_window_content(
 }
 
 void ConstraintSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
-    context->focus(constraint_name, glm::vec3(0.f));
+    context->focus_black(constraint_name);
 
-    context->focus(parent_name, glm::vec3(0.7f));
-    context->focus(child_name, glm::vec3(0.7f));
+    context->focus_grey(parent_name);
+    context->focus_grey(child_name);
 }
 
 void ConstraintSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {

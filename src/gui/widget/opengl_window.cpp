@@ -161,6 +161,7 @@ std::shared_ptr<DrawableFactory> BuilderOpenGlWindow::get_drawable_factory(
                     case CONSTRAINT: return !builder_env->constraint_exists(item->get_name());
                     case MUSCLE: return false;
                 }
+                return false;
             });
 
     return OpenGlWindow::get_drawable_factory(item, curr_rng);

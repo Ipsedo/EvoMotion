@@ -10,46 +10,6 @@
 
 #include <evo_motion_model/robot/builder.h>
 
-template<typename T>
-class Option {
-public:
-    Option() : value(std::nullopt) {}
-    bool is_set() const { return value.has_value(); }
-    T get() const { return value.value(); }
-    void set(const T &new_value) { value = new_value; }
-    void release() { value = std::nullopt; }
-
-private:
-    std::optional<T> value;
-};
-
-class AppContext {
-public:
-    explicit AppContext();
-
-    /*
-     * Builder context function
-     */
-
-    Option<std::string> focused_member;
-    Option<std::string> focused_constraint;
-
-    Option<std::shared_ptr<RobotBuilderEnvironment>> builder_env;
-
-    Option<std::string> constraint_parent;
-    Option<std::string> constraint_child;
-
-    void hide_members(bool hidden);
-    [[nodiscard]] bool are_members_hidden() const;
-
-    void hide_constraints(bool hidden);
-    [[nodiscard]] bool are_constraints_hidden() const;
-
-private:
-    bool members_hidden;
-    bool constraints_hidden;
-};
-
 class ItemFocusContext {
 public:
     ItemFocusContext();
@@ -57,6 +17,9 @@ public:
     std::optional<glm::vec3> get_focus_color(const std::string &item_name);
     void release_focus(const std::string &item_name);
     void focus(const std::string &item_name, const glm::vec3 &focus_color);
+
+    void focus_black(const std::string &item_name);
+    void focus_grey(const std::string &item_name);
 
 private:
     std::map<std::string, glm::vec3> item_to_focus_color;

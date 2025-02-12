@@ -145,7 +145,7 @@ void MemberSettingsWindow::on_focus_change(
 }
 
 void MemberSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
-    context->focus(member_name, glm::vec3(0.f));
+    context->focus_black(member_name);
 }
 void MemberSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
     context->release_focus(member_name);

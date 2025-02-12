@@ -72,10 +72,10 @@ void NewConstraintWindow::on_focus_change(
 }
 
 void NewConstraintWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
-    context->focus(constraint_name, glm::vec3(0.f));
+    context->focus_black(constraint_name);
 
-    if (parent_name.has_value()) context->focus(parent_name.value(), glm::vec3(0.7f));
-    if (child_name.has_value()) context->focus(child_name.value(), glm::vec3(0.7f));
+    if (parent_name.has_value()) context->focus_grey(parent_name.value());
+    if (child_name.has_value()) context->focus_grey(child_name.value());
 }
 
 void NewConstraintWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {

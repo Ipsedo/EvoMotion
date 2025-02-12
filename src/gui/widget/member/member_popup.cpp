@@ -31,7 +31,7 @@ void MemberMenuWindow::on_close(const std::shared_ptr<ItemFocusContext> &context
 
 void MemberMenuWindow::on_focus_change(
     bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
-    if (new_focus) context->focus(member_name, glm::vec3(0.f));
+    if (new_focus) context->focus_black(member_name);
     else context->release_focus(member_name);
 }
 
@@ -40,7 +40,6 @@ std::optional<std::shared_ptr<ImGuiWindow>> MemberMenuWindow::pop_child() {
         auto return_value = children.value();
         children = std::nullopt;
         return return_value;
-        ;
     }
     return children;
 }
