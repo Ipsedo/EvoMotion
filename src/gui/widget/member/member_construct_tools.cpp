@@ -2,6 +2,7 @@
 // Created by samuel on 11/02/25.
 //
 
+#include "../construct/rotate.h"
 #include "../window.h"
 
 MemberConstructToolsWindow::MemberConstructToolsWindow()

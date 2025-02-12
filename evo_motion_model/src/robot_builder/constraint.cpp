@@ -72,8 +72,8 @@ BuilderHingeConstraint::BuilderHingeConstraint(
 
 void BuilderHingeConstraint::update_constraint(
     const std::optional<glm::vec3> &new_pivot, const std::optional<glm::vec3> &new_axis,
-    const std::optional<float> new_limit_radian_min,
-    const std::optional<float> new_limit_radian_max) {
+    const std::optional<float> &new_limit_radian_min,
+    const std::optional<float> &new_limit_radian_max) {
 
     // Frames
     const auto parent_model_mat = get_parent()->get_item()->model_matrix_without_scale();

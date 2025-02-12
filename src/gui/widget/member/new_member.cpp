@@ -12,9 +12,8 @@ NewMemberWindow::NewMemberWindow()
 
 void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
     member_name.resize(128);
-
-    if (ImGui::InputText("Name", &member_name[0], member_name.size()))
-        member_name = member_name.c_str();
+    ImGui::InputText("Name", &member_name[0], member_name.size());
+    member_name = member_name.c_str();
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -91,10 +90,11 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (ImGui::Button("Create member")) {
+    if (ImGui::Button("Create member") && !member_name.empty()) {
         if (context->get_builder_env()->add_member(
                 member_name, CUBE, pos, axis_angle_to_quat(rotation_axis, rotation_angle), scale,
                 mass, friction)) {
+
             member_name = "";
             pos = glm::vec3(0.f);
             rotation_axis = glm::vec3(0, 1, 0);
@@ -102,6 +102,8 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
             scale = glm::vec3(1.f);
             mass = 1.f;
             friction = 0.5f;
+
+            close();
         }
     }
 }

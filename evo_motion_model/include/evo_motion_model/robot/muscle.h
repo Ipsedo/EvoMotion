@@ -17,10 +17,10 @@
 class Muscle {
 public:
     Muscle(
-        const std::string &name, float attach_mass, glm::vec3 attach_scale,
-        const std::shared_ptr<RigidBodyItem> &item_a, glm::vec3 pos_in_a,
-        const std::shared_ptr<RigidBodyItem> &item_b, glm::vec3 pos_in_b, float force,
-        float max_speed);
+        const std::string &name, const float attach_mass, const glm::vec3 &attach_scale,
+        const std::shared_ptr<RigidBodyItem> &item_a, const glm::vec3 &pos_in_a,
+        const std::shared_ptr<RigidBodyItem> &item_b, const glm::vec3 &pos_in_b, const float force,
+        const float max_speed);
 
     Muscle(
         const std::shared_ptr<AbstractDeserializer> &deserializer,

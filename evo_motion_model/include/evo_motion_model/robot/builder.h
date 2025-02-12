@@ -31,12 +31,12 @@ public:
     explicit BuilderMember(const std::shared_ptr<AbstractDeserializer> &deserializer);
 
     void update_item(
-        std::optional<glm::vec3> new_pos = std::nullopt,
-        std::optional<glm::quat> new_rot = std::nullopt,
-        std::optional<glm::vec3> new_scale = std::nullopt,
-        std::optional<float> new_friction = std::nullopt,
-        std::optional<float> new_mass = std::nullopt,
-        std::optional<bool> new_ignore_collision = std::nullopt);
+        const std::optional<glm::vec3> &new_pos = std::nullopt,
+        const std::optional<glm::quat> &new_rot = std::nullopt,
+        const std::optional<glm::vec3> &new_scale = std::nullopt,
+        const std::optional<float> &new_friction = std::nullopt,
+        const std::optional<float> &new_mass = std::nullopt,
+        const std::optional<bool> &new_ignore_collision = std::nullopt);
 };
 
 /*
@@ -76,8 +76,8 @@ public:
     void update_constraint(
         const std::optional<glm::vec3> &new_pivot = std::nullopt,
         const std::optional<glm::vec3> &new_axis = std::nullopt,
-        std::optional<float> new_limit_radian_min = std::nullopt,
-        std::optional<float> new_limit_radian_max = std::nullopt);
+        const std::optional<float> &new_limit_radian_min = std::nullopt,
+        const std::optional<float> &new_limit_radian_max = std::nullopt);
 
 protected:
     std::shared_ptr<Shape> get_shape() override;
@@ -137,25 +137,27 @@ public:
     bool set_root(const std::string &member_name);
 
     bool add_member(
-        const std::string &member_name, ShapeKind shape_kind, glm::vec3 center_pos,
-        glm::quat rotation, glm::vec3 scale, float mass, float friction);
+        const std::string &member_name, const ShapeKind &shape_kind, const glm::vec3 &center_pos,
+        const glm::quat &rotation, const glm::vec3 &scale, float mass, float friction);
 
     bool update_member(
-        const std::string &member_name, std::optional<glm::vec3> new_pos = std::nullopt,
+        const std::string &member_name, const std::optional<glm::vec3> &new_pos = std::nullopt,
         const std::optional<glm::quat> &new_rot = std::nullopt,
-        std::optional<glm::vec3> new_scale = std::nullopt,
-        std::optional<float> new_friction = std::nullopt,
-        std::optional<float> new_mass = std::nullopt,
-        std::optional<bool> new_ignore_collision = std::nullopt);
+        const std::optional<glm::vec3> &new_scale = std::nullopt,
+        const std::optional<float> &new_friction = std::nullopt,
+        const std::optional<float> &new_mass = std::nullopt,
+        const std::optional<bool> &new_ignore_collision = std::nullopt);
 
     bool update_hinge_constraint(
-        const std::string &hinge_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
-        std::optional<glm::vec3> new_axis = std::nullopt,
-        std::optional<float> new_limit_angle_min = std::nullopt,
-        std::optional<float> new_angle_limit_max = std::nullopt) const;
+        const std::string &hinge_constraint_name,
+        const std::optional<glm::vec3> &new_pos = std::nullopt,
+        const std::optional<glm::vec3> &new_axis = std::nullopt,
+        const std::optional<float> &new_limit_angle_min = std::nullopt,
+        const std::optional<float> &new_angle_limit_max = std::nullopt) const;
 
     bool update_fixed_constraint(
-        const std::string &fixed_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
+        const std::string &fixed_constraint_name,
+        const std::optional<glm::vec3> &new_pos = std::nullopt,
         const std::optional<glm::quat> &new_rot = std::nullopt) const;
 
     bool rename_member(const std::string &old_name, const std::string &new_name);
@@ -189,7 +191,7 @@ public:
     void load_robot(const std::filesystem::path &input_json_path);
 
     std::string get_robot_name();
-    std::string get_root_name();
+    std::optional<std::string> get_root_name();
     void set_robot_name(const std::string &new_robot_name);
 
     std::vector<std::string> get_member_names();
@@ -216,7 +218,7 @@ protected:
 
 private:
     std::string robot_name;
-    std::string root_name;
+    std::optional<std::string> root_name;
 
     std::map<std::string, std::vector<std::tuple<std::string, std::string>>> skeleton_graph;
 
@@ -230,10 +232,10 @@ private:
 
     template<typename Part>
     static std::shared_ptr<Part>
-    get_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec);
+    get_part(const std::string &name, const std::vector<std::shared_ptr<Part>> &vec);
 
     template<typename Part>
-    static bool exists_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec);
+    static bool exists_part(const std::string &name, const std::vector<std::shared_ptr<Part>> &vec);
 };
 
 #endif//EVO_MOTION_BUILDER_H

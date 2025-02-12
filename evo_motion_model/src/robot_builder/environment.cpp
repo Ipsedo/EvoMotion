@@ -13,16 +13,16 @@
 #include "../utils.h"
 
 RobotBuilderEnvironment::RobotBuilderEnvironment(std::string robot_name)
-    : Environment(1), robot_name(std::move(robot_name)), root_name(), skeleton_graph(), members(),
-      constraints(), muscles() {}
+    : Environment(1), robot_name(std::move(robot_name)), root_name(std::nullopt), skeleton_graph(),
+      members(), constraints(), muscles() {}
 
 /*
  * Members
  */
 
 bool RobotBuilderEnvironment::add_member(
-    const std::string &member_name, ShapeKind shape_kind, glm::vec3 center_pos, glm::quat rotation,
-    glm::vec3 scale, float mass, float friction) {
+    const std::string &member_name, const ShapeKind &shape_kind, const glm::vec3 &center_pos,
+    const glm::quat &rotation, const glm::vec3 &scale, const float mass, const float friction) {
     if (member_exists(member_name)) return false;
 
     skeleton_graph[member_name] = std::vector<std::tuple<std::string, std::string>>();
@@ -38,10 +38,10 @@ bool RobotBuilderEnvironment::add_member(
 }
 
 bool RobotBuilderEnvironment::update_member(
-    const std::string &member_name, std::optional<glm::vec3> new_pos,
-    const std::optional<glm::quat> &new_rot, std::optional<glm::vec3> new_scale,
-    std::optional<float> new_friction, std::optional<float> new_mass,
-    std::optional<bool> new_ignore_collision) {
+    const std::string &member_name, const std::optional<glm::vec3> &new_pos,
+    const std::optional<glm::quat> &new_rot, const std::optional<glm::vec3> &new_scale,
+    const std::optional<float> &new_friction, const std::optional<float> &new_mass,
+    const std::optional<bool> &new_ignore_collision) {
 
     if (member_exists(member_name)) {
         std::set<std::string> updated_members;
@@ -136,6 +136,8 @@ bool RobotBuilderEnvironment::remove_member(const std::string &member_name) {
 
     skeleton_graph.erase(member_name);
 
+    if (root_name.has_value() && root_name.value() == member_name) root_name = std::nullopt;
+
     return true;
 }
 
@@ -144,7 +146,7 @@ RobotBuilderEnvironment::get_member_transform(const std::string &member_name) co
     return decompose_model_matrix(get_member(member_name)->get_item()->model_matrix());
 }
 
-std::string RobotBuilderEnvironment::get_root_name() { return root_name; }
+std::optional<std::string> RobotBuilderEnvironment::get_root_name() { return root_name; }
 
 float RobotBuilderEnvironment::get_member_mass(const std::string &member_name) const {
     return get_member(member_name)->get_item()->get_body()->getMass();
@@ -267,9 +269,9 @@ RobotBuilderEnvironment::get_constraint_fixed_info(const std::string &fixed_cons
 }
 
 bool RobotBuilderEnvironment::update_hinge_constraint(
-    const std::string &hinge_constraint_name, const std::optional<glm::vec3> new_pos,
-    const std::optional<glm::vec3> new_axis, const std::optional<float> new_limit_angle_min,
-    const std::optional<float> new_angle_limit_max) const {
+    const std::string &hinge_constraint_name, const std::optional<glm::vec3> &new_pos,
+    const std::optional<glm::vec3> &new_axis, const std::optional<float> &new_limit_angle_min,
+    const std::optional<float> &new_angle_limit_max) const {
     if (!constraint_exists(hinge_constraint_name)
         || get_constraint_type(hinge_constraint_name) != HINGE)
         return false;
@@ -281,7 +283,7 @@ bool RobotBuilderEnvironment::update_hinge_constraint(
 }
 
 bool RobotBuilderEnvironment::update_fixed_constraint(
-    const std::string &fixed_constraint_name, const std::optional<glm::vec3> new_pos,
+    const std::string &fixed_constraint_name, const std::optional<glm::vec3> &new_pos,
     const std::optional<glm::quat> &new_rot) const {
     if (!constraint_exists(fixed_constraint_name)
         || get_constraint_type(fixed_constraint_name) != FIXED)
@@ -315,6 +317,7 @@ bool RobotBuilderEnvironment::set_root(const std::string &member_name) {
 }
 
 std::string RobotBuilderEnvironment::get_robot_name() { return robot_name; }
+
 void RobotBuilderEnvironment::set_robot_name(const std::string &new_robot_name) {
     robot_name = new_robot_name;
 }
@@ -325,7 +328,7 @@ bool RobotBuilderEnvironment::muscle_exists(const std::string &muscle_name) cons
 
 template<typename Part>
 bool RobotBuilderEnvironment::exists_part(
-    const std::string &name, std::vector<std::shared_ptr<Part>> vec) {
+    const std::string &name, const std::vector<std::shared_ptr<Part>> &vec) {
     return std::any_of(
         vec.begin(), vec.end(), [name](const auto &p) { return p->get_name() == name; });
 }
@@ -336,8 +339,8 @@ RobotBuilderEnvironment::get_muscle(const std::string &muscle_name) const {
 }
 
 template<typename Part>
-std::shared_ptr<Part>
-RobotBuilderEnvironment::get_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec) {
+std::shared_ptr<Part> RobotBuilderEnvironment::get_part(
+    const std::string &name, const std::vector<std::shared_ptr<Part>> &vec) {
     for (const auto &o: vec)
         if (o->get_name() == name) return o;
     throw std::runtime_error("Part \"" + name + "\" not found");
@@ -423,13 +426,14 @@ std::optional<std::string> RobotBuilderEnvironment::ray_cast_constraint(
  */
 
 void RobotBuilderEnvironment::save_robot(const std::filesystem::path &output_json_path) {
-
     const std::vector<std::shared_ptr<Member>> members_vector(members.begin(), members.end());
     const std::vector<std::shared_ptr<Constraint>> constraints_vector(
         constraints.begin(), constraints.end());
     const std::vector<std::shared_ptr<Muscle>> muscles_vector(muscles.begin(), muscles.end());
 
-    Skeleton skeleton(robot_name, root_name, members_vector, constraints_vector, muscles_vector);
+    Skeleton skeleton(
+        robot_name, root_name.has_value() ? root_name.value() : members_vector[0]->get_name(),
+        members_vector, constraints_vector, muscles_vector);
 
     const auto json_serializer = std::make_shared<JsonSerializer>();
     skeleton.serialize(json_serializer);
@@ -518,7 +522,7 @@ std::vector<std::shared_ptr<Controller>> RobotBuilderEnvironment::get_controller
 std::vector<int64_t> RobotBuilderEnvironment::get_state_space() { return {}; }
 std::vector<int64_t> RobotBuilderEnvironment::get_action_space() { return {}; }
 std::optional<std::shared_ptr<AbstractItem>> RobotBuilderEnvironment::get_camera_track_item() {
-    if (!root_name.empty()) return get_member(root_name)->get_item();
+    if (root_name.has_value()) return get_member(root_name.value())->get_item();
     return std::nullopt;
 }
 step RobotBuilderEnvironment::compute_step() { return {}; }

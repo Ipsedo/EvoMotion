@@ -20,7 +20,7 @@ public:
 
     int get_size() override;
 
-    torch::Tensor get_state(torch::Device device) override;
+    torch::Tensor get_state(const torch::Device &device) override;
 
     btScalar addSingleResult(
         btManifoldPoint &cp, const btCollisionObjectWrapper *colObj0Wrap, int partId0, int index0,
@@ -45,7 +45,7 @@ public:
 
     int get_size() override;
 
-    torch::Tensor get_state(torch::Device device) override;
+    torch::Tensor get_state(const torch::Device &device) override;
 
 private:
     std::shared_ptr<RigidBodyItem> root_item;
@@ -59,7 +59,7 @@ public:
 
     int get_size() override;
 
-    torch::Tensor get_state(torch::Device device) override;
+    torch::Tensor get_state(const torch::Device &device) override;
 };
 
 // Muscle
@@ -70,7 +70,7 @@ public:
 
     int get_size() override;
 
-    torch::Tensor get_state(torch::Device device) override;
+    torch::Tensor get_state(const torch::Device &device) override;
 
 private:
     btSliderConstraint *slider_constraint;

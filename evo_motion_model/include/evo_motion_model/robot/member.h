@@ -20,8 +20,9 @@
 class Member {
 public:
     Member(
-        const std::string &name, ShapeKind shape_kind, glm::vec3 center_pos, glm::quat rotation,
-        glm::vec3 scale, float mass, float friction, bool ignore_collision);
+        const std::string &name, const ShapeKind &shape_kind, const glm::vec3 &center_pos,
+        const glm::quat &rotation, const glm::vec3 &scale, const float mass, const float friction,
+        const bool ignore_collision);
     explicit Member(const std::shared_ptr<AbstractDeserializer> &deserializer);
     virtual std::shared_ptr<RigidBodyItem> get_item();
     virtual std::string get_name();
