@@ -9,7 +9,7 @@
 
 #include "../program.h"
 
-class TileGround : public Drawable {
+class TileGround final : public Drawable {
     const int position_size;
     const int normal_size;
     const int stride;

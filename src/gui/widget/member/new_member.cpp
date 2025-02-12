@@ -7,8 +7,8 @@
 #include "../window.h"
 
 NewMemberWindow::NewMemberWindow()
-    : ImGuiWindow("New member"), member_name(""), pos(0), rotation_axis(0, 1, 0),
-      rotation_angle(0.f), scale(1.f), mass(1.f), friction(0.5f) {}
+    : ImGuiWindow("New member"), member_name(), pos(0), rotation_axis(0, 1, 0), rotation_angle(0.f),
+      scale(1.f), mass(1.f), friction(0.5f) {}
 
 void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
     member_name.resize(128);
@@ -61,7 +61,7 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
 
     ImGui::Text("Scale");
     ImGui::Spacing();
-    float min_scale = 1e-4f;
+    const float min_scale = 1e-4f;
 
     if (ImGui::InputFloat("scale.x", &scale.x, 0.f, 0.f, "%.4f"))
         scale.x = std::max(scale.x, min_scale);

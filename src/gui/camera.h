@@ -10,7 +10,7 @@
 #include <evo_motion_model/item.h>
 #include <evo_motion_view/camera.h>
 
-class ImGuiCamera : public Camera {
+class ImGuiCamera final : public Camera {
 public:
     explicit ImGuiCamera(const std::function<glm::vec3()> &get_object_center);
 

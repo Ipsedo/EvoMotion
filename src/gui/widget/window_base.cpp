@@ -2,11 +2,13 @@
 // Created by samuel on 11/02/25.
 //
 
+#include <utility>
+
 #include <imgui.h>
 
 #include "./window.h"
 
-ImGuiWindow::ImGuiWindow(const std::string &name) : name(name), show(false) {}
+ImGuiWindow::ImGuiWindow(std::string name) : name(std::move(name)), show(false) {}
 
 void ImGuiWindow::open() { show = true; }
 

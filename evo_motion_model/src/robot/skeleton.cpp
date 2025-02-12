@@ -40,7 +40,7 @@ Skeleton::Skeleton(const std::shared_ptr<AbstractDeserializer> &deserializer)
                   if (d->read_str("type") == "fixed")
                       return std::make_shared<FixedConstraint>(
                           d, [this](const std::string &n) { return get_member(n); });
-                  else if (d->read_str("type") == "hinge")
+                  if (d->read_str("type") == "hinge")
                       return std::make_shared<HingeConstraint>(
                           d, [this](const std::string &n) { return get_member(n); });
                   throw std::runtime_error("Unknown constraint type: " + d->read_str("type"));

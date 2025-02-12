@@ -18,7 +18,7 @@
 
 class ImGuiWindow {
 public:
-    ImGuiWindow(const std::string &name);
+    explicit ImGuiWindow(std::string name);
 
     void open();
     void close();
@@ -39,7 +39,7 @@ private:
  * Robot
  */
 
-class RobotInfoWindow : public ImGuiWindow {
+class RobotInfoWindow final : public ImGuiWindow {
 public:
     RobotInfoWindow();
 
@@ -51,7 +51,7 @@ protected:
  * Member
  */
 
-class NewMemberWindow : public ImGuiWindow {
+class NewMemberWindow final : public ImGuiWindow {
 public:
     NewMemberWindow();
 
@@ -72,7 +72,7 @@ private:
     float friction;
 };
 
-class MemberSettingsWindow : public ImGuiWindow {
+class MemberSettingsWindow final : public ImGuiWindow {
 public:
     MemberSettingsWindow();
 
@@ -80,7 +80,7 @@ protected:
     void render_window_content(const std::shared_ptr<AppContext> &context) override;
 };
 
-class MemberConstructToolsWindow : public ImGuiWindow {
+class MemberConstructToolsWindow final : public ImGuiWindow {
 public:
     MemberConstructToolsWindow();
 
@@ -92,7 +92,7 @@ protected:
  * Constraint
  */
 
-class NewConstraintWindow : public ImGuiWindow {
+class NewConstraintWindow final : public ImGuiWindow {
 public:
     NewConstraintWindow();
 
@@ -100,7 +100,7 @@ protected:
     void render_window_content(const std::shared_ptr<AppContext> &context) override;
 };
 
-class ConstraintSettingsWindow : public ImGuiWindow {
+class ConstraintSettingsWindow final : public ImGuiWindow {
 public:
     ConstraintSettingsWindow();
 
@@ -108,7 +108,7 @@ protected:
     void render_window_content(const std::shared_ptr<AppContext> &context) override;
 };
 
-class ConstraintConstructToolsWindow : public ImGuiWindow {
+class ConstraintConstructToolsWindow final : public ImGuiWindow {
 public:
     ConstraintConstructToolsWindow();
 
@@ -120,9 +120,10 @@ protected:
  * Infer
  */
 
-class InferSettingsWindow : public ImGuiWindow {
+class InferSettingsWindow final : public ImGuiWindow {
 public:
-    InferSettingsWindow(const std::function<void(std::shared_ptr<OpenGlWindow>)> &on_start_infer);
+    explicit InferSettingsWindow(
+        const std::function<void(std::shared_ptr<OpenGlWindow>)> &on_start_infer);
     void render_window(const std::shared_ptr<AppContext> &context) override;
 
 protected:
@@ -139,7 +140,7 @@ private:
  *
  */
 
-class StartTrainingWindow : public ImGuiWindow {
+class StartTrainingWindow final : public ImGuiWindow {
 public:
     StartTrainingWindow();
 
@@ -147,7 +148,7 @@ protected:
     void render_window_content(const std::shared_ptr<AppContext> &context) override;
 };
 
-class ManageTrainingWindow : public ImGuiWindow {
+class ManageTrainingWindow final : public ImGuiWindow {
 public:
     ManageTrainingWindow();
 

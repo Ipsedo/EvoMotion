@@ -37,7 +37,7 @@ private:
     torch::Tensor get_point_state(glm::vec3 point) const;
 };
 
-class MemberState : public ItemProprioceptionState {
+class MemberState final : public ItemProprioceptionState {
 public:
     MemberState(
         const std::shared_ptr<RigidBodyItem> &item, const std::shared_ptr<RigidBodyItem> &root_item,
@@ -51,7 +51,7 @@ private:
     std::shared_ptr<RigidBodyItem> root_item;
 };
 
-class RootMemberState : public ItemProprioceptionState {
+class RootMemberState final : public ItemProprioceptionState {
 public:
     RootMemberState(
         const std::shared_ptr<RigidBodyItem> &item, const std::shared_ptr<RigidBodyItem> &floor,
@@ -64,7 +64,7 @@ public:
 
 // Muscle
 
-class MuscleState : public State {
+class MuscleState final : public State {
 public:
     explicit MuscleState(const std::shared_ptr<Muscle> &muscle);
 

@@ -140,16 +140,16 @@ bool RobotBuilderEnvironment::remove_member(const std::string &member_name) {
 }
 
 std::tuple<glm::vec3, glm::quat, glm::vec3>
-RobotBuilderEnvironment::get_member_transform(const std::string &member_name) {
+RobotBuilderEnvironment::get_member_transform(const std::string &member_name) const {
     return decompose_model_matrix(get_member(member_name)->get_item()->model_matrix());
 }
 
 std::string RobotBuilderEnvironment::get_root_name() { return root_name; }
 
-float RobotBuilderEnvironment::get_member_mass(const std::string &member_name) {
+float RobotBuilderEnvironment::get_member_mass(const std::string &member_name) const {
     return get_member(member_name)->get_item()->get_body()->getMass();
 }
-float RobotBuilderEnvironment::get_member_friction(const std::string &member_name) {
+float RobotBuilderEnvironment::get_member_friction(const std::string &member_name) const {
     return get_member(member_name)->get_item()->get_body()->getFriction();
 }
 
@@ -224,7 +224,8 @@ bool RobotBuilderEnvironment::remove_constraint(const std::string &constraint_na
     return true;
 }
 
-ConstraintType RobotBuilderEnvironment::get_constraint_type(const std::string &constraint_name) {
+ConstraintType
+RobotBuilderEnvironment::get_constraint_type(const std::string &constraint_name) const {
     if (std::dynamic_pointer_cast<BuilderHingeConstraint>(get_constraint(constraint_name)))
         return HINGE;
     if (std::dynamic_pointer_cast<BuilderFixedConstraint>(get_constraint(constraint_name)))
@@ -233,7 +234,7 @@ ConstraintType RobotBuilderEnvironment::get_constraint_type(const std::string &c
 }
 
 std::tuple<glm::vec3, glm::vec3, float, float>
-RobotBuilderEnvironment::get_constraint_hinge_info(const std::string &hinge_constraint_name) {
+RobotBuilderEnvironment::get_constraint_hinge_info(const std::string &hinge_constraint_name) const {
     const auto c =
         std::dynamic_pointer_cast<BuilderHingeConstraint>(get_constraint(hinge_constraint_name));
 
@@ -246,11 +247,12 @@ RobotBuilderEnvironment::get_constraint_hinge_info(const std::string &hinge_cons
     const auto pos = glm::vec3(absolute_frame[3]);
     const auto axis = glm::vec3(absolute_frame[2]);
 
-    return {pos, axis, bullet_constraint->getLowerLimit(), bullet_constraint->getUpperLimit()};
+    return std::tuple{
+        pos, axis, bullet_constraint->getLowerLimit(), bullet_constraint->getUpperLimit()};
 }
 
 std::tuple<glm::vec3, glm::quat>
-RobotBuilderEnvironment::get_constraint_fixed_info(const std::string &fixed_constraint_name) {
+RobotBuilderEnvironment::get_constraint_fixed_info(const std::string &fixed_constraint_name) const {
     const auto c =
         std::dynamic_pointer_cast<BuilderFixedConstraint>(get_constraint(fixed_constraint_name));
 
@@ -267,7 +269,7 @@ RobotBuilderEnvironment::get_constraint_fixed_info(const std::string &fixed_cons
 bool RobotBuilderEnvironment::update_hinge_constraint(
     const std::string &hinge_constraint_name, const std::optional<glm::vec3> new_pos,
     const std::optional<glm::vec3> new_axis, const std::optional<float> new_limit_angle_min,
-    const std::optional<float> new_angle_limit_max) {
+    const std::optional<float> new_angle_limit_max) const {
     if (!constraint_exists(hinge_constraint_name)
         || get_constraint_type(hinge_constraint_name) != HINGE)
         return false;
@@ -280,7 +282,7 @@ bool RobotBuilderEnvironment::update_hinge_constraint(
 
 bool RobotBuilderEnvironment::update_fixed_constraint(
     const std::string &fixed_constraint_name, const std::optional<glm::vec3> new_pos,
-    const std::optional<glm::quat> &new_rot) {
+    const std::optional<glm::quat> &new_rot) const {
     if (!constraint_exists(fixed_constraint_name)
         || get_constraint_type(fixed_constraint_name) != FIXED)
         return false;

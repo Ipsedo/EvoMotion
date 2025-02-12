@@ -18,11 +18,11 @@ public:
     public:
         Builder(std::string vertex_shader_path, std::string fragment_shader_path);
 
-        Program::Builder add_uniform(const std::string &name);
+        Builder add_uniform(const std::string &name);
 
-        Program::Builder add_attribute(const std::string &name);
+        Builder add_attribute(const std::string &name);
 
-        Program::Builder add_buffer(const std::string &name, const std::vector<float> &data);
+        Builder add_buffer(const std::string &name, const std::vector<float> &data);
 
         Program build();
 

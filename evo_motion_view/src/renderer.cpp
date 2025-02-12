@@ -93,8 +93,6 @@ void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix, const 
 
     glfwPollEvents();
 
-    on_new_frame();
-
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
@@ -102,8 +100,6 @@ void Renderer::draw(const std::map<std::string, glm::mat4> &model_matrix, const 
 
     glBindVertexArray(vao);
     render_drawables(model_matrix, delta_t);
-
-    on_end_frame();
 
     glfwSwapBuffers(window);
 }
@@ -121,8 +117,5 @@ void Renderer::render_drawables(
     for (const auto &[name, drawable]: drawables)
         drawable->draw(proj_matrix, view_matrix, model_matrix[name], light_pos, camera->pos());
 }
-
-void Renderer::on_new_frame() {}
-void Renderer::on_end_frame() {}
 
 void Renderer::reset_camera() const { camera->reset(); }

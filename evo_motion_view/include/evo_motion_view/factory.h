@@ -10,7 +10,7 @@
 
 #include "./drawable.h"
 
-class ObjSpecularFactory : public DrawableFactory {
+class ObjSpecularFactory final : public DrawableFactory {
 private:
     std::uniform_real_distribution<float> rd_uni;
 
@@ -35,7 +35,7 @@ public:
     std::shared_ptr<Drawable> create_drawable() override;
 };
 
-class BuilderObjSpecularFactory : public DrawableFactory {
+class BuilderObjSpecularFactory final : public DrawableFactory {
 private:
     std::uniform_real_distribution<float> rd_uni;
 
@@ -66,7 +66,7 @@ public:
     std::shared_ptr<Drawable> create_drawable() override;
 };
 
-class TileGroundFactory : public DrawableFactory {
+class TileGroundFactory final : public DrawableFactory {
 private:
     std::uniform_real_distribution<float> rd_uni;
 

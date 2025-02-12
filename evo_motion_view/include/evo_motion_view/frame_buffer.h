@@ -5,7 +5,7 @@
 #ifndef EVO_MOTION_FRAME_BUFFER_H
 #define EVO_MOTION_FRAME_BUFFER_H
 
-class FrameBuffer {
+class FrameBuffer final {
 public:
     FrameBuffer(float width, float height);
     virtual ~FrameBuffer();

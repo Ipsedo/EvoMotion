@@ -49,7 +49,7 @@ public:
     ~OBjSpecular() override;
 };
 
-class BuilderObjSpecular : public OBjSpecular {
+class BuilderObjSpecular final : public OBjSpecular {
 public:
     BuilderObjSpecular(
         const std::vector<std::tuple<float, float, float>> &vertices,

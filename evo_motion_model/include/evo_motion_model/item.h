@@ -31,7 +31,7 @@ public:
     virtual ~AbstractItem() = default;
 };
 
-class RigidBodyItem : public AbstractItem {
+class RigidBodyItem final : public AbstractItem {
 public:
     RigidBodyItem(
         std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,
@@ -72,7 +72,7 @@ private:
     DrawableKind kind;
 };
 
-class EmptyItem : public AbstractItem {
+class EmptyItem final : public AbstractItem {
 public:
     EmptyItem(
         const std::string &name, const std::shared_ptr<Shape> &shape, glm::vec3 position,

@@ -60,7 +60,8 @@ protected:
     virtual std::shared_ptr<Shape> get_shape() = 0;
 };
 
-class BuilderHingeConstraint : public virtual HingeConstraint, public virtual BuilderConstraint {
+class BuilderHingeConstraint final : public virtual HingeConstraint,
+                                     public virtual BuilderConstraint {
 public:
     BuilderHingeConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,
@@ -85,7 +86,8 @@ private:
     std::shared_ptr<Shape> shape;
 };
 
-class BuilderFixedConstraint : public virtual FixedConstraint, public virtual BuilderConstraint {
+class BuilderFixedConstraint final : public virtual FixedConstraint,
+                                     public virtual BuilderConstraint {
 public:
     BuilderFixedConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,
@@ -111,7 +113,7 @@ private:
  * Muscles
  */
 
-class BuilderMuscle : public Muscle {
+class BuilderMuscle final : public Muscle {
 public:
     BuilderMuscle(
         const std::string &name, float attach_mass, const glm::vec3 &attach_scale,
@@ -128,7 +130,7 @@ public:
  * Environment
  */
 
-class RobotBuilderEnvironment : public Environment {
+class RobotBuilderEnvironment final : public Environment {
 public:
     explicit RobotBuilderEnvironment(std::string robot_name);
 
@@ -150,11 +152,11 @@ public:
         const std::string &hinge_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
         std::optional<glm::vec3> new_axis = std::nullopt,
         std::optional<float> new_limit_angle_min = std::nullopt,
-        std::optional<float> new_angle_limit_max = std::nullopt);
+        std::optional<float> new_angle_limit_max = std::nullopt) const;
 
     bool update_fixed_constraint(
         const std::string &fixed_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
-        const std::optional<glm::quat> &new_rot = std::nullopt);
+        const std::optional<glm::quat> &new_rot = std::nullopt) const;
 
     bool rename_member(const std::string &old_name, const std::string &new_name);
 
@@ -166,16 +168,16 @@ public:
     bool remove_constraint(const std::string &constraint_name);
 
     std::tuple<glm::vec3, glm::quat, glm::vec3>
-    get_member_transform(const std::string &member_name);
+    get_member_transform(const std::string &member_name) const;
 
-    float get_member_mass(const std::string &member_name);
-    float get_member_friction(const std::string &member_name);
+    float get_member_mass(const std::string &member_name) const;
+    float get_member_friction(const std::string &member_name) const;
 
-    ConstraintType get_constraint_type(const std::string &constraint_name);
+    ConstraintType get_constraint_type(const std::string &constraint_name) const;
     std::tuple<glm::vec3, glm::vec3, float, float>
-    get_constraint_hinge_info(const std::string &hinge_constraint_name);
+    get_constraint_hinge_info(const std::string &hinge_constraint_name) const;
     std::tuple<glm::vec3, glm::quat>
-    get_constraint_fixed_info(const std::string &fixed_constraint_name);
+    get_constraint_fixed_info(const std::string &fixed_constraint_name) const;
 
     std::optional<std::string>
     ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) const;

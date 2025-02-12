@@ -20,6 +20,8 @@
 
 class OpenGlWindow {
 public:
+    virtual ~OpenGlWindow() = default;
+
     OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Environment> &env);
 
     void draw_opengl(float width, float height);
@@ -65,7 +67,7 @@ protected:
  * Builder
  */
 
-class BuilderOpenGlWindow : public OpenGlWindow {
+class BuilderOpenGlWindow final : public OpenGlWindow {
 private:
     std::shared_ptr<AppContext> context;
 
@@ -93,7 +95,7 @@ protected:
  * Run
  */
 
-class InferOpenGlWindow : public OpenGlWindow {
+class InferOpenGlWindow final : public OpenGlWindow {
 public:
     InferOpenGlWindow(
         const std::shared_ptr<Agent> &agent, std::string bar_item_name,
