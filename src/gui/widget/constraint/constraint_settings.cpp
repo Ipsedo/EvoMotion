@@ -8,6 +8,8 @@
 
 #include <evo_motion_model/converter.h>
 
+#include "../utils.h"
+
 ConstraintSettingsWindow::ConstraintSettingsWindow(
     const std::string &constraint_name, const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
     : ImGuiWindow("Constraint settings of \"" + constraint_name + "\""),
@@ -83,9 +85,9 @@ void HingeConstraintSettingsWindow::render_constraint_specific_window(
     ImGui::Text("Position");
     ImGui::Spacing();
 
-    if (ImGui::InputFloat("pos.x", &pos.x, 0.f, 0.f, "%.8f")) updated = true;
-    if (ImGui::InputFloat("pos.y", &pos.y, 0.f, 0.f, "%.8f")) updated = true;
-    if (ImGui::InputFloat("pos.z", &pos.z, 0.f, 0.f, "%.8f")) updated = true;
+    if (input_float("pos.x", &pos.x, 8)) updated = true;
+    if (input_float("pos.y", &pos.y, 8)) updated = true;
+    if (input_float("pos.z", &pos.z, 8)) updated = true;
 
     ImGui::EndGroup();
     ImGui::Spacing();
@@ -95,15 +97,15 @@ void HingeConstraintSettingsWindow::render_constraint_specific_window(
     ImGui::Text("Axis");
     ImGui::Spacing();
 
-    if (ImGui::InputFloat("axis.x", &axis.x, 0.f, 0.f, "%.8f")) {
+    if (input_float("axis.x", &axis.x, 8)) {
         axis = glm::normalize(axis);
         updated = true;
     }
-    if (ImGui::InputFloat("axis.y", &axis.y, 0.f, 0.f, "%.8f")) {
+    if (input_float("axis.y", &axis.y, 8)) {
         axis = glm::normalize(axis);
         updated = true;
     }
-    if (ImGui::InputFloat("axis.z", &axis.z, 0.f, 0.f, "%.8f")) {
+    if (input_float("axis.z", &axis.z, 8)) {
         axis = glm::normalize(axis);
         updated = true;
     }
@@ -116,8 +118,8 @@ void HingeConstraintSettingsWindow::render_constraint_specific_window(
     ImGui::Text("Angular limits");
     ImGui::Spacing();
 
-    if (ImGui::InputFloat("min", &limit_angle_min, 0.f, 0.f, "%.8f")) updated = true;
-    if (ImGui::InputFloat("max", &limit_angle_max, 0.f, 0.f, "%.8f")) updated = true;
+    if (input_float("min", &limit_angle_min, 8)) updated = true;
+    if (input_float("max", &limit_angle_max, 8)) updated = true;
 
     ImGui::EndGroup();
 
@@ -153,9 +155,9 @@ void FixedConstraintSettingsWindow::render_constraint_specific_window(
     ImGui::Text("Position");
     ImGui::Spacing();
 
-    if (ImGui::InputFloat("pos.x", &pos.x, 0.f, 0.f, "%.8f")) updated = true;
-    if (ImGui::InputFloat("pos.y", &pos.y, 0.f, 0.f, "%.8f")) updated = true;
-    if (ImGui::InputFloat("pos.z", &pos.z, 0.f, 0.f, "%.8f")) updated = true;
+    if (input_float("pos.x", &pos.x, 8)) updated = true;
+    if (input_float("pos.y", &pos.y, 8)) updated = true;
+    if (input_float("pos.z", &pos.z, 8)) updated = true;
 
     ImGui::EndGroup();
     ImGui::Spacing();
@@ -167,19 +169,19 @@ void FixedConstraintSettingsWindow::render_constraint_specific_window(
 
     auto [rotation_axis, rotation_angle] = quat_to_axis_angle(rot);
 
-    if (ImGui::InputFloat("axis.x", &rotation_axis.x, 0.f, 0.f, "%.8f")) {
+    if (input_float("axis.x", &rotation_axis.x, 8)) {
         rotation_axis = glm::normalize(rotation_axis + 1e-9f);
         updated = true;
     }
-    if (ImGui::InputFloat("axis.y", &rotation_axis.y, 0.f, 0.f, "%.8f")) {
+    if (input_float("axis.y", &rotation_axis.y, 8)) {
         rotation_axis = glm::normalize(rotation_axis + 1e-9f);
         updated = true;
     }
-    if (ImGui::InputFloat("axis.z", &rotation_axis.z, 0.f, 0.f, "%.8f")) {
+    if (input_float("axis.z", &rotation_axis.z, 8)) {
         rotation_axis = glm::normalize(rotation_axis + 1e-9f);
         updated = true;
     }
-    if (ImGui::InputFloat("angle", &rotation_angle, 0.f, 0.f, "%.8f")) updated = true;
+    if (input_float("angle", &rotation_angle, 8)) updated = true;
 
     rot = axis_angle_to_quat(rotation_axis, rotation_angle);
 

@@ -20,10 +20,19 @@ std::string ImGuiWindow::get_name() const { return name; }
 
 void ImGuiWindow::render_window(const std::shared_ptr<ItemFocusContext> &context) {
     if (show) {
-        if (ImGui::Begin(name.c_str(), &show)) {
-            bool new_focus = ImGui::IsWindowFocused();
-            if (new_focus != focus) on_focus_change(new_focus, context);
-            focus = new_focus;
+        ImVec2 title_size = ImGui::CalcTextSize(name.c_str());
+        ImGui::SetNextWindowSizeConstraints(
+            ImVec2(
+                ImGui::GetTextLineHeight() * 4.f + title_size.x
+                    + ImGui::GetStyle().FramePadding.x * 2.f,
+                0),
+            ImVec2(FLT_MAX, FLT_MAX));
+        if (ImGui::Begin(name.c_str(), &show, ImGuiWindowFlags_AlwaysAutoResize)) {
+
+            if (ImGui::IsWindowFocused() != focus) {
+                focus = !focus;
+                on_focus_change(focus, context);
+            }
 
             render_window_content(context);
         }

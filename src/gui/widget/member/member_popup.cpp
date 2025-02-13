@@ -14,7 +14,7 @@ FocusMemberPopUpWindow::FocusMemberPopUpWindow(
     : PopUpWindow(member_name), member_name(member_name), builder_env(builder_env),
       children(std::nullopt) {}
 
-void FocusMemberPopUpWindow::render_window_content(
+void FocusMemberPopUpWindow::render_popup_content(
     const std::shared_ptr<ItemFocusContext> &context) {
     if (ImGui::MenuItem("Setting")) {
         context->release_focus(member_name);
@@ -26,8 +26,6 @@ void FocusMemberPopUpWindow::render_window_content(
         children = std::make_shared<MemberConstructToolsWindow>();
         close();
     }
-
-    PopUpWindow::render_window_content(context);
 }
 
 void FocusMemberPopUpWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {
@@ -57,19 +55,20 @@ NoFocusMemberPopUpWindow::NoFocusMemberPopUpWindow(
     const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
     : PopUpWindow("Member"), builder_env(builder_env), children(std::nullopt) {}
 
-void NoFocusMemberPopUpWindow::render_window_content(
+void NoFocusMemberPopUpWindow::render_popup_content(
     const std::shared_ptr<ItemFocusContext> &context) {
 
     if (ImGui::MenuItem("New")) {
         children = std::make_shared<NewMemberWindow>(builder_env);
         close();
     }
+
+    ImGui::Separator();
+
     if (ImGui::MenuItem("Robot info")) {
         children = std::make_shared<RobotInfoWindow>(builder_env);
         close();
     }
-
-    PopUpWindow::render_window_content(context);
 }
 
 void NoFocusMemberPopUpWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {}

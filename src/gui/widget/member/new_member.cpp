@@ -6,20 +6,20 @@
 
 #include <evo_motion_model/converter.h>
 
+#include "../utils.h"
+
 NewMemberWindow::NewMemberWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
-    : ImGuiWindow("New member"), builder_env(builder_env), member_name(), pos(0),
+    : ImGuiWindow("New member"), builder_env(builder_env), member_name("no_name_member"), pos(0),
       rotation_axis(0, 1, 0), rotation_angle(0.f), scale(1.f), mass(1.f), friction(0.5f) {}
 
 void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
     member_name.resize(128);
-    ImGui::InputText("Name", &member_name[0], member_name.size());
+    input_text("Name", &member_name[0], member_name.size(), 16);
     member_name = member_name.c_str();
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
-
-    ImGui::Columns(2, nullptr, false);
 
     // position
     ImGui::BeginGroup();
@@ -28,9 +28,9 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     ImGui::Text("Position");
     ImGui::Spacing();
 
-    ImGui::InputFloat("pos.x", &pos.x, 0.f, 0.f, "%.8f");
-    ImGui::InputFloat("pos.y", &pos.y, 0.f, 0.f, "%.8f");
-    ImGui::InputFloat("pos.z", &pos.z, 0.f, 0.f, "%.8f");
+    input_float("pos.x", &pos.x, 8);
+    input_float("pos.y", &pos.y, 8);
+    input_float("pos.z", &pos.z, 8);
 
     ImGui::EndGroup();
     ImGui::Spacing();
@@ -42,14 +42,14 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     ImGui::Text("Rotation");
     ImGui::Spacing();
 
-    if (ImGui::InputFloat("axis.x", &rotation_axis.x, 0.f, 0.f, "%.8f"))
+    if (input_float("axis.x", &rotation_axis.x, 8))
         rotation_axis = glm::normalize(rotation_axis + 1e-9f);
-    if (ImGui::InputFloat("axis.y", &rotation_axis.y, 0.f, 0.f, "%.8f"))
+    if (input_float("axis.y", &rotation_axis.y, 8))
         rotation_axis = glm::normalize(rotation_axis + 1e-9f);
-    if (ImGui::InputFloat("axis.z", &rotation_axis.z, 0.f, 0.f, "%.8f"))
+    if (input_float("axis.z", &rotation_axis.z, 8))
         rotation_axis = glm::normalize(rotation_axis + 1e-9f);
 
-    ImGui::InputFloat("angle", &rotation_angle, 0.f, 0.f, "%.8f");
+    input_float("angle", &rotation_angle, 8);
 
     ImGui::EndGroup();
     ImGui::Spacing();
@@ -62,29 +62,25 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     ImGui::Spacing();
     const float min_scale = 1e-4f;
 
-    if (ImGui::InputFloat("scale.x", &scale.x, 0.f, 0.f, "%.4f"))
-        scale.x = std::max(scale.x, min_scale);
-    if (ImGui::InputFloat("scale.y", &scale.y, 0.f, 0.f, "%.4f"))
-        scale.y = std::max(scale.y, min_scale);
-    if (ImGui::InputFloat("scale.z", &scale.z, 0.f, 0.f, "%.4f"))
-        scale.z = std::max(scale.z, min_scale);
+    if (input_float("scale.x", &scale.x, 4)) scale.x = std::max(scale.x, min_scale);
+    if (input_float("scale.y", &scale.y, 4)) scale.y = std::max(scale.y, min_scale);
+    if (input_float("scale.z", &scale.z, 4)) scale.z = std::max(scale.z, min_scale);
 
     ImGui::EndGroup();
+
+    ImGui::Spacing();
+    ImGui::Separator();
     ImGui::Spacing();
 
-    // next column
-    ImGui::NextColumn();
-
+    ImGui::Text("Member parameters");
     ImGui::Spacing();
 
     // mass
-    ImGui::InputFloat("mass (kg)", &mass, 0.f, 0.f, "%.8f");
+    input_float("mass (kg)", &mass, 8);
     ImGui::Spacing();
 
     // friction
-    ImGui::DragFloat("friction", &friction, 0.01f, 0.f, 1.f);
-
-    ImGui::Columns(1);
+    ImGui::SliderFloat("friction", &friction, 0.f, 1.f);
 
     ImGui::Spacing();
     ImGui::Separator();

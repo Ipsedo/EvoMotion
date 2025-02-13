@@ -16,5 +16,6 @@ void PopUpWindow::render_window(const std::shared_ptr<ItemFocusContext> &context
     ImGuiWindow::render_window(context);
 }
 void PopUpWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+    render_popup_content(context);
     if (!ImGui::IsWindowFocused()) close();
 }

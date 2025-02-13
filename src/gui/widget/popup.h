@@ -16,6 +16,8 @@ public:
 protected:
     void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
 
+    virtual void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) = 0;
+
 private:
     std::string name;
     bool first_open;

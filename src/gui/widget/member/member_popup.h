@@ -19,7 +19,7 @@ public:
     std::optional<std::shared_ptr<ImGuiWindow>> pop_child() override;
 
 protected:
-    void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 
@@ -42,7 +42,7 @@ public:
 protected:
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
-    void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) override;
 
 private:
     std::shared_ptr<RobotBuilderEnvironment> builder_env;
