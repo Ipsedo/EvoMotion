@@ -9,8 +9,8 @@
 
 MemberMenuWindow::MemberMenuWindow(
     const std::string &member_name, const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
-    : ImGuiWindow(member_name), first_open(true), member_name(member_name),
-      builder_env(builder_env), children(std::nullopt) {}
+    : PopUpWindow(member_name), member_name(member_name), builder_env(builder_env),
+      children(std::nullopt) {}
 
 void MemberMenuWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
     if (ImGui::MenuItem("Setting")) {
@@ -23,6 +23,8 @@ void MemberMenuWindow::render_window_content(const std::shared_ptr<ItemFocusCont
         children = std::make_shared<MemberConstructToolsWindow>();
         close();
     }
+
+    PopUpWindow::render_window_content(context);
 }
 
 void MemberMenuWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {
@@ -42,13 +44,4 @@ std::optional<std::shared_ptr<ImGuiWindow>> MemberMenuWindow::pop_child() {
         return return_value;
     }
     return children;
-}
-
-void MemberMenuWindow::render_window(const std::shared_ptr<ItemFocusContext> &context) {
-    if (first_open) {
-        const auto mouse_pos = ImGui::GetMousePos();
-        ImGui::SetNextWindowPos(mouse_pos);
-        first_open = false;
-    }
-    ImGuiWindow::render_window(context);
 }

@@ -10,7 +10,7 @@
 
 MemberSettingsWindow::MemberSettingsWindow(
     const std::string &member_name, const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
-    : ImGuiWindow("Member settings \"" + member_name + "\""), member_name(member_name),
+    : ImGuiWindow("Member settings of \"" + member_name + "\""), member_name(member_name),
       builder_env(builder_env) {}
 
 void MemberSettingsWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {

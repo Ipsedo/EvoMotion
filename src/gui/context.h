@@ -20,6 +20,7 @@ public:
 
     void focus_black(const std::string &item_name);
     void focus_grey(const std::string &item_name);
+    void focus_white(const std::string &item_name);
 
 private:
     std::map<std::string, glm::vec3> item_to_focus_color;

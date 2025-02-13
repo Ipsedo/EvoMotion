@@ -26,6 +26,11 @@ void ItemFocusContext::focus(const std::string &item_name, const glm::vec3 &focu
 void ItemFocusContext::focus_black(const std::string &item_name) {
     focus(item_name, glm::vec3(0.f));
 }
+
 void ItemFocusContext::focus_grey(const std::string &item_name) {
     focus(item_name, glm::vec3(0.5f));
+}
+
+void ItemFocusContext::focus_white(const std::string &item_name) {
+    focus(item_name, glm::vec3(1.f));
 }

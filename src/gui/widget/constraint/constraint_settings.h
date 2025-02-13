@@ -7,7 +7,7 @@
 
 #include "../window.h"
 
-class ConstraintSettingsWindow final : public ImGuiWindow {
+class ConstraintSettingsWindow : public ImGuiWindow {
 public:
     ConstraintSettingsWindow(
         const std::string &constraint_name,
@@ -18,6 +18,11 @@ protected:
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 
+    virtual void render_constraint_specific_window(
+        const std::string &constraint_name,
+        const std::shared_ptr<RobotBuilderEnvironment> &builder_env,
+        const std::shared_ptr<ItemFocusContext> &context) = 0;
+
 private:
     std::string constraint_name;
     std::string parent_name;
@@ -27,6 +32,40 @@ private:
 
     void add_focus(const std::shared_ptr<ItemFocusContext> &context);
     void clear_focus(const std::shared_ptr<ItemFocusContext> &context);
+};
+
+/*
+ * Hinge
+ */
+
+class HingeConstraintSettingsWindow : public ConstraintSettingsWindow {
+public:
+    HingeConstraintSettingsWindow(
+        const std::string &constraint_name,
+        const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+
+protected:
+    void render_constraint_specific_window(
+        const std::string &constraint_name,
+        const std::shared_ptr<RobotBuilderEnvironment> &builder_env,
+        const std::shared_ptr<ItemFocusContext> &context) override;
+};
+
+/*
+ * Fixed
+ */
+
+class FixedConstraintSettingsWindow : public ConstraintSettingsWindow {
+public:
+    FixedConstraintSettingsWindow(
+        const std::string &constraint_name,
+        const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+
+protected:
+    void render_constraint_specific_window(
+        const std::string &constraint_name,
+        const std::shared_ptr<RobotBuilderEnvironment> &builder_env,
+        const std::shared_ptr<ItemFocusContext> &context) override;
 };
 
 #endif//EVO_MOTION_CONSTRAINT_SETTINGS_H
