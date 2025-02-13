@@ -20,10 +20,13 @@ std::string ImGuiWindow::get_name() const { return name; }
 
 void ImGuiWindow::render_window(const std::shared_ptr<ItemFocusContext> &context) {
     if (show) {
+        ImGui::SetNextWindowContentSize(ImVec2(0, 0));
         if (ImGui::Begin(name.c_str(), &show)) {
-            bool new_focus = ImGui::IsWindowFocused();
-            if (new_focus != focus) on_focus_change(new_focus, context);
-            focus = new_focus;
+
+            if (ImGui::IsWindowFocused() != focus) {
+                focus = !focus;
+                on_focus_change(focus, context);
+            }
 
             render_window_content(context);
         }

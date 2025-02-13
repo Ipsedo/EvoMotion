@@ -7,15 +7,15 @@
 
 #include "../popup.h"
 
-class ConstraintMenuWindow : public PopUpWindow {
+class FocusConstraintPopUpWindow : public PopUpWindow {
 public:
-    ConstraintMenuWindow(
+    FocusConstraintPopUpWindow(
         const std::string &constraint_name,
         const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
     std::optional<std::shared_ptr<ImGuiWindow>> pop_child() override;
 
 protected:
-    void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 
@@ -30,6 +30,25 @@ private:
 
     void add_focus(const std::shared_ptr<ItemFocusContext> &context);
     void clear_focus(const std::shared_ptr<ItemFocusContext> &context);
+};
+
+/*
+ * No focus
+ */
+
+class NoFocusConstraintPopUpWindow : public PopUpWindow {
+public:
+    NoFocusConstraintPopUpWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+    std::optional<std::shared_ptr<ImGuiWindow>> pop_child() override;
+
+protected:
+    void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
+    void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) override;
+
+private:
+    std::shared_ptr<RobotBuilderEnvironment> builder_env;
+    std::optional<std::shared_ptr<ImGuiWindow>> children;
 };
 
 #endif//EVO_MOTION_CONSTRAINT_POPUP_H
