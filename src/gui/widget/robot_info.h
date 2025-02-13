@@ -13,6 +13,8 @@ public:
 
 protected:
     void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
+    void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 
 private:
     std::shared_ptr<RobotBuilderEnvironment> builder_env;

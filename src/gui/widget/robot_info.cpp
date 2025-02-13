@@ -51,3 +51,8 @@ void RobotInfoWindow::render_window_content(const std::shared_ptr<ItemFocusConte
         ImGui::EndCombo();
     }
 }
+
+void RobotInfoWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {}
+
+void RobotInfoWindow::on_focus_change(
+    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {}

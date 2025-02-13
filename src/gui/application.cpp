@@ -329,7 +329,11 @@ std::shared_ptr<BuilderOpenGlWindow> ImGuiApplication::create_builder_opengl_win
             if (focused_member.has_value()
                 && !contains_window(imgui_windows[gl_window_name], focused_member.value()))
                 imgui_windows[gl_window_name].push_back(
-                    std::make_shared<MemberMenuWindow>(focused_member.value(), builder_env));
+                    std::make_shared<FocusMemberPopUpWindow>(focused_member.value(), builder_env));
+
+            if (!focused_member.has_value())
+                imgui_windows[gl_window_name].push_back(
+                    std::make_shared<NoFocusMemberPopUpWindow>(builder_env));
         },
         [this](
             const std::string &gl_window_name, std::optional<std::string> focused_constraint,

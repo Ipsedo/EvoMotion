@@ -4,15 +4,18 @@
 
 #include "./member_popup.h"
 
+#include "../robot_info.h"
 #include "./member_construct_tools.h"
 #include "./member_settings.h"
+#include "./new_member.h"
 
-MemberMenuWindow::MemberMenuWindow(
+FocusMemberPopUpWindow::FocusMemberPopUpWindow(
     const std::string &member_name, const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
     : PopUpWindow(member_name), member_name(member_name), builder_env(builder_env),
       children(std::nullopt) {}
 
-void MemberMenuWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+void FocusMemberPopUpWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context) {
     if (ImGui::MenuItem("Setting")) {
         context->release_focus(member_name);
         children = std::make_shared<MemberSettingsWindow>(member_name, builder_env);
@@ -27,19 +30,56 @@ void MemberMenuWindow::render_window_content(const std::shared_ptr<ItemFocusCont
     PopUpWindow::render_window_content(context);
 }
 
-void MemberMenuWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {
+void FocusMemberPopUpWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {
     context->release_focus(member_name);
 }
 
-void MemberMenuWindow::on_focus_change(
+void FocusMemberPopUpWindow::on_focus_change(
     bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) context->focus_black(member_name);
     else context->release_focus(member_name);
 }
 
-std::optional<std::shared_ptr<ImGuiWindow>> MemberMenuWindow::pop_child() {
+std::optional<std::shared_ptr<ImGuiWindow>> FocusMemberPopUpWindow::pop_child() {
     if (children.has_value()) {
         auto return_value = children.value();
+        children = std::nullopt;
+        return return_value;
+    }
+    return children;
+}
+
+/*
+ * No focus
+ */
+
+NoFocusMemberPopUpWindow::NoFocusMemberPopUpWindow(
+    const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
+    : PopUpWindow("Member"), builder_env(builder_env), children(std::nullopt) {}
+
+void NoFocusMemberPopUpWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context) {
+
+    if (ImGui::MenuItem("New")) {
+        children = std::make_shared<NewMemberWindow>(builder_env);
+        close();
+    }
+    if (ImGui::MenuItem("Robot info")) {
+        children = std::make_shared<RobotInfoWindow>(builder_env);
+        close();
+    }
+
+    PopUpWindow::render_window_content(context);
+}
+
+void NoFocusMemberPopUpWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {}
+
+void NoFocusMemberPopUpWindow::on_focus_change(
+    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {}
+
+std::optional<std::shared_ptr<ImGuiWindow>> NoFocusMemberPopUpWindow::pop_child() {
+    if (children.has_value()) {
+        const auto return_value = children.value();
         children = std::nullopt;
         return return_value;
     }
