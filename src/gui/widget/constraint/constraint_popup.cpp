@@ -22,10 +22,12 @@ void ConstraintMenuWindow::render_window_content(const std::shared_ptr<ItemFocus
 
         switch (builder_env->get_constraint_type(constraint_name)) {
             case HINGE:
-                children = std::make_shared<HingeConstraintSettingsWindow>(constraint_name, builder_env);
+                children =
+                    std::make_shared<HingeConstraintSettingsWindow>(constraint_name, builder_env);
                 break;
             case FIXED:
-                children = std::make_shared<FixedConstraintSettingsWindow>(constraint_name, builder_env);
+                children =
+                    std::make_shared<FixedConstraintSettingsWindow>(constraint_name, builder_env);
                 break;
         }
 

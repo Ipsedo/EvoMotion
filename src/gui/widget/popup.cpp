@@ -4,7 +4,8 @@
 
 #include "./popup.h"
 
-PopUpWindow::PopUpWindow(const std::string &popup_name) : ImGuiWindow(popup_name), name(popup_name), first_open(true) {}
+PopUpWindow::PopUpWindow(const std::string &popup_name)
+    : ImGuiWindow(popup_name), name(popup_name), first_open(true) {}
 
 void PopUpWindow::render_window(const std::shared_ptr<ItemFocusContext> &context) {
     if (first_open) {

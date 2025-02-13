@@ -74,7 +74,8 @@ private:
     std::shared_ptr<BuilderOpenGlWindow>
     create_builder_opengl_window(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
-    static bool contains_window(const std::vector<std::shared_ptr<ImGuiWindow>> &windows, const std::string &window_name);
+    static bool contains_window(
+        const std::vector<std::shared_ptr<ImGuiWindow>> &windows, const std::string &window_name);
 };
 
 #endif//EVO_MOTION_APPLICATION_H

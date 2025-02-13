@@ -8,8 +8,8 @@
 
 #include <evo_motion_networks/agents/cross_q.h>
 
-#include "./widget/member/member_popup.h"
 #include "./widget/constraint/constraint_popup.h"
+#include "./widget/member/member_popup.h"
 
 ImGuiApplication::ImGuiApplication(const std::string &title, const int width, const int height)
     : need_close(false), clear_color(0.45f, 0.55f, 0.60f, 1.00f),
@@ -331,12 +331,13 @@ std::shared_ptr<BuilderOpenGlWindow> ImGuiApplication::create_builder_opengl_win
                 imgui_windows[gl_window_name].push_back(
                     std::make_shared<MemberMenuWindow>(focused_member.value(), builder_env));
         },
-        [this](const std::string &gl_window_name, std::optional<std::string> focused_constraint,
-           std::shared_ptr<RobotBuilderEnvironment> builder_env) {
+        [this](
+            const std::string &gl_window_name, std::optional<std::string> focused_constraint,
+            std::shared_ptr<RobotBuilderEnvironment> builder_env) {
             if (focused_constraint.has_value()
                 && !contains_window(imgui_windows[gl_window_name], focused_constraint.value()))
-                imgui_windows[gl_window_name].push_back(
-                    std::make_shared<ConstraintMenuWindow>(focused_constraint.value(), builder_env));
+                imgui_windows[gl_window_name].push_back(std::make_shared<ConstraintMenuWindow>(
+                    focused_constraint.value(), builder_env));
         },
         [this]() { return part_kind; });
 }
@@ -344,7 +345,5 @@ std::shared_ptr<BuilderOpenGlWindow> ImGuiApplication::create_builder_opengl_win
 bool ImGuiApplication::contains_window(
     const std::vector<std::shared_ptr<ImGuiWindow>> &windows, const std::string &window_name) {
     return std::ranges::any_of(
-        windows, [window_name](const auto &w) {
-            return w->get_name() == window_name;
-        });
+        windows, [window_name](const auto &w) { return w->get_name() == window_name; });
 }
