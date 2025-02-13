@@ -17,9 +17,9 @@
 class Muscle {
 public:
     Muscle(
-        const std::string &name, const float attach_mass, const glm::vec3 attach_scale,
-        const std::shared_ptr<RigidBodyItem> &item_a, const glm::vec3 pos_in_a,
-        const std::shared_ptr<RigidBodyItem> &item_b, const glm::vec3 pos_in_b, const float force,
+        const std::string &name, const float attach_mass, const glm::vec3 &attach_scale,
+        const std::shared_ptr<RigidBodyItem> &item_a, const glm::vec3 &pos_in_a,
+        const std::shared_ptr<RigidBodyItem> &item_b, const glm::vec3 &pos_in_b, const float force,
         const float max_speed);
 
     Muscle(
@@ -34,7 +34,7 @@ public:
 
     std::vector<std::shared_ptr<AbstractItem>> get_items();
 
-    std::vector<btRigidBody *> get_bodies();
+    std::vector<btRigidBody *> get_bodies() const;
     std::vector<btTypedConstraint *> get_constraints();
 
     btSliderConstraint *get_slider_constraint() const;

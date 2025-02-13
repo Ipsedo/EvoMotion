@@ -5,6 +5,7 @@
 #ifndef EVO_MOTION_ITEM_H
 #define EVO_MOTION_ITEM_H
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -26,21 +27,24 @@ public:
     virtual void reset(const glm::mat4 &main_model_matrix) = 0;
 
     virtual DrawableKind get_drawable_kind() const = 0;
+
+    virtual ~AbstractItem() = default;
 };
 
-class RigidBodyItem : public AbstractItem {
+class RigidBodyItem final : public AbstractItem {
 public:
     RigidBodyItem(
-        std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,
-        glm::vec3 scale, float mass, DrawableKind drawable_kind);
+        std::string name, const std::shared_ptr<Shape> &shape, const glm::mat4 &model_matrix,
+        const glm::vec3 &scale, const float mass, const DrawableKind &drawable_kind);
 
     RigidBodyItem(
-        std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position, glm::vec3 scale,
-        float mass, DrawableKind drawable_kind);
+        std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
+        const glm::vec3 &scale, const float mass, const DrawableKind &drawable_kind);
 
     RigidBodyItem(
-        std::string name, const std::shared_ptr<Shape> &shape, glm::vec3 position,
-        glm::quat rotation, glm::vec3 scale, float mass, DrawableKind drawable_kind);
+        std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
+        const glm::quat &rotation, const glm::vec3 &scale, const float mass,
+        const DrawableKind &drawable_kind);
 
     std::shared_ptr<Shape> get_shape() const override;
     std::string get_name() const override;
@@ -69,16 +73,17 @@ private:
     DrawableKind kind;
 };
 
-class EmptyItem : public AbstractItem {
+class EmptyItem final : public AbstractItem {
 public:
     EmptyItem(
-        const std::string &name, const std::shared_ptr<Shape> &shape, glm::vec3 position,
-        glm::quat rotation, glm::vec3 scale, DrawableKind drawable_kind);
+        const std::string &name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
+        const glm::quat &rotation, const glm::vec3 &scale, const DrawableKind &drawable_kind);
 
     EmptyItem(
-        const std::string &name, const std::shared_ptr<Shape> &shape,
-        std::function<glm::vec3()> get_position, std::function<glm::quat()> get_rotation,
-        std::function<glm::vec3()> get_scale, DrawableKind drawable_kind);
+        std::string name, const std::shared_ptr<Shape> &shape,
+        const std::function<glm::vec3()> &get_position,
+        const std::function<glm::quat()> &get_rotation, const std::function<glm::vec3()> &get_scale,
+        const DrawableKind &drawable_kind);
 
     std::shared_ptr<Shape> get_shape() const override;
     std::string get_name() const override;

@@ -49,8 +49,8 @@ public:
     HingeConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,
         const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
-        const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
-        float limit_radian_min, float limit_radian_max);
+        const glm::vec3 &pivot_in_child, const glm::vec3 &axis_in_parent,
+        const glm::vec3 &axis_in_child, const float limit_radian_min, const float limit_radian_max);
     HingeConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);

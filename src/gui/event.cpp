@@ -8,11 +8,11 @@
 
 #include <imgui.h>
 
-RayMouseEvent::RayMouseEvent(float width, float height)
+RayMouseEvent::RayMouseEvent(const float width, const float height)
     : width(width), height(height), view_matrix(1.f), proj_matrix(1.f) {}
 
 void RayMouseEvent::update(
-    float new_width, float new_height, const glm::mat4 &new_view_matrix,
+    const float new_width, const float new_height, const glm::mat4 &new_view_matrix,
     const glm::mat4 &new_proj_matrix) {
     width = new_width;
     height = new_height;
@@ -21,15 +21,15 @@ void RayMouseEvent::update(
 }
 
 std::optional<std::tuple<glm::vec3, glm::vec3>>
-RayMouseEvent::get_scene_absolute_click_pos(float width_offset, float height_offset) {
+RayMouseEvent::get_scene_absolute_click_pos(float width_offset, float height_offset) const {
     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
         float image_x = ImGui::GetMousePos().x - width_offset;
         float image_y = ImGui::GetMousePos().y - height_offset;
 
         glm::vec2 screen_coord(2.f * image_x / width - 1.f, -(2.f * image_y / height - 1.f));
 
-        glm::vec4 screen_coord_near = glm::vec4(screen_coord, -1.f, 1.f);
-        glm::vec4 screen_coord_far = glm::vec4(screen_coord, 1.f, 1.f);
+        auto screen_coord_near = glm::vec4(screen_coord, -1.f, 1.f);
+        auto screen_coord_far = glm::vec4(screen_coord, 1.f, 1.f);
 
         glm::mat4 inv_proj_matrix = glm::inverse(proj_matrix);
         glm::vec4 cam_near = inv_proj_matrix * screen_coord_near;

@@ -4,6 +4,7 @@
 
 #include "./program.h"
 
+#include <ranges>
 #include <stdexcept>
 #include <utility>
 
@@ -100,7 +101,7 @@ void Program::kill() {
     glDeleteShader(vertex_shader_id);
     glDeleteShader(fragment_shader_id);
 
-    for (const auto &[name, buffer_id]: buffer_ids) glDeleteBuffers(1, &buffer_id);
+    for (const auto &buffer_id: buffer_ids | std::views::values) glDeleteBuffers(1, &buffer_id);
 
     glDeleteProgram(program_id);
 }
@@ -142,7 +143,8 @@ void Program::attrib(
 }
 
 void Program::disable_attrib_array() {
-    for (const auto &[name, attrib_id]: attribute_handles) glDisableVertexAttribArray(attrib_id);
+    for (const auto &attrib_id: attribute_handles | std::views::values)
+        glDisableVertexAttribArray(attrib_id);
 }
 
 void Program::draw_arrays(const GLenum type, const int from, const int nb_vertices) {

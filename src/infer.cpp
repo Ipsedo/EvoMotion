@@ -25,7 +25,7 @@ void infer(
     std::shared_ptr<Camera> camera;
     if (env->get_camera_track_item().has_value()) {
         const auto track_item = env->get_camera_track_item().value();
-        camera = std::make_shared<FollowCamera>([&track_item]() {
+        camera = std::make_shared<FollowCamera>([track_item]() {
             return glm::vec3(track_item->model_matrix() * glm::vec4(glm::vec3(0), 1.f));
         });
     } else {

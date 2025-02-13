@@ -56,7 +56,7 @@ nlohmann::json read_json(const std::string &json_path) {
  * GLM stuff
  */
 
-std::tuple<glm::vec3, glm::quat, glm::vec3> decompose_model_matrix(glm::mat4 model_matrix) {
+std::tuple<glm::vec3, glm::quat, glm::vec3> decompose_model_matrix(const glm::mat4 &model_matrix) {
     glm::vec3 curr_scale;
     glm::quat curr_rotation;
     glm::vec3 curr_translation;
@@ -71,7 +71,7 @@ std::tuple<glm::vec3, glm::quat, glm::vec3> decompose_model_matrix(glm::mat4 mod
  * GLM to JSON
  */
 
-nlohmann::json model_matrix_to_json_transformation(glm::mat4 model_matrix) {
+nlohmann::json model_matrix_to_json_transformation(const glm::mat4 &model_matrix) {
 
     const auto [curr_translation, curr_rotation, curr_scale] = decompose_model_matrix(model_matrix);
 
@@ -113,7 +113,7 @@ glm::mat4 bullet_to_glm(const btTransform &m) {
 
 glm::quat bullet_to_glm(const btQuaternion q) { return {q.w(), q.x(), q.y(), q.z()}; }
 
-glm::quat axis_angle_to_quat(const glm::vec3 &axis, float angle) {
+glm::quat axis_angle_to_quat(const glm::vec3 &axis, const float angle) {
     return glm::angleAxis(angle, axis);
 }
 

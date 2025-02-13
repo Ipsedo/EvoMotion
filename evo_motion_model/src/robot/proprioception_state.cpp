@@ -20,7 +20,7 @@ ItemProprioceptionState::ItemProprioceptionState(
 
 int ItemProprioceptionState::get_size() { return 3 + 3 * 4 + 1 /* + 6 * 3*/; }
 
-torch::Tensor ItemProprioceptionState::get_state(torch::Device device) {
+torch::Tensor ItemProprioceptionState::get_state(const torch::Device &device) {
     btScalar yaw, pitch, roll;
     state_item->get_body()->getWorldTransform().getRotation().getEulerZYX(yaw, pitch, roll);
 
@@ -83,7 +83,7 @@ MemberState::MemberState(
 
 int MemberState::get_size() { return ItemProprioceptionState::get_size() + 3; }
 
-torch::Tensor MemberState::get_state(torch::Device device) {
+torch::Tensor MemberState::get_state(const torch::Device &device) {
     constexpr glm::vec4 center_point(0.f, 0.f, 0.f, 1.f);
     glm::vec3 center_pos =
         state_item->model_matrix() * center_point - root_item->model_matrix() * center_point;
@@ -102,7 +102,7 @@ RootMemberState::RootMemberState(
 
 int RootMemberState::get_size() { return ItemProprioceptionState::get_size() + 3; }
 
-torch::Tensor RootMemberState::get_state(torch::Device device) {
+torch::Tensor RootMemberState::get_state(const torch::Device &device) {
     const auto center_pos = state_item->get_body()->getCenterOfMassPosition();
     return torch::cat(
         {ItemProprioceptionState::get_state(device),
@@ -121,7 +121,7 @@ MuscleState::MuscleState(const std::shared_ptr<Muscle> &muscle)
 
 int MuscleState::get_size() { return 4; }
 
-torch::Tensor MuscleState::get_state(torch::Device device) {
+torch::Tensor MuscleState::get_state(const torch::Device &device) {
     return torch::tensor(
         {slider_constraint->getLinearPos(), slider_constraint->getAppliedImpulse(),
          p2p_a->getAppliedImpulse(), p2p_b->getAppliedImpulse()},

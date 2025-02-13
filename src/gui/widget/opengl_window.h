@@ -20,6 +20,8 @@
 
 class OpenGlWindow {
 public:
+    virtual ~OpenGlWindow() = default;
+
     OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Environment> &env);
 
     void draw_opengl(float width, float height);
@@ -56,27 +58,42 @@ protected:
 
     virtual std::shared_ptr<DrawableFactory>
     get_drawable_factory(const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng);
-
-    virtual void on_hide_tab() = 0;
-    virtual void on_open_tab() = 0;
 };
 
 /*
  * Builder
  */
 
-class BuilderOpenGlWindow : public OpenGlWindow {
+enum PartKind { MEMBER, CONSTRAINT, MUSCLE };
+
+class BuilderOpenGlWindow final : public OpenGlWindow {
 private:
-    std::shared_ptr<AppContext> context;
+    std::shared_ptr<ItemFocusContext> context;
 
     std::unique_ptr<RayMouseEvent> mouse_event;
 
     std::shared_ptr<RobotBuilderEnvironment> builder_env;
 
+    std::function<void(
+        std::string, std::optional<std::string>, std::shared_ptr<RobotBuilderEnvironment>)>
+        on_member_focused;
+    std::function<void(
+        std::string, std::optional<std::string>, std::shared_ptr<RobotBuilderEnvironment>)>
+        on_constraint_focused;
+
+    std::function<PartKind()> get_part_type;
+
 public:
     BuilderOpenGlWindow(
-        const std::shared_ptr<AppContext> &context, std::string bar_item_name,
-        const std::shared_ptr<RobotBuilderEnvironment> &env);
+        const std::shared_ptr<ItemFocusContext> &context, std::string bar_item_name,
+        const std::shared_ptr<RobotBuilderEnvironment> &env,
+        const std::function<
+            void(std::string, std::optional<std::string>, std::shared_ptr<RobotBuilderEnvironment>)>
+            &on_member_focused,
+        const std::function<
+            void(std::string, std::optional<std::string>, std::shared_ptr<RobotBuilderEnvironment>)>
+            &on_constraint_focused,
+        const std::function<PartKind()> &get_part_type);
 
 protected:
     void on_imgui_tab_begin() override;
@@ -85,15 +102,13 @@ protected:
         const glm::mat4 &new_proj_matrix) override;
     std::shared_ptr<DrawableFactory> get_drawable_factory(
         const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng) override;
-    void on_hide_tab() override;
-    void on_open_tab() override;
 };
 
 /*
  * Run
  */
 
-class InferOpenGlWindow : public OpenGlWindow {
+class InferOpenGlWindow final : public OpenGlWindow {
 public:
     InferOpenGlWindow(
         const std::shared_ptr<Agent> &agent, std::string bar_item_name,
@@ -104,8 +119,6 @@ protected:
         float new_width, float new_height, const glm::mat4 &new_view_matrix,
         const glm::mat4 &new_proj_matrix) override;
     void on_imgui_tab_begin() override;
-    void on_hide_tab() override;
-    void on_open_tab() override;
 
 private:
     std::shared_ptr<Agent> agent;

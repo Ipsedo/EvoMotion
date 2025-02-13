@@ -28,6 +28,8 @@
 
 class Skeleton {
 public:
+    virtual ~Skeleton() = default;
+
     Skeleton(
         std::string robot_name, std::string root_name,
         const std::vector<std::shared_ptr<Member>> &members,

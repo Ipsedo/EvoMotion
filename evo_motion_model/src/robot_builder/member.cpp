@@ -17,9 +17,9 @@ BuilderMember::BuilderMember(const std::shared_ptr<AbstractDeserializer> &deseri
     : Member(deserializer) {}
 
 void BuilderMember::update_item(
-    std::optional<glm::vec3> new_pos, std::optional<glm::quat> new_rot,
-    std::optional<glm::vec3> new_scale, std::optional<float> new_friction,
-    std::optional<float> new_mass, std::optional<bool> new_ignore_collision) {
+    const std::optional<glm::vec3> &new_pos, const std::optional<glm::quat> &new_rot,
+    const std::optional<glm::vec3> &new_scale, const std::optional<float> &new_friction,
+    const std::optional<float> &new_mass, const std::optional<bool> &new_ignore_collision) {
 
     const auto [pos, rot, _] = decompose_model_matrix(get_item()->model_matrix_without_scale());
 

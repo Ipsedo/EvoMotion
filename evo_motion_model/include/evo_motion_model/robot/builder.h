@@ -31,12 +31,12 @@ public:
     explicit BuilderMember(const std::shared_ptr<AbstractDeserializer> &deserializer);
 
     void update_item(
-        std::optional<glm::vec3> new_pos = std::nullopt,
-        std::optional<glm::quat> new_rot = std::nullopt,
-        std::optional<glm::vec3> new_scale = std::nullopt,
-        std::optional<float> new_friction = std::nullopt,
-        std::optional<float> new_mass = std::nullopt,
-        std::optional<bool> new_ignore_collision = std::nullopt);
+        const std::optional<glm::vec3> &new_pos = std::nullopt,
+        const std::optional<glm::quat> &new_rot = std::nullopt,
+        const std::optional<glm::vec3> &new_scale = std::nullopt,
+        const std::optional<float> &new_friction = std::nullopt,
+        const std::optional<float> &new_mass = std::nullopt,
+        const std::optional<bool> &new_ignore_collision = std::nullopt);
 };
 
 /*
@@ -60,13 +60,14 @@ protected:
     virtual std::shared_ptr<Shape> get_shape() = 0;
 };
 
-class BuilderHingeConstraint : public virtual HingeConstraint, public virtual BuilderConstraint {
+class BuilderHingeConstraint final : public virtual HingeConstraint,
+                                     public virtual BuilderConstraint {
 public:
     BuilderHingeConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,
         const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
-        const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
-        float limit_radian_min, float limit_radian_max);
+        const glm::vec3 &pivot_in_child, const glm::vec3 &axis_in_parent,
+        const glm::vec3 &axis_in_child, float limit_radian_min, float limit_radian_max);
 
     BuilderHingeConstraint(
         const std::shared_ptr<AbstractDeserializer> &deserializer,
@@ -75,8 +76,8 @@ public:
     void update_constraint(
         const std::optional<glm::vec3> &new_pivot = std::nullopt,
         const std::optional<glm::vec3> &new_axis = std::nullopt,
-        std::optional<float> new_limit_radian_min = std::nullopt,
-        std::optional<float> new_limit_radian_max = std::nullopt);
+        const std::optional<float> &new_limit_radian_min = std::nullopt,
+        const std::optional<float> &new_limit_radian_max = std::nullopt);
 
 protected:
     std::shared_ptr<Shape> get_shape() override;
@@ -85,7 +86,8 @@ private:
     std::shared_ptr<Shape> shape;
 };
 
-class BuilderFixedConstraint : public virtual FixedConstraint, public virtual BuilderConstraint {
+class BuilderFixedConstraint final : public virtual FixedConstraint,
+                                     public virtual BuilderConstraint {
 public:
     BuilderFixedConstraint(
         const std::string &name, const std::shared_ptr<Member> &parent,
@@ -111,7 +113,7 @@ private:
  * Muscles
  */
 
-class BuilderMuscle : public Muscle {
+class BuilderMuscle final : public Muscle {
 public:
     BuilderMuscle(
         const std::string &name, float attach_mass, const glm::vec3 &attach_scale,
@@ -128,57 +130,61 @@ public:
  * Environment
  */
 
-class RobotBuilderEnvironment : public Environment {
+class RobotBuilderEnvironment final : public Environment {
 public:
     explicit RobotBuilderEnvironment(std::string robot_name);
 
     bool set_root(const std::string &member_name);
 
     bool add_member(
-        const std::string &member_name, ShapeKind shape_kind, glm::vec3 center_pos,
-        glm::quat rotation, glm::vec3 scale, float mass, float friction);
+        const std::string &member_name, const ShapeKind &shape_kind, const glm::vec3 &center_pos,
+        const glm::quat &rotation, const glm::vec3 &scale, float mass, float friction);
 
     bool update_member(
-        const std::string &member_name, std::optional<glm::vec3> new_pos = std::nullopt,
+        const std::string &member_name, const std::optional<glm::vec3> &new_pos = std::nullopt,
         const std::optional<glm::quat> &new_rot = std::nullopt,
-        std::optional<glm::vec3> new_scale = std::nullopt,
-        std::optional<float> new_friction = std::nullopt,
-        std::optional<float> new_mass = std::nullopt,
-        std::optional<bool> new_ignore_collision = std::nullopt);
+        const std::optional<glm::vec3> &new_scale = std::nullopt,
+        const std::optional<float> &new_friction = std::nullopt,
+        const std::optional<float> &new_mass = std::nullopt,
+        const std::optional<bool> &new_ignore_collision = std::nullopt);
 
     bool update_hinge_constraint(
-        const std::string &hinge_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
-        std::optional<glm::vec3> new_axis = std::nullopt,
-        std::optional<float> new_limit_angle_min = std::nullopt,
-        std::optional<float> new_angle_limit_max = std::nullopt);
+        const std::string &hinge_constraint_name,
+        const std::optional<glm::vec3> &new_pos = std::nullopt,
+        const std::optional<glm::vec3> &new_axis = std::nullopt,
+        const std::optional<float> &new_limit_angle_min = std::nullopt,
+        const std::optional<float> &new_angle_limit_max = std::nullopt) const;
 
     bool update_fixed_constraint(
-        const std::string &fixed_constraint_name, std::optional<glm::vec3> new_pos = std::nullopt,
-        std::optional<glm::quat> new_rot = std::nullopt);
+        const std::string &fixed_constraint_name,
+        const std::optional<glm::vec3> &new_pos = std::nullopt,
+        const std::optional<glm::quat> &new_rot = std::nullopt) const;
 
     bool rename_member(const std::string &old_name, const std::string &new_name);
 
     bool attach_fixed_constraint(
         const std::string &constraint_name, const std::string &parent_name,
-        const std::string &child_name, const glm::vec3 &absolute_fixed_point);
+        const std::string &child_name, const glm::vec3 &absolute_fixed_point,
+        const glm::quat &absolute_rotation);
 
     bool remove_member(const std::string &member_name);
     bool remove_constraint(const std::string &constraint_name);
 
     std::tuple<glm::vec3, glm::quat, glm::vec3>
-    get_member_transform(const std::string &member_name);
+    get_member_transform(const std::string &member_name) const;
 
-    float get_member_mass(const std::string &member_name);
-    float get_member_friction(const std::string &member_name);
+    float get_member_mass(const std::string &member_name) const;
+    float get_member_friction(const std::string &member_name) const;
 
-    ConstraintType get_constraint_type(const std::string &constraint_name);
+    ConstraintType get_constraint_type(const std::string &constraint_name) const;
     std::tuple<glm::vec3, glm::vec3, float, float>
-    get_constraint_hinge_info(const std::string &hinge_constraint_name);
+    get_constraint_hinge_info(const std::string &hinge_constraint_name) const;
     std::tuple<glm::vec3, glm::quat>
-    get_constraint_fixed_info(const std::string &fixed_constraint_name);
+    get_constraint_fixed_info(const std::string &fixed_constraint_name) const;
+    std::tuple<std::string, std::string> get_constraint_members(const std::string &constraint_name);
 
     std::optional<std::string>
-    ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
+    ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) const;
 
     std::optional<std::string>
     ray_cast_constraint(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute);
@@ -187,16 +193,16 @@ public:
     void load_robot(const std::filesystem::path &input_json_path);
 
     std::string get_robot_name();
-    std::string get_root_name();
+    std::optional<std::string> get_root_name();
     void set_robot_name(const std::string &new_robot_name);
 
     std::vector<std::string> get_member_names();
 
-    int get_members_count();
+    int get_members_count() const;
 
-    bool member_exists(const std::string &member_name);
-    bool constraint_exists(const std::string &constraint_name);
-    bool muscle_exists(const std::string &muscle_name);
+    bool member_exists(const std::string &member_name) const;
+    bool constraint_exists(const std::string &constraint_name) const;
+    bool muscle_exists(const std::string &muscle_name) const;
 
     /*
      * Environment
@@ -214,7 +220,7 @@ protected:
 
 private:
     std::string robot_name;
-    std::string root_name;
+    std::optional<std::string> root_name;
 
     std::map<std::string, std::vector<std::tuple<std::string, std::string>>> skeleton_graph;
 
@@ -222,16 +228,16 @@ private:
     std::vector<std::shared_ptr<BuilderConstraint>> constraints;
     std::vector<std::shared_ptr<BuilderMuscle>> muscles;
 
-    std::shared_ptr<BuilderMember> get_member(const std::string &member_name);
-    std::shared_ptr<BuilderConstraint> get_constraint(const std::string &constraint_name);
-    std::shared_ptr<BuilderMuscle> get_muscle(const std::string &muscle_name);
+    std::shared_ptr<BuilderMember> get_member(const std::string &member_name) const;
+    std::shared_ptr<BuilderConstraint> get_constraint(const std::string &constraint_name) const;
+    std::shared_ptr<BuilderMuscle> get_muscle(const std::string &muscle_name) const;
 
     template<typename Part>
     static std::shared_ptr<Part>
-    get_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec);
+    get_part(const std::string &name, const std::vector<std::shared_ptr<Part>> &vec);
 
     template<typename Part>
-    static bool exists_part(const std::string &name, std::vector<std::shared_ptr<Part>> vec);
+    static bool exists_part(const std::string &name, const std::vector<std::shared_ptr<Part>> &vec);
 };
 
 #endif//EVO_MOTION_BUILDER_H

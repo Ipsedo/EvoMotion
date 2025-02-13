@@ -18,7 +18,8 @@ ObjSpecularFactory::ObjSpecularFactory(
 
 ObjSpecularFactory::ObjSpecularFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
-    const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng, float shininess)
+    const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng,
+    const float shininess)
     : rd_uni(0.f, 1.f), vertices(vertices), normals(normals),
       ambient_color(glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f)),
       diffuse_color(glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f)),
@@ -35,7 +36,8 @@ TileGroundFactory::TileGroundFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
     const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color_a,
     glm::vec4 diffuse_color_a, glm::vec4 specular_color_a, glm::vec4 ambient_color_b,
-    glm::vec4 diffuse_color_b, glm::vec4 specular_color_b, float shininess, float tile_size)
+    glm::vec4 diffuse_color_b, glm::vec4 specular_color_b, const float shininess,
+    const float tile_size)
     : rd_uni(0.f, 1.f), vertices(vertices), normals(normals), ambient_color_a(ambient_color_a),
       diffuse_color_a(diffuse_color_a), specular_color_a(specular_color_a),
       ambient_color_b(ambient_color_b), diffuse_color_b(diffuse_color_b),
@@ -43,8 +45,8 @@ TileGroundFactory::TileGroundFactory(
 
 TileGroundFactory::TileGroundFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
-    const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng, float shininess,
-    float tile_size)
+    const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng,
+    const float shininess, const float tile_size)
     : rd_uni(0.f, 1.f), vertices(vertices), normals(normals),
       ambient_color_a(glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f)),
       diffuse_color_a(glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f)),
@@ -64,9 +66,9 @@ std::shared_ptr<Drawable> TileGroundFactory::create_drawable() {
 
 BuilderObjSpecularFactory::BuilderObjSpecularFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
-    const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color,
-    glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess,
-    const std::optional<std::function<bool()>> &is_focus_function,
+    const std::vector<std::tuple<float, float, float>> &normals, const glm::vec4 ambient_color,
+    const glm::vec4 diffuse_color, const glm::vec4 specular_color, const float shininess,
+    const std::optional<std::function<std::optional<glm::vec3>()>> &is_focus_function,
     const std::optional<std::function<bool()>> &is_hidden_function)
     : rd_uni(0.f, 1.f), vertices(vertices), normals(normals), ambient_color(ambient_color),
       diffuse_color(diffuse_color), specular_color(specular_color), shininess(shininess),
@@ -74,8 +76,9 @@ BuilderObjSpecularFactory::BuilderObjSpecularFactory(
 
 BuilderObjSpecularFactory::BuilderObjSpecularFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
-    const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng, float shininess,
-    const std::optional<std::function<bool()>> &is_focus_function,
+    const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng,
+    const float shininess,
+    const std::optional<std::function<std::optional<glm::vec3>()>> &is_focus_function,
     const std::optional<std::function<bool()>> &is_hidden_function)
     : rd_uni(0.f, 1.f), vertices(vertices), normals(normals),
       ambient_color(glm::vec4(rd_uni(rng), rd_uni(rng), rd_uni(rng), 1.f)),

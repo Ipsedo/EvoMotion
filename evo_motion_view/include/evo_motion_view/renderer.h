@@ -20,7 +20,7 @@ void GLAPIENTRY message_callback(
     GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar *message,
     const void *userParam);
 
-class Renderer {
+class Renderer final {
 public:
     Renderer(const std::string &title, int width, int height, std::shared_ptr<Camera> camera);
 
@@ -34,14 +34,7 @@ public:
 
     void reset_camera() const;
 
-    virtual ~Renderer();
-
-protected:
-    virtual void on_new_frame();
-
-    virtual void on_end_frame();
-
-    virtual void render_drawables(std::map<std::string, glm::mat4> model_matrix, float delta_t);
+    ~Renderer();
 
 private:
     std::string title;
@@ -57,6 +50,10 @@ private:
     std::map<std::string, std::shared_ptr<Drawable>> drawables;
 
     GLFWwindow *window;
+
+    GLuint vao;
+
+    void render_drawables(std::map<std::string, glm::mat4> model_matrix, float delta_t);
 };
 
 #endif//EVO_MOTION_RENDERER_H

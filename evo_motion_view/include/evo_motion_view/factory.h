@@ -10,7 +10,7 @@
 
 #include "./drawable.h"
 
-class ObjSpecularFactory : public DrawableFactory {
+class ObjSpecularFactory final : public DrawableFactory {
 private:
     std::uniform_real_distribution<float> rd_uni;
 
@@ -35,7 +35,7 @@ public:
     std::shared_ptr<Drawable> create_drawable() override;
 };
 
-class BuilderObjSpecularFactory : public DrawableFactory {
+class BuilderObjSpecularFactory final : public DrawableFactory {
 private:
     std::uniform_real_distribution<float> rd_uni;
 
@@ -46,7 +46,7 @@ private:
     glm::vec4 specular_color;
     float shininess;
 
-    std::optional<std::function<bool()>> is_focus_function;
+    std::optional<std::function<std::optional<glm::vec3>()>> is_focus_function;
     std::optional<std::function<bool()>> is_hidden_function;
 
 public:
@@ -54,19 +54,20 @@ public:
         const std::vector<std::tuple<float, float, float>> &vertices,
         const std::vector<std::tuple<float, float, float>> &normals, glm::vec4 ambient_color,
         glm::vec4 diffuse_color, glm::vec4 specular_color, float shininess,
-        const std::optional<std::function<bool()>> &is_focus_function,
+        const std::optional<std::function<std::optional<glm::vec3>()>> &is_focus_function,
         const std::optional<std::function<bool()>> &is_hidden_function);
 
     BuilderObjSpecularFactory(
         const std::vector<std::tuple<float, float, float>> &vertices,
         const std::vector<std::tuple<float, float, float>> &normals, std::mt19937 &rng,
-        float shininess, const std::optional<std::function<bool()>> &is_focus_function,
+        float shininess,
+        const std::optional<std::function<std::optional<glm::vec3>()>> &is_focus_function,
         const std::optional<std::function<bool()>> &is_hidden_function);
 
     std::shared_ptr<Drawable> create_drawable() override;
 };
 
-class TileGroundFactory : public DrawableFactory {
+class TileGroundFactory final : public DrawableFactory {
 private:
     std::uniform_real_distribution<float> rd_uni;
 

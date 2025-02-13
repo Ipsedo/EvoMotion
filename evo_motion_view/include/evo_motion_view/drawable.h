@@ -22,6 +22,8 @@ public:
 
 class DrawableFactory {
 public:
+    virtual ~DrawableFactory() = default;
+
     virtual std::shared_ptr<Drawable> create_drawable() = 0;
 };
 

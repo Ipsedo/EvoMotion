@@ -11,16 +11,10 @@
 #include <evo_motion_model/converter.h>
 #include <evo_motion_model/robot/muscle.h>
 
-glm::mat4 get_rotation(const glm::vec3 a, const glm::vec3 b) {
-    return glm::rotate(
-        glm::mat4(1.0f), acos(glm::dot(b, a) / (glm::length(b) * glm::length(a))),
-        glm::cross(b, a));
-}
-
 Muscle::Muscle(
-    const std::string &name, const float attach_mass, const glm::vec3 attach_scale,
-    const std::shared_ptr<RigidBodyItem> &item_a, const glm::vec3 pos_in_a,
-    const std::shared_ptr<RigidBodyItem> &item_b, const glm::vec3 pos_in_b, const float force,
+    const std::string &name, const float attach_mass, const glm::vec3 &attach_scale,
+    const std::shared_ptr<RigidBodyItem> &item_a, const glm::vec3 &pos_in_a,
+    const std::shared_ptr<RigidBodyItem> &item_b, const glm::vec3 &pos_in_b, const float force,
     const float max_speed)
     : name(name), item_a_name(item_a->get_name()), item_b_name(item_b->get_name()),
       max_speed(max_speed),
@@ -96,7 +90,7 @@ std::string Muscle::get_name() { return name; }
 
 std::vector<std::shared_ptr<AbstractItem>> Muscle::get_items() { return {attach_a, attach_b}; }
 
-std::vector<btRigidBody *> Muscle::get_bodies() {
+std::vector<btRigidBody *> Muscle::get_bodies() const {
     return {attach_a->get_body(), attach_b->get_body()};
 }
 

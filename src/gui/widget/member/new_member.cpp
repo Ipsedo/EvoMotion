@@ -2,19 +2,18 @@
 // Created by samuel on 11/02/25.
 //
 
+#include "./new_member.h"
+
 #include <evo_motion_model/converter.h>
 
-#include "../window.h"
+NewMemberWindow::NewMemberWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
+    : ImGuiWindow("New member"), builder_env(builder_env), member_name(), pos(0),
+      rotation_axis(0, 1, 0), rotation_angle(0.f), scale(1.f), mass(1.f), friction(0.5f) {}
 
-NewMemberWindow::NewMemberWindow()
-    : ImGuiWindow("New member"), member_name(""), pos(0), rotation_axis(0, 1, 0),
-      rotation_angle(0.f), scale(1.f), mass(1.f), friction(0.5f) {}
-
-void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &context) {
+void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
     member_name.resize(128);
-
-    if (ImGui::InputText("Name", &member_name[0], member_name.size()))
-        member_name = member_name.c_str();
+    ImGui::InputText("Name", &member_name[0], member_name.size());
+    member_name = member_name.c_str();
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -61,7 +60,7 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
 
     ImGui::Text("Scale");
     ImGui::Spacing();
-    float min_scale = 1e-4f;
+    const float min_scale = 1e-4f;
 
     if (ImGui::InputFloat("scale.x", &scale.x, 0.f, 0.f, "%.4f"))
         scale.x = std::max(scale.x, min_scale);
@@ -91,10 +90,11 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (ImGui::Button("Create member")) {
-        if (context->get_builder_env()->add_member(
+    if (ImGui::Button("Create member") && !member_name.empty()) {
+        if (builder_env->add_member(
                 member_name, CUBE, pos, axis_angle_to_quat(rotation_axis, rotation_angle), scale,
                 mass, friction)) {
+
             member_name = "";
             pos = glm::vec3(0.f);
             rotation_axis = glm::vec3(0, 1, 0);
@@ -102,6 +102,12 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<AppContext> &c
             scale = glm::vec3(1.f);
             mass = 1.f;
             friction = 0.5f;
+
+            close();
         }
     }
 }
+
+void NewMemberWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {}
+void NewMemberWindow::on_focus_change(
+    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {}

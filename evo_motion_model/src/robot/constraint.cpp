@@ -52,8 +52,8 @@ Constraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer) {
 HingeConstraint::HingeConstraint(
     const std::string &name, const std::shared_ptr<Member> &parent,
     const std::shared_ptr<Member> &child, const glm::vec3 &pivot_in_parent,
-    const glm::vec3 &pivot_in_child, glm::vec3 axis_in_parent, glm::vec3 axis_in_child,
-    const float limit_radian_min, const float limit_radian_max)
+    const glm::vec3 &pivot_in_child, const glm::vec3 &axis_in_parent,
+    const glm::vec3 &axis_in_child, const float limit_radian_min, const float limit_radian_max)
     : Constraint(name, parent, child),
       shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")),
       constraint(new btHingeConstraint(

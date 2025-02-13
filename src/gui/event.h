@@ -18,7 +18,7 @@ public:
         const glm::mat4 &new_proj_matrix);
 
     std::optional<std::tuple<glm::vec3, glm::vec3>>
-    get_scene_absolute_click_pos(float width_offset, float height_offset);
+    get_scene_absolute_click_pos(float width_offset, float height_offset) const;
 
 private:
     float width;

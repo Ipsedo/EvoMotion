@@ -15,8 +15,8 @@
 #include <evo_motion_model/item.h>
 
 RigidBodyItem::RigidBodyItem(
-    std::string name, const std::shared_ptr<Shape> &shape, glm::mat4 model_matrix,
-    const glm::vec3 scale, const float mass, const DrawableKind drawable_kind)
+    std::string name, const std::shared_ptr<Shape> &shape, const glm::mat4 &model_matrix,
+    const glm::vec3 &scale, const float mass, const DrawableKind &drawable_kind)
     : name(std::move(name)), shape(shape), first_model_matrix(model_matrix), kind(drawable_kind) {
     auto *convex_hull_shape = new btConvexHullShape();
 
@@ -41,16 +41,17 @@ RigidBodyItem::RigidBodyItem(
 }
 
 RigidBodyItem::RigidBodyItem(
-    std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 position,
-    const glm::quat rotation, const glm::vec3 scale, const float mass, DrawableKind drawable_kind)
+    std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
+    const glm::quat &rotation, const glm::vec3 &scale, const float mass,
+    const DrawableKind &drawable_kind)
     : RigidBodyItem(
           std::move(name), shape,
           glm::translate(glm::mat4(1.f), position) * glm::mat4_cast(rotation), scale, mass,
           drawable_kind) {}
 
 RigidBodyItem::RigidBodyItem(
-    std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 position,
-    const glm::vec3 scale, const float mass, DrawableKind drawable_kind)
+    std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
+    const glm::vec3 &scale, const float mass, const DrawableKind &drawable_kind)
     : RigidBodyItem(
           std::move(name), shape, position, glm::quat_cast(glm::mat4(1.f)), scale, mass,
           drawable_kind) {}
@@ -93,18 +94,19 @@ void RigidBodyItem::rename(const std::string &new_name) { name = new_name; }
  */
 
 EmptyItem::EmptyItem(
-    const std::string &name, const std::shared_ptr<Shape> &shape, glm::vec3 position,
-    glm::quat rotation, glm::vec3 scale, DrawableKind drawable_kind)
+    const std::string &name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
+    const glm::quat &rotation, const glm::vec3 &scale, const DrawableKind &drawable_kind)
     : EmptyItem(
           name, shape, [position]() { return position; }, [rotation]() { return rotation; },
           [scale]() { return scale; }, drawable_kind) {}
 
 EmptyItem::EmptyItem(
-    const std::string &name, const std::shared_ptr<Shape> &shape,
-    std::function<glm::vec3()> get_position, std::function<glm::quat()> get_rotation,
-    std::function<glm::vec3()> get_scale, DrawableKind drawable_kind)
-    : name(name), shape(shape), drawable_kind(drawable_kind), get_position(get_position),
-      get_rotation(get_rotation), get_scale(get_scale), first_model_matrix(model_matrix()) {}
+    std::string name, const std::shared_ptr<Shape> &shape,
+    const std::function<glm::vec3()> &get_position, const std::function<glm::quat()> &get_rotation,
+    const std::function<glm::vec3()> &get_scale, const DrawableKind &drawable_kind)
+    : name(std::move(name)), shape(shape), drawable_kind(drawable_kind),
+      get_position(std::move(get_position)), get_rotation(std::move(get_rotation)),
+      get_scale(std::move(get_scale)), first_model_matrix(EmptyItem::model_matrix()) {}
 
 std::shared_ptr<Shape> EmptyItem::get_shape() const { return shape; }
 

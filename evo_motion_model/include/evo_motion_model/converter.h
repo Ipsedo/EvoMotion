@@ -22,14 +22,14 @@ glm::vec3 json_vec3_to_glm_vec3(nlohmann::json vec3);
 
 btVector3 json_vec3_to_bt_vector3(nlohmann::json vec3);
 
-nlohmann::json model_matrix_to_json_transformation(glm::mat4 model_matrix);
+nlohmann::json model_matrix_to_json_transformation(const glm::mat4 &model_matrix);
 nlohmann::json vec3_to_json(glm::vec3 vec);
 
 /*
  * GLM stuff
  */
 
-std::tuple<glm::vec3, glm::quat, glm::vec3> decompose_model_matrix(glm::mat4 model_matrix);
+std::tuple<glm::vec3, glm::quat, glm::vec3> decompose_model_matrix(const glm::mat4 &model_matrix);
 
 /*
  * GLM <-> Bullet conversions
