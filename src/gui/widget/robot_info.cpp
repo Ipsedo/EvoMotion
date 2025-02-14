@@ -35,15 +35,15 @@ void RobotInfoWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     // select root item
     int selected_item = 0;
 
-    std::vector<std::string> item_names = builder_env->get_member_names();
+    const std::vector<std::string> item_names = builder_env->get_member_names();
     for (int i = 0; i < item_names.size(); i++)
         if (root_name.has_value() && item_names[i] == root_name.value()) {
             selected_item = i;
             break;
         }
 
-    ImVec2 root_member_title_size = ImGui::CalcTextSize("Select root member");
-    ImVec2 default_root_size = ImGui::CalcTextSize("No root");
+    const ImVec2 root_member_title_size = ImGui::CalcTextSize("Select root member");
+    const ImVec2 default_root_size = ImGui::CalcTextSize("No root");
     ImGui::SetNextItemWidth(
         root_member_title_size.x + default_root_size.x + ImGui::GetStyle().FramePadding.x * 4.f);
     if (ImGui::BeginCombo(

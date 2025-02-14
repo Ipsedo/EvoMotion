@@ -9,7 +9,7 @@
 
 class PopUpWindow : public ImGuiWindow {
 public:
-    PopUpWindow(const std::string &popup_name);
+    explicit PopUpWindow(const std::string &popup_name);
 
     void render_window(const std::shared_ptr<ItemFocusContext> &context) override;
 

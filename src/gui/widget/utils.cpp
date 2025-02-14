@@ -8,11 +8,12 @@
 
 #include <imgui.h>
 
-bool input_float(const char *name, float *value, int precision, ImGuiInputTextFlags flags) {
-    ImVec2 name_size = ImGui::CalcTextSize(name);
-    ImVec2 float_size = ImGui::CalcTextSize(std::string(precision + 3, '0').c_str());
+bool input_float(
+    const char *name, float *value, const int precision, const ImGuiInputTextFlags flags) {
+    const ImVec2 name_size = ImGui::CalcTextSize(name);
+    const ImVec2 float_size = ImGui::CalcTextSize(std::string(precision + 3, '0').c_str());
 
-    float width = name_size.x + float_size.x + ImGui::GetStyle().FramePadding.x * 4.f;
+    const float width = name_size.x + float_size.x + ImGui::GetStyle().FramePadding.x * 4.f;
     std::string format = "%.";
     format += std::to_string(precision) + "f";
 
@@ -21,9 +22,10 @@ bool input_float(const char *name, float *value, int precision, ImGuiInputTextFl
 }
 
 bool input_text(
-    const char *name, char *buf, size_t buf_size, int nb_char, ImGuiInputTextFlags flags) {
-    ImVec2 name_size = ImGui::CalcTextSize(name);
-    ImVec2 default_input_size = ImGui::CalcTextSize(std::string(nb_char, 'a').c_str());
+    const char *name, char *buf, const size_t buf_size, const int nb_char,
+    const ImGuiInputTextFlags flags) {
+    const ImVec2 name_size = ImGui::CalcTextSize(name);
+    const ImVec2 default_input_size = ImGui::CalcTextSize(std::string(nb_char, 'a').c_str());
 
     float width = name_size.x + default_input_size.x + ImGui::GetStyle().FramePadding.x * 4.f;
 

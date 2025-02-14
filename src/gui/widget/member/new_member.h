@@ -9,7 +9,7 @@
 
 class NewMemberWindow final : public ImGuiWindow {
 public:
-    NewMemberWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+    explicit NewMemberWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
 protected:
     void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;

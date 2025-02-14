@@ -9,7 +9,7 @@
 
 class RobotInfoWindow final : public ImGuiWindow {
 public:
-    RobotInfoWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+    explicit RobotInfoWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
 protected:
     void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;

@@ -33,7 +33,7 @@ void FocusMemberPopUpWindow::on_close(const std::shared_ptr<ItemFocusContext> &c
 }
 
 void FocusMemberPopUpWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) context->focus_black(member_name);
     else context->release_focus(member_name);
 }

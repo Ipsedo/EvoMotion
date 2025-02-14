@@ -10,7 +10,6 @@
 #include <evo_motion_model/environment.h>
 #include <evo_motion_model/robot/builder.h>
 #include <evo_motion_networks/agent.h>
-#include <evo_motion_view/camera.h>
 #include <evo_motion_view/drawable.h>
 #include <evo_motion_view/frame_buffer.h>
 

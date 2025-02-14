@@ -9,7 +9,7 @@
 
 class RotateWidget {
 public:
-    RotateWidget(const std::function<void(float, float, float)> &on_rotate);
+    explicit RotateWidget(const std::function<void(float, float, float)> &on_rotate);
 
     void render_widget();
 

@@ -34,8 +34,8 @@ private:
 
     glm::vec3 absolute_position;
 
-    void add_focus(const std::shared_ptr<ItemFocusContext> &context);
-    void clear_focus(const std::shared_ptr<ItemFocusContext> &context);
+    void add_focus(const std::shared_ptr<ItemFocusContext> &context) const;
+    void clear_focus(const std::shared_ptr<ItemFocusContext> &context) const;
 
     static std::string get_window_name(const ConstraintType &constraint_type);
 };
@@ -44,9 +44,9 @@ private:
  * Fixed
  */
 
-class NewFixedConstraintWindow : public NewConstraintWindow {
+class NewFixedConstraintWindow final : public NewConstraintWindow {
 public:
-    NewFixedConstraintWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+    explicit NewFixedConstraintWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
 protected:
     void render_constraint_specific_settings(
@@ -64,9 +64,9 @@ private:
  * Hinge
  */
 
-class NewHingeConstraintWindow : public NewConstraintWindow {
+class NewHingeConstraintWindow final : public NewConstraintWindow {
 public:
-    NewHingeConstraintWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+    explicit NewHingeConstraintWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
 protected:
     void render_constraint_specific_settings(

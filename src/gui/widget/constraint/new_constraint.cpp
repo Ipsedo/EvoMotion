@@ -27,11 +27,11 @@ void NewConstraintWindow::render_window_content(const std::shared_ptr<ItemFocusC
     ImGui::Spacing();
 
     // combo size
-    ImVec2 parent_title_size = ImGui::CalcTextSize("Parent");
-    ImVec2 default_parent_size = ImGui::CalcTextSize("No parent");
+    const ImVec2 parent_title_size = ImGui::CalcTextSize("Parent");
+    const ImVec2 default_parent_size = ImGui::CalcTextSize("No parent");
 
-    ImVec2 child_title_size = ImGui::CalcTextSize("Child");
-    ImVec2 default_child_size = ImGui::CalcTextSize("No child");
+    const ImVec2 child_title_size = ImGui::CalcTextSize("Child");
+    const ImVec2 default_child_size = ImGui::CalcTextSize("No child");
 
     const float combo_width = std::max(
         parent_title_size.x + default_parent_size.x + ImGui::GetStyle().FramePadding.x * 4,
@@ -75,6 +75,8 @@ void NewConstraintWindow::render_window_content(const std::shared_ptr<ItemFocusC
     }
 
     ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
 
     render_constraint_specific_settings(
         context, builder_env, constraint_name, parent_name, child_name, absolute_position);
@@ -84,19 +86,19 @@ void NewConstraintWindow::on_close(const std::shared_ptr<ItemFocusContext> &cont
     clear_focus(context);
 }
 void NewConstraintWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) add_focus(context);
     else clear_focus(context);
 }
 
-void NewConstraintWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
+void NewConstraintWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->focus_black(constraint_name);
 
     if (parent_name.has_value()) context->focus_grey(parent_name.value());
     if (child_name.has_value()) context->focus_grey(child_name.value());
 }
 
-void NewConstraintWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
+void NewConstraintWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->release_focus(constraint_name);
 
     if (parent_name.has_value()) context->release_focus(parent_name.value());

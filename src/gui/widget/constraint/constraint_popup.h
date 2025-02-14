@@ -28,8 +28,8 @@ private:
     std::string parent_item;
     std::string child_item;
 
-    void add_focus(const std::shared_ptr<ItemFocusContext> &context);
-    void clear_focus(const std::shared_ptr<ItemFocusContext> &context);
+    void add_focus(const std::shared_ptr<ItemFocusContext> &context) const;
+    void clear_focus(const std::shared_ptr<ItemFocusContext> &context) const;
 };
 
 /*
