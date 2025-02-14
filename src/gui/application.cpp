@@ -153,7 +153,7 @@ void ImGuiApplication::imgui_render_toolbar() {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Robots")) {
+        if (ImGui::BeginMenu("Robot")) {
 
             if (ImGui::MenuItem("New robot")) {
                 const auto new_robot = std::make_shared<RobotBuilderEnvironment>(
@@ -170,7 +170,7 @@ void ImGuiApplication::imgui_render_toolbar() {
 
             ImGui::Separator();
 
-            if (ImGui::BeginMenu("Show parts")) {
+            if (ImGui::BeginMenu("Edit mode")) {
                 if (ImGui::MenuItem("Members", nullptr, part_kind == MEMBER)) part_kind = MEMBER;
                 if (ImGui::MenuItem("Constraints", nullptr, part_kind == CONSTRAINT))
                     part_kind = CONSTRAINT;
