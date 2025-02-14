@@ -69,7 +69,7 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocus
     ImGui::Text("Scale");
     ImGui::Spacing();
 
-    float min_scale = 1e-4f;
+    constexpr float min_scale = 1e-4f;
 
     if (input_float("scale.x", &member_scale.x, 4)) {
         member_scale.x = std::max(member_scale.x, min_scale);
@@ -132,14 +132,15 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocus
 }
 
 void MemberSettingsWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) add_focus(context);
     else clear_focus(context);
 }
 
-void MemberSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
+void MemberSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->focus_black(member_name);
 }
-void MemberSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
+
+void MemberSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->release_focus(member_name);
 }

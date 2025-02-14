@@ -156,8 +156,7 @@ void ImGuiApplication::imgui_render_toolbar() {
         if (ImGui::BeginMenu("Robots")) {
 
             if (ImGui::MenuItem("New robot")) {
-
-                auto new_robot = std::make_shared<RobotBuilderEnvironment>(
+                const auto new_robot = std::make_shared<RobotBuilderEnvironment>(
                     "robot_" + std::to_string(opengl_windows.size()));
 
                 opengl_windows.push_back(create_builder_opengl_window(new_robot));
@@ -170,11 +169,6 @@ void ImGuiApplication::imgui_render_toolbar() {
             if (ImGui::MenuItem("Save robot", nullptr, nullptr)) {}
 
             ImGui::Separator();
-
-            /*if (ImGui::MenuItem("Robot information", nullptr, false, context->builder_env.is_set()))
-                imgui_windows[ROBOT_INFO_NAME]->open();
-
-            ImGui::Separator();*/
 
             if (ImGui::BeginMenu("Show parts")) {
                 if (ImGui::MenuItem("Members", nullptr, part_kind == MEMBER)) part_kind = MEMBER;

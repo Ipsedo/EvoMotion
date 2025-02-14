@@ -38,13 +38,13 @@ void OpenGlWindow::draw_opengl(const float width, const float height) {
     const auto projection_matrix =
         glm::frustum(-1.f, 1.f, -height / width, height / width, 1.f, 200.f);
 
-    on_opengl_frame(width, height, view_matrix, projection_matrix);
-
     frame_buffer->rescale_frame_buffer(width, height);
     frame_buffer->bind();
 
     glViewport(0, 0, static_cast<int>(width), static_cast<int>(height));
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    on_opengl_frame(width, height, view_matrix, projection_matrix);
 
     for (const auto &i: env->get_draw_items()) {
         if (!drawables.contains(i->get_name()))

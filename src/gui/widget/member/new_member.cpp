@@ -33,6 +33,9 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     input_float("pos.z", &pos.z, 8);
 
     ImGui::EndGroup();
+
+    ImGui::Spacing();
+    ImGui::Separator();
     ImGui::Spacing();
 
     // rotation
@@ -52,6 +55,9 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     input_float("angle", &rotation_angle, 8);
 
     ImGui::EndGroup();
+
+    ImGui::Spacing();
+    ImGui::Separator();
     ImGui::Spacing();
 
     // scale
@@ -60,7 +66,7 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
 
     ImGui::Text("Scale");
     ImGui::Spacing();
-    const float min_scale = 1e-4f;
+    constexpr float min_scale = 1e-4f;
 
     if (input_float("scale.x", &scale.x, 4)) scale.x = std::max(scale.x, min_scale);
     if (input_float("scale.y", &scale.y, 4)) scale.y = std::max(scale.y, min_scale);
@@ -105,5 +111,6 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
 }
 
 void NewMemberWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {}
+
 void NewMemberWindow::on_focus_change(
     bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {}

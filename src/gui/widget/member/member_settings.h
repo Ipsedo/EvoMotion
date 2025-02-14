@@ -23,8 +23,8 @@ private:
     std::string member_name;
     std::shared_ptr<RobotBuilderEnvironment> builder_env;
 
-    void add_focus(const std::shared_ptr<ItemFocusContext> &context);
-    void clear_focus(const std::shared_ptr<ItemFocusContext> &context);
+    void add_focus(const std::shared_ptr<ItemFocusContext> &context) const;
+    void clear_focus(const std::shared_ptr<ItemFocusContext> &context) const;
 };
 
 #endif//EVO_MOTION_MEMBER_SETTINGS_H

@@ -13,7 +13,7 @@
 ConstraintSettingsWindow::ConstraintSettingsWindow(
     const std::string &constraint_name, const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
     : ImGuiWindow("Constraint settings of \"" + constraint_name + "\""),
-      constraint_name(constraint_name), builder_env(builder_env), parent_name(), child_name() {
+      constraint_name(constraint_name), parent_name(), child_name(), builder_env(builder_env) {
     auto [p_n, c_n] = builder_env->get_constraint_members(constraint_name);
     parent_name = p_n;
     child_name = c_n;
@@ -35,14 +35,14 @@ void ConstraintSettingsWindow::render_window_content(
     }
 }
 
-void ConstraintSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
+void ConstraintSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->focus_black(constraint_name);
 
     context->focus_white(parent_name);
     context->focus_white(child_name);
 }
 
-void ConstraintSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
+void ConstraintSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->release_focus(constraint_name);
     context->release_focus(parent_name);
     context->release_focus(child_name);
@@ -53,7 +53,7 @@ void ConstraintSettingsWindow::on_close(const std::shared_ptr<ItemFocusContext> 
 }
 
 void ConstraintSettingsWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) add_focus(context);
     else clear_focus(context);
 }
@@ -90,6 +90,9 @@ void HingeConstraintSettingsWindow::render_constraint_specific_window(
     if (input_float("pos.z", &pos.z, 8)) updated = true;
 
     ImGui::EndGroup();
+
+    ImGui::Spacing();
+    ImGui::Separator();
     ImGui::Spacing();
 
     // axis
@@ -111,6 +114,9 @@ void HingeConstraintSettingsWindow::render_constraint_specific_window(
     }
 
     ImGui::EndGroup();
+
+    ImGui::Spacing();
+    ImGui::Separator();
     ImGui::Spacing();
 
     // Limit
@@ -160,6 +166,9 @@ void FixedConstraintSettingsWindow::render_constraint_specific_window(
     if (input_float("pos.z", &pos.z, 8)) updated = true;
 
     ImGui::EndGroup();
+
+    ImGui::Spacing();
+    ImGui::Separator();
     ImGui::Spacing();
 
     // axis
