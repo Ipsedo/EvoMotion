@@ -18,6 +18,8 @@ protected:
 
     virtual void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) = 0;
 
+    ImVec2 get_min_size() override;
+
 private:
     std::string name;
     bool first_open;

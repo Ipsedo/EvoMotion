@@ -18,8 +18,11 @@ std::optional<std::shared_ptr<ImGuiWindow>> ImGuiWindow::pop_child() { return st
 
 std::string ImGuiWindow::get_name() const { return name; }
 
+ImVec2 ImGuiWindow::get_min_size() { return ImVec2(300, 0); }
+
 void ImGuiWindow::render_window(const std::shared_ptr<ItemFocusContext> &context) {
     if (show) {
+        ImGui::SetNextWindowSizeConstraints(get_min_size(), ImVec2(FLT_MAX, FLT_MAX));
         if (ImGui::Begin(name.c_str(), &show)) {
             if (ImGui::IsWindowFocused() != focus) {
                 focus = !focus;
@@ -27,9 +30,9 @@ void ImGuiWindow::render_window(const std::shared_ptr<ItemFocusContext> &context
             }
 
             render_window_content(context);
-
-            ImGui::End();
         }
+
+        ImGui::End();
     }
     if (!show) on_close(context);
 }
