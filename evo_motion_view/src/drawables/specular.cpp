@@ -126,7 +126,6 @@ void BuilderObjSpecular::draw(
 
     glDisable(GL_POLYGON_OFFSET_FILL);
     glDepthMask(GL_TRUE);
-    glDisable(GL_BLEND);
 
     if (const auto focus_color = is_focus_function(); focus_color.has_value()) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -136,9 +135,9 @@ void BuilderObjSpecular::draw(
         const glm::vec4 original_diff_color = diffuse_color;
         const glm::vec4 original_spec_color = specular_color;
 
-        ambient_color = glm::vec4(focus_color.value(), ambient_color.z);
-        diffuse_color = glm::vec4(focus_color.value(), diffuse_color.z);
-        specular_color = glm::vec4(focus_color.value(), specular_color.z);
+        ambient_color = glm::vec4(focus_color.value(), ambient_color.a);
+        diffuse_color = glm::vec4(focus_color.value(), diffuse_color.a);
+        specular_color = glm::vec4(focus_color.value(), specular_color.a);
 
         OBjSpecular::draw(
             projection_matrix, view_matrix, model_matrix, light_pos_from_camera, camera_pos);
@@ -149,4 +148,6 @@ void BuilderObjSpecular::draw(
         diffuse_color = original_diff_color;
         specular_color = original_spec_color;
     }
+
+    glDisable(GL_BLEND);
 }

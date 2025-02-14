@@ -38,8 +38,8 @@ void ConstraintSettingsWindow::render_window_content(
 void ConstraintSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
     context->focus_black(constraint_name);
 
-    context->focus_white(parent_name);
-    context->focus_white(child_name);
+    context->focus_grey(parent_name);
+    context->focus_grey(child_name);
 }
 
 void ConstraintSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {

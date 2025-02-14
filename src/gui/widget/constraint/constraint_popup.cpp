@@ -54,8 +54,8 @@ void FocusConstraintPopUpWindow::on_focus_change(
 void FocusConstraintPopUpWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
     context->focus_black(constraint_name);
 
-    context->focus_white(parent_item);
-    context->focus_white(child_item);
+    context->focus_grey(parent_item);
+    context->focus_grey(child_item);
 }
 
 void FocusConstraintPopUpWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
