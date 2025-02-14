@@ -29,7 +29,7 @@ void RobotInfoWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     // robot name
     std::string robot_name = builder_env->get_robot_name();
     robot_name.resize(128);
-    if (input_text("Robot name", &robot_name[0], robot_name.size(), 16))
+    if (ImGui::InputText("Robot name", &robot_name[0], robot_name.size()))
         builder_env->set_robot_name(robot_name.c_str());
 
     // select root item
@@ -42,10 +42,6 @@ void RobotInfoWindow::render_window_content(const std::shared_ptr<ItemFocusConte
             break;
         }
 
-    const ImVec2 root_member_title_size = ImGui::CalcTextSize("Select root member");
-    const ImVec2 default_root_size = ImGui::CalcTextSize("No root");
-    ImGui::SetNextItemWidth(
-        root_member_title_size.x + default_root_size.x + ImGui::GetStyle().FramePadding.x * 4.f);
     if (ImGui::BeginCombo(
             "Select root member", root_name.has_value() ? root_name.value().c_str() : "No root")) {
         for (int i = 0; i < item_names.size(); i++)

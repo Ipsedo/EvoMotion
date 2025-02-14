@@ -87,9 +87,6 @@ void ImGuiApplication::render() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    imgui_render_toolbar();
-    imgui_render_robot_builder_file_dialog();
-
     // get active imgui window
     std::optional<std::string> active_opengl_window = std::nullopt;
     for (const auto &gl_window: opengl_windows)
@@ -116,6 +113,9 @@ void ImGuiApplication::render() {
         // render them
         for (const auto &w: imgui_windows[active_opengl_window.value()]) w->render_window(context);
     }
+
+    imgui_render_toolbar();
+    imgui_render_robot_builder_file_dialog();
 
     imgui_render_opengl();
 
@@ -297,8 +297,8 @@ std::shared_ptr<BuilderOpenGlWindow> ImGuiApplication::create_builder_opengl_win
             std::shared_ptr<RobotBuilderEnvironment> curr_builder_env) {
             if (focused_member.has_value()
                 && !contains_window(imgui_windows[gl_window_name], focused_member.value()))
-                imgui_windows[gl_window_name].push_back(
-                    std::make_shared<FocusMemberPopUpWindow>(focused_member.value(), curr_builder_env));
+                imgui_windows[gl_window_name].push_back(std::make_shared<FocusMemberPopUpWindow>(
+                    focused_member.value(), curr_builder_env));
 
             if (!focused_member.has_value())
                 imgui_windows[gl_window_name].push_back(

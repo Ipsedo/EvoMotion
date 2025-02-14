@@ -6,6 +6,8 @@
 
 #include <imgui.h>
 
+#include <evo_motion_model/converter.h>
+
 #include "../utils.h"
 
 NewConstraintWindow::NewConstraintWindow(
@@ -16,29 +18,16 @@ NewConstraintWindow::NewConstraintWindow(
       absolute_position(0.f) {}
 
 void NewConstraintWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
-
     const auto member_names = builder_env->get_member_names();
 
     // constraint name
     constraint_name.resize(128);
-    input_text("Name", &constraint_name[0], constraint_name.size(), 16);
+    ImGui::InputText("Name", &constraint_name[0], constraint_name.size());
     constraint_name = constraint_name.c_str();
 
     ImGui::Spacing();
 
-    // combo size
-    const ImVec2 parent_title_size = ImGui::CalcTextSize("Parent");
-    const ImVec2 default_parent_size = ImGui::CalcTextSize("No parent");
-
-    const ImVec2 child_title_size = ImGui::CalcTextSize("Child");
-    const ImVec2 default_child_size = ImGui::CalcTextSize("No child");
-
-    const float combo_width = std::max(
-        parent_title_size.x + default_parent_size.x + ImGui::GetStyle().FramePadding.x * 4,
-        child_title_size.x + default_child_size.x + ImGui::GetStyle().FramePadding.x * 4);
-
     // parent
-    ImGui::SetNextItemWidth(combo_width);
     if (ImGui::BeginCombo(
             "Parent", parent_name.has_value() ? parent_name.value().c_str() : "No parent")) {
         for (int i = 0; i < member_names.size(); i++)
@@ -58,7 +47,6 @@ void NewConstraintWindow::render_window_content(const std::shared_ptr<ItemFocusC
     ImGui::Spacing();
 
     // child
-    ImGui::SetNextItemWidth(combo_width);
     if (ImGui::BeginCombo(
             "Child", child_name.has_value() ? child_name.value().c_str() : "No child")) {
         for (int i = 0; i < member_names.size(); i++)
@@ -73,6 +61,15 @@ void NewConstraintWindow::render_window_content(const std::shared_ptr<ItemFocusC
 
         ImGui::EndCombo();
     }
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::Text("Position");
+    input_float("pos.x", &absolute_position.x, 4);
+    input_float("pos.y", &absolute_position.y, 4);
+    input_float("pos.z", &absolute_position.z, 4);
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -128,7 +125,27 @@ void NewFixedConstraintWindow::render_constraint_specific_settings(
     const std::shared_ptr<ItemFocusContext> &context,
     const std::shared_ptr<RobotBuilderEnvironment> &builder_env, const std::string &constraint_name,
     const std::optional<std::string> &parent_name, const std::optional<std::string> &child_name,
-    const glm::vec3 &absolute_position) {}
+    const glm::vec3 &absolute_position) {
+
+    ImGui::Text("Rotation");
+    ImGui::Spacing();
+
+    if (input_float("axis.x", &rotation_axis.x, 4)) rotation_axis = glm::normalize(rotation_axis);
+    if (input_float("axis.y", &rotation_axis.y, 4)) rotation_axis = glm::normalize(rotation_axis);
+    if (input_float("axis.z", &rotation_axis.z, 4)) rotation_axis = glm::normalize(rotation_axis);
+    input_float("angle", &angle, 4);
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (ImGui::Button("Create") && parent_name.has_value() && child_name.has_value()) {
+        builder_env->attach_fixed_constraint(
+            constraint_name, parent_name.value(), child_name.value(), absolute_position,
+            axis_angle_to_quat(rotation_axis, angle));
+        close();
+    }
+}
 
 /*
  * Hinge

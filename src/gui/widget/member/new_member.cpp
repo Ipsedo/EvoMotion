@@ -14,7 +14,7 @@ NewMemberWindow::NewMemberWindow(const std::shared_ptr<RobotBuilderEnvironment> 
 
 void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
     member_name.resize(128);
-    input_text("Name", &member_name[0], member_name.size(), 16);
+    ImGui::InputText("Name", &member_name[0], member_name.size());
     member_name = member_name.c_str();
 
     ImGui::Spacing();
@@ -28,9 +28,9 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     ImGui::Text("Position");
     ImGui::Spacing();
 
-    input_float("pos.x", &pos.x, 8);
-    input_float("pos.y", &pos.y, 8);
-    input_float("pos.z", &pos.z, 8);
+    input_float("pos.x", &pos.x, 4);
+    input_float("pos.y", &pos.y, 4);
+    input_float("pos.z", &pos.z, 4);
 
     ImGui::EndGroup();
 
@@ -45,14 +45,14 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     ImGui::Text("Rotation");
     ImGui::Spacing();
 
-    if (input_float("axis.x", &rotation_axis.x, 8))
-        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
-    if (input_float("axis.y", &rotation_axis.y, 8))
-        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
-    if (input_float("axis.z", &rotation_axis.z, 8))
-        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
+    if (input_float("axis.x", &rotation_axis.x, 4))
+        rotation_axis = glm::normalize(rotation_axis + 1e-5f);
+    if (input_float("axis.y", &rotation_axis.y, 4))
+        rotation_axis = glm::normalize(rotation_axis + 1e-5f);
+    if (input_float("axis.z", &rotation_axis.z, 4))
+        rotation_axis = glm::normalize(rotation_axis + 1e-5f);
 
-    input_float("angle", &rotation_angle, 8);
+    input_float("angle", &rotation_angle, 4);
 
     ImGui::EndGroup();
 
@@ -82,7 +82,7 @@ void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusConte
     ImGui::Spacing();
 
     // mass
-    input_float("mass (kg)", &mass, 8);
+    input_float("mass (kg)", &mass, 4);
     ImGui::Spacing();
 
     // friction
