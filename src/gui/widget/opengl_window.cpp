@@ -23,7 +23,8 @@ OpenGlWindow::OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Envi
           if (const auto track_item = env->get_camera_track_item(); track_item.has_value())
               return glm::vec3(track_item.value()->model_matrix_without_scale()[3]);
           return glm::vec3(0.f);
-      })) {}
+      })),
+      view_matrix(1.f), projection_matrix(1.f) {}
 
 std::string OpenGlWindow::get_name() { return name; }
 
@@ -45,9 +46,8 @@ void OpenGlWindow::remove_item(const std::shared_ptr<NoShapeItem> &no_shape_item
 }
 
 void OpenGlWindow::draw_opengl(const float width, const float height) {
-    const auto view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
-    const auto projection_matrix =
-        glm::frustum(-1.f, 1.f, -height / width, height / width, 1.f, 200.f);
+    view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
+    projection_matrix = glm::frustum(-1.f, 1.f, -height / width, height / width, 1.f, 200.f);
 
     const glm::vec3 light_pos(0, 20, 0);
     const glm::vec3 cam_pos = camera->pos();
@@ -101,6 +101,9 @@ void OpenGlWindow::draw_imgui_image() {
 bool OpenGlWindow::is_active() const { return active; }
 
 bool OpenGlWindow::is_opened() const { return opened; }
+
+glm::mat4 OpenGlWindow::get_view_matrix() { return view_matrix; }
+glm::mat4 OpenGlWindow::get_projection_matrix() { return projection_matrix; }
 
 std::shared_ptr<DrawableFactory>
 OpenGlWindow::get_drawable_factory(const std::shared_ptr<ShapeItem> &item, std::mt19937 &curr_rng) {

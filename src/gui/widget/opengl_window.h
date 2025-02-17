@@ -34,6 +34,9 @@ public:
     void add_item(const std::shared_ptr<NoShapeItem> &no_shape_item);
     void remove_item(const std::shared_ptr<NoShapeItem> &no_shape_item);
 
+    glm::mat4 get_view_matrix();
+    glm::mat4 get_projection_matrix();
+
 protected:
     std::mt19937 rng;
 
@@ -51,6 +54,9 @@ private:
     bool opened;
 
     std::unique_ptr<ImGuiCamera> camera;
+
+    glm::mat4 view_matrix;
+    glm::mat4 projection_matrix;
 
 protected:
     virtual void on_imgui_tab_begin() = 0;

@@ -15,11 +15,14 @@ public:
         const std::string &member_name,
         const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
-    void render_window(const std::shared_ptr<ItemFocusContext> &context) override;
-    void on_render(const std::shared_ptr<OpenGlWindow> &gl_window) override;
+    void render_window(
+        const std::shared_ptr<ItemFocusContext> &context,
+        const std::shared_ptr<OpenGlWindow> &gl_window) override;
 
 protected:
-    void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_window_content(
+        const std::shared_ptr<ItemFocusContext> &context,
+        const std::shared_ptr<OpenGlWindow> &gl_window) override;
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 
@@ -31,6 +34,10 @@ private:
     bool changed;
     int edit_choice;
 
+    bool is_dragging;
+    float prev_x_mouse;
+    float prev_y_mouse;
+
     float yaw;
     float pitch;
     float roll;
@@ -39,6 +46,9 @@ private:
     std::shared_ptr<RobotBuilderEnvironment> builder_env;
 
     std::shared_ptr<NoShapeItem> construct_item;
+
+    glm::mat4 view_matrix;
+    glm::mat4 projection_matrix;
 };
 
 #endif//EVO_MOTION_MEMBER_CONSTRUCT_TOOLS_H

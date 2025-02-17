@@ -11,10 +11,14 @@ class InferSettingsWindow final : public ImGuiWindow {
 public:
     explicit InferSettingsWindow(
         const std::function<void(std::shared_ptr<OpenGlWindow>)> &on_start_infer);
-    void render_window(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_window(
+        const std::shared_ptr<ItemFocusContext> &context,
+        const std::shared_ptr<OpenGlWindow> &gl_window) override;
 
 protected:
-    void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_window_content(
+        const std::shared_ptr<ItemFocusContext> &context,
+        const std::shared_ptr<OpenGlWindow> &gl_window) override;
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 

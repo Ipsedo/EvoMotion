@@ -17,7 +17,9 @@ NewConstraintWindow::NewConstraintWindow(
       constraint_name("no_name_constraint"), parent_name(std::nullopt), child_name(std::nullopt),
       absolute_position(0.f) {}
 
-void NewConstraintWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+void NewConstraintWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
     const auto member_names = builder_env->get_member_names();
 
     // constraint name

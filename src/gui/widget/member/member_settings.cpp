@@ -19,7 +19,9 @@ void MemberSettingsWindow::on_close(const std::shared_ptr<ItemFocusContext> &con
     clear_focus(context);
 }
 
-void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+void MemberSettingsWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
     auto [member_pos, member_rot, member_scale] = builder_env->get_member_transform(member_name);
 
     // Position

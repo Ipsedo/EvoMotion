@@ -12,7 +12,9 @@ NewMemberWindow::NewMemberWindow(const std::shared_ptr<RobotBuilderEnvironment> 
     : ImGuiWindow("New member"), builder_env(builder_env), member_name("no_name_member"), pos(0),
       rotation_axis(0, 1, 0), rotation_angle(0.f), scale(1.f), mass(1.f), friction(0.5f) {}
 
-void NewMemberWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+void NewMemberWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
     member_name.resize(128);
     ImGui::InputText("Name", &member_name[0], member_name.size());
     member_name = member_name.c_str();

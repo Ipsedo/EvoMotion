@@ -113,10 +113,8 @@ void ImGuiApplication::render() {
         });
 
         // render them
-        for (const auto &w: imgui_windows[active_opengl_window.value()->get_name()]) {
-            w->on_render(active_opengl_window.value());
-            w->render_window(context);
-        }
+        for (const auto &w: imgui_windows[active_opengl_window.value()->get_name()])
+            w->render_window(context, active_opengl_window.value());
     }
 
     imgui_render_toolbar();

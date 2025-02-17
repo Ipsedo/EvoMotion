@@ -20,7 +20,8 @@ ConstraintSettingsWindow::ConstraintSettingsWindow(
 }
 
 void ConstraintSettingsWindow::render_window_content(
-    const std::shared_ptr<ItemFocusContext> &context) {
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
 
     render_constraint_specific_window(constraint_name, builder_env, context);
 

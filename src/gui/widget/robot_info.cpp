@@ -11,7 +11,9 @@
 RobotInfoWindow::RobotInfoWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
     : ImGuiWindow("Robot information"), builder_env(builder_env) {}
 
-void RobotInfoWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+void RobotInfoWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
     ImGui::Text("Robot selected : %s", builder_env->get_robot_name().c_str());
 
     ImGui::Spacing();

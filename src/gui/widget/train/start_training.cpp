@@ -6,4 +6,6 @@
 
 StartTrainingWindow::StartTrainingWindow() : ImGuiWindow("Start training") {}
 
-void StartTrainingWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {}
+void StartTrainingWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {}

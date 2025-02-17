@@ -20,7 +20,9 @@ std::string ImGuiWindow::get_name() const { return name; }
 
 ImVec2 ImGuiWindow::get_min_size() { return ImVec2(300, 0); }
 
-void ImGuiWindow::render_window(const std::shared_ptr<ItemFocusContext> &context) {
+void ImGuiWindow::render_window(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
     if (show) {
         ImGui::SetNextWindowSizeConstraints(get_min_size(), ImVec2(FLT_MAX, FLT_MAX));
         if (ImGui::Begin(name.c_str(), &show)) {
@@ -29,14 +31,12 @@ void ImGuiWindow::render_window(const std::shared_ptr<ItemFocusContext> &context
                 on_focus_change(focus, context);
             }
 
-            render_window_content(context);
+            render_window_content(context, gl_window);
         }
 
         ImGui::End();
     }
     if (!show) on_close(context);
 }
-
-void ImGuiWindow::on_render(const std::shared_ptr<OpenGlWindow> &gl_window) {}
 
 ImGuiWindow::~ImGuiWindow() = default;
