@@ -101,4 +101,10 @@ public:
     std::shared_ptr<Drawable> create_drawable() override;
 };
 
+class BasisAxisFactory : public DrawableFactory {
+public:
+    BasisAxisFactory();
+    std::shared_ptr<Drawable> create_drawable() override;
+};
+
 #endif//EVO_MOTION_FACTORY_H

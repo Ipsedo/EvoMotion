@@ -18,7 +18,7 @@ OpenGlWindow::OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Envi
               std::chrono::system_clock::now().time_since_epoch())
               .count()),
       name(std::move(bar_item_name)), frame_buffer(std::make_unique<FrameBuffer>(1920, 1080)),
-      drawables(), env(env), active(true), opened(true),
+      drawables(), env(env), no_shape_items(), active(true), opened(true),
       camera(std::make_unique<ImGuiCamera>([env]() {
           if (const auto track_item = env->get_camera_track_item(); track_item.has_value())
               return glm::vec3(track_item.value()->model_matrix_without_scale()[3]);
@@ -33,10 +33,24 @@ void OpenGlWindow::rename_drawable(const std::string &old_name, const std::strin
     drawables.insert(std::move(n));
 }
 
+void OpenGlWindow::add_item(const std::shared_ptr<NoShapeItem> &no_shape_item) {
+    no_shape_items.push_back(no_shape_item);
+}
+
+void OpenGlWindow::remove_item(const std::shared_ptr<NoShapeItem> &no_shape_item) {
+    std::erase_if(no_shape_items, [no_shape_item](const auto &i) {
+        return i->get_name() == no_shape_item->get_name();
+    });
+    if (drawables.contains(no_shape_item->get_name())) drawables.erase(no_shape_item->get_name());
+}
+
 void OpenGlWindow::draw_opengl(const float width, const float height) {
     const auto view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
     const auto projection_matrix =
         glm::frustum(-1.f, 1.f, -height / width, height / width, 1.f, 200.f);
+
+    const glm::vec3 light_pos(0, 20, 0);
+    const glm::vec3 cam_pos = camera->pos();
 
     frame_buffer->rescale_frame_buffer(width, height);
     frame_buffer->bind();
@@ -51,7 +65,15 @@ void OpenGlWindow::draw_opengl(const float width, const float height) {
             drawables[i->get_name()] = get_drawable_factory(i, rng)->create_drawable();
 
         drawables[i->get_name()]->draw(
-            projection_matrix, view_matrix, i->model_matrix(), glm::vec3(0, 20, 0), camera->pos());
+            projection_matrix, view_matrix, i->model_matrix(), light_pos, cam_pos);
+    }
+
+    for (const auto &i: no_shape_items) {
+        if (!drawables.contains(i->get_name()))
+            drawables[i->get_name()] = get_drawable_factory(i)->create_drawable();
+
+        drawables[i->get_name()]->draw(
+            projection_matrix, view_matrix, i->model_matrix(), light_pos, cam_pos);
     }
 
     FrameBuffer::unbind();
@@ -80,8 +102,8 @@ bool OpenGlWindow::is_active() const { return active; }
 
 bool OpenGlWindow::is_opened() const { return opened; }
 
-std::shared_ptr<DrawableFactory> OpenGlWindow::get_drawable_factory(
-    const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng) {
+std::shared_ptr<DrawableFactory>
+OpenGlWindow::get_drawable_factory(const std::shared_ptr<ShapeItem> &item, std::mt19937 &curr_rng) {
     std::shared_ptr<DrawableFactory> factory;
     const auto shape = item->get_shape();
 
@@ -94,6 +116,15 @@ std::shared_ptr<DrawableFactory> OpenGlWindow::get_drawable_factory(
             factory = std::make_shared<TileGroundFactory>(
                 shape->get_vertices(), shape->get_normals(), rng, 300.f, 1.f);
             break;
+    }
+    return factory;
+}
+
+std::shared_ptr<DrawableFactory>
+OpenGlWindow::get_drawable_factory(const std::shared_ptr<NoShapeItem> &item) {
+    std::shared_ptr<DrawableFactory> factory;
+    switch (item->get_drawable_kind()) {
+        case BASIS_AXIS: factory = std::make_shared<BasisAxisFactory>(); break;
     }
     return factory;
 }
@@ -150,7 +181,7 @@ void BuilderOpenGlWindow::on_opengl_frame(
 }
 
 std::shared_ptr<DrawableFactory> BuilderOpenGlWindow::get_drawable_factory(
-    const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng) {
+    const std::shared_ptr<ShapeItem> &item, std::mt19937 &curr_rng) {
     if (item->get_drawable_kind() == SPECULAR)
         return std::make_shared<BuilderObjSpecularFactory>(
             item->get_shape()->get_vertices(), item->get_shape()->get_normals(), rng, 300.f,

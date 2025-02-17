@@ -23,7 +23,7 @@ void FocusMemberPopUpWindow::render_popup_content(
     }
     if (ImGui::MenuItem("Construct tools")) {
         context->release_focus(member_name);
-        children = std::make_shared<MemberConstructToolsWindow>();
+        children = std::make_shared<MemberConstructToolsWindow>(member_name, builder_env);
         close();
     }
 }

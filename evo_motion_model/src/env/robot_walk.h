@@ -18,13 +18,13 @@ public:
         float initial_remaining_seconds, float max_episode_seconds, float target_velocity,
         float minimal_velocity, int reset_frames);
 
-    std::vector<std::shared_ptr<AbstractItem>> get_draw_items() override;
+    std::vector<std::shared_ptr<ShapeItem>> get_draw_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
 
     std::vector<int64_t> get_state_space() override;
     std::vector<int64_t> get_action_space() override;
 
-    std::optional<std::shared_ptr<AbstractItem>> get_camera_track_item() override;
+    std::optional<std::shared_ptr<ShapeItem>> get_camera_track_item() override;
 
 protected:
     step compute_step() override;

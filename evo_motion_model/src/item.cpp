@@ -90,39 +90,69 @@ DrawableKind RigidBodyItem::get_drawable_kind() const { return kind; }
 void RigidBodyItem::rename(const std::string &new_name) { name = new_name; }
 
 /*
- * Empty item
+ * No shape item
  */
 
-EmptyItem::EmptyItem(
+NoShapeItem::NoShapeItem(std::string name, const PredefinedDrawableKind &predefined_drawable)
+    : name(std::move(name)), position(0), rotation(0, glm::vec3(1, 0, 0)), scale(1),
+      predefined_drawable(predefined_drawable) {}
+
+PredefinedDrawableKind NoShapeItem::get_drawable_kind() { return predefined_drawable; }
+
+std::string NoShapeItem::get_name() const { return name; }
+
+glm::mat4 NoShapeItem::model_matrix() const {
+    return model_matrix_without_scale() * glm::scale(glm::mat4(1), scale);
+}
+
+glm::mat4 NoShapeItem::model_matrix_without_scale() const {
+    return glm::translate(glm::mat4(1), position) * glm::toMat4(rotation);
+}
+
+void NoShapeItem::reset(const glm::mat4 &main_model_matrix) {
+    const auto [new_pos, new_rot, new_scale] = decompose_model_matrix(main_model_matrix);
+    position = new_pos;
+    rotation = new_rot;
+    scale = new_scale;
+}
+
+void NoShapeItem::set_drawable_kind(const PredefinedDrawableKind &new_drawable_kind) {
+    predefined_drawable = new_drawable_kind;
+}
+
+/*
+ * No body item
+ */
+
+NoBodyItem::NoBodyItem(
     const std::string &name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
     const glm::quat &rotation, const glm::vec3 &scale, const DrawableKind &drawable_kind)
-    : EmptyItem(
+    : NoBodyItem(
           name, shape, [position]() { return position; }, [rotation]() { return rotation; },
           [scale]() { return scale; }, drawable_kind) {}
 
-EmptyItem::EmptyItem(
+NoBodyItem::NoBodyItem(
     std::string name, const std::shared_ptr<Shape> &shape,
     const std::function<glm::vec3()> &get_position, const std::function<glm::quat()> &get_rotation,
     const std::function<glm::vec3()> &get_scale, const DrawableKind &drawable_kind)
-    : name(std::move(name)), shape(shape), drawable_kind(drawable_kind),
-      get_position(std::move(get_position)), get_rotation(std::move(get_rotation)),
-      get_scale(std::move(get_scale)), first_model_matrix(EmptyItem::model_matrix()) {}
+    : name(std::move(name)), get_position(get_position), get_rotation(get_rotation),
+      get_scale(get_scale), shape(shape), drawable_kind(drawable_kind) {}
 
-std::shared_ptr<Shape> EmptyItem::get_shape() const { return shape; }
+std::string NoBodyItem::get_name() const { return name; }
 
-std::string EmptyItem::get_name() const { return name; }
+std::shared_ptr<Shape> NoBodyItem::get_shape() const { return shape; }
 
-glm::mat4 EmptyItem::model_matrix() const {
+glm::mat4 NoBodyItem::model_matrix() const {
     return model_matrix_without_scale() * glm::scale(glm::mat4(1), get_scale());
 }
 
-glm::mat4 EmptyItem::model_matrix_without_scale() const {
+glm::mat4 NoBodyItem::model_matrix_without_scale() const {
     return glm::translate(glm::mat4(1), get_position()) * glm::toMat4(get_rotation());
 }
 
-DrawableKind EmptyItem::get_drawable_kind() const { return drawable_kind; }
+DrawableKind NoBodyItem::get_drawable_kind() const { return drawable_kind; }
 
-void EmptyItem::reset(const glm::mat4 &main_model_matrix) {
+void NoBodyItem::reset(const glm::mat4 &main_model_matrix) {
     const auto [pos, rot, scale] = decompose_model_matrix(main_model_matrix * first_model_matrix);
     get_position = [pos]() { return pos; };
     get_rotation = [rot]() { return rot; };

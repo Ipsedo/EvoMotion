@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.22.1)
 project(evo_motion_view)
 set(CMAKE_CXX_STANDARD 20)
 
-set(SHADERS_SOURCE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
+set(SHADERS_SOURCE_PATH "${CMAKE_CURRENT_BINARY_DIR}/shaders")
+set(RESOURCES_PATH "${CMAKE_CURRENT_BINARY_DIR}/resources")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/constants.h.in" "${CMAKE_CURRENT_BINARY_DIR}/constants.h" @ONLY)
 
 set(EVO_MOTION_VIEW_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include" CACHE INTERNAL "")
@@ -48,4 +49,11 @@ add_custom_command(
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders"
         DEPENDS ${destination}
         COMMENT "symbolic link resources folder from ${source} => ${destination}"
+)
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources"
+        DEPENDS ${destination}
 )

@@ -31,6 +31,8 @@ public:
     std::string get_name();
 
     void rename_drawable(const std::string &old_name, const std::string &new_name);
+    void add_item(const std::shared_ptr<NoShapeItem> &no_shape_item);
+    void remove_item(const std::shared_ptr<NoShapeItem> &no_shape_item);
 
 protected:
     std::mt19937 rng;
@@ -43,6 +45,7 @@ private:
     std::unique_ptr<FrameBuffer> frame_buffer;
     std::unordered_map<std::string, std::shared_ptr<Drawable>> drawables;
     std::shared_ptr<Environment> env;
+    std::vector<std::shared_ptr<NoShapeItem>> no_shape_items;
 
     bool active;
     bool opened;
@@ -56,7 +59,10 @@ protected:
         const glm::mat4 &new_proj_matrix) = 0;
 
     virtual std::shared_ptr<DrawableFactory>
-    get_drawable_factory(const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng);
+    get_drawable_factory(const std::shared_ptr<ShapeItem> &item, std::mt19937 &curr_rng);
+
+    virtual std::shared_ptr<DrawableFactory>
+    get_drawable_factory(const std::shared_ptr<NoShapeItem> &item);
 };
 
 /*
@@ -99,8 +105,8 @@ protected:
     void on_opengl_frame(
         float new_width, float new_height, const glm::mat4 &new_view_matrix,
         const glm::mat4 &new_proj_matrix) override;
-    std::shared_ptr<DrawableFactory> get_drawable_factory(
-        const std::shared_ptr<AbstractItem> &item, std::mt19937 &curr_rng) override;
+    std::shared_ptr<DrawableFactory>
+    get_drawable_factory(const std::shared_ptr<ShapeItem> &item, std::mt19937 &curr_rng) override;
 };
 
 /*

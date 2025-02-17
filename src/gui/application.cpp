@@ -88,30 +88,35 @@ void ImGuiApplication::render() {
     ImGui::NewFrame();
 
     // get active imgui window
-    std::optional<std::string> active_opengl_window = std::nullopt;
+    std::optional<std::shared_ptr<OpenGlWindow>> active_opengl_window = std::nullopt;
     for (const auto &gl_window: opengl_windows)
-        if (gl_window->is_active()) active_opengl_window = gl_window->get_name();
+        if (gl_window->is_active()) active_opengl_window = gl_window;
 
     if (active_opengl_window.has_value()) {
         // add new windows
-        for (int i = imgui_windows[active_opengl_window.value()].size() - 1; i >= 0; i--) {
-            const auto curr_window = imgui_windows[active_opengl_window.value()][i];
+        for (int i = imgui_windows[active_opengl_window.value()->get_name()].size() - 1; i >= 0;
+             i--) {
+            const auto curr_window = imgui_windows[active_opengl_window.value()->get_name()][i];
             auto w = curr_window->pop_child();
             while (w.has_value()) {
                 if (!contains_window(
-                        imgui_windows[active_opengl_window.value()], w.value()->get_name()))
-                    imgui_windows[active_opengl_window.value()].push_back(w.value());
+                        imgui_windows[active_opengl_window.value()->get_name()],
+                        w.value()->get_name()))
+                    imgui_windows[active_opengl_window.value()->get_name()].push_back(w.value());
                 w = curr_window->pop_child();
             }
         }
 
         // remove closed windows
-        std::erase_if(imgui_windows[active_opengl_window.value()], [](const auto &w) {
+        std::erase_if(imgui_windows[active_opengl_window.value()->get_name()], [](const auto &w) {
             return w->is_closed();
         });
 
         // render them
-        for (const auto &w: imgui_windows[active_opengl_window.value()]) w->render_window(context);
+        for (const auto &w: imgui_windows[active_opengl_window.value()->get_name()]) {
+            w->on_render(active_opengl_window.value());
+            w->render_window(context);
+        }
     }
 
     imgui_render_toolbar();
@@ -254,6 +259,7 @@ void ImGuiApplication::imgui_render_opengl() {
             if (gl_win->is_active()) {
                 glBindVertexArray(vao);
                 gl_win->draw_opengl(opengl_render_size.x, opengl_render_size.y);
+                glBindVertexArray(0);
             }
             gl_win->draw_imgui_image();
         }

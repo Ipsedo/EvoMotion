@@ -130,8 +130,8 @@ CartPole3d::CartPole3d(
     m_world->addConstraint(p2p_constraint);
 }
 
-std::vector<std::shared_ptr<AbstractItem>> CartPole3d::get_draw_items() {
-    std::vector<std::shared_ptr<AbstractItem>> abs_items;
+std::vector<std::shared_ptr<ShapeItem>> CartPole3d::get_draw_items() {
+    std::vector<std::shared_ptr<ShapeItem>> abs_items;
     std::transform(
         items.begin(), items.end(), std::back_inserter(abs_items), [](const auto &i) { return i; });
     return abs_items;
@@ -325,6 +325,6 @@ std::vector<int64_t> CartPole3d::get_state_space() { return {28}; }
 
 std::vector<int64_t> CartPole3d::get_action_space() { return {2}; }
 
-std::optional<std::shared_ptr<AbstractItem>> CartPole3d::get_camera_track_item() {
+std::optional<std::shared_ptr<ShapeItem>> CartPole3d::get_camera_track_item() {
     return std::nullopt;
 }

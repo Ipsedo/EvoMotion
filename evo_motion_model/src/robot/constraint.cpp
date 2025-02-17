@@ -127,10 +127,10 @@ std::tuple<glm::vec3, glm::quat, glm::vec3> HingeConstraint::get_empty_item_tran
     return {parent_pos, parent_rot, scale};
 }
 
-std::shared_ptr<EmptyItem> HingeConstraint::get_empty_item() {
+std::shared_ptr<NoBodyItem> HingeConstraint::get_empty_item() {
     const auto [pos, rot, scale] = get_empty_item_transform();
 
-    return std::make_shared<EmptyItem>(get_name(), shape, pos, rot, scale, SPECULAR);
+    return std::make_shared<NoBodyItem>(get_name(), shape, pos, rot, scale, SPECULAR);
 }
 
 /*
@@ -210,7 +210,7 @@ std::tuple<glm::vec3, glm::quat, glm::vec3> FixedConstraint::get_empty_item_tran
     return {parent_pos, parent_rot, scale};
 }
 
-std::shared_ptr<EmptyItem> FixedConstraint::get_empty_item() {
+std::shared_ptr<NoBodyItem> FixedConstraint::get_empty_item() {
     const auto [pos, rot, scale] = get_empty_item_transform();
-    return std::make_shared<EmptyItem>(get_name(), shape, pos, rot, scale, SPECULAR);
+    return std::make_shared<NoBodyItem>(get_name(), shape, pos, rot, scale, SPECULAR);
 }

@@ -70,7 +70,7 @@ Program::Program(
 
     int success;
     glGetProgramiv(program_id, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (success != GL_TRUE) {
         std::string info_log;
         info_log.resize(512);
         glGetProgramInfoLog(program_id, 512, nullptr, &info_log[0]);
@@ -95,6 +95,21 @@ Program::Program(
 
     for (const auto &name: attributes)
         attribute_handles.insert({name, glGetAttribLocation(program_id, name.c_str())});
+
+    glValidateProgram(program_id);
+
+    GLint validation_status;
+    glGetProgramiv(program_id, GL_VALIDATE_STATUS, &validation_status);
+    if (validation_status == GL_FALSE) {
+        GLint log_length = 0;
+        glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &log_length);
+
+        if (log_length > 0) {
+            char *log = new char[log_length];
+            glGetProgramInfoLog(program_id, log_length, nullptr, log);
+            throw std::runtime_error(log);
+        }
+    }
 }
 
 void Program::kill() {

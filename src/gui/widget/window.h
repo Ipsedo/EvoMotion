@@ -27,6 +27,8 @@ public:
     virtual ~ImGuiWindow();
     std::string get_name() const;
 
+    virtual void on_render(const std::shared_ptr<OpenGlWindow> &gl_window);
+
 protected:
     virtual void render_window_content(const std::shared_ptr<ItemFocusContext> &context) = 0;
     virtual void on_close(const std::shared_ptr<ItemFocusContext> &context) = 0;

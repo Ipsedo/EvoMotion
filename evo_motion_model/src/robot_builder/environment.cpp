@@ -517,8 +517,8 @@ void RobotBuilderEnvironment::load_robot(const std::filesystem::path &input_json
  * Environment methods
  */
 
-std::vector<std::shared_ptr<AbstractItem>> RobotBuilderEnvironment::get_draw_items() {
-    std::vector<std::shared_ptr<AbstractItem>> items;
+std::vector<std::shared_ptr<ShapeItem>> RobotBuilderEnvironment::get_draw_items() {
+    std::vector<std::shared_ptr<ShapeItem>> items;
 
     std::ranges::transform(
         members, std::back_inserter(items), [](const auto &m) { return m->get_item(); });
@@ -532,7 +532,7 @@ std::vector<std::shared_ptr<AbstractItem>> RobotBuilderEnvironment::get_draw_ite
 std::vector<std::shared_ptr<Controller>> RobotBuilderEnvironment::get_controllers() { return {}; }
 std::vector<int64_t> RobotBuilderEnvironment::get_state_space() { return {}; }
 std::vector<int64_t> RobotBuilderEnvironment::get_action_space() { return {}; }
-std::optional<std::shared_ptr<AbstractItem>> RobotBuilderEnvironment::get_camera_track_item() {
+std::optional<std::shared_ptr<ShapeItem>> RobotBuilderEnvironment::get_camera_track_item() {
     if (root_name.has_value()) return get_member(root_name.value())->get_item();
     return std::nullopt;
 }

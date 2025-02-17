@@ -19,7 +19,7 @@ public:
         const std::shared_ptr<AbstractDeserializer> &deserializer,
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
-    virtual std::shared_ptr<EmptyItem> get_empty_item() = 0;
+    virtual std::shared_ptr<NoBodyItem> get_empty_item() = 0;
     virtual btTypedConstraint *get_constraint() = 0;
     virtual ~Constraint();
 
@@ -56,7 +56,7 @@ public:
         const std::function<std::shared_ptr<Member>(std::string)> &get_member_function);
 
     btTypedConstraint *get_constraint() override;
-    std::shared_ptr<EmptyItem> get_empty_item() override;
+    std::shared_ptr<NoBodyItem> get_empty_item() override;
 
     std::shared_ptr<AbstractSerializer>
     serialize(const std::shared_ptr<AbstractSerializer> &serializer) override;
@@ -91,7 +91,7 @@ public:
     std::shared_ptr<AbstractSerializer>
     serialize(const std::shared_ptr<AbstractSerializer> &serializer) override;
 
-    std::shared_ptr<EmptyItem> get_empty_item() override;
+    std::shared_ptr<NoBodyItem> get_empty_item() override;
 
 protected:
     std::shared_ptr<Shape> shape;

@@ -32,7 +32,7 @@ TileGround::TileGround(
       specular_color_a(specular_color_a), ambient_color_b(ambient_color_b),
       diffuse_color_b(diffuse_color_b), specular_color_b(specular_color_b), shininess(shininess),
       nb_vertices(static_cast<int>(vertices.size())), tile_size(tile_size),
-      program(Program::Builder("./shaders/tile_specular_vs.glsl", "./shaders/tile_specular_fs.glsl")
+      program(Program::Builder("./tile_specular_vs.glsl", "./tile_specular_fs.glsl")
                   .add_uniform("u_mvp_matrix")
                   .add_uniform("u_mv_matrix")
                   .add_uniform("u_m_matrix")

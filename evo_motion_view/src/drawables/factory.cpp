@@ -4,6 +4,7 @@
 
 #include <evo_motion_view/factory.h>
 
+#include "./constants.h"
 #include "./ground.h"
 #include "./specular.h"
 
@@ -90,4 +91,16 @@ std::shared_ptr<Drawable> BuilderObjSpecularFactory::create_drawable() {
     return std::make_shared<BuilderObjSpecular>(
         vertices, normals, ambient_color, diffuse_color, specular_color, shininess,
         is_focus_function, is_hidden_function);
+}
+
+/*
+ * Basis axis
+ */
+
+BasisAxisFactory::BasisAxisFactory() {}
+
+std::shared_ptr<Drawable> BasisAxisFactory::create_drawable() {
+    return std::make_shared<ObjMtlSpecular>(
+        std::filesystem::path(RESOURCES_PATH) / "basis_axis.obj",
+        std::filesystem::path(RESOURCES_PATH) / "basis_axis.mtl", 0.5f, 0.35f, 0.15f);
 }

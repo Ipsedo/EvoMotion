@@ -37,4 +37,6 @@ void ImGuiWindow::render_window(const std::shared_ptr<ItemFocusContext> &context
     if (!show) on_close(context);
 }
 
+void ImGuiWindow::on_render(const std::shared_ptr<OpenGlWindow> &gl_window) {}
+
 ImGuiWindow::~ImGuiWindow() = default;
