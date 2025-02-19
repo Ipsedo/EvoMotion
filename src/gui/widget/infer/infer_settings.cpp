@@ -18,7 +18,9 @@ InferSettingsWindow::InferSettingsWindow(
     agent_infer_file_dialog.SetTitle("Load agent directory");
 }
 
-void InferSettingsWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+void InferSettingsWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
 
     ImGui::Spacing();
 
@@ -69,7 +71,9 @@ void InferSettingsWindow::render_window_content(const std::shared_ptr<ItemFocusC
     }
 }
 
-void InferSettingsWindow::render_window(const std::shared_ptr<ItemFocusContext> &context) {
+void InferSettingsWindow::render_window(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
     // robot JSON file dialog
     robot_infer_file_dialog.Display();
     if (robot_infer_file_dialog.HasSelected()) {
@@ -84,7 +88,7 @@ void InferSettingsWindow::render_window(const std::shared_ptr<ItemFocusContext> 
         agent_infer_file_dialog.ClearSelected();
     }
 
-    ImGuiWindow::render_window(context);
+    ImGuiWindow::render_window(context, gl_window);
 }
 
 void InferSettingsWindow::on_close(const std::shared_ptr<ItemFocusContext> &context) {}

@@ -44,7 +44,7 @@ RobotJump::RobotJump(
     controllers = skeleton.get_controllers();
 }
 
-std::vector<std::shared_ptr<AbstractItem>> RobotJump::get_draw_items() {
+std::vector<std::shared_ptr<ShapeItem>> RobotJump::get_draw_items() {
     auto items = skeleton.get_items();
     items.push_back(base);
     return items;
@@ -61,9 +61,7 @@ std::vector<int64_t> RobotJump::get_action_space() {
     return {static_cast<long>(controllers.size())};
 }
 
-std::optional<std::shared_ptr<AbstractItem>> RobotJump::get_camera_track_item() {
-    return root_item;
-}
+std::optional<std::shared_ptr<ShapeItem>> RobotJump::get_camera_track_item() { return root_item; }
 
 step RobotJump::compute_step() {
     std::vector<torch::Tensor> current_states;

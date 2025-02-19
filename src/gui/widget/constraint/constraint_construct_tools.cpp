@@ -8,4 +8,5 @@ ConstraintConstructToolsWindow::ConstraintConstructToolsWindow()
     : ImGuiWindow("Construct tools - Constraint") {}
 
 void ConstraintConstructToolsWindow::render_window_content(
-    const std::shared_ptr<ItemFocusContext> &context) {}
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {}

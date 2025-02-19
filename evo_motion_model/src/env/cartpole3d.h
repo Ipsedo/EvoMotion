@@ -16,13 +16,13 @@ public:
         float chariot_push_force, int reset_frame_nb, float limit_angle, float cart_x_mass,
         float cart_z_mass, float pole_mass, int max_steps);
 
-    std::vector<std::shared_ptr<AbstractItem>> get_draw_items() override;
+    std::vector<std::shared_ptr<ShapeItem>> get_draw_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
 
     std::vector<int64_t> get_state_space() override;
     std::vector<int64_t> get_action_space() override;
 
-    std::optional<std::shared_ptr<AbstractItem>> get_camera_track_item() override;
+    std::optional<std::shared_ptr<ShapeItem>> get_camera_track_item() override;
 
 protected:
     step compute_step() override;

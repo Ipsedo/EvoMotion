@@ -56,6 +56,8 @@ public:
 
     btRigidBody *create_fake_body();
 
+    virtual std::vector<std::shared_ptr<NoBodyItem>> get_builder_empty_items() = 0;
+
 protected:
     virtual std::shared_ptr<Shape> get_shape() = 0;
 };
@@ -79,11 +81,16 @@ public:
         const std::optional<float> &new_limit_radian_min = std::nullopt,
         const std::optional<float> &new_limit_radian_max = std::nullopt);
 
+    std::vector<std::shared_ptr<NoBodyItem>> get_builder_empty_items() override;
+
 protected:
     std::shared_ptr<Shape> get_shape() override;
 
 private:
     std::shared_ptr<Shape> shape;
+    std::shared_ptr<Shape> angle_limit_start_shape;
+    std::shared_ptr<Shape> angle_limit_end_shape;
+    std::shared_ptr<Shape> angle_ref_shape;
 };
 
 class BuilderFixedConstraint final : public virtual FixedConstraint,
@@ -101,6 +108,8 @@ public:
     void update_constraint(
         const std::optional<glm::vec3> &new_pivot = std::nullopt,
         const std::optional<glm::quat> &new_rot = std::nullopt);
+
+    std::vector<std::shared_ptr<NoBodyItem>> get_builder_empty_items() override;
 
 protected:
     std::shared_ptr<Shape> get_shape() override;
@@ -139,6 +148,10 @@ public:
     bool add_member(
         const std::string &member_name, const ShapeKind &shape_kind, const glm::vec3 &center_pos,
         const glm::quat &rotation, const glm::vec3 &scale, float mass, float friction);
+
+    bool clone_body_part(
+        const std::string &member_name, const std::string &prefix_name, const glm::vec3 &center_pos,
+        const glm::quat &rotation);
 
     bool update_member(
         const std::string &member_name, const std::optional<glm::vec3> &new_pos = std::nullopt,
@@ -208,11 +221,11 @@ public:
      * Environment
      */
 
-    std::vector<std::shared_ptr<AbstractItem>> get_draw_items() override;
+    std::vector<std::shared_ptr<ShapeItem>> get_draw_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;
     std::vector<int64_t> get_state_space() override;
     std::vector<int64_t> get_action_space() override;
-    std::optional<std::shared_ptr<AbstractItem>> get_camera_track_item() override;
+    std::optional<std::shared_ptr<ShapeItem>> get_camera_track_item() override;
 
 protected:
     step compute_step() override;

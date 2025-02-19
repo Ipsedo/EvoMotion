@@ -19,6 +19,8 @@ protected:
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 
+    bool need_close() override;
+
 private:
     std::string constraint_name;
     std::shared_ptr<RobotBuilderEnvironment> builder_env;
@@ -28,8 +30,8 @@ private:
     std::string parent_item;
     std::string child_item;
 
-    void add_focus(const std::shared_ptr<ItemFocusContext> &context);
-    void clear_focus(const std::shared_ptr<ItemFocusContext> &context);
+    void add_focus(const std::shared_ptr<ItemFocusContext> &context) const;
+    void clear_focus(const std::shared_ptr<ItemFocusContext> &context) const;
 };
 
 /*
@@ -45,6 +47,8 @@ protected:
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
     void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) override;
+
+    bool need_close() override;
 
 private:
     std::shared_ptr<RobotBuilderEnvironment> builder_env;

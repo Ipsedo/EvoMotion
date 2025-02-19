@@ -8,9 +8,9 @@
 
 void gui() {
 
-    /*convert_tree_skeleton_to_graph_skeleton();
+    convert_tree_skeleton_to_graph_skeleton();
 
-    RobotBuilderEnvironment env;
+    /*RobotBuilderEnvironment env;
     env.load_robot("/home/samuel/CLionProjects/EvoMotion/evo_motion_model/resources/skeleton/_test/"
                    "new_format_spider_c++-binary-float.json");
     env.save_robot(

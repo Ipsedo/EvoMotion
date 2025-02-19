@@ -150,13 +150,19 @@ void convert_tree_skeleton_to_graph_skeleton() {
                 {"type", curr_constraint["constraint_type"].get<std::string>()}};
 
             if (curr_constraint["constraint_type"].get<std::string>() == "hinge") {
+                float min_angle_rad = curr_constraint["limit_degree"]["min"].get<float>()
+                                      * static_cast<float>(M_PI) / 180.f;
+                if (min_angle_rad > static_cast<float>(M_PI))
+                    min_angle_rad -= 2. * static_cast<float>(M_PI);
+
+                float max_angle_rad = curr_constraint["limit_degree"]["max"].get<float>()
+                                      * static_cast<float>(M_PI) / 180.f;
+                if (max_angle_rad > static_cast<float>(M_PI))
+                    max_angle_rad -= 2. * static_cast<float>(M_PI);
+
                 new_constraint["limit_radian"] = {
-                    {"min", float_to_binary_string(
-                                curr_constraint["limit_degree"]["min"].get<float>()
-                                * static_cast<float>(M_PI) / 180.f)},
-                    {"max", float_to_binary_string(
-                                curr_constraint["limit_degree"]["max"].get<float>()
-                                * static_cast<float>(M_PI) / 180.f)},
+                    {"min", float_to_binary_string(min_angle_rad)},
+                    {"max", float_to_binary_string(max_angle_rad)},
                 };
                 glm::mat4 frame_in_parent = to_mat4(parent_frame);
                 glm::mat4 frame_in_child = to_mat4(child_frame);

@@ -5,6 +5,7 @@
 #include "./member_popup.h"
 
 #include "../robot_info.h"
+#include "./duplicate_member.h"
 #include "./member_construct_tools.h"
 #include "./member_settings.h"
 #include "./new_member.h"
@@ -23,7 +24,12 @@ void FocusMemberPopUpWindow::render_popup_content(
     }
     if (ImGui::MenuItem("Construct tools")) {
         context->release_focus(member_name);
-        children = std::make_shared<MemberConstructToolsWindow>();
+        children = std::make_shared<MemberConstructToolsWindow>(member_name, builder_env);
+        close();
+    }
+    if (ImGui::MenuItem("Duplicate")) {
+        context->release_focus(member_name);
+        children = std::make_shared<DuplicateGroupWindow>(member_name, builder_env);
         close();
     }
 }
@@ -33,7 +39,7 @@ void FocusMemberPopUpWindow::on_close(const std::shared_ptr<ItemFocusContext> &c
 }
 
 void FocusMemberPopUpWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) context->focus_black(member_name);
     else context->release_focus(member_name);
 }
@@ -46,6 +52,8 @@ std::optional<std::shared_ptr<ImGuiWindow>> FocusMemberPopUpWindow::pop_child() 
     }
     return children;
 }
+
+bool FocusMemberPopUpWindow::need_close() { return !builder_env->member_exists(member_name); }
 
 /*
  * No focus
@@ -84,3 +92,5 @@ std::optional<std::shared_ptr<ImGuiWindow>> NoFocusMemberPopUpWindow::pop_child(
     }
     return children;
 }
+
+bool NoFocusMemberPopUpWindow::need_close() { return false; }

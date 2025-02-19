@@ -56,7 +56,7 @@ protected:
 public:
     explicit Environment(int num_threads);
 
-    virtual std::vector<std::shared_ptr<AbstractItem>> get_draw_items() = 0;
+    virtual std::vector<std::shared_ptr<ShapeItem>> get_draw_items() = 0;
     virtual std::vector<std::shared_ptr<Controller>> get_controllers() = 0;
 
     step do_step(const torch::Tensor &action);
@@ -65,7 +65,7 @@ public:
     virtual std::vector<int64_t> get_state_space() = 0;
     virtual std::vector<int64_t> get_action_space() = 0;
 
-    virtual std::optional<std::shared_ptr<AbstractItem>> get_camera_track_item() = 0;
+    virtual std::optional<std::shared_ptr<ShapeItem>> get_camera_track_item() = 0;
 
     void to(torch::DeviceType device);
 

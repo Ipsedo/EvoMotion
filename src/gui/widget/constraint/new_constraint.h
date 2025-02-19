@@ -14,7 +14,9 @@ public:
         const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
 protected:
-    void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_window_content(
+        const std::shared_ptr<ItemFocusContext> &context,
+        const std::shared_ptr<OpenGlWindow> &gl_window) override;
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 
@@ -25,6 +27,8 @@ protected:
         const std::string &constraint_name, const std::optional<std::string> &parent_name,
         const std::optional<std::string> &child_name, const glm::vec3 &absolute_position) = 0;
 
+    bool need_close() override;
+
 private:
     std::shared_ptr<RobotBuilderEnvironment> builder_env;
 
@@ -34,8 +38,8 @@ private:
 
     glm::vec3 absolute_position;
 
-    void add_focus(const std::shared_ptr<ItemFocusContext> &context);
-    void clear_focus(const std::shared_ptr<ItemFocusContext> &context);
+    void add_focus(const std::shared_ptr<ItemFocusContext> &context) const;
+    void clear_focus(const std::shared_ptr<ItemFocusContext> &context) const;
 
     static std::string get_window_name(const ConstraintType &constraint_type);
 };
@@ -44,9 +48,9 @@ private:
  * Fixed
  */
 
-class NewFixedConstraintWindow : public NewConstraintWindow {
+class NewFixedConstraintWindow final : public NewConstraintWindow {
 public:
-    NewFixedConstraintWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+    explicit NewFixedConstraintWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
 protected:
     void render_constraint_specific_settings(
@@ -64,9 +68,9 @@ private:
  * Hinge
  */
 
-class NewHingeConstraintWindow : public NewConstraintWindow {
+class NewHingeConstraintWindow final : public NewConstraintWindow {
 public:
-    NewHingeConstraintWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+    explicit NewHingeConstraintWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
 protected:
     void render_constraint_specific_settings(

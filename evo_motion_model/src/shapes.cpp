@@ -2,6 +2,7 @@
 // Created by samuel on 15/12/22.
 //
 
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <sstream>

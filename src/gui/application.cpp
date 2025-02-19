@@ -87,35 +87,38 @@ void ImGuiApplication::render() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    imgui_render_toolbar();
-    imgui_render_robot_builder_file_dialog();
-
     // get active imgui window
-    std::optional<std::string> active_opengl_window = std::nullopt;
+    std::optional<std::shared_ptr<OpenGlWindow>> active_opengl_window = std::nullopt;
     for (const auto &gl_window: opengl_windows)
-        if (gl_window->is_active()) active_opengl_window = gl_window->get_name();
+        if (gl_window->is_active()) active_opengl_window = gl_window;
 
     if (active_opengl_window.has_value()) {
         // add new windows
-        for (int i = imgui_windows[active_opengl_window.value()].size() - 1; i >= 0; i--) {
-            const auto curr_window = imgui_windows[active_opengl_window.value()][i];
+        for (int i = imgui_windows[active_opengl_window.value()->get_name()].size() - 1; i >= 0;
+             i--) {
+            const auto curr_window = imgui_windows[active_opengl_window.value()->get_name()][i];
             auto w = curr_window->pop_child();
             while (w.has_value()) {
                 if (!contains_window(
-                        imgui_windows[active_opengl_window.value()], w.value()->get_name()))
-                    imgui_windows[active_opengl_window.value()].push_back(w.value());
+                        imgui_windows[active_opengl_window.value()->get_name()],
+                        w.value()->get_name()))
+                    imgui_windows[active_opengl_window.value()->get_name()].push_back(w.value());
                 w = curr_window->pop_child();
             }
         }
 
         // remove closed windows
-        std::erase_if(imgui_windows[active_opengl_window.value()], [](const auto &w) {
+        std::erase_if(imgui_windows[active_opengl_window.value()->get_name()], [](const auto &w) {
             return w->is_closed();
         });
 
         // render them
-        for (const auto &w: imgui_windows[active_opengl_window.value()]) w->render_window(context);
+        for (const auto &w: imgui_windows[active_opengl_window.value()->get_name()])
+            w->render_window(context, active_opengl_window.value());
     }
+
+    imgui_render_toolbar();
+    imgui_render_robot_builder_file_dialog();
 
     imgui_render_opengl();
 
@@ -153,11 +156,10 @@ void ImGuiApplication::imgui_render_toolbar() {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Robots")) {
+        if (ImGui::BeginMenu("Robot")) {
 
             if (ImGui::MenuItem("New robot")) {
-
-                auto new_robot = std::make_shared<RobotBuilderEnvironment>(
+                const auto new_robot = std::make_shared<RobotBuilderEnvironment>(
                     "robot_" + std::to_string(opengl_windows.size()));
 
                 opengl_windows.push_back(create_builder_opengl_window(new_robot));
@@ -171,40 +173,12 @@ void ImGuiApplication::imgui_render_toolbar() {
 
             ImGui::Separator();
 
-            /*if (ImGui::MenuItem("Robot information", nullptr, false, context->builder_env.is_set()))
-                imgui_windows[ROBOT_INFO_NAME]->open();
-
-            ImGui::Separator();*/
-
-            if (ImGui::BeginMenu("Show parts")) {
+            if (ImGui::BeginMenu("Edit mode")) {
                 if (ImGui::MenuItem("Members", nullptr, part_kind == MEMBER)) part_kind = MEMBER;
                 if (ImGui::MenuItem("Constraints", nullptr, part_kind == CONSTRAINT))
                     part_kind = CONSTRAINT;
                 ImGui::EndMenu();
             }
-
-            /*ImGui::Separator();
-
-            if (ImGui::BeginMenu(
-                    "Member", context->builder_env.is_set() && !context->are_members_hidden())) {
-                if (ImGui::MenuItem("New member")) imgui_windows[NEW_MEMBER_NAME]->open();
-                if (ImGui::MenuItem("Settings")) imgui_windows[MEMBER_SETTINGS_NAME]->open();
-                if (ImGui::MenuItem("Construct tools"))
-                    imgui_windows[MEMBER_CONSTRUCT_TOOLS_NAME]->open();
-
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::BeginMenu(
-                    "Constraint",
-                    context->builder_env.is_set() && !context->are_constraints_hidden())) {
-                if (ImGui::MenuItem("New constraint")) imgui_windows[NEW_CONSTRAINT_NAME]->open();
-                if (ImGui::MenuItem("Settings")) imgui_windows[CONSTRAINT_SETTINGS_NAME]->open();
-                if (ImGui::MenuItem("Construct tools"))
-                    imgui_windows[CONSTRAINT_CONSTRUCT_TOOLS_NAME]->open();
-
-                ImGui::EndMenu();
-            }*/
 
             ImGui::EndMenu();
         }
@@ -283,6 +257,7 @@ void ImGuiApplication::imgui_render_opengl() {
             if (gl_win->is_active()) {
                 glBindVertexArray(vao);
                 gl_win->draw_opengl(opengl_render_size.x, opengl_render_size.y);
+                glBindVertexArray(0);
             }
             gl_win->draw_imgui_image();
         }
@@ -323,28 +298,28 @@ std::shared_ptr<BuilderOpenGlWindow> ImGuiApplication::create_builder_opengl_win
         context, builder_env->get_robot_name(), builder_env,
         [this](
             const std::string &gl_window_name, std::optional<std::string> focused_member,
-            std::shared_ptr<RobotBuilderEnvironment> builder_env) {
+            std::shared_ptr<RobotBuilderEnvironment> curr_builder_env) {
             if (focused_member.has_value()
                 && !contains_window(imgui_windows[gl_window_name], focused_member.value()))
-                imgui_windows[gl_window_name].push_back(
-                    std::make_shared<FocusMemberPopUpWindow>(focused_member.value(), builder_env));
+                imgui_windows[gl_window_name].push_back(std::make_shared<FocusMemberPopUpWindow>(
+                    focused_member.value(), curr_builder_env));
 
             if (!focused_member.has_value())
                 imgui_windows[gl_window_name].push_back(
-                    std::make_shared<NoFocusMemberPopUpWindow>(builder_env));
+                    std::make_shared<NoFocusMemberPopUpWindow>(curr_builder_env));
         },
         [this](
             const std::string &gl_window_name, std::optional<std::string> focused_constraint,
-            std::shared_ptr<RobotBuilderEnvironment> builder_env) {
+            std::shared_ptr<RobotBuilderEnvironment> curr_builder_env) {
             if (focused_constraint.has_value()
                 && !contains_window(imgui_windows[gl_window_name], focused_constraint.value()))
                 imgui_windows[gl_window_name].push_back(
                     std::make_shared<FocusConstraintPopUpWindow>(
-                        focused_constraint.value(), builder_env));
+                        focused_constraint.value(), curr_builder_env));
 
             if (!focused_constraint.has_value())
                 imgui_windows[gl_window_name].push_back(
-                    std::make_shared<NoFocusConstraintPopUpWindow>(builder_env));
+                    std::make_shared<NoFocusConstraintPopUpWindow>(curr_builder_env));
         },
         [this]() { return part_kind; });
 }

@@ -19,7 +19,9 @@ void MemberSettingsWindow::on_close(const std::shared_ptr<ItemFocusContext> &con
     clear_focus(context);
 }
 
-void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocusContext> &context) {
+void MemberSettingsWindow::render_window_content(
+    const std::shared_ptr<ItemFocusContext> &context,
+    const std::shared_ptr<OpenGlWindow> &gl_window) {
     auto [member_pos, member_rot, member_scale] = builder_env->get_member_transform(member_name);
 
     // Position
@@ -29,9 +31,9 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocus
 
     bool updated = false;
 
-    if (input_float("pos.x", &member_pos.x, 8)) updated = true;
-    if (input_float("pos.y", &member_pos.y, 8)) updated = true;
-    if (input_float("pos.z", &member_pos.z, 8)) updated = true;
+    if (input_float("pos.x", &member_pos.x, 4)) updated = true;
+    if (input_float("pos.y", &member_pos.y, 4)) updated = true;
+    if (input_float("pos.z", &member_pos.z, 4)) updated = true;
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -44,19 +46,21 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocus
 
     auto [rotation_axis, rotation_angle] = quat_to_axis_angle(member_rot);
 
-    if (input_float("axis.x", &rotation_axis.x, 8)) {
-        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
+    if (input_float("axis.x", &rotation_axis.x, 4)) {
+        rotation_axis = glm::normalize(rotation_axis + 1e-5f);
         updated = true;
     }
-    if (input_float("axis.y", &rotation_axis.y, 8)) {
-        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
+    if (input_float("axis.y", &rotation_axis.y, 4)) {
+        rotation_axis = glm::normalize(rotation_axis + 1e-5f);
         updated = true;
     }
-    if (input_float("axis.z", &rotation_axis.z, 8)) {
-        rotation_axis = glm::normalize(rotation_axis + 1e-9f);
+    if (input_float("axis.z", &rotation_axis.z, 4)) {
+        rotation_axis = glm::normalize(rotation_axis + 1e-5f);
         updated = true;
     }
-    if (input_float("angle", &rotation_angle, 8)) updated = true;
+    rotation_angle = glm::degrees(rotation_angle);
+    if (input_float("angle", &rotation_angle, 4)) updated = true;
+    rotation_angle = glm::radians(rotation_angle);
 
     member_rot = axis_angle_to_quat(rotation_axis, rotation_angle);
 
@@ -69,7 +73,7 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocus
     ImGui::Text("Scale");
     ImGui::Spacing();
 
-    float min_scale = 1e-4f;
+    constexpr float min_scale = 1e-4f;
 
     if (input_float("scale.x", &member_scale.x, 4)) {
         member_scale.x = std::max(member_scale.x, min_scale);
@@ -96,7 +100,7 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocus
     // Member name
     std::string new_member_name = member_name;
     new_member_name.resize(128);
-    if (input_text("Member name", &new_member_name[0], new_member_name.size(), 16))
+    if (ImGui::InputText("Member name", &new_member_name[0], new_member_name.size()))
         if (builder_env->rename_member(member_name, new_member_name.c_str())) {
             clear_focus(context);
             member_name = new_member_name.c_str();
@@ -107,7 +111,7 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocus
 
     // mass
     float mass = builder_env->get_member_mass(member_name);
-    if (input_float("mass (kg)", &mass, 8)) updated = true;
+    if (input_float("mass (kg)", &mass, 4)) updated = true;
 
     ImGui::Spacing();
 
@@ -132,14 +136,17 @@ void MemberSettingsWindow::render_window_content(const std::shared_ptr<ItemFocus
 }
 
 void MemberSettingsWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) add_focus(context);
     else clear_focus(context);
 }
 
-void MemberSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
+void MemberSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->focus_black(member_name);
 }
-void MemberSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
+
+void MemberSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->release_focus(member_name);
 }
+
+bool MemberSettingsWindow::need_close() { return !builder_env->member_exists(member_name); }

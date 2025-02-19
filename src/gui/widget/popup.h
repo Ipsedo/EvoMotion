@@ -9,14 +9,20 @@
 
 class PopUpWindow : public ImGuiWindow {
 public:
-    PopUpWindow(const std::string &popup_name);
+    explicit PopUpWindow(const std::string &popup_name);
 
-    void render_window(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_window(
+        const std::shared_ptr<ItemFocusContext> &context,
+        const std::shared_ptr<OpenGlWindow> &gl_window) override;
 
 protected:
-    void render_window_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    void render_window_content(
+        const std::shared_ptr<ItemFocusContext> &context,
+        const std::shared_ptr<OpenGlWindow> &gl_window) override;
 
     virtual void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) = 0;
+
+    ImVec2 get_min_size() override;
 
 private:
     std::string name;

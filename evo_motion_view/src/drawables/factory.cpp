@@ -4,6 +4,8 @@
 
 #include <evo_motion_view/factory.h>
 
+#include "./constants.h"
+#include "./cube_grid.h"
 #include "./ground.h"
 #include "./specular.h"
 
@@ -62,7 +64,7 @@ std::shared_ptr<Drawable> TileGroundFactory::create_drawable() {
         diffuse_color_b, specular_color_b, shininess, tile_size);
 }
 
-// Edge Specular
+// Builder OBJ Specular
 
 BuilderObjSpecularFactory::BuilderObjSpecularFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
@@ -90,4 +92,37 @@ std::shared_ptr<Drawable> BuilderObjSpecularFactory::create_drawable() {
     return std::make_shared<BuilderObjSpecular>(
         vertices, normals, ambient_color, diffuse_color, specular_color, shininess,
         is_focus_function, is_hidden_function);
+}
+
+/*
+ * Basis axis
+ */
+
+BasisAxisFactory::BasisAxisFactory() {}
+
+std::shared_ptr<Drawable> BasisAxisFactory::create_drawable() {
+    return std::make_shared<ObjMtlSpecular>(
+        std::filesystem::path(RESOURCES_PATH) / "basis_axis.obj",
+        std::filesystem::path(RESOURCES_PATH) / "basis_axis.mtl", 0.5f, 0.35f, 0.15f);
+}
+
+/*
+ * Torus
+ */
+
+RotationTorusFactory::RotationTorusFactory() {}
+std::shared_ptr<Drawable> RotationTorusFactory::create_drawable() {
+    return std::make_shared<ObjMtlSpecular>(
+        std::filesystem::path(RESOURCES_PATH) / "rotation_torus.obj",
+        std::filesystem::path(RESOURCES_PATH) / "rotation_torus.mtl", 0.5f, 0.35f, 0.15f);
+}
+
+/*
+ * Cube Grid
+ */
+
+CubeGridFactory::CubeGridFactory(float cube_size, float cell_size, const glm::vec4 &color)
+    : cube_size(cube_size), cell_size(cell_size), color(color) {}
+std::shared_ptr<Drawable> CubeGridFactory::create_drawable() {
+    return std::make_shared<CubeGrid>(cube_size, cell_size, color);
 }

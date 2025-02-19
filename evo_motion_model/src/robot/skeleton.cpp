@@ -58,8 +58,8 @@ std::shared_ptr<Member> Skeleton::get_member(const std::string &name) {
     throw std::runtime_error("Member \"" + name + "\"not found");
 }
 
-std::vector<std::shared_ptr<AbstractItem>> Skeleton::get_items() {
-    std::vector<std::shared_ptr<AbstractItem>> items;
+std::vector<std::shared_ptr<ShapeItem>> Skeleton::get_items() {
+    std::vector<std::shared_ptr<ShapeItem>> items;
     std::ranges::transform(
         members, std::back_inserter(items), [](const auto &t) { return t->get_item(); });
 

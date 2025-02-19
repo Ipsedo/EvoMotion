@@ -32,7 +32,7 @@ public:
 
     std::string get_name();
 
-    std::vector<std::shared_ptr<AbstractItem>> get_items();
+    std::vector<std::shared_ptr<ShapeItem>> get_items();
 
     std::vector<btRigidBody *> get_bodies() const;
     std::vector<btTypedConstraint *> get_constraints();

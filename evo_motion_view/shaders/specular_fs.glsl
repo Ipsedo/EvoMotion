@@ -16,7 +16,7 @@ uniform float u_shininess;
 in vec3 v_position;
 in vec3 v_normal;
 
-void main(){
+void main() {
     float distance = length(u_light_pos - v_position);
     vec3 light_vector = normalize(u_light_pos - v_position);
 

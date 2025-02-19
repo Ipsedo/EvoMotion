@@ -11,7 +11,7 @@
  * On focus member popup
  */
 
-class FocusMemberPopUpWindow : public PopUpWindow {
+class FocusMemberPopUpWindow final : public PopUpWindow {
 public:
     FocusMemberPopUpWindow(
         const std::string &member_name,
@@ -22,6 +22,8 @@ protected:
     void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
+
+    bool need_close() override;
 
 private:
     std::string member_name;
@@ -34,15 +36,16 @@ private:
  * No focus member popup
  */
 
-class NoFocusMemberPopUpWindow : public PopUpWindow {
+class NoFocusMemberPopUpWindow final : public PopUpWindow {
 public:
-    NoFocusMemberPopUpWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
+    explicit NoFocusMemberPopUpWindow(const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
     std::optional<std::shared_ptr<ImGuiWindow>> pop_child() override;
 
 protected:
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
     void render_popup_content(const std::shared_ptr<ItemFocusContext> &context) override;
+    bool need_close() override;
 
 private:
     std::shared_ptr<RobotBuilderEnvironment> builder_env;

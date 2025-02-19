@@ -46,19 +46,20 @@ void FocusConstraintPopUpWindow::on_close(const std::shared_ptr<ItemFocusContext
 }
 
 void FocusConstraintPopUpWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) add_focus(context);
     else clear_focus(context);
 }
 
-void FocusConstraintPopUpWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) {
+void FocusConstraintPopUpWindow::add_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->focus_black(constraint_name);
 
-    context->focus_white(parent_item);
-    context->focus_white(child_item);
+    context->focus_grey(parent_item);
+    context->focus_grey(child_item);
 }
 
-void FocusConstraintPopUpWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
+void FocusConstraintPopUpWindow::clear_focus(
+    const std::shared_ptr<ItemFocusContext> &context) const {
     context->release_focus(constraint_name);
 
     context->release_focus(parent_item);
@@ -72,6 +73,9 @@ std::optional<std::shared_ptr<ImGuiWindow>> FocusConstraintPopUpWindow::pop_chil
         return return_value;
     }
     return children;
+}
+bool FocusConstraintPopUpWindow::need_close() {
+    return !builder_env->constraint_exists(constraint_name);
 }
 
 /*
@@ -115,3 +119,5 @@ void NoFocusConstraintPopUpWindow::render_popup_content(
         close();
     }
 }
+
+bool NoFocusConstraintPopUpWindow::need_close() { return false; }

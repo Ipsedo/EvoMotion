@@ -25,7 +25,7 @@ void BuilderMember::update_item(
 
     const auto translate =
         glm::translate(glm::mat4(1.f), new_pos.has_value() ? new_pos.value() : pos);
-    const auto rotation = glm::toMat4(new_pos.has_value() ? new_rot.value() : rot);
+    const auto rotation = glm::toMat4(new_rot.has_value() ? new_rot.value() : rot);
 
     const auto model_matrix = translate * rotation;
 
