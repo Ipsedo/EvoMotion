@@ -23,6 +23,8 @@ public:
 
 private:
     bool is_dragging;
+    int locked_direction;
+
     float prev_x_mouse;
     float prev_y_mouse;
 

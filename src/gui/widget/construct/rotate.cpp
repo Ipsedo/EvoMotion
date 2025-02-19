@@ -10,7 +10,8 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <imgui.h>
 
-RotateTools::RotateTools() : is_dragging(false), prev_x_mouse(0.f), prev_y_mouse(0.f) {}
+RotateTools::RotateTools()
+    : is_dragging(false), locked_direction(-1), prev_x_mouse(0.f), prev_y_mouse(0.f) {}
 
 std::optional<glm::quat> RotateTools::get_rot_delta(
     const std::shared_ptr<OpenGlWindow> &gl_window, const bool parent_cond,
@@ -27,11 +28,18 @@ std::optional<glm::quat> RotateTools::get_rot_delta(
             {"pitch", glm::vec4(1, 0, 0, 0)},
             {"roll", glm::vec4(0, 0, 1, 0)}};
 
-        if (!is_dragging) {
+        if (const auto mouse_pos = ImGui::GetMousePos(); !is_dragging) {
             is_dragging = true;
-            const auto mouse_pos = ImGui::GetMousePos();
+
             prev_x_mouse = mouse_pos.x;
             prev_y_mouse = mouse_pos.y;
+        } else if (locked_direction == -1) {
+            float dist_width = std::abs(prev_x_mouse - mouse_pos.x);
+            float dist_height = std::abs(prev_y_mouse - mouse_pos.y);
+
+            if (dist_width > dist_height) locked_direction = 0;
+            else if (!ImGui::IsKeyDown(ImGuiKey_LeftShift)) locked_direction = 1;
+            else locked_direction = 2;
         }
 
         const auto new_mouse_pos = ImGui::GetMousePos();
@@ -68,21 +76,48 @@ std::optional<glm::quat> RotateTools::get_rot_delta(
 
         std::string vertical;
         std::string horizontal;
+        std::string third_dir;
 
         if (yaw_height < pitch_height && yaw_height < roll_height) vertical = "yaw";
         else if (pitch_height < yaw_height && pitch_height < roll_height) vertical = "pitch";
         else vertical = "roll";
 
-        angle = screen_coord.y < member_screen_pos.y ? screen_move_x : -screen_move_x;
+        if (yaw_width < pitch_width && yaw_width < roll_width) horizontal = "yaw";
+        else if (pitch_width < yaw_width && pitch_width < roll_width) horizontal = "pitch";
+        else horizontal = "roll";
+
+        if (vertical == "yaw" && horizontal == "pitch") third_dir = "roll";
+        else if (vertical == "pitch" && horizontal == "yaw") third_dir = "roll";
+
+        else if (vertical == "roll" && horizontal == "pitch") third_dir = "yaw";
+        else if (vertical == "pitch" && horizontal == "roll") third_dir = "yaw";
+
+        else if (vertical == "roll" && horizontal == "yaw") third_dir = "pitch";
+        else if (vertical == "yaw" && horizontal == "roll") third_dir = "pitch";
+
+        if (locked_direction == 0)
+            angle = screen_coord.y < member_screen_pos.y ? screen_move_x : -screen_move_x;
+        else if (locked_direction == 1)
+            angle = screen_coord.x < member_screen_pos.x ? screen_move_y : -screen_move_y;
+        else angle = screen_coord.x < member_screen_pos.x ? screen_move_y : -screen_move_y;
 
         prev_x_mouse = new_mouse_pos.x;
         prev_y_mouse = new_mouse_pos.y;
 
-        const auto final_rot_axis = glm::vec3(axis_rot * rot_to_axis[vertical]);
+        std::string to_use;
+        switch (locked_direction) {
+            case 0: to_use = vertical; break;
+            case 1: to_use = horizontal; break;
+            case 2: to_use = third_dir; break;
+            default: to_use = vertical; break;
+        }
+
+        const auto final_rot_axis = glm::vec3(axis_rot * rot_to_axis[to_use]);
 
         return glm::angleAxis(angle, final_rot_axis);
     } else {
         is_dragging = false;
+        locked_direction = -1;
         return std::nullopt;
     }
 }
