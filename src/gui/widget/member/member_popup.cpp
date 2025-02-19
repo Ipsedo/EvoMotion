@@ -5,6 +5,7 @@
 #include "./member_popup.h"
 
 #include "../robot_info.h"
+#include "./duplicate_member.h"
 #include "./member_construct_tools.h"
 #include "./member_settings.h"
 #include "./new_member.h"
@@ -24,6 +25,11 @@ void FocusMemberPopUpWindow::render_popup_content(
     if (ImGui::MenuItem("Construct tools")) {
         context->release_focus(member_name);
         children = std::make_shared<MemberConstructToolsWindow>(member_name, builder_env);
+        close();
+    }
+    if (ImGui::MenuItem("Duplicate")) {
+        context->release_focus(member_name);
+        children = std::make_shared<DuplicateGroupWindow>(member_name, builder_env);
         close();
     }
 }

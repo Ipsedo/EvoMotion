@@ -149,6 +149,10 @@ public:
         const std::string &member_name, const ShapeKind &shape_kind, const glm::vec3 &center_pos,
         const glm::quat &rotation, const glm::vec3 &scale, float mass, float friction);
 
+    bool clone_body_part(
+        const std::string &member_name, const std::string &prefix_name, const glm::vec3 &center_pos,
+        const glm::quat &rotation);
+
     bool update_member(
         const std::string &member_name, const std::optional<glm::vec3> &new_pos = std::nullopt,
         const std::optional<glm::quat> &new_rot = std::nullopt,

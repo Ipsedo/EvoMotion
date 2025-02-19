@@ -176,6 +176,92 @@ RobotBuilderEnvironment::get_member(const std::string &member_name) const {
     return get_part<BuilderMember>(member_name, members);
 }
 
+bool RobotBuilderEnvironment::clone_body_part(
+    const std::string &member_name, const std::string &prefix_name, const glm::vec3 &center_pos,
+    const glm::quat &rotation) {
+    if (!member_exists(member_name)) return false;
+
+    std::vector<std::shared_ptr<BuilderMember>> member_to_add;
+    std::vector<std::shared_ptr<BuilderConstraint>> constraint_to_add;
+    std::set<std::string> constraint_original_name_to_add;
+
+    std::queue<std::shared_ptr<BuilderMember>> queue;
+    queue.emplace(get_member(member_name));
+
+    std::set<std::string> added_members;
+
+    while (!queue.empty()) {
+        auto curr_member = queue.front();
+        queue.pop();
+
+        std::shared_ptr<JsonSerializer> serializer =
+            std::make_shared<JsonSerializer>(nlohmann::json());
+        auto serialized = curr_member->serialize(serializer);
+
+        nlohmann::json content = std::any_cast<nlohmann::json>(serialized->get_data());
+        content["name"] = prefix_name + content["name"].get<std::string>();
+
+        const auto new_name = content["name"].get<std::string>();
+
+        if (member_exists(new_name)) return false;
+
+        std::shared_ptr<JsonDeserializer> deserializer =
+            std::make_shared<JsonDeserializer>(content);
+
+        member_to_add.push_back(std::make_shared<BuilderMember>(deserializer));
+        skeleton_graph[new_name] = {};
+        added_members.insert(new_name);
+
+        for (const auto &[c, n]: skeleton_graph[curr_member->get_name()]) {
+            if (!added_members.contains(prefix_name + n)) queue.emplace(get_member(n));
+
+            if (constraint_exists(prefix_name + c)) return false;
+
+            constraint_original_name_to_add.insert(c);
+        }
+    }
+
+    for (const auto &m: member_to_add) {
+        m->get_item()->get_body()->setUserPointer(new std::string(m->get_name()));
+        m_world->addRigidBody(m->get_item()->get_body());
+        members.push_back(m);
+    }
+
+    for (const auto &c: constraint_original_name_to_add) {
+        auto constraint = get_constraint(c);
+
+        auto serializer = std::make_shared<JsonSerializer>(nlohmann::json());
+        auto serialized = constraint->serialize(serializer);
+
+        auto content = std::any_cast<nlohmann::json>(serialized->get_data());
+        content["name"] = prefix_name + content["name"].get<std::string>();
+
+        content["parent_name"] = prefix_name + content["parent_name"].get<std::string>();
+        content["child_name"] = prefix_name + content["child_name"].get<std::string>();
+
+        auto deserializer = std::make_shared<JsonDeserializer>(content);
+
+        std::shared_ptr<BuilderConstraint> new_constraint;
+        if (deserializer->read_str("type") == "hinge")
+            new_constraint = std::make_shared<BuilderHingeConstraint>(
+                deserializer, [this](const auto &n) { return get_member(n); });
+        else if (deserializer->read_str("type") == "fixed")
+            new_constraint = std::make_shared<BuilderFixedConstraint>(
+                deserializer, [this](const auto &n) { return get_member(n); });
+
+        constraints.push_back(new_constraint);
+
+        skeleton_graph[new_constraint->get_parent()->get_name()].emplace_back(
+            new_constraint->get_name(), new_constraint->get_child()->get_name());
+        skeleton_graph[new_constraint->get_child()->get_name()].emplace_back(
+            new_constraint->get_name(), new_constraint->get_parent()->get_name());
+
+        m_world->addConstraint(new_constraint->get_constraint());
+    }
+    return true;
+    return update_member(prefix_name + member_name, center_pos, rotation);
+}
+
 /*
  * Constraint
  */
