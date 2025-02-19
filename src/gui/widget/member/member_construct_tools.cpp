@@ -91,7 +91,7 @@ void MemberConstructToolsWindow::render_window_content(
             if (const auto rot_delta_opt = rotate_tools->get_rot_delta(
                     gl_window, is_editing && !is_dragging_axis, {yaw, pitch, roll}, pos);
                 rot_delta_opt.has_value())
-                builder_env->update_member(member_name, std::nullopt, rot * rot_delta_opt.value());
+                builder_env->update_member(member_name, std::nullopt, rot_delta_opt.value() * rot);
             break;
         case 2: break;
     }
