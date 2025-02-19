@@ -7,6 +7,7 @@
 #include <evo_motion_model/robot/builder.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 #include <evo_motion_model/converter.h>
@@ -60,7 +61,12 @@ BuilderHingeConstraint::BuilderHingeConstraint(
           name, parent, child, pivot_in_parent, pivot_in_child, axis_in_parent, axis_in_child,
           limit_radian_min, limit_radian_max),
       Constraint(name, parent, child), BuilderConstraint(name, parent, child),
-      shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
+      shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")),
+      angle_limit_start_shape(
+          std::make_shared<ObjShape>("./resources/obj/hinge_angle_limit_start.obj")),
+      angle_limit_end_shape(
+          std::make_shared<ObjShape>("./resources/obj/hinge_angle_limit_end.obj")),
+      angle_ref_shape(std::make_shared<ObjShape>("./resources/obj/hinge_angle_ref.obj")) {}
 
 BuilderHingeConstraint::BuilderHingeConstraint(
     const std::shared_ptr<AbstractDeserializer> &deserializer,
@@ -68,7 +74,12 @@ BuilderHingeConstraint::BuilderHingeConstraint(
     : HingeConstraint(deserializer, get_member_function),
       Constraint(deserializer, get_member_function),
       BuilderConstraint(deserializer, get_member_function),
-      shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")) {}
+      shape(std::make_shared<ObjShape>("./resources/obj/cylinder.obj")),
+      angle_limit_start_shape(
+          std::make_shared<ObjShape>("./resources/obj/hinge_angle_limit_start.obj")),
+      angle_limit_end_shape(
+          std::make_shared<ObjShape>("./resources/obj/hinge_angle_limit_end.obj")),
+      angle_ref_shape(std::make_shared<ObjShape>("./resources/obj/hinge_angle_ref.obj")) {}
 
 void BuilderHingeConstraint::update_constraint(
     const std::optional<glm::vec3> &new_pivot, const std::optional<glm::vec3> &new_axis,
@@ -106,6 +117,47 @@ void BuilderHingeConstraint::update_constraint(
 }
 
 std::shared_ptr<Shape> BuilderHingeConstraint::get_shape() { return shape; }
+
+float getRotationAroundAxis(const glm::quat &q, const glm::vec3 &axis) {
+    // Normaliser l'axe au cas où
+    glm::vec3 axisNorm = glm::normalize(axis);
+
+    // Extraire l'angle total de rotation du quaternion
+    float totalAngle = 2.0f * std::acos(glm::clamp(q.w, -1.0f, 1.0f));
+
+    // Extraire l'axe de rotation du quaternion
+    glm::vec3 quatAxis = glm::normalize(glm::vec3(q.x, q.y, q.z));
+
+    // Trouver la contribution de l'axe donné en projetant le quaternion sur cet axe
+    float projection = glm::dot(quatAxis, axisNorm);
+
+    // L'angle autour de l'axe est proportionnel à cette projection
+    return glm::degrees(totalAngle * projection);
+}
+
+std::vector<std::shared_ptr<NoBodyItem>> BuilderHingeConstraint::get_builder_empty_items() {
+    const auto [pos, rot, scale] = HingeConstraint::get_empty_item_transform();
+
+    const glm::vec3 local_axis(0, 0, 1);
+
+    const float angle_min = constraint->getLowerLimit();
+    const float angle_max = constraint->getUpperLimit();
+    const float angle_offset = constraint->getHingeAngle();
+
+    const glm::quat rotation_start = glm::angleAxis(angle_offset, local_axis);
+    const glm::quat rotation_min = glm::angleAxis(angle_min, local_axis);
+    const glm::quat rotation_max = glm::angleAxis(angle_max, local_axis);
+
+    return {
+        std::make_shared<NoBodyItem>(
+            get_name() + "_limit_ref", angle_ref_shape, pos, rot * rotation_start, scale, SPECULAR),
+        std::make_shared<NoBodyItem>(
+            get_name() + "_limit_min", angle_limit_end_shape, pos, rot * rotation_min, scale,
+            SPECULAR),
+        std::make_shared<NoBodyItem>(
+            get_name() + "_limit_max", angle_limit_start_shape, pos, rot * rotation_max, scale,
+            SPECULAR)};
+}
 
 /*
  * Fixed
@@ -150,4 +202,8 @@ void BuilderFixedConstraint::update_constraint(
     const glm::mat4 new_frame_in_child = glm::inverse(child_model_mat) * new_absolute_frame;
 
     constraint->setFrames(glm_to_bullet(new_frame_in_parent), glm_to_bullet(new_frame_in_child));
+}
+
+std::vector<std::shared_ptr<NoBodyItem>> BuilderFixedConstraint::get_builder_empty_items() {
+    return {};
 }

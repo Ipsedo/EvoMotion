@@ -54,7 +54,9 @@ void NewMemberWindow::render_window_content(
     if (input_float("axis.z", &rotation_axis.z, 4))
         rotation_axis = glm::normalize(rotation_axis + 1e-5f);
 
+    rotation_angle = glm::degrees(rotation_angle);
     input_float("angle", &rotation_angle, 4);
+    rotation_angle = glm::radians(rotation_angle);
 
     ImGui::EndGroup();
 

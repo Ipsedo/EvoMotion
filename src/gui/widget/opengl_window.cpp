@@ -24,7 +24,8 @@ OpenGlWindow::OpenGlWindow(std::string bar_item_name, const std::shared_ptr<Envi
               return glm::vec3(track_item.value()->model_matrix_without_scale()[3]);
           return glm::vec3(0.f);
       })),
-      view_matrix(1.f), projection_matrix(1.f) {}
+      view_matrix(1.f), projection_matrix(1.f), window_start_x(0), window_start_y(0),
+      window_width(1920), window_height(1080) {}
 
 std::string OpenGlWindow::get_name() { return name; }
 
@@ -46,6 +47,9 @@ void OpenGlWindow::remove_item(const std::shared_ptr<NoShapeItem> &no_shape_item
 }
 
 void OpenGlWindow::draw_opengl(const float width, const float height) {
+    window_width = width;
+    window_height = height;
+
     view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
     projection_matrix = glm::frustum(-1.f, 1.f, -height / width, height / width, 1.f, 200.f);
 
@@ -82,6 +86,10 @@ void OpenGlWindow::draw_opengl(const float width, const float height) {
 void OpenGlWindow::draw_imgui_image() {
     if (ImGui::BeginTabItem(name.c_str(), &opened)) {
 
+        const auto start_pos = ImGui::GetCursorStartPos();
+        window_start_x = start_pos.x;
+        window_start_y = start_pos.y;
+
         on_imgui_tab_begin();
 
         if (ImGui::IsWindowHovered()) camera->update();
@@ -97,6 +105,12 @@ void OpenGlWindow::draw_imgui_image() {
         active = false;
     }
 }
+
+std::tuple<float, float> OpenGlWindow::get_window_start_pos() {
+    return {window_start_x, window_start_y};
+}
+
+std::tuple<float, float> OpenGlWindow::get_width_height() { return {window_width, window_height}; }
 
 bool OpenGlWindow::is_active() const { return active; }
 
@@ -128,6 +142,7 @@ OpenGlWindow::get_drawable_factory(const std::shared_ptr<NoShapeItem> &item) {
     std::shared_ptr<DrawableFactory> factory;
     switch (item->get_drawable_kind()) {
         case BASIS_AXIS: factory = std::make_shared<BasisAxisFactory>(); break;
+        case ROTATION_TORUS: factory = std::make_shared<RotationTorusFactory>(); break;
     }
     return factory;
 }

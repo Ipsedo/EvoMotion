@@ -58,7 +58,9 @@ void MemberSettingsWindow::render_window_content(
         rotation_axis = glm::normalize(rotation_axis + 1e-5f);
         updated = true;
     }
+    rotation_angle = glm::degrees(rotation_angle);
     if (input_float("angle", &rotation_angle, 4)) updated = true;
+    rotation_angle = glm::radians(rotation_angle);
 
     member_rot = axis_angle_to_quat(rotation_axis, rotation_angle);
 

@@ -527,6 +527,9 @@ std::vector<std::shared_ptr<ShapeItem>> RobotBuilderEnvironment::get_draw_items(
         constraints, std::back_inserter(items),
         [](const std::shared_ptr<BuilderConstraint> &c) { return c->get_empty_item(); });
 
+    for (auto c: constraints)
+        for (const auto &i: c->get_builder_empty_items()) items.push_back(i);
+
     return items;
 }
 std::vector<std::shared_ptr<Controller>> RobotBuilderEnvironment::get_controllers() { return {}; }

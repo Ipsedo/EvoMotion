@@ -30,6 +30,9 @@ public:
     bool is_opened() const;
     std::string get_name();
 
+    std::tuple<float, float> get_window_start_pos();
+    std::tuple<float, float> get_width_height();
+
     void rename_drawable(const std::string &old_name, const std::string &new_name);
     void add_item(const std::shared_ptr<NoShapeItem> &no_shape_item);
     void remove_item(const std::shared_ptr<NoShapeItem> &no_shape_item);
@@ -57,6 +60,11 @@ private:
 
     glm::mat4 view_matrix;
     glm::mat4 projection_matrix;
+
+    float window_start_x;
+    float window_start_y;
+    float window_width;
+    float window_height;
 
 protected:
     virtual void on_imgui_tab_begin() = 0;

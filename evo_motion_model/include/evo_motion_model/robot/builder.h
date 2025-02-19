@@ -56,6 +56,8 @@ public:
 
     btRigidBody *create_fake_body();
 
+    virtual std::vector<std::shared_ptr<NoBodyItem>> get_builder_empty_items() = 0;
+
 protected:
     virtual std::shared_ptr<Shape> get_shape() = 0;
 };
@@ -79,11 +81,16 @@ public:
         const std::optional<float> &new_limit_radian_min = std::nullopt,
         const std::optional<float> &new_limit_radian_max = std::nullopt);
 
+    std::vector<std::shared_ptr<NoBodyItem>> get_builder_empty_items() override;
+
 protected:
     std::shared_ptr<Shape> get_shape() override;
 
 private:
     std::shared_ptr<Shape> shape;
+    std::shared_ptr<Shape> angle_limit_start_shape;
+    std::shared_ptr<Shape> angle_limit_end_shape;
+    std::shared_ptr<Shape> angle_ref_shape;
 };
 
 class BuilderFixedConstraint final : public virtual FixedConstraint,
@@ -101,6 +108,8 @@ public:
     void update_constraint(
         const std::optional<glm::vec3> &new_pivot = std::nullopt,
         const std::optional<glm::quat> &new_rot = std::nullopt);
+
+    std::vector<std::shared_ptr<NoBodyItem>> get_builder_empty_items() override;
 
 protected:
     std::shared_ptr<Shape> get_shape() override;

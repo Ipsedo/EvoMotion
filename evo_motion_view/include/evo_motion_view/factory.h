@@ -107,4 +107,10 @@ public:
     std::shared_ptr<Drawable> create_drawable() override;
 };
 
+class RotationTorusFactory : public DrawableFactory {
+public:
+    RotationTorusFactory();
+    std::shared_ptr<Drawable> create_drawable() override;
+};
+
 #endif//EVO_MOTION_FACTORY_H

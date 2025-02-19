@@ -7,6 +7,8 @@
 
 #include <evo_motion_model/item.h>
 
+#include "../construct/rotate.h"
+#include "../construct/translate.h"
 #include "../window.h"
 
 class MemberConstructToolsWindow final : public ImGuiWindow {
@@ -34,10 +36,6 @@ private:
     bool changed;
     int edit_choice;
 
-    bool is_dragging;
-    float prev_x_mouse;
-    float prev_y_mouse;
-
     float yaw;
     float pitch;
     float roll;
@@ -49,6 +47,9 @@ private:
 
     glm::mat4 view_matrix;
     glm::mat4 projection_matrix;
+
+    std::unique_ptr<TranslateTools> translate_tools;
+    std::unique_ptr<RotateTools> rotate_tools;
 };
 
 #endif//EVO_MOTION_MEMBER_CONSTRUCT_TOOLS_H

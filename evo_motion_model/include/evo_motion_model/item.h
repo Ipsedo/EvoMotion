@@ -90,7 +90,7 @@ private:
  * No Shape Item
  */
 
-enum PredefinedDrawableKind { BASIS_AXIS };
+enum PredefinedDrawableKind { BASIS_AXIS, ROTATION_TORUS };
 
 class NoShapeItem : public EmptyItem {
 public:

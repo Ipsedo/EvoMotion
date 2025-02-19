@@ -109,11 +109,8 @@ HingeConstraint::serialize(const std::shared_ptr<AbstractSerializer> &serializer
 std::tuple<glm::vec3, glm::quat, glm::vec3> HingeConstraint::get_empty_item_transform() {
     auto parent_model_mat = get_parent()->get_item()->model_matrix_without_scale();
 
-    const auto pre_rot =
-        glm::rotate(glm::mat4(1), static_cast<float>(M_PI) / 2.f, glm::vec3(1, 0, 0));
-
-    const auto [parent_pos, parent_rot, _1] = decompose_model_matrix(
-        parent_model_mat * bullet_to_glm(constraint->getFrameOffsetA()) * pre_rot);
+    const auto [parent_pos, parent_rot, _1] =
+        decompose_model_matrix(parent_model_mat * bullet_to_glm(constraint->getFrameOffsetA()));
 
     const auto [_2, _3, parent_scale] =
         decompose_model_matrix(get_parent()->get_item()->model_matrix());

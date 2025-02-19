@@ -63,7 +63,7 @@ std::shared_ptr<Drawable> TileGroundFactory::create_drawable() {
         diffuse_color_b, specular_color_b, shininess, tile_size);
 }
 
-// Edge Specular
+// Builder OBJ Specular
 
 BuilderObjSpecularFactory::BuilderObjSpecularFactory(
     const std::vector<std::tuple<float, float, float>> &vertices,
@@ -103,4 +103,15 @@ std::shared_ptr<Drawable> BasisAxisFactory::create_drawable() {
     return std::make_shared<ObjMtlSpecular>(
         std::filesystem::path(RESOURCES_PATH) / "basis_axis.obj",
         std::filesystem::path(RESOURCES_PATH) / "basis_axis.mtl", 0.5f, 0.35f, 0.15f);
+}
+
+/*
+ * Torus
+ */
+
+RotationTorusFactory::RotationTorusFactory() {}
+std::shared_ptr<Drawable> RotationTorusFactory::create_drawable() {
+    return std::make_shared<ObjMtlSpecular>(
+        std::filesystem::path(RESOURCES_PATH) / "rotation_torus.obj",
+        std::filesystem::path(RESOURCES_PATH) / "rotation_torus.mtl", 0.5f, 0.35f, 0.15f);
 }

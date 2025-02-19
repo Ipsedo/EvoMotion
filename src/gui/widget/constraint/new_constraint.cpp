@@ -135,7 +135,9 @@ void NewFixedConstraintWindow::render_constraint_specific_settings(
     if (input_float("axis.x", &rotation_axis.x, 4)) rotation_axis = glm::normalize(rotation_axis);
     if (input_float("axis.y", &rotation_axis.y, 4)) rotation_axis = glm::normalize(rotation_axis);
     if (input_float("axis.z", &rotation_axis.z, 4)) rotation_axis = glm::normalize(rotation_axis);
+    angle = glm::degrees(angle);
     input_float("angle", &angle, 4);
+    angle = glm::radians(angle);
 
     ImGui::Spacing();
     ImGui::Separator();

@@ -125,8 +125,12 @@ void HingeConstraintSettingsWindow::render_constraint_specific_window(
     ImGui::Text("Angular limits");
     ImGui::Spacing();
 
+    limit_angle_min = glm::degrees(limit_angle_min);
+    limit_angle_max = glm::degrees(limit_angle_max);
     if (input_float("min", &limit_angle_min, 4)) updated = true;
     if (input_float("max", &limit_angle_max, 4)) updated = true;
+    limit_angle_min = glm::radians(limit_angle_min);
+    limit_angle_max = glm::radians(limit_angle_max);
 
     ImGui::EndGroup();
 
