@@ -42,7 +42,6 @@ bool RobotBuilderEnvironment::update_member(
     const std::optional<glm::quat> &new_rot, const std::optional<glm::vec3> &new_scale,
     const std::optional<float> &new_friction, const std::optional<float> &new_mass,
     const std::optional<bool> &new_ignore_collision) {
-
     if (member_exists(member_name)) {
         std::set<std::string> updated_members;
 

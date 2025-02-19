@@ -166,7 +166,8 @@ BuilderOpenGlWindow::BuilderOpenGlWindow(
     : OpenGlWindow(std::move(bar_item_name), env), context(context),
       mouse_event(std::make_unique<RayMouseEvent>(1920, 1080)), builder_env(env),
       on_member_focused(on_member_focused), on_constraint_focused(on_constraint_focused),
-      get_part_type(get_part_type) {}
+      get_part_type(get_part_type),
+      cube_grid(CubeGridFactory(4.f, 1.f, glm::vec4(glm::vec3(0.2), 0.2)).create_drawable()) {}
 
 void BuilderOpenGlWindow::on_imgui_tab_begin() {
     if (ImGui::IsWindowHovered() && ImGui::IsWindowFocused()) {
@@ -196,6 +197,8 @@ void BuilderOpenGlWindow::on_opengl_frame(
     const glm::mat4 &new_proj_matrix) {
 
     mouse_event->update(new_width, new_height, new_view_matrix, new_proj_matrix);
+
+    cube_grid->draw(new_proj_matrix, new_view_matrix, glm::mat4(1.f), glm::vec3(0), glm::vec3(0));
 }
 
 std::shared_ptr<DrawableFactory> BuilderOpenGlWindow::get_drawable_factory(

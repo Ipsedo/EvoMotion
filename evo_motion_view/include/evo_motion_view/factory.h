@@ -113,4 +113,15 @@ public:
     std::shared_ptr<Drawable> create_drawable() override;
 };
 
+class CubeGridFactory : public DrawableFactory {
+public:
+    CubeGridFactory(float cube_size, float cell_size, const glm::vec4 &color);
+    std::shared_ptr<Drawable> create_drawable() override;
+
+private:
+    float cube_size;
+    float cell_size;
+    glm::vec4 color;
+};
+
 #endif//EVO_MOTION_FACTORY_H

@@ -148,6 +148,8 @@ void BuilderObjSpecular::draw(
         ambient_color = original_amb_color;
         diffuse_color = original_diff_color;
         specular_color = original_spec_color;
+
+        glLineWidth(1.0f);
     }
 
     glDisable(GL_BLEND);

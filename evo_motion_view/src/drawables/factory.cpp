@@ -5,6 +5,7 @@
 #include <evo_motion_view/factory.h>
 
 #include "./constants.h"
+#include "./cube_grid.h"
 #include "./ground.h"
 #include "./specular.h"
 
@@ -114,4 +115,14 @@ std::shared_ptr<Drawable> RotationTorusFactory::create_drawable() {
     return std::make_shared<ObjMtlSpecular>(
         std::filesystem::path(RESOURCES_PATH) / "rotation_torus.obj",
         std::filesystem::path(RESOURCES_PATH) / "rotation_torus.mtl", 0.5f, 0.35f, 0.15f);
+}
+
+/*
+ * Cube Grid
+ */
+
+CubeGridFactory::CubeGridFactory(float cube_size, float cell_size, const glm::vec4 &color)
+    : cube_size(cube_size), cell_size(cell_size), color(color) {}
+std::shared_ptr<Drawable> CubeGridFactory::create_drawable() {
+    return std::make_shared<CubeGrid>(cube_size, cell_size, color);
 }

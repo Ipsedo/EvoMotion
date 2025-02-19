@@ -102,6 +102,8 @@ private:
 
     std::function<PartKind()> get_part_type;
 
+    std::shared_ptr<Drawable> cube_grid;
+
 public:
     BuilderOpenGlWindow(
         const std::shared_ptr<ItemFocusContext> &context, std::string bar_item_name,
