@@ -148,3 +148,5 @@ void MemberSettingsWindow::add_focus(const std::shared_ptr<ItemFocusContext> &co
 void MemberSettingsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) const {
     context->release_focus(member_name);
 }
+
+bool MemberSettingsWindow::need_close() { return !builder_env->member_exists(member_name); }

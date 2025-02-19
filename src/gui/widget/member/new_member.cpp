@@ -118,3 +118,5 @@ void NewMemberWindow::on_close(const std::shared_ptr<ItemFocusContext> &context)
 
 void NewMemberWindow::on_focus_change(
     bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {}
+
+bool NewMemberWindow::need_close() { return false; }

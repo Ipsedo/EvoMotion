@@ -74,6 +74,9 @@ std::optional<std::shared_ptr<ImGuiWindow>> FocusConstraintPopUpWindow::pop_chil
     }
     return children;
 }
+bool FocusConstraintPopUpWindow::need_close() {
+    return !builder_env->constraint_exists(constraint_name);
+}
 
 /*
  * No focus
@@ -116,3 +119,5 @@ void NoFocusConstraintPopUpWindow::render_popup_content(
         close();
     }
 }
+
+bool NoFocusConstraintPopUpWindow::need_close() { return false; }

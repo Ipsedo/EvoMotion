@@ -20,7 +20,7 @@ class ImGuiWindow {
 public:
     explicit ImGuiWindow(std::string name);
 
-    bool is_closed() const;
+    bool is_closed();
     void close();
     virtual void render_window(
         const std::shared_ptr<ItemFocusContext> &context,
@@ -36,6 +36,7 @@ protected:
     virtual void on_close(const std::shared_ptr<ItemFocusContext> &context) = 0;
     virtual void
     on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) = 0;
+    virtual bool need_close() = 0;
 
     virtual ImVec2 get_min_size();
 

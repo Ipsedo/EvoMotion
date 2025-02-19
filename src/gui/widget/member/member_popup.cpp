@@ -53,6 +53,8 @@ std::optional<std::shared_ptr<ImGuiWindow>> FocusMemberPopUpWindow::pop_child() 
     return children;
 }
 
+bool FocusMemberPopUpWindow::need_close() { return !builder_env->member_exists(member_name); }
+
 /*
  * No focus
  */
@@ -90,3 +92,5 @@ std::optional<std::shared_ptr<ImGuiWindow>> NoFocusMemberPopUpWindow::pop_child(
     }
     return children;
 }
+
+bool NoFocusMemberPopUpWindow::need_close() { return false; }

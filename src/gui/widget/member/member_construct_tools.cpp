@@ -130,3 +130,4 @@ void MemberConstructToolsWindow::add_focus(const std::shared_ptr<ItemFocusContex
 void MemberConstructToolsWindow::clear_focus(const std::shared_ptr<ItemFocusContext> &context) {
     context->release_focus(member_name);
 }
+bool MemberConstructToolsWindow::need_close() { return !builder_env->member_exists(member_name); }

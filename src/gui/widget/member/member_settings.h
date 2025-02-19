@@ -21,6 +21,8 @@ protected:
 
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
 
+    bool need_close() override;
+
 private:
     std::string member_name;
     std::shared_ptr<RobotBuilderEnvironment> builder_env;

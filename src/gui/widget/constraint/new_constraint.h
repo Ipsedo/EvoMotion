@@ -27,6 +27,8 @@ protected:
         const std::string &constraint_name, const std::optional<std::string> &parent_name,
         const std::optional<std::string> &child_name, const glm::vec3 &absolute_position) = 0;
 
+    bool need_close() override;
+
 private:
     std::shared_ptr<RobotBuilderEnvironment> builder_env;
 

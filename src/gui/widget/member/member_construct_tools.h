@@ -27,6 +27,7 @@ protected:
         const std::shared_ptr<OpenGlWindow> &gl_window) override;
     void on_close(const std::shared_ptr<ItemFocusContext> &context) override;
     void on_focus_change(bool new_focus, const std::shared_ptr<ItemFocusContext> &context) override;
+    bool need_close() override;
 
     void add_focus(const std::shared_ptr<ItemFocusContext> &context);
     void clear_focus(const std::shared_ptr<ItemFocusContext> &context);

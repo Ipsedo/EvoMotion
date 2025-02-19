@@ -87,3 +87,4 @@ void DuplicateGroupWindow::on_focus_change(
     if (new_focus) add_focus(context);
     else clear_focus(context);
 }
+bool DuplicateGroupWindow::need_close() { return !builder_env->member_exists(member_name); }

@@ -12,7 +12,7 @@ ImGuiWindow::ImGuiWindow(std::string name) : name(std::move(name)), show(true), 
 
 void ImGuiWindow::close() { show = false; }
 
-bool ImGuiWindow::is_closed() const { return !show; }
+bool ImGuiWindow::is_closed() { return !show || need_close(); }
 
 std::optional<std::shared_ptr<ImGuiWindow>> ImGuiWindow::pop_child() { return std::nullopt; }
 

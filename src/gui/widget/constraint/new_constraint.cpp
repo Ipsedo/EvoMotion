@@ -115,6 +115,8 @@ std::string NewConstraintWindow::get_window_name(const ConstraintType &constrain
     return window_name + " constraint";
 }
 
+bool NewConstraintWindow::need_close() { return false; }
+
 /*
  * Fixed
  */

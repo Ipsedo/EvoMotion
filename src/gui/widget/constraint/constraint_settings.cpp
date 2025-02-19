@@ -59,6 +59,10 @@ void ConstraintSettingsWindow::on_focus_change(
     else clear_focus(context);
 }
 
+bool ConstraintSettingsWindow::need_close() {
+    return !builder_env->constraint_exists(constraint_name);
+}
+
 /*
  * Hinge
  */
