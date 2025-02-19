@@ -258,7 +258,7 @@ bool RobotBuilderEnvironment::clone_body_part(
 
         m_world->addConstraint(new_constraint->get_constraint());
     }
-    return true;
+
     return update_member(prefix_name + member_name, center_pos, rotation);
 }
 
