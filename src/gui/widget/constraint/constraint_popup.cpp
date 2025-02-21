@@ -5,6 +5,7 @@
 #include "./constraint_popup.h"
 
 #include "../robot_info.h"
+#include "./constraint_construct_tools.h"
 #include "./constraint_settings.h"
 #include "./new_constraint.h"
 
@@ -36,8 +37,17 @@ void FocusConstraintPopUpWindow::render_popup_content(
 
         close();
     }
+
     if (ImGui::MenuItem("Construct tools")) {
-        // TODO
+        switch (builder_env->get_constraint_type(constraint_name)) {
+            case HINGE:
+                children =
+                    std::make_shared<HingeConstructToolsWindow>(constraint_name, builder_env);
+                break;
+            case FIXED: break;
+        }
+
+        close();
     }
 }
 

@@ -195,6 +195,8 @@ public:
     std::tuple<glm::vec3, glm::quat>
     get_constraint_fixed_info(const std::string &fixed_constraint_name) const;
     std::tuple<std::string, std::string> get_constraint_members(const std::string &constraint_name);
+    std::tuple<glm::vec3, glm::quat, glm::vec3>
+    get_constraint_transform(const std::string &constraint_name) const;
 
     std::optional<std::string>
     ray_cast_member(const glm::vec3 &from_absolute, const glm::vec3 &to_absolute) const;

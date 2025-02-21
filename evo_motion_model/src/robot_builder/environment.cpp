@@ -400,6 +400,12 @@ RobotBuilderEnvironment::get_constraint(const std::string &constraint_name) cons
     return get_part<BuilderConstraint>(constraint_name, constraints);
 }
 
+std::tuple<glm::vec3, glm::quat, glm::vec3>
+RobotBuilderEnvironment::get_constraint_transform(const std::string &constraint_name) const {
+    return decompose_model_matrix(
+        get_constraint(constraint_name)->get_empty_item()->model_matrix());
+}
+
 /*
  * Utility
  */

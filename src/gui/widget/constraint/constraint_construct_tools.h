@@ -5,16 +5,26 @@
 #ifndef EVO_MOTION_CONSTRAINT_CONSTRUCT_TOOLS_H
 #define EVO_MOTION_CONSTRAINT_CONSTRUCT_TOOLS_H
 
-#include "../window.h"
+#include "../construct/construct_tools.h"
 
-class ConstraintConstructToolsWindow final : public ImGuiWindow {
+class HingeConstructToolsWindow final : public ConstructToolsWindow {
 public:
-    ConstraintConstructToolsWindow();
+    HingeConstructToolsWindow(
+        const std::string &constraint_name,
+        const std::shared_ptr<RobotBuilderEnvironment> &builder_env);
 
 protected:
-    void render_window_content(
-        const std::shared_ptr<ItemFocusContext> &context,
-        const std::shared_ptr<OpenGlWindow> &gl_window) override;
+    void on_update_pos(const glm::vec3 &pos_delta) override;
+    void on_update_rot(const glm::quat &rot_delta) override;
+    void on_update_scale(const glm::vec3 &scale_delta) override;
+    std::tuple<glm::vec3, glm::quat, glm::vec3> get_construct_item_model_matrix() override;
+    void add_focus(const std::shared_ptr<ItemFocusContext> &context) override;
+    void clear_focus(const std::shared_ptr<ItemFocusContext> &context) override;
+    bool need_close() override;
+
+private:
+    std::string constraint_name;
+    std::shared_ptr<RobotBuilderEnvironment> builder_env;
 };
 
 #endif//EVO_MOTION_CONSTRAINT_CONSTRUCT_TOOLS_H
