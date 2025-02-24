@@ -9,7 +9,8 @@
 MemberConstructToolsWindow::MemberConstructToolsWindow(
     const std::string &member_name, const std::shared_ptr<RobotBuilderEnvironment> &builder_env)
     : ConstructToolsWindow("Construct tools of \"" + member_name + "\"", true, true, true),
-      member_name(member_name), builder_env(builder_env) {}
+      member_name(member_name), builder_env(builder_env), view_matrix(1.f), projection_matrix(1.f) {
+}
 
 void MemberConstructToolsWindow::on_update_pos(const glm::vec3 &pos_delta) {
     const auto [pos, rot, scale] = builder_env->get_member_transform(member_name);

@@ -34,10 +34,9 @@ std::optional<glm::quat> RotateTools::get_rot_delta(
             prev_x_mouse = mouse_pos.x;
             prev_y_mouse = mouse_pos.y;
         } else if (locked_direction == -1) {
-            float dist_width = std::abs(prev_x_mouse - mouse_pos.x);
-            float dist_height = std::abs(prev_y_mouse - mouse_pos.y);
-
-            if (dist_width > dist_height) locked_direction = 0;
+            // rist_width > dist_height
+            if (std::abs(prev_x_mouse - mouse_pos.x) > std::abs(prev_y_mouse - mouse_pos.y))
+                locked_direction = 0;
             else if (!ImGui::IsKeyDown(ImGuiKey_LeftShift)) locked_direction = 1;
             else locked_direction = 2;
         }
@@ -115,11 +114,11 @@ std::optional<glm::quat> RotateTools::get_rot_delta(
         const auto final_rot_axis = glm::vec3(axis_rot * rot_to_axis[to_use]);
 
         return glm::angleAxis(angle, final_rot_axis);
-    } else {
-        is_dragging = false;
-        locked_direction = -1;
-        return std::nullopt;
     }
+
+    is_dragging = false;
+    locked_direction = -1;
+    return std::nullopt;
 }
 
 std::vector<glm::vec2> RotateTools::transform_circle_points(
@@ -128,7 +127,7 @@ std::vector<glm::vec2> RotateTools::transform_circle_points(
     std::vector<glm::vec2> points;
 
     const auto [ini_yaw, init_pitch, ini_roll] = initial_yaw_pitch_roll;
-    glm::mat4 ini_rot = glm::yawPitchRoll(ini_yaw, init_pitch, ini_roll);
+    const glm::mat4 ini_rot = glm::yawPitchRoll(ini_yaw, init_pitch, ini_roll);
 
     for (int i = 0; i < nb_points; i++) {
         const auto point =

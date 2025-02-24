@@ -211,7 +211,7 @@ std::vector<float> ObjMtlSpecular::read_packed_data(
     std::map<std::string, float> mtl_shininess;
 
     // MTL
-    std::string current_mtl = "";
+    std::string current_mtl;
     while (std::getline(mtl_file, line)) {
         if (line.starts_with("newmtl")) {
             current_mtl = split(line, ' ')[1];//line.split(" ")[1];
@@ -258,7 +258,7 @@ std::vector<float> ObjMtlSpecular::read_packed_data(
             curr_normals_order.push_back(std::stoi(split(split_line[2], '/')[2]));
             curr_normals_order.push_back(std::stoi(split(split_line[3], '/')[2]));
         } else if (split_line[0] == "usemtl") {
-            if (mtl_to_use.size() > 0) {
+            if (!mtl_to_use.empty()) {
                 vertices_order.push_back(curr_vertices_order);
                 normals_order.push_back(curr_normals_order);
             }
@@ -273,10 +273,10 @@ std::vector<float> ObjMtlSpecular::read_packed_data(
     std::vector<float> packed_data;
 
     for (int i = 0; i < vertices_order.size(); i++) {
-        const auto curr_v_order = vertices_order[i];
-        const auto curr_n_order = normals_order[i];
+        const auto &curr_v_order = vertices_order[i];
+        const auto &curr_n_order = normals_order[i];
 
-        const auto mtl = mtl_to_use[i];
+        const auto &mtl = mtl_to_use[i];
         const auto [a_r, a_g, a_b] = mtl_amb_color[mtl];
         const auto [d_r, d_g, d_b] = mtl_diff_color[mtl];
         const auto [s_r, s_g, s_b] = mtl_spec_color[mtl];
@@ -323,8 +323,8 @@ std::vector<float> ObjMtlSpecular::read_packed_data(
 }
 
 void ObjMtlSpecular::draw(
-    glm::mat4 projection_matrix, glm::mat4 view_matrix, glm::mat4 model_matrix,
-    glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) {
+    const glm::mat4 projection_matrix, const glm::mat4 view_matrix, const glm::mat4 model_matrix,
+    const glm::vec3 light_pos_from_camera, const glm::vec3 camera_pos) {
     const auto mv_matrix = view_matrix * model_matrix;
     const auto mvp_matrix = projection_matrix * mv_matrix;
 

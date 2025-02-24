@@ -83,7 +83,7 @@ void DuplicateGroupWindow::on_close(const std::shared_ptr<ItemFocusContext> &con
 }
 
 void DuplicateGroupWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) add_focus(context);
     else clear_focus(context);
 }

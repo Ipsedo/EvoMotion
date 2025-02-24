@@ -97,8 +97,8 @@ std::optional<glm::vec3> TranslateTools::get_pos_delta(
         prev_y_mouse = new_mouse_pos.y;
 
         return glm::vec3(axis_rot * glm::vec4(new_move, 0.f));
-    } else {
-        is_dragging = false;
-        return std::nullopt;
     }
+
+    is_dragging = false;
+    return std::nullopt;
 }

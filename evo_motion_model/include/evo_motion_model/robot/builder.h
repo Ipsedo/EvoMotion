@@ -194,7 +194,8 @@ public:
     get_constraint_hinge_info(const std::string &hinge_constraint_name) const;
     std::tuple<glm::vec3, glm::quat>
     get_constraint_fixed_info(const std::string &fixed_constraint_name) const;
-    std::tuple<std::string, std::string> get_constraint_members(const std::string &constraint_name);
+    std::tuple<std::string, std::string>
+    get_constraint_members(const std::string &constraint_name) const;
     std::tuple<glm::vec3, glm::quat, glm::vec3>
     get_constraint_transform(const std::string &constraint_name) const;
 

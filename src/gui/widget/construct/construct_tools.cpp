@@ -8,13 +8,12 @@
 #include <glm/gtx/euler_angles.hpp>
 
 ConstructToolsWindow::ConstructToolsWindow(
-    const std::string &window_name, bool position, bool rotation, bool scale)
-    : ImGuiWindow(window_name), is_editing(false), changed(false), edit_choice(0), yaw(0.f),
-      pitch(0.f), roll(0.f),
+    const std::string &window_name, const bool position, const bool rotation, const bool scale)
+    : ImGuiWindow(window_name), is_editing(false), changed(false), position_tools(position),
+      rotation_tools(rotation), scale_tools(scale), edit_choice(0), yaw(0.f), pitch(0.f), roll(0.f),
       construct_item(std::make_shared<NoShapeItem>(window_name + "_construct_tools", BASIS_AXIS)),
       translate_tools(std::make_unique<TranslateTools>()),
-      rotate_tools(std::make_unique<RotateTools>()), position_tools(position),
-      rotation_tools(rotation), scale_tools(scale) {}
+      rotate_tools(std::make_unique<RotateTools>()) {}
 
 void ConstructToolsWindow::render_window_content(
     const std::shared_ptr<ItemFocusContext> &context,
@@ -93,6 +92,7 @@ void ConstructToolsWindow::render_window_content(
                 on_update_rot(rot_delta_opt.value());
             break;
         case 2: break;
+        default: break;
     }
 }
 
@@ -117,7 +117,7 @@ void ConstructToolsWindow::on_close(const std::shared_ptr<ItemFocusContext> &con
 }
 
 void ConstructToolsWindow::on_focus_change(
-    bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
+    const bool new_focus, const std::shared_ptr<ItemFocusContext> &context) {
     if (new_focus) add_focus(context);
     else clear_focus(context);
 }

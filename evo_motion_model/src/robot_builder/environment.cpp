@@ -193,19 +193,17 @@ bool RobotBuilderEnvironment::clone_body_part(
         auto curr_member = queue.front();
         queue.pop();
 
-        std::shared_ptr<JsonSerializer> serializer =
-            std::make_shared<JsonSerializer>(nlohmann::json());
+        auto serializer = std::make_shared<JsonSerializer>(nlohmann::json());
         auto serialized = curr_member->serialize(serializer);
 
-        nlohmann::json content = std::any_cast<nlohmann::json>(serialized->get_data());
+        auto content = std::any_cast<nlohmann::json>(serialized->get_data());
         content["name"] = prefix_name + content["name"].get<std::string>();
 
         const auto new_name = content["name"].get<std::string>();
 
         if (member_exists(new_name)) return false;
 
-        std::shared_ptr<JsonDeserializer> deserializer =
-            std::make_shared<JsonDeserializer>(content);
+        auto deserializer = std::make_shared<JsonDeserializer>(content);
 
         member_to_add.push_back(std::make_shared<BuilderMember>(deserializer));
         skeleton_graph[new_name] = {};
@@ -317,7 +315,7 @@ bool RobotBuilderEnvironment::remove_constraint(const std::string &constraint_na
 }
 
 std::tuple<std::string, std::string>
-RobotBuilderEnvironment::get_constraint_members(const std::string &constraint_name) {
+RobotBuilderEnvironment::get_constraint_members(const std::string &constraint_name) const {
     const auto c = get_constraint(constraint_name);
     return {c->get_parent()->get_name(), c->get_child()->get_name()};
 }
@@ -618,7 +616,7 @@ std::vector<std::shared_ptr<ShapeItem>> RobotBuilderEnvironment::get_draw_items(
         constraints, std::back_inserter(items),
         [](const std::shared_ptr<BuilderConstraint> &c) { return c->get_empty_item(); });
 
-    for (auto c: constraints)
+    for (const auto &c: constraints)
         for (const auto &i: c->get_builder_empty_items()) items.push_back(i);
 
     return items;

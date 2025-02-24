@@ -18,7 +18,7 @@ std::optional<std::shared_ptr<ImGuiWindow>> ImGuiWindow::pop_child() { return st
 
 std::string ImGuiWindow::get_name() const { return name; }
 
-ImVec2 ImGuiWindow::get_min_size() { return ImVec2(300, 0); }
+ImVec2 ImGuiWindow::get_min_size() { return {300, 0}; }
 
 void ImGuiWindow::render_window(
     const std::shared_ptr<ItemFocusContext> &context,

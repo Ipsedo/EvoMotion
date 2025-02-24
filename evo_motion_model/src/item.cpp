@@ -97,7 +97,7 @@ NoShapeItem::NoShapeItem(std::string name, const PredefinedDrawableKind &predefi
     : name(std::move(name)), position(0), rotation(0, glm::vec3(1, 0, 0)), scale(1),
       predefined_drawable(predefined_drawable) {}
 
-PredefinedDrawableKind NoShapeItem::get_drawable_kind() { return predefined_drawable; }
+PredefinedDrawableKind NoShapeItem::get_drawable_kind() const { return predefined_drawable; }
 
 std::string NoShapeItem::get_name() const { return name; }
 
@@ -136,7 +136,7 @@ NoBodyItem::NoBodyItem(
     const std::function<glm::vec3()> &get_position, const std::function<glm::quat()> &get_rotation,
     const std::function<glm::vec3()> &get_scale, const DrawableKind &drawable_kind)
     : name(std::move(name)), get_position(get_position), get_rotation(get_rotation),
-      get_scale(get_scale), shape(shape), drawable_kind(drawable_kind) {}
+      get_scale(get_scale), first_model_matrix(1.f), shape(shape), drawable_kind(drawable_kind) {}
 
 std::string NoBodyItem::get_name() const { return name; }
 

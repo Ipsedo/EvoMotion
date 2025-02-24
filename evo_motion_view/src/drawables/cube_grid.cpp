@@ -16,15 +16,15 @@ CubeGrid::CubeGrid(const float cube_size, const float cell_size, const glm::vec4
                                .build()),
       color(color) {}
 
-std::vector<float> CubeGrid::get_line_data(float cube_size, float cell_size) {
-    int num_lines = static_cast<int>(cube_size / cell_size) + 1;
+std::vector<float> CubeGrid::get_line_data(const float cube_size, const float cell_size) {
+    const int num_lines = static_cast<int>(cube_size / cell_size) + 1;
 
     float side = cube_size / 2.f;
 
     std::vector<float> packed_data;
 
     for (int i = 0; i < num_lines; ++i) {
-        float offset = i * cell_size;
+        float offset = static_cast<float>(i) * cell_size;
 
         packed_data.insert(packed_data.end(), {0, 0, offset, cube_size, 0, offset});
         packed_data.insert(packed_data.end(), {0, cube_size, offset, cube_size, cube_size, offset});
@@ -47,14 +47,14 @@ std::vector<float> CubeGrid::get_line_data(float cube_size, float cell_size) {
         packed_data, std::back_inserter(centered_packed_date),
         [side](const float f) { return f - side; });
 
-    nb_lines = packed_data.size() / 3;
+    nb_lines = static_cast<int>(packed_data.size()) / 3;
 
     return centered_packed_date;
 }
 
 void CubeGrid::draw(
-    glm::mat4 projection_matrix, glm::mat4 view_matrix, glm::mat4 model_matrix,
-    glm::vec3 light_pos_from_camera, glm::vec3 camera_pos) {
+    const glm::mat4 projection_matrix, const glm::mat4 view_matrix, const glm::mat4 model_matrix,
+    const glm::vec3 light_pos_from_camera, const glm::vec3 camera_pos) {
     glEnable(GL_BLEND);
 
     program.use();
