@@ -17,10 +17,10 @@ void HingeConstructToolsWindow::on_update_pos(const glm::vec3 &pos_delta) {
 }
 
 void HingeConstructToolsWindow::on_update_rot(const glm::quat &rot_delta) {
-    const auto [pos, rot, scale] = builder_env->get_constraint_transform(constraint_name);
-
-    const glm::vec3 axis(0, 0, 1);
-    builder_env->update_hinge_constraint(constraint_name, std::nullopt, rot_delta * rot * axis);
+    const auto [pos, axis, limit_min, limit_max] =
+        builder_env->get_constraint_hinge_info(constraint_name);
+    builder_env->update_hinge_constraint(
+        constraint_name, std::nullopt, glm::normalize(rot_delta * axis));
 }
 
 void HingeConstructToolsWindow::on_update_scale(const glm::vec3 &scale_delta) {}

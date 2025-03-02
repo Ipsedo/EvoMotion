@@ -6,6 +6,7 @@
 #define EVO_MOTION_EVENT_H
 
 #include <optional>
+#include <tuple>
 
 #include <glm/glm.hpp>
 

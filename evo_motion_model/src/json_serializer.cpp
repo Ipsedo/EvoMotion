@@ -22,7 +22,7 @@
  * Serializer
  */
 
-JsonSerializer::JsonSerializer() : JsonSerializer({}) {}
+JsonSerializer::JsonSerializer() : JsonSerializer(nlohmann::json()) {}
 JsonSerializer::JsonSerializer(nlohmann::json content)
     : content(std::move(content)),
       shape_kind_to_str(

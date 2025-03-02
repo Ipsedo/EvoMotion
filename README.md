@@ -53,7 +53,7 @@ Build and run image :
 ```bash
 $ cd /path/to/EvoMotion
 $ # build image
-$ docker build . --tag evo_motion
+$ sudo docker buildx build . --tag evo_motion
 $ # run training
 $ docker run -v /path/to/your/local/output_folder:/opt/evo_motion/out_train_muscle_ppo --rm --runtime=nvidia --gpus all evo_motion robot_walk ppo --agent_parameters seed=1234 hidden_size=256 gamma=0.99 lambda=0.95 epsilon=0.2 epoch=8 batch_size=32 learning_rate=1e-3 replay_buffer_size=1024 train_every=8 entropy_factor=0.01 critic_loss_factor=0.5 grad_norm_clip=0.5 --cuda --env_seed 1234  train /opt/evo_motion/out_train_muscle_ppo --episodes 512 --nb_saves 4096
 ```

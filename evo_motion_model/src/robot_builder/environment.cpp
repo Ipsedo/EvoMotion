@@ -372,8 +372,10 @@ bool RobotBuilderEnvironment::update_hinge_constraint(
         || get_constraint_type(hinge_constraint_name) != HINGE)
         return false;
 
+    m_world->removeConstraint(get_constraint(hinge_constraint_name)->get_constraint());
     std::dynamic_pointer_cast<BuilderHingeConstraint>(get_constraint(hinge_constraint_name))
         ->update_constraint(new_pos, new_axis, new_limit_angle_min, new_angle_limit_max);
+    m_world->addConstraint(get_constraint(hinge_constraint_name)->get_constraint());
 
     return true;
 }
@@ -385,8 +387,10 @@ bool RobotBuilderEnvironment::update_fixed_constraint(
         || get_constraint_type(fixed_constraint_name) != FIXED)
         return false;
 
+    m_world->removeConstraint(get_constraint(fixed_constraint_name)->get_constraint());
     std::dynamic_pointer_cast<BuilderFixedConstraint>(get_constraint(fixed_constraint_name))
         ->update_constraint(new_pos, new_rot);
+    m_world->addConstraint(get_constraint(fixed_constraint_name)->get_constraint());
 
     return true;
 }
