@@ -6,6 +6,7 @@
 #define EVO_MOTION_BUILDER_H
 
 #include <string>
+
 #include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 
