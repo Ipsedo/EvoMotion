@@ -62,12 +62,12 @@ void InferSettingsWindow::render_window_content(
 
         const auto now = std::chrono::system_clock::now().time_since_epoch();
         const long id = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
-        const auto gl_window =
+        const auto infer_gl_window =
             std::make_shared<InferOpenGlWindow>(agent, "Infer " + std::to_string(id), env);
 
         close();
 
-        on_start_infer(gl_window);
+        on_start_infer(infer_gl_window);
     }
 }
 

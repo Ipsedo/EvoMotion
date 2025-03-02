@@ -23,10 +23,10 @@ enum DrawableKind { SPECULAR, TILE_SPECULAR };
 
 class EmptyItem {
 public:
-    virtual std::string get_name() const = 0;
+    [[nodiscard]] virtual std::string get_name() const = 0;
 
-    virtual glm::mat4 model_matrix() const = 0;
-    virtual glm::mat4 model_matrix_without_scale() const = 0;
+    [[nodiscard]] virtual glm::mat4 model_matrix() const = 0;
+    [[nodiscard]] virtual glm::mat4 model_matrix_without_scale() const = 0;
 
     virtual void reset(const glm::mat4 &main_model_matrix) = 0;
 
@@ -35,9 +35,9 @@ public:
 
 class ShapeItem : public EmptyItem {
 public:
-    virtual std::shared_ptr<Shape> get_shape() const = 0;
+    [[nodiscard]] virtual std::shared_ptr<Shape> get_shape() const = 0;
 
-    virtual DrawableKind get_drawable_kind() const = 0;
+    [[nodiscard]] virtual DrawableKind get_drawable_kind() const = 0;
 };
 
 /*
@@ -48,30 +48,30 @@ class RigidBodyItem final : public ShapeItem {
 public:
     RigidBodyItem(
         std::string name, const std::shared_ptr<Shape> &shape, const glm::mat4 &model_matrix,
-        const glm::vec3 &scale, const float mass, const DrawableKind &drawable_kind);
+        const glm::vec3 &scale, float mass, const DrawableKind &drawable_kind);
 
     RigidBodyItem(
         std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
-        const glm::vec3 &scale, const float mass, const DrawableKind &drawable_kind);
+        const glm::vec3 &scale, float mass, const DrawableKind &drawable_kind);
 
     RigidBodyItem(
         std::string name, const std::shared_ptr<Shape> &shape, const glm::vec3 &position,
-        const glm::quat &rotation, const glm::vec3 &scale, const float mass,
+        const glm::quat &rotation, const glm::vec3 &scale, float mass,
         const DrawableKind &drawable_kind);
 
-    std::shared_ptr<Shape> get_shape() const override;
-    std::string get_name() const override;
+    [[nodiscard]] std::shared_ptr<Shape> get_shape() const override;
+    [[nodiscard]] std::string get_name() const override;
 
-    btRigidBody *get_body() const;
+    [[nodiscard]] btRigidBody *get_body() const;
 
-    glm::mat4 model_matrix() const override;
-    glm::mat4 model_matrix_without_scale() const override;
+    [[nodiscard]] glm::mat4 model_matrix() const override;
+    [[nodiscard]] glm::mat4 model_matrix_without_scale() const override;
 
     void rename(const std::string &new_name);
 
     void reset(const glm::mat4 &main_model_matrix) override;
 
-    DrawableKind get_drawable_kind() const override;
+    [[nodiscard]] DrawableKind get_drawable_kind() const override;
 
 private:
     std::string name;
@@ -92,16 +92,16 @@ private:
 
 enum PredefinedDrawableKind { BASIS_AXIS, ROTATION_TORUS };
 
-class NoShapeItem : public EmptyItem {
+class NoShapeItem final : public EmptyItem {
 public:
     NoShapeItem(std::string name, const PredefinedDrawableKind &predefined_drawable);
 
-    std::string get_name() const override;
-    glm::mat4 model_matrix() const override;
-    glm::mat4 model_matrix_without_scale() const override;
+    [[nodiscard]] std::string get_name() const override;
+    [[nodiscard]] glm::mat4 model_matrix() const override;
+    [[nodiscard]] glm::mat4 model_matrix_without_scale() const override;
     void reset(const glm::mat4 &main_model_matrix) override;
 
-    PredefinedDrawableKind get_drawable_kind();
+    [[nodiscard]] PredefinedDrawableKind get_drawable_kind() const;
     void set_drawable_kind(const PredefinedDrawableKind &new_drawable_kind);
 
 private:
@@ -130,13 +130,13 @@ public:
         const std::function<glm::quat()> &get_rotation, const std::function<glm::vec3()> &get_scale,
         const DrawableKind &drawable_kind);
 
-    std::string get_name() const override;
-    glm::mat4 model_matrix() const override;
-    glm::mat4 model_matrix_without_scale() const override;
+    [[nodiscard]] std::string get_name() const override;
+    [[nodiscard]] glm::mat4 model_matrix() const override;
+    [[nodiscard]] glm::mat4 model_matrix_without_scale() const override;
     void reset(const glm::mat4 &main_model_matrix) override;
 
-    std::shared_ptr<Shape> get_shape() const override;
-    DrawableKind get_drawable_kind() const override;
+    [[nodiscard]] std::shared_ptr<Shape> get_shape() const override;
+    [[nodiscard]] DrawableKind get_drawable_kind() const override;
 
 private:
     std::string name;

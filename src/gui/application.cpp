@@ -94,8 +94,10 @@ void ImGuiApplication::render() {
 
     if (active_opengl_window.has_value()) {
         // add new windows
-        for (int i = imgui_windows[active_opengl_window.value()->get_name()].size() - 1; i >= 0;
-             i--) {
+        for (int i =
+                 static_cast<int>(imgui_windows[active_opengl_window.value()->get_name()].size())
+                 - 1;
+             i >= 0; i--) {
             const auto curr_window = imgui_windows[active_opengl_window.value()->get_name()][i];
             auto w = curr_window->pop_child();
             while (w.has_value()) {
@@ -298,7 +300,7 @@ std::shared_ptr<BuilderOpenGlWindow> ImGuiApplication::create_builder_opengl_win
         context, builder_env->get_robot_name(), builder_env,
         [this](
             const std::string &gl_window_name, std::optional<std::string> focused_member,
-            std::shared_ptr<RobotBuilderEnvironment> curr_builder_env) {
+            const std::shared_ptr<RobotBuilderEnvironment> &curr_builder_env) {
             if (focused_member.has_value()
                 && !contains_window(imgui_windows[gl_window_name], focused_member.value()))
                 imgui_windows[gl_window_name].push_back(std::make_shared<FocusMemberPopUpWindow>(
@@ -310,7 +312,7 @@ std::shared_ptr<BuilderOpenGlWindow> ImGuiApplication::create_builder_opengl_win
         },
         [this](
             const std::string &gl_window_name, std::optional<std::string> focused_constraint,
-            std::shared_ptr<RobotBuilderEnvironment> curr_builder_env) {
+            const std::shared_ptr<RobotBuilderEnvironment> &curr_builder_env) {
             if (focused_constraint.has_value()
                 && !contains_window(imgui_windows[gl_window_name], focused_constraint.value()))
                 imgui_windows[gl_window_name].push_back(

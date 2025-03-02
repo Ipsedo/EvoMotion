@@ -37,8 +37,8 @@ public:
     void add_item(const std::shared_ptr<NoShapeItem> &no_shape_item);
     void remove_item(const std::shared_ptr<NoShapeItem> &no_shape_item);
 
-    glm::mat4 get_view_matrix();
-    glm::mat4 get_projection_matrix();
+    glm::mat4 get_view_matrix() const;
+    glm::mat4 get_projection_matrix() const;
 
 protected:
     std::mt19937 rng;

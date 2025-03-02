@@ -140,8 +140,9 @@ void HingeConstraintSettingsWindow::render_constraint_specific_window(
 
     // final
     if (updated)
-        builder_env->update_hinge_constraint(
-            constraint_name, pos, axis, limit_angle_min, limit_angle_max);
+        if (!builder_env->update_hinge_constraint(
+                constraint_name, pos, axis, limit_angle_min, limit_angle_max))
+            throw std::runtime_error("Failed to update Hinge constraint");// TODO display error
 }
 
 /*
@@ -206,5 +207,7 @@ void FixedConstraintSettingsWindow::render_constraint_specific_window(
     ImGui::EndGroup();
     ImGui::Spacing();
 
-    if (updated) builder_env->update_fixed_constraint(constraint_name, pos, rot);
+    if (updated)
+        if (!builder_env->update_fixed_constraint(constraint_name, pos, rot))
+            throw std::runtime_error("Failed to update fixed constraint");// TODO display error
 }

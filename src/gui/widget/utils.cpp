@@ -16,7 +16,8 @@ bool input_float(
     std::string input_float_name(name);
     input_float_name = "##" + input_float_name;
 
-    bool set = ImGui::InputFloat(input_float_name.c_str(), value, 0.f, 0.f, format.c_str(), flags);
+    const bool set =
+        ImGui::InputFloat(input_float_name.c_str(), value, 0.f, 0.f, format.c_str(), flags);
     ImGui::SameLine();
     ImGui::Text("%s", name);
 

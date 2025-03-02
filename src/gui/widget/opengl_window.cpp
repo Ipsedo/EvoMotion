@@ -53,7 +53,7 @@ void OpenGlWindow::draw_opengl(const float width, const float height) {
     view_matrix = glm::lookAt(camera->pos(), camera->look(), camera->up());
     projection_matrix = glm::frustum(-1.f, 1.f, -height / width, height / width, 1.f, 200.f);
 
-    const glm::vec3 light_pos(0, 20, 0);
+    constexpr glm::vec3 light_pos(0, 20, 0);
     const glm::vec3 cam_pos = camera->pos();
 
     frame_buffer->rescale_frame_buffer(width, height);
@@ -116,8 +116,8 @@ bool OpenGlWindow::is_active() const { return active; }
 
 bool OpenGlWindow::is_opened() const { return opened; }
 
-glm::mat4 OpenGlWindow::get_view_matrix() { return view_matrix; }
-glm::mat4 OpenGlWindow::get_projection_matrix() { return projection_matrix; }
+glm::mat4 OpenGlWindow::get_view_matrix() const { return view_matrix; }
+glm::mat4 OpenGlWindow::get_projection_matrix() const { return projection_matrix; }
 
 std::shared_ptr<DrawableFactory>
 OpenGlWindow::get_drawable_factory(const std::shared_ptr<ShapeItem> &item, std::mt19937 &curr_rng) {

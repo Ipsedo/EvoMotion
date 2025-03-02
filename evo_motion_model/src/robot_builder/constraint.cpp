@@ -118,27 +118,10 @@ void BuilderHingeConstraint::update_constraint(
 
 std::shared_ptr<Shape> BuilderHingeConstraint::get_shape() { return shape; }
 
-float getRotationAroundAxis(const glm::quat &q, const glm::vec3 &axis) {
-    // Normaliser l'axe au cas où
-    glm::vec3 axisNorm = glm::normalize(axis);
-
-    // Extraire l'angle total de rotation du quaternion
-    float totalAngle = 2.0f * std::acos(glm::clamp(q.w, -1.0f, 1.0f));
-
-    // Extraire l'axe de rotation du quaternion
-    glm::vec3 quatAxis = glm::normalize(glm::vec3(q.x, q.y, q.z));
-
-    // Trouver la contribution de l'axe donné en projetant le quaternion sur cet axe
-    float projection = glm::dot(quatAxis, axisNorm);
-
-    // L'angle autour de l'axe est proportionnel à cette projection
-    return glm::degrees(totalAngle * projection);
-}
-
 std::vector<std::shared_ptr<NoBodyItem>> BuilderHingeConstraint::get_builder_empty_items() {
     const auto [pos, rot, scale] = HingeConstraint::get_empty_item_transform();
 
-    const glm::vec3 local_axis(0, 0, 1);
+    constexpr glm::vec3 local_axis(0, 0, 1);
 
     const float angle_min = constraint->getLowerLimit();
     const float angle_max = constraint->getUpperLimit();
