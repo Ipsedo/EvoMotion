@@ -8,6 +8,13 @@
 #include <torch/torch.h>
 
 class BatchRenormalization final : public torch::nn::Module {
+public:
+    explicit BatchRenormalization(
+        int num_features, float epsilon = 1e-5, float momentum = 0.01, bool affine = true,
+        int warmup_steps = 1e5);
+
+    torch::Tensor forward(const torch::Tensor &x);
+
 private:
     torch::Tensor running_mean;
     torch::Tensor running_std;
@@ -29,12 +36,6 @@ private:
 
     float r_max() const;
     float d_max() const;
-
-public:
-    explicit BatchRenormalization(
-        int num_features, float epsilon = 1e-5, float momentum = 0.01, bool affine = true,
-        int warmup_steps = 1e5);
-    torch::Tensor forward(const torch::Tensor &x);
 };
 
 #endif//EVO_MOTION_NORM_H

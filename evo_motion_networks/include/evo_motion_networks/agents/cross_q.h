@@ -13,7 +13,7 @@
 
 class CrossQAgent final : public Agent {
 private:
-    std::shared_ptr<ActorModule> actor;
+    std::shared_ptr<BatchNormActorModule> actor;
     std::shared_ptr<BatchNormQNetworkModule> critic_1;
     std::shared_ptr<BatchNormQNetworkModule> critic_2;
 

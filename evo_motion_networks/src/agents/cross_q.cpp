@@ -11,7 +11,7 @@ CrossQAgent::CrossQAgent(
     const std::vector<int64_t> &action_space, int actor_hidden_size, int critic_hidden_size,
     const int batch_size, const int epoch, const float lr, const float gamma,
     const int replay_buffer_size, const int train_every)
-    : actor(std::make_shared<ActorModule>(state_space, action_space, actor_hidden_size)),
+    : actor(std::make_shared<BatchNormActorModule>(state_space, action_space, actor_hidden_size)),
       critic_1(
           std::make_shared<BatchNormQNetworkModule>(state_space, action_space, critic_hidden_size)),
       critic_2(
