@@ -22,11 +22,12 @@ private:
     torch::Tensor weight;
     torch::Tensor bias;
 
+    torch::Tensor curr_step;
+
     float epsilon;
     float momentum;
     bool affine;
 
-    long curr_step;
     long warmup_steps;
 
     float r_max_init;
