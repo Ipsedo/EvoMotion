@@ -14,21 +14,17 @@
  */
 
 SoftActorCriticAgent::SoftActorCriticAgent(
-    const int seed, const std::vector<int64_t> &state_space,
-    const std::vector<int64_t> &action_space, int actor_hidden_size, int critic_hidden_size,
-    const int batch_size, const int epoch, float lr, const float gamma, const float tau,
-    const int replay_buffer_size, const int train_every)
-    : actor(std::make_shared<ActorModule>(state_space, action_space, actor_hidden_size)),
-      critic_1(std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size)),
-      critic_2(std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size)),
-      target_critic_1(
-          std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size)),
-      target_critic_2(
-          std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size)),
+    const int seed, const int nb_action, const std::shared_ptr<AbstractActor> &actor,
+    const std::shared_ptr<AbstractQNetwork> &critic_1,
+    const std::shared_ptr<AbstractQNetwork> &critic_2, const int batch_size, const int epoch,
+    const float lr, const float gamma, const float tau, const int replay_buffer_size,
+    const int train_every)
+    : actor(actor), critic_1(critic_1), critic_2(critic_2), target_critic_1(critic_1->clone()),
+      target_critic_2(critic_2->clone()),
       actor_optimizer(std::make_shared<torch::optim::Adam>(actor->parameters(), lr)),
       critic_1_optimizer(std::make_shared<torch::optim::Adam>(critic_1->parameters(), lr)),
       critic_2_optimizer(std::make_shared<torch::optim::Adam>(critic_2->parameters(), lr)),
-      target_entropy(-static_cast<float>(action_space[0])),
+      target_entropy(-static_cast<float>(nb_action)),
       entropy_parameter(std::make_shared<EntropyParameter>(1.f, 1)),
       entropy_optimizer(std::make_shared<torch::optim::Adam>(entropy_parameter->parameters(), lr)),
       curr_device(torch::kCPU), gamma(gamma), tau(tau), batch_size(batch_size), epoch(epoch),
@@ -37,11 +33,6 @@ SoftActorCriticAgent::SoftActorCriticAgent(
       critic_2_loss_meter("critic_2", 64), entropy_loss_meter("entropy", 64),
       episode_steps_meter("steps", 64), rewards_meter("rewards", 64), train_every(train_every) {
     at::manual_seed(seed);
-
-    hard_update(target_critic_1, critic_1);
-    hard_update(target_critic_2, critic_2);
-
-    set_eval(true);
 }
 
 torch::Tensor SoftActorCriticAgent::act(const torch::Tensor state, const float reward) {
@@ -249,3 +240,35 @@ int SoftActorCriticAgent::count_parameters() {
            + count_module_parameters(target_critic_2) + count_module_parameters(critic_1)
            + count_module_parameters(critic_2) + count_module_parameters(entropy_parameter);
 }
+
+// Linear Agent
+
+LinearSoftActorCriticAgent::LinearSoftActorCriticAgent(
+    const int seed, const std::vector<int64_t> &state_space,
+    const std::vector<int64_t> &action_space, int actor_hidden_size, int critic_hidden_size,
+    const int batch_size, const int epoch, const float lr, const float gamma, const float tau,
+    const int replay_buffer_size, const int train_every)
+    : SoftActorCriticAgent(
+          seed, action_space[0],
+          std::make_shared<ActorModule>(state_space, action_space, actor_hidden_size),
+          std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size),
+          std::make_shared<QNetworkModule>(state_space, action_space, critic_hidden_size),
+          batch_size, epoch, lr, gamma, tau, replay_buffer_size, train_every) {}
+
+// KAN Agent
+
+KanSoftActorCriticAgent::KanSoftActorCriticAgent(
+    const int seed, const std::vector<int64_t> &state_space,
+    const std::vector<int64_t> &action_space, const int actor_hidden_size,
+    const int critic_hidden_size, const int poly_degree, const int batch_size, const int epoch,
+    const float lr, const float gamma, const float tau, const int replay_buffer_size,
+    const int train_every)
+    : SoftActorCriticAgent(
+          seed, action_space[0],
+          std::make_shared<ActorKanModule>(
+              state_space, action_space, actor_hidden_size, poly_degree),
+          std::make_shared<QNetworkKanModule>(
+              state_space, action_space, critic_hidden_size, poly_degree),
+          std::make_shared<QNetworkKanModule>(
+              state_space, action_space, critic_hidden_size, poly_degree),
+          batch_size, epoch, lr, gamma, tau, replay_buffer_size, train_every) {}

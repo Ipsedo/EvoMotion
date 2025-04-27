@@ -22,14 +22,16 @@ CriticModule::CriticModule(std::vector<int64_t> state_space, int hidden_size)
 
 critic_response CriticModule::forward(const torch::Tensor &state) {
     bool only_one = false;
-    torch::Tensor in_critic;
-    if (state.sizes().size() == 1) {
-        in_critic = state.unsqueeze(0);
+    torch::Tensor in_critic = state;
+
+    if (in_critic.sizes().size() == 1) {
+        in_critic = in_critic.unsqueeze(0);
         only_one = true;
-    } else in_critic = state;
+    }
 
     auto out_critic = critic->forward(in_critic);
 
     if (only_one) { out_critic = out_critic.squeeze(0); }
+
     return {out_critic};
 }

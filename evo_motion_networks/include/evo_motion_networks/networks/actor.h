@@ -82,4 +82,21 @@ private:
     torch::nn::Sequential sigma{nullptr};
 };
 
+// KAN
+
+class ActorKanModule final : public AbstractActor {
+public:
+    ActorKanModule(
+        const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int hidden_size, int poly_degree);
+
+    actor_response forward(const torch::Tensor &state) override;
+
+private:
+    torch::nn::Sequential head{nullptr};
+
+    torch::nn::Sequential mu{nullptr};
+    torch::nn::Sequential sigma{nullptr};
+};
+
 #endif//EVO_MOTION_ACTOR_H

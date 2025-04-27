@@ -25,7 +25,7 @@ AgentFactory::AgentFactory(std::map<std::string, std::string> parameters)
 template<typename Value>
 Value AgentFactory::generic_get_value(
     const std::function<Value(const std::string &)> &converter, const std::string &key) {
-    if (parameters.find(key) == parameters.end()) throw std::invalid_argument(key);
+    if (!parameters.contains(key)) throw std::invalid_argument(key);
     return converter(parameters[key]);
 }
 
@@ -61,7 +61,7 @@ std::string AgentFactory::get_value(const std::string &key) {
     return generic_get_value<std::string>([](const std::string &s) { return s; }, key);
 }
 
-// Agents
+// Random
 
 std::shared_ptr<Agent> RandomAgentFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
@@ -71,6 +71,8 @@ std::shared_ptr<Agent> RandomAgentFactory::create_agent(
 RandomAgentFactory::RandomAgentFactory(const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
 
+// Constant
+
 std::shared_ptr<Agent> ConstantAgentFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
     return std::make_shared<ConstantAgent>(action_space, get_value<float>("action_value"));
@@ -78,6 +80,8 @@ std::shared_ptr<Agent> ConstantAgentFactory::create_agent(
 
 ConstantAgentFactory::ConstantAgentFactory(const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
+
+// AC
 
 std::shared_ptr<Agent> ActorCriticFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
@@ -91,6 +95,8 @@ std::shared_ptr<Agent> ActorCriticFactory::create_agent(
 
 ActorCriticFactory::ActorCriticFactory(const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
+
+// AC Liquid
 
 std::shared_ptr<Agent> ActorCriticLiquidFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
@@ -106,23 +112,44 @@ ActorCriticLiquidFactory::ActorCriticLiquidFactory(
     const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
 
-SofActorCriticFactory::SofActorCriticFactory(const std::map<std::string, std::string> &parameters)
+// Linear SAC
+
+LinearSoftActorCriticFactory::LinearSoftActorCriticFactory(
+    const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
 
-std::shared_ptr<Agent> SofActorCriticFactory::create_agent(
+std::shared_ptr<Agent> LinearSoftActorCriticFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
-    return std::make_shared<SoftActorCriticAgent>(
+    return std::make_shared<LinearSoftActorCriticAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("actor_hidden_size"),
         get_value<int>("critic_hidden_size"), get_value<int>("batch_size"), get_value<int>("epoch"),
         get_value<float>("learning_rate"), get_value<float>("gamma"), get_value<float>("tau"),
         get_value<int>("replay_buffer_size"), get_value<int>("train_every"));
 }
 
-SofActorCriticLiquidFactory::SofActorCriticLiquidFactory(
+// KAN SAC
+
+KanSoftActorCriticFactory::KanSoftActorCriticFactory(
     const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
 
-std::shared_ptr<Agent> SofActorCriticLiquidFactory::create_agent(
+std::shared_ptr<Agent> KanSoftActorCriticFactory::create_agent(
+    const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
+    return std::make_shared<KanSoftActorCriticAgent>(
+        get_value<int>("seed"), state_space, action_space, get_value<int>("actor_hidden_size"),
+        get_value<int>("critic_hidden_size"), get_value<int>("poly_degree"),
+        get_value<int>("batch_size"), get_value<int>("epoch"), get_value<float>("learning_rate"),
+        get_value<float>("gamma"), get_value<float>("tau"), get_value<int>("replay_buffer_size"),
+        get_value<int>("train_every"));
+}
+
+// Liquid SAC
+
+SoftActorCriticLiquidFactory::SoftActorCriticLiquidFactory(
+    const std::map<std::string, std::string> &parameters)
+    : AgentFactory(parameters) {}
+
+std::shared_ptr<Agent> SoftActorCriticLiquidFactory::create_agent(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) {
     return std::make_shared<SoftActorCriticLiquidAgent>(
         get_value<int>("seed"), state_space, action_space, get_value<int>("neuron_number"),
@@ -130,6 +157,8 @@ std::shared_ptr<Agent> SofActorCriticLiquidFactory::create_agent(
         get_value<float>("gamma"), get_value<float>("tau"), get_value<int>("unfolding_steps"),
         get_value<int>("replay_buffer_size"), get_value<int>("train_every"));
 }
+
+// PPO GAE
 
 PpoGaeFactory::PpoGaeFactory(const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
@@ -145,6 +174,8 @@ std::shared_ptr<Agent> PpoGaeFactory::create_agent(
         get_value<float>("clip_grad_norm"));
 }
 
+// PPO Vanilla
+
 PpoVanillaFactory::PpoVanillaFactory(const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
 
@@ -156,6 +187,8 @@ std::shared_ptr<Agent> PpoVanillaFactory::create_agent(
         get_value<float>("critic_loss_factor"), get_value<int>("epoch"),
         get_value<int>("batch_size"), get_value<float>("learning_rate"));
 }
+
+// PPO Liquid
 
 PpoGaeLiquidFactory::PpoGaeLiquidFactory(const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
@@ -171,6 +204,8 @@ std::shared_ptr<Agent> PpoGaeLiquidFactory::create_agent(
         get_value<int>("replay_buffer_size"), get_value<float>("learning_rate"),
         get_value<float>("clip_grad_norm"));
 }
+
+// Cross-Q
 
 CrossQFactory::CrossQFactory(const std::map<std::string, std::string> &parameters)
     : AgentFactory(parameters) {}
@@ -195,9 +230,11 @@ std::map<
         {"actor_critic_liquid",
          std::make_shared<ActorCriticLiquidFactory, std::map<std::string, std::string>>},
         {"soft_actor_critic",
-         std::make_shared<SofActorCriticFactory, std::map<std::string, std::string>>},
+         std::make_shared<LinearSoftActorCriticFactory, std::map<std::string, std::string>>},
+        {"soft_actor_critic_kan",
+         std::make_shared<KanSoftActorCriticFactory, std::map<std::string, std::string>>},
         {"soft_actor_critic_liquid",
-         std::make_shared<SofActorCriticLiquidFactory, std::map<std::string, std::string>>},
+         std::make_shared<SoftActorCriticLiquidFactory, std::map<std::string, std::string>>},
         {"ppo_gae", std::make_shared<PpoGaeFactory, std::map<std::string, std::string>>},
         {"ppo_gae_liquid",
          std::make_shared<PpoGaeLiquidFactory, std::map<std::string, std::string>>},
@@ -207,7 +244,6 @@ std::map<
 
 std::shared_ptr<AgentFactory>
 get_agent_factory(const std::string &agent_name, std::map<std::string, std::string> parameters) {
-    if (AGENT_FACTORY_CONSTRUCTORS.find(agent_name) == AGENT_FACTORY_CONSTRUCTORS.end())
-        throw std::invalid_argument(agent_name);
+    if (!AGENT_FACTORY_CONSTRUCTORS.contains(agent_name)) throw std::invalid_argument(agent_name);
     return AGENT_FACTORY_CONSTRUCTORS[agent_name](std::move(parameters));
 }

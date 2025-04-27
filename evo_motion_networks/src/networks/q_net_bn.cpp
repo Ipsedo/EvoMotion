@@ -2,6 +2,7 @@
 // Created by samuel on 09/01/25.
 //
 
+#include <evo_motion_networks/functions.h>
 #include <evo_motion_networks/init.h>
 #include <evo_motion_networks/networks/norm.h>
 #include <evo_motion_networks/networks/q_net.h>
@@ -9,7 +10,8 @@
 BatchNormQNetworkModule::BatchNormQNetworkModule(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
     int hidden_size)
-    : q_network(register_module(
+    : state_space(state_space), action_space(action_space), hidden_size(hidden_size),
+      q_network(register_module(
           "q_network", torch::nn::Sequential(
                            BatchRenormalization(static_cast<int>(state_space[0] + action_space[0])),
 
@@ -36,10 +38,17 @@ BatchNormQNetworkModule::forward(const torch::Tensor &state, const torch::Tensor
     if (in_q_net.sizes().size() == 1) {
         in_q_net = in_q_net.unsqueeze(0);
         only_one = true;
-    } else in_q_net = in_q_net;
+    }
 
     auto q_value = q_network->forward(in_q_net);
 
-    if (only_one) { q_value = q_value.squeeze(0); }
+    if (only_one) q_value = q_value.squeeze(0);
+
     return {q_value};
+}
+
+std::shared_ptr<AbstractQNetwork> BatchNormQNetworkModule::clone() {
+    auto clone = std::make_shared<BatchNormQNetworkModule>(state_space, action_space, hidden_size);
+    hard_update(clone, std::make_shared<BatchNormQNetworkModule>(*this));
+    return clone;
 }

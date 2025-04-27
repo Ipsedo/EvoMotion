@@ -86,26 +86,33 @@ void BuilderHingeConstraint::update_constraint(
     const std::optional<float> &new_limit_radian_min,
     const std::optional<float> &new_limit_radian_max) {
 
-    // Frames
+    // parent
     const auto parent_model_mat = get_parent()->get_item()->model_matrix_without_scale();
     const auto frame_in_parent = bullet_to_glm(constraint->getFrameOffsetA());
-    // force to use parent absolute pos (from parent frame)
-    const auto absolute_model_mat = parent_model_mat * frame_in_parent;
+    const auto parent_absolute_model_mat = parent_model_mat * frame_in_parent;
+    const auto parent_absolute_pivot =
+        new_pivot.has_value() ? new_pivot.value() : glm::vec3(parent_absolute_model_mat[3]);
+    const auto parent_absolute_axis =
+        new_axis.has_value() ? new_axis.value() : glm::mat3(parent_absolute_model_mat)[2];
 
+    const glm::mat4 new_frame_in_parent =
+        glm::inverse(parent_model_mat) * glm::translate(glm::mat4(1.f), parent_absolute_pivot)
+        * glm::toMat4(glm::rotation(glm::vec3(0, 0, 1), glm::normalize(parent_absolute_axis)));
+
+    // child
     const auto child_model_mat = get_child()->get_item()->model_matrix_without_scale();
+    const auto frame_in_child = bullet_to_glm(constraint->getFrameOffsetB());
+    const auto child_absolute_model_mat = child_model_mat * frame_in_child;
+    const auto child_absolute_pivot =
+        new_pivot.has_value() ? new_pivot.value() : glm::vec3(child_absolute_model_mat[3]);
+    const auto child_absolute_axis =
+        new_axis.has_value() ? new_axis.value() : glm::mat3(child_absolute_model_mat)[2];
 
-    const auto absolute_pivot =
-        new_pivot.has_value() ? new_pivot.value() : glm::vec3(absolute_model_mat[3]);
-    const auto absolute_axis =
-        new_axis.has_value() ? new_axis.value() : glm::mat3(absolute_model_mat)[2];
+    const glm::mat4 new_frame_in_child =
+        glm::inverse(child_model_mat) * glm::translate(glm::mat4(1.f), child_absolute_pivot)
+        * glm::toMat4(glm::rotation(glm::vec3(0, 0, 1), glm::normalize(child_absolute_axis)));
 
-    const glm::mat4 new_absolute_frame =
-        glm::translate(glm::mat4(1.f), absolute_pivot)
-        * glm::toMat4(glm::rotation(glm::vec3(0, 0, 1), glm::normalize(absolute_axis)));
-
-    const glm::mat4 new_frame_in_parent = glm::inverse(parent_model_mat) * new_absolute_frame;
-    const glm::mat4 new_frame_in_child = glm::inverse(child_model_mat) * new_absolute_frame;
-
+    // update
     constraint->setFrames(glm_to_bullet(new_frame_in_parent), glm_to_bullet(new_frame_in_child));
 
     // Limit

@@ -16,7 +16,7 @@ public:
     RobotWalk(
         int num_threads, int seed, const std::string &skeleton_json_path,
         float initial_remaining_seconds, float max_episode_seconds, float target_velocity,
-        float minimal_velocity, int reset_frames);
+        float minimal_velocity, int reset_frames, float z_gravity);
 
     std::vector<std::shared_ptr<ShapeItem>> get_draw_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;

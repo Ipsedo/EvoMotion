@@ -14,6 +14,7 @@
 class AbstractQNetwork : public torch::nn::Module {
 public:
     virtual critic_response forward(const torch::Tensor &state, const torch::Tensor &action) = 0;
+    virtual std::shared_ptr<AbstractQNetwork> clone() = 0;
 };
 
 // Linear
@@ -26,13 +27,19 @@ public:
 
     critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
 
+    std::shared_ptr<AbstractQNetwork> clone() override;
+
 private:
+    std::vector<int64_t> state_space;
+    std::vector<int64_t> action_space;
+    int hidden_size;
+
     torch::nn::Sequential q_network{nullptr};
 };
 
 // BatchNorm -> CrossQ
 
-class BatchNormQNetworkModule : public AbstractQNetwork {
+class BatchNormQNetworkModule final : public AbstractQNetwork {
 public:
     BatchNormQNetworkModule(
         const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
@@ -40,7 +47,13 @@ public:
 
     critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
 
+    std::shared_ptr<AbstractQNetwork> clone() override;
+
 private:
+    std::vector<int64_t> state_space;
+    std::vector<int64_t> action_space;
+    int hidden_size;
+
     torch::nn::Sequential q_network{nullptr};
 };
 
@@ -59,9 +72,37 @@ public:
     void reset_liquid() const;
     torch::Tensor get_x() const;
 
+    std::shared_ptr<AbstractQNetwork> clone() override;
+
 private:
+    std::vector<int64_t> state_space;
+    std::vector<int64_t> action_space;
+    int hidden_size;
+    int unfolding_steps;
+
     std::shared_ptr<LiquidCellModule> liquid_network{nullptr};
     torch::nn::Linear q_network{nullptr};
+};
+
+// KAN
+
+class QNetworkKanModule final : public AbstractQNetwork {
+public:
+    QNetworkKanModule(
+        const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int hidden_size, int poly_degree);
+
+    critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
+
+    std::shared_ptr<AbstractQNetwork> clone() override;
+
+private:
+    std::vector<int64_t> state_space;
+    std::vector<int64_t> action_space;
+    int hidden_size;
+    int poly_degree;
+
+    torch::nn::Sequential q_network{nullptr};
 };
 
 #endif//EVO_MOTION_Q_NET_H

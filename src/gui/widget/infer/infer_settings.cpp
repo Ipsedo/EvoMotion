@@ -5,6 +5,7 @@
 #include "./infer_settings.h"
 
 #include <evo_motion_networks/agents/cross_q.h>
+#include <evo_motion_networks/agents/soft_actor_critic.h>
 
 InferSettingsWindow::InferSettingsWindow(
     const std::function<void(std::shared_ptr<OpenGlWindow>)> &on_start_infer)
@@ -54,9 +55,9 @@ void InferSettingsWindow::render_window_content(
     if (ImGui::Button("Start inference") && agent_folder_path.has_value()
         && robot_json_path.has_value()) {
         const auto env = get_environment_factory("robot_walk", {})->get_env(4, 1234);
-        const auto agent = std::make_shared<CrossQAgent>(
-            12345, env->get_state_space(), env->get_action_space(), 256, 1024, 128, 1, 3e-4f, 0.99f,
-            1, 2);
+        const auto agent = std::make_shared<LinearSoftActorCriticAgent>(
+            12345, env->get_state_space(), env->get_action_space(), 512, 512, 128, 1, 3e-4f, 0.99f,
+            0.f, 1, 1);
         agent->load(agent_folder_path.value());// TODO check if loaded successfully
         agent->to(torch::kCPU);
 

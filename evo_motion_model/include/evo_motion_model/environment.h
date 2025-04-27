@@ -54,7 +54,7 @@ protected:
     void step_world(float delta) const;
 
 public:
-    explicit Environment(int num_threads);
+    explicit Environment(int num_threads, float z_gravity);
 
     virtual std::vector<std::shared_ptr<ShapeItem>> get_draw_items() = 0;
     virtual std::vector<std::shared_ptr<Controller>> get_controllers() = 0;

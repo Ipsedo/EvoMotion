@@ -8,7 +8,7 @@
  * Focus Item Context
  */
 
-ItemFocusContext::ItemFocusContext() : item_to_focus_color() {}
+ItemFocusContext::ItemFocusContext() : item_to_focus_color(), item_to_focus_count() {}
 
 std::optional<glm::vec3> ItemFocusContext::get_focus_color(const std::string &item_name) {
     if (item_to_focus_color.contains(item_name)) return item_to_focus_color[item_name];
@@ -16,11 +16,19 @@ std::optional<glm::vec3> ItemFocusContext::get_focus_color(const std::string &it
 }
 
 void ItemFocusContext::release_focus(const std::string &item_name) {
-    if (item_to_focus_color.contains(item_name)) item_to_focus_color.erase(item_name);
+    if (item_to_focus_color.contains(item_name)) {
+        item_to_focus_count[item_name] = item_to_focus_count[item_name] - 1;
+        if (item_to_focus_count[item_name] <= 0) {
+            item_to_focus_color.erase(item_name);
+            item_to_focus_count.erase(item_name);
+        }
+    }
 }
 
 void ItemFocusContext::focus(const std::string &item_name, const glm::vec3 &focus_color) {
     item_to_focus_color[item_name] = focus_color;
+    if (!item_to_focus_count.contains(item_name)) item_to_focus_count[item_name] = 0;
+    item_to_focus_count[item_name] = item_to_focus_count[item_name] + 1;
 }
 
 void ItemFocusContext::focus_black(const std::string &item_name) {

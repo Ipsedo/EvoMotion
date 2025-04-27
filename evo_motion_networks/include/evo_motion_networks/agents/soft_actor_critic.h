@@ -15,13 +15,13 @@
 #include <evo_motion_networks/networks/q_net.h>
 #include <evo_motion_networks/replay_buffer.h>
 
-class SoftActorCriticAgent final : public Agent {
+class SoftActorCriticAgent : public Agent {
 private:
-    std::shared_ptr<ActorModule> actor;
-    std::shared_ptr<QNetworkModule> critic_1;
-    std::shared_ptr<QNetworkModule> critic_2;
-    std::shared_ptr<QNetworkModule> target_critic_1;
-    std::shared_ptr<QNetworkModule> target_critic_2;
+    std::shared_ptr<AbstractActor> actor;
+    std::shared_ptr<AbstractQNetwork> critic_1;
+    std::shared_ptr<AbstractQNetwork> critic_2;
+    std::shared_ptr<AbstractQNetwork> target_critic_1;
+    std::shared_ptr<AbstractQNetwork> target_critic_2;
 
     std::shared_ptr<torch::optim::Optimizer> actor_optimizer;
     std::shared_ptr<torch::optim::Optimizer> critic_1_optimizer;
@@ -61,8 +61,9 @@ private:
 
 public:
     SoftActorCriticAgent(
-        int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int actor_hidden_size, int critic_hidden_size, int batch_size, int epoch, float lr,
+        int seed, int nb_action, const std::shared_ptr<AbstractActor> &actor,
+        const std::shared_ptr<AbstractQNetwork> &critic_1,
+        const std::shared_ptr<AbstractQNetwork> &critic_2, int batch_size, int epoch, float lr,
         float gamma, float tau, int replay_buffer_size, int train_every);
 
     torch::Tensor act(torch::Tensor state, float reward) override;
@@ -80,6 +81,26 @@ public:
     void set_eval(bool eval) override;
 
     int count_parameters() override;
+};
+
+// Linear
+
+class LinearSoftActorCriticAgent final : public SoftActorCriticAgent {
+public:
+    LinearSoftActorCriticAgent(
+        int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int actor_hidden_size, int critic_hidden_size, int batch_size, int epoch, float lr,
+        float gamma, float tau, int replay_buffer_size, int train_every);
+};
+
+// KAN
+
+class KanSoftActorCriticAgent final : public SoftActorCriticAgent {
+public:
+    KanSoftActorCriticAgent(
+        int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
+        int actor_hidden_size, int critic_hidden_size, int poly_degree, int batch_size, int epoch,
+        float lr, float gamma, float tau, int replay_buffer_size, int train_every);
 };
 
 #endif//EVO_MOTION_SOFT_ACTOR_CRITIC_H

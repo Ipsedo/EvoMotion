@@ -34,27 +34,4 @@ public:
     virtual ~Agent() = default;
 };
 
-// Agent abstract factory
-
-class AgentFactory {
-public:
-    explicit AgentFactory(std::map<std::string, std::string> parameters);
-    virtual std::shared_ptr<Agent> create_agent(
-        const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space) = 0;
-
-protected:
-    template<typename Value>
-    Value get_value(const std::string &key);
-
-    template<typename Value>
-    Value generic_get_value(
-        const std::function<Value(const std::string &)> &converter, const std::string &key);
-
-private:
-    std::map<std::string, std::string> parameters;
-};
-
-std::shared_ptr<AgentFactory>
-get_agent_factory(const std::string &agent_name, std::map<std::string, std::string> parameters);
-
 #endif//EVO_MOTION_AGENT_H

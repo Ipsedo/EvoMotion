@@ -12,9 +12,9 @@
 #include "./run.h"
 
 std::pair<std::string, std::string> parse_pair(const std::string &k_v) {
-    const auto delimiter = '=';
+    constexpr auto delimiter = '=';
 
-    if (std::count(k_v.begin(), k_v.end(), delimiter) != 1) throw std::invalid_argument(k_v);
+    if (std::ranges::count(k_v, delimiter) != 1) throw std::invalid_argument(k_v);
 
     const std::string key = k_v.substr(0, k_v.find(delimiter));
     const std::string value = k_v.substr(k_v.find(delimiter) + 1);

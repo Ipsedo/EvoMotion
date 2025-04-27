@@ -79,7 +79,7 @@ std::shared_ptr<Environment> RobotWalkFactory::get_env(int num_threads, int seed
             std::filesystem::path(RESOURCES_PATH) / "./resources/skeleton/new_format_spider.json"),
         get_value("initial_remaining_seconds", 1.f), get_value("max_episode_seconds", 30.f),
         get_value("target_velocity", 5e-1f), get_value("minimal_velocity", 1e-1f),
-        get_value("reset_frames", 30));
+        get_value("reset_frames", 30), get_value("gravity", -9.8f));
 }
 
 /*
@@ -96,7 +96,7 @@ std::shared_ptr<Environment> RobotJumpFactory::get_env(int num_threads, int seed
             std::filesystem::path(RESOURCES_PATH) / "./resources/skeleton/new_format_spider.json"),
         get_value("minimal_velocity", 1e-1f), get_value("target_velocity", 0.5f),
         get_value("max_seconds", 30.f), get_value("initial_seconds", 1.f),
-        get_value("reset_seconds", 1.f / 6.f));
+        get_value("reset_seconds", 1.f / 6.f), get_value("gravity", -9.8f));
 }
 
 /*

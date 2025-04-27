@@ -13,8 +13,8 @@
 #include "../utils.h"
 
 RobotBuilderEnvironment::RobotBuilderEnvironment(std::string robot_name)
-    : Environment(1), robot_name(std::move(robot_name)), root_name(std::nullopt), skeleton_graph(),
-      members(), constraints(), muscles() {}
+    : Environment(1, -9.8f), robot_name(std::move(robot_name)), root_name(std::nullopt),
+      skeleton_graph(), members(), constraints(), muscles() {}
 
 /*
  * Members

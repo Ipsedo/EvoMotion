@@ -17,7 +17,7 @@ InitBtThread::InitBtThread(const int num_threads) {
 
 btDefaultCollisionConstructionInfo InitBtThread::get_cci() const { return cci; }
 
-Environment::Environment(const int num_threads)
+Environment::Environment(const int num_threads, const float z_gravity)
     : num_threads(num_threads), init_thread(num_threads), curr_device(torch::kCPU),
       m_collision_configuration(new btDefaultCollisionConfiguration(init_thread.get_cci())),
       m_dispatcher(new btCollisionDispatcherMt(m_collision_configuration, 40)),
@@ -27,7 +27,7 @@ Environment::Environment(const int num_threads)
       m_world(new btDiscreteDynamicsWorldMt(
           m_dispatcher, m_broad_phase, m_pool_solver, m_constraint_solver,
           m_collision_configuration)) {
-    m_world->setGravity(btVector3(0, -9.8f, 0));
+    m_world->setGravity(btVector3(0, z_gravity, 0));
 }
 
 step Environment::do_step(const torch::Tensor &action) {

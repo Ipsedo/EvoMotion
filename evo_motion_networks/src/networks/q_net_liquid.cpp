@@ -2,13 +2,16 @@
 // Created by samuel on 11/11/24.
 //
 
+#include <evo_motion_networks/functions.h>
 #include <evo_motion_networks/init.h>
 #include <evo_motion_networks/networks/q_net.h>
 
 QNetworkLiquidModule::QNetworkLiquidModule(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
     int hidden_size, int unfolding_steps)
-    : liquid_network(register_module(
+    : state_space(state_space), action_space(action_space), hidden_size(hidden_size),
+      unfolding_steps(unfolding_steps),
+      liquid_network(register_module(
           "liquid_network", std::make_shared<LiquidCellModule>(
                                 state_space[0] + action_space[0], hidden_size, unfolding_steps))),
       q_network(register_module("critic", torch::nn::Linear(hidden_size, 1))) {
@@ -53,4 +56,11 @@ liquid_critic_response QNetworkLiquidModule::forward(
     }
 
     return {q_value, next_x_t};
+}
+
+std::shared_ptr<AbstractQNetwork> QNetworkLiquidModule::clone() {
+    auto clone = std::make_shared<QNetworkLiquidModule>(
+        state_space, action_space, hidden_size, unfolding_steps);
+    hard_update(clone, std::make_shared<QNetworkLiquidModule>(*this));
+    return clone;
 }

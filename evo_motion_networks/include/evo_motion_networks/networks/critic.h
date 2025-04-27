@@ -57,4 +57,16 @@ private:
     torch::nn::Linear critic{nullptr};
 };
 
+// KAN
+
+class CriticKanModule final : public AbstractCritic {
+public:
+    CriticKanModule(const std::vector<int64_t> &state_space, int hidden_size, int poly_degree);
+
+    critic_response forward(const torch::Tensor &state) override;
+
+private:
+    torch::nn::Sequential critic{nullptr};
+};
+
 #endif//EVO_MOTION_CRITIC_H

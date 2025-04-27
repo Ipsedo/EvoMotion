@@ -7,10 +7,11 @@
 #include "../controller/slider.h"
 
 CartPole3d::CartPole3d(
-    int num_threads, int seed, float slider_speed, float slider_force_per_kg,
-    float chariot_push_force, int reset_frame_nb, float limit_angle, float cart_x_mass,
-    float cart_z_mass, float pole_mass, int max_steps)
-    : Environment(num_threads), reset_frame_nb(reset_frame_nb),
+    const int num_threads, const int seed, const float slider_speed,
+    const float slider_force_per_kg, const float chariot_push_force, const int reset_frame_nb,
+    const float limit_angle, const float cart_x_mass, const float cart_z_mass,
+    const float pole_mass, const int max_steps)
+    : Environment(num_threads, -9.8f), reset_frame_nb(reset_frame_nb),
       chariot_push_force(chariot_push_force), cart_x_scale(0.5f, 0.125f, 0.5f),
       cart_z_scale(0.5f, 0.125f, 0.5f), pole_scale(0.1f, 0.5f, 0.1f), base_scale(10.f, 1.f, 10.f),
       base_pos(0.f, -4.f, 10.f),

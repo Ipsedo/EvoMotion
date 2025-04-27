@@ -17,8 +17,9 @@
 RobotJump::RobotJump(
     const int num_threads, const int seed, const std::string &skeleton_json_path,
     const float minimal_velocity, const float target_velocity, const float max_seconds,
-    const float initial_seconds, const float reset_seconds)
-    : Environment(num_threads), rng(seed), rd_uni(0.f, 1.f), skeleton_json_path(skeleton_json_path),
+    const float initial_seconds, const float reset_seconds, const float z_gravity)
+    : Environment(num_threads, z_gravity), rng(seed), rd_uni(0.f, 1.f),
+      skeleton_json_path(skeleton_json_path),
       skeleton(std::make_shared<JsonDeserializer>(std::filesystem::path(skeleton_json_path))),
       base(std::make_shared<RigidBodyItem>(
           "base", std::make_shared<ObjShape>("./resources/obj/cube.obj"),
@@ -29,6 +30,7 @@ RobotJump::RobotJump(
       initial_steps(static_cast<int>(initial_seconds / DELTA_T_MODEL)),
       remaining_steps(initial_steps), reset_frames(static_cast<int>(reset_seconds / DELTA_T_MODEL)),
       minimal_velocity(minimal_velocity), target_velocity(target_velocity) {
+
     base->get_body()->setFriction(0.5f);
 
     m_world->addRigidBody(base->get_body());
@@ -68,8 +70,8 @@ step RobotJump::compute_step() {
 
     for (const auto &state: states) current_states.push_back(state->get_state(curr_device));
 
-    const auto velocity = std::max(root_item->get_body()->getLinearVelocity().y(), 0.f)
-                          + root_item->get_body()->getLinearVelocity().z();
+    const auto velocity = (std::max(root_item->get_body()->getLinearVelocity().y(), 0.f) + 1.f)
+                          * root_item->get_body()->getLinearVelocity().z();
     const float reward = velocity;
 
     if (velocity < minimal_velocity) remaining_steps -= 1;

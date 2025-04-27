@@ -8,7 +8,7 @@
 #include <string>
 
 #include <evo_motion_model/environment.h>
-#include <evo_motion_networks/agent.h>
+#include <evo_motion_networks/agent_factory.h>
 
 struct run_params {
     std::string input_folder;

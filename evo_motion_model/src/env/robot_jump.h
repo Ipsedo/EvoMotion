@@ -16,7 +16,8 @@ class RobotJump final : public Environment {
 public:
     RobotJump(
         int num_threads, int seed, const std::string &skeleton_json_path, float minimal_velocity,
-        float target_velocity, float max_seconds, float initial_seconds, float reset_seconds);
+        float target_velocity, float max_seconds, float initial_seconds, float reset_seconds,
+        float z_gravity);
 
     std::vector<std::shared_ptr<ShapeItem>> get_draw_items() override;
     std::vector<std::shared_ptr<Controller>> get_controllers() override;

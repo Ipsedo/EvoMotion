@@ -24,6 +24,7 @@ public:
 
 private:
     std::map<std::string, glm::vec3> item_to_focus_color;
+    std::map<std::string, unsigned int> item_to_focus_count;
 };
 
 #endif//EVO_MOTION_CONTEXT_H
