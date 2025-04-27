@@ -6,15 +6,20 @@
 
 // Polynomial coefficients
 
-PolyCoefActivation::PolyCoefActivation(const int n, const torch::Tensor &coefficients)
+PolyCoefActivation::PolyCoefActivation(
+    const int n, const torch::Tensor &coefficients, const float scale_coefficient)
     : n(n), coefficients(register_buffer("coefficients", coefficients)),
-      exponent(register_buffer("exponent", torch::arange(0, n + 1))) {}
+      exponent(register_buffer("exponent", torch::arange(0, n + 1))),
+      scale_coefficients(register_buffer(
+          "scale_coefficients",
+          torch::pow(torch::tensor({scale_coefficient}), -torch::arange(0, n + 1)))) {}
 
 int PolyCoefActivation::get_size() { return n; }
 
 torch::Tensor PolyCoefActivation::forward(const torch::Tensor &x) {
-    return torch::einsum("b...a,ac->bc...", {torch::pow(x.unsqueeze(-1), exponent), coefficients});
-    ;
+    return torch::einsum(
+        "b...a,ac->bc...",
+        {torch::pow(x.unsqueeze(-1), exponent) * scale_coefficients, coefficients});
 }
 
 // Hermite
@@ -30,9 +35,9 @@ float HermiteActivation::factorial(const int n) {
 torch::Tensor HermiteActivation::hermite_coef(int n) {
     auto coef = torch::zeros({n + 1, n});
     for (int i = 0; i < n; i++) {
-        const float i_float = static_cast<float>(i);
+        const auto i_float = static_cast<float>(i);
         for (int k = 0; k <= static_cast<int>(std::floor((i_float + 1.0) / 2.0)) + 1; k++) {
-            const float k_float = static_cast<float>(k);
+            const auto k_float = static_cast<float>(k);
             coef[i + 1 - 2 * k][i] =
                 std::pow(-1.0, k_float) / std::pow(2.0, k_float) / factorial(k)
                 / factorial(i + 1 - 2 * k)
@@ -40,10 +45,6 @@ torch::Tensor HermiteActivation::hermite_coef(int n) {
         }
     }
     return coef;
-}
-
-torch::Tensor HermiteActivation::forward(const torch::Tensor &x) {
-    return torch::exp(-torch::pow(PolyCoefActivation::forward(x), 2.0) / 2.0);
 }
 
 // Linear KAN
@@ -56,8 +57,8 @@ LinearKAN::LinearKAN(
       c(register_parameter("c", torch::ones({activation->get_size(), out_features, in_features}))),
       act(register_module("act", activation)), res_act_fun(res_act_fun) {
 
-    torch::nn::init::xavier_normal_(w_b, 1e-1f);
-    torch::nn::init::normal_(c.data(), 1e-1f);
+    torch::nn::init::xavier_normal_(w_b, 1e-3f);
+    torch::nn::init::normal_(c.data(), 0.f, 1e-3f);
 }
 
 torch::Tensor LinearKAN::forward(const torch::Tensor &x) {

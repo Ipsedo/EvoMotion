@@ -17,7 +17,7 @@ public:
 
 class PolyCoefActivation : public ActivationFunction {
 public:
-    PolyCoefActivation(int n, const torch::Tensor &coefficients);
+    PolyCoefActivation(int n, const torch::Tensor &coefficients, float scale_coefficient = 10.f);
 
     int get_size() override;
     torch::Tensor forward(const torch::Tensor &x) override;
@@ -26,15 +26,16 @@ private:
     int n;
     torch::Tensor coefficients;
     torch::Tensor exponent;
+    torch::Tensor scale_coefficients;
 };
 
 class HermiteActivation final : public PolyCoefActivation {
 public:
     explicit HermiteActivation(int n);
 
-    torch::Tensor forward(const torch::Tensor &x) override;
-
 private:
+    torch::Tensor scale_coefficients;
+
     static torch::Tensor hermite_coef(int n);
     static float factorial(int n);
 };
