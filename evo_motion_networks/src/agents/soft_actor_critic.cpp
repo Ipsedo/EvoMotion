@@ -260,15 +260,15 @@ LinearSoftActorCriticAgent::LinearSoftActorCriticAgent(
 KanSoftActorCriticAgent::KanSoftActorCriticAgent(
     const int seed, const std::vector<int64_t> &state_space,
     const std::vector<int64_t> &action_space, const int actor_hidden_size,
-    const int critic_hidden_size, const int poly_degree, const int batch_size, const int epoch,
-    const float lr, const float gamma, const float tau, const int replay_buffer_size,
-    const int train_every)
+    const int critic_hidden_size, const int poly_degree, const int grid_size, const int batch_size,
+    const int epoch, const float lr, const float gamma, const float tau,
+    const int replay_buffer_size, const int train_every)
     : SoftActorCriticAgent(
           seed, action_space[0],
           std::make_shared<ActorKanModule>(
-              state_space, action_space, actor_hidden_size, poly_degree),
+              state_space, action_space, actor_hidden_size, poly_degree, grid_size),
           std::make_shared<QNetworkKanModule>(
-              state_space, action_space, critic_hidden_size, poly_degree),
+              state_space, action_space, critic_hidden_size, poly_degree, grid_size),
           std::make_shared<QNetworkKanModule>(
-              state_space, action_space, critic_hidden_size, poly_degree),
+              state_space, action_space, critic_hidden_size, poly_degree, grid_size),
           batch_size, epoch, lr, gamma, tau, replay_buffer_size, train_every) {}

@@ -9,20 +9,22 @@
 
 QNetworkKanModule::QNetworkKanModule(
     const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-    int hidden_size, int poly_degree)
+    int hidden_size, int poly_degree, int grid_size)
     : state_space(state_space), action_space(action_space), hidden_size(hidden_size),
-      poly_degree(poly_degree),
+      poly_degree(poly_degree), grid_size(grid_size),
       q_network(register_module(
           "q_network",
           torch::nn::Sequential(
               std::make_shared<LinearKAN>(
                   state_space[0] + action_space[0], hidden_size,
-                  std::make_shared<HermiteActivation>(poly_degree), torch::nn::functional::mish),
-              std::make_shared<LinearKAN>(
-                  hidden_size, hidden_size, std::make_shared<HermiteActivation>(poly_degree),
+                  std::make_shared<BSplinesActivation>(poly_degree, grid_size),
                   torch::nn::functional::mish),
               std::make_shared<LinearKAN>(
-                  hidden_size, 1, std::make_shared<HermiteActivation>(poly_degree),
+                  hidden_size, hidden_size,
+                  std::make_shared<BSplinesActivation>(poly_degree, grid_size),
+                  torch::nn::functional::mish),
+              std::make_shared<LinearKAN>(
+                  hidden_size, 1, std::make_shared<BSplinesActivation>(poly_degree, grid_size),
                   torch::nn::functional::mish)))) {
 
     apply(init_weights);
@@ -47,8 +49,8 @@ QNetworkKanModule::forward(const torch::Tensor &state, const torch::Tensor &acti
 }
 
 std::shared_ptr<AbstractQNetwork> QNetworkKanModule::clone() {
-    auto clone =
-        std::make_shared<QNetworkKanModule>(state_space, action_space, hidden_size, poly_degree);
+    auto clone = std::make_shared<QNetworkKanModule>(
+        state_space, action_space, hidden_size, poly_degree, grid_size);
     hard_update(clone, std::make_shared<QNetworkKanModule>(*this));
     return clone;
 }

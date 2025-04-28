@@ -99,8 +99,9 @@ class KanSoftActorCriticAgent final : public SoftActorCriticAgent {
 public:
     KanSoftActorCriticAgent(
         int seed, const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int actor_hidden_size, int critic_hidden_size, int poly_degree, int batch_size, int epoch,
-        float lr, float gamma, float tau, int replay_buffer_size, int train_every);
+        int actor_hidden_size, int critic_hidden_size, int poly_degree, int grid_size,
+        int batch_size, int epoch, float lr, float gamma, float tau, int replay_buffer_size,
+        int train_every);
 };
 
 #endif//EVO_MOTION_SOFT_ACTOR_CRITIC_H

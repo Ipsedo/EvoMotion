@@ -90,7 +90,7 @@ class QNetworkKanModule final : public AbstractQNetwork {
 public:
     QNetworkKanModule(
         const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int poly_degree);
+        int hidden_size, int poly_degree, int grid_size);
 
     critic_response forward(const torch::Tensor &state, const torch::Tensor &action) override;
 
@@ -100,7 +100,9 @@ private:
     std::vector<int64_t> state_space;
     std::vector<int64_t> action_space;
     int hidden_size;
+
     int poly_degree;
+    int grid_size;
 
     torch::nn::Sequential q_network{nullptr};
 };

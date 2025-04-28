@@ -24,9 +24,9 @@ torch::Tensor PolyCoefActivation::forward(const torch::Tensor &x) {
 
 // Hermite
 
-HermiteActivation::HermiteActivation(const int n) : PolyCoefActivation(n, hermite_coef(n)) {}
+HermiteActivation::HermiteActivation(const int degree) : degree(degree) {}
 
-float HermiteActivation::factorial(const int n) {
+/*float HermiteActivation::factorial(const int n) {
     int result = 1;
     for (int i = n; i > 0; i--) { result *= i; }
     return static_cast<float>(result);
@@ -45,6 +45,52 @@ torch::Tensor HermiteActivation::hermite_coef(int n) {
         }
     }
     return coef;
+}*/
+
+int HermiteActivation::get_size() { return degree + 1; }
+
+torch::Tensor HermiteActivation::forward(const torch::Tensor &x) {
+    std::vector<torch::Tensor> hermites{
+        torch::ones_like(x, torch::TensorOptions().dtype(torch::kFloat32).device(x.device()))};
+
+    if (degree >= 1) hermites.push_back(2.0 * x / 10.);
+
+    for (int n = 2; n <= degree; ++n) {
+        torch::Tensor hn =
+            2.0 * x * hermites[n - 1] - 2.0 * (static_cast<float>(n) - 1.0) * hermites[n - 2];
+        hermites.push_back(hn / std::pow(10.0, n));
+    }
+
+    return torch::stack(hermites, 1);
+}
+
+// B-Spline
+
+BSplinesActivation::BSplinesActivation(const int degree, const int grid_size)
+    : degree(degree), grid_size(grid_size), x_min(0.f), x_max(1.f) {}
+
+int BSplinesActivation::get_size() { return degree + grid_size; }
+
+torch::Tensor BSplinesActivation::forward(const torch::Tensor &x) {
+    const auto out = x.unsqueeze(-1);
+    const auto i_s = torch::arange(-grid_size, degree, torch::TensorOptions().device(x.device()));
+    return torch::movedim(b_splines(out, i_s, grid_size), -1, 1);
+}
+
+torch::Tensor BSplinesActivation::b_splines(
+    const torch::Tensor &x, const torch::Tensor &curr_i_s, const int &curr_k) {
+    if (curr_k == 0)
+        return torch::logical_and(torch::le(knots(curr_i_s), x), torch::lt(x, knots(curr_i_s + 1)))
+            .to(torch::kFloat);
+
+    return b_splines(x, curr_i_s, curr_k - 1) * (x - knots(curr_i_s))
+               / (knots(curr_i_s + curr_k) - knots(curr_i_s))
+           + b_splines(x, curr_i_s + 1, curr_k - 1) * (knots(curr_i_s + curr_k + 1) - x)
+                 / (knots(curr_i_s + curr_k + 1) - knots(curr_i_s + 1));
+}
+
+torch::Tensor BSplinesActivation::knots(const torch::Tensor &i) const {
+    return i / degree * (x_max - x_min) + x_min;
 }
 
 // Linear KAN

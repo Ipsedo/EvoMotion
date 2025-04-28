@@ -88,7 +88,7 @@ class ActorKanModule final : public AbstractActor {
 public:
     ActorKanModule(
         const std::vector<int64_t> &state_space, const std::vector<int64_t> &action_space,
-        int hidden_size, int poly_degree);
+        int hidden_size, int poly_degree, int grid_size);
 
     actor_response forward(const torch::Tensor &state) override;
 

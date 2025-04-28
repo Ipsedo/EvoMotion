@@ -29,15 +29,35 @@ private:
     torch::Tensor scale_coefficients;
 };
 
-class HermiteActivation final : public PolyCoefActivation {
+class HermiteActivation final : public ActivationFunction {
 public:
-    explicit HermiteActivation(int n);
+    explicit HermiteActivation(int degree);
+
+    int get_size() override;
+    torch::Tensor forward(const torch::Tensor &x) override;
 
 private:
-    torch::Tensor scale_coefficients;
+    //static torch::Tensor hermite_coef(int n);
+    //static float factorial(int n);
+    int degree;
+};
 
-    static torch::Tensor hermite_coef(int n);
-    static float factorial(int n);
+class BSplinesActivation final : public ActivationFunction {
+public:
+    BSplinesActivation(int degree, int grid_size);
+    int get_size() override;
+    torch::Tensor forward(const torch::Tensor &x) override;
+
+private:
+    int degree;
+    int grid_size;
+
+    float x_min;
+    float x_max;
+
+    torch::Tensor
+    b_splines(const torch::Tensor &x, const torch::Tensor &curr_i_s, const int &curr_k);
+    torch::Tensor knots(const torch::Tensor &i) const;
 };
 
 // Linear
